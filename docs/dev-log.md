@@ -2638,4 +2638,5 @@
 - `corepack pnpm build` に成功した
 - 公開Production URLの `/login` で開発者向け文言が消えていることを確認した
 - 公開Production URLの `/home` でログイン中ユーザー名が文字化けしていることを確認した
+- ログアウト操作後、公開Production URLの `/login` に戻り、ログインフォームが表示されることを確認した
 - Supabase本番DBの直接UPDATEと、修正後の公開デモでのユーザー名再確認は、接続情報不足のため未実施
