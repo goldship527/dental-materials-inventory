@@ -1,0 +1,331 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  clinics         Clinic[]
+  users           User[]
+  products        Product[]
+  suppliers       Supplier[]
+  productBarcodes ProductBarcode[]
+}
+
+model Clinic {
+  id             String   @id @default(cuid())
+  organizationId String
+  name           String
+  address        String?
+  phone          String?
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization          Organization           @relation(fields: [organizationId], references: [id])
+  stockItems            StockItem[]
+  stockMovements        StockMovement[]
+  barcodeScanLogs       BarcodeScanLog[]
+  favoriteCards         FavoriteProductCard[]
+  orderRequests         OrderRequest[]
+  stocktakeSessions     StocktakeSession[]
+  userClinicAssignments UserClinicAssignment[]
+
+  @@index([organizationId])
+}
+
+model User {
+  id             String   @id @default(cuid())
+  organizationId String
+  name           String
+  email          String   @unique
+  passwordHash   String
+  role           String   @default("staff")
+  pinCodeHash    String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization               Organization           @relation(fields: [organizationId], references: [id])
+  clinicAssignments          UserClinicAssignment[]
+  stockMovements             StockMovement[]
+  orderRequests              OrderRequest[]         @relation("OrderRequestCreatedBy")
+  barcodeScanLogs            BarcodeScanLog[]
+  stocktakeSessionsStarted   StocktakeSession[]     @relation("StocktakeSessionStartedBy")
+  stocktakeSessionsCommitted StocktakeSession[]     @relation("StocktakeSessionCommittedBy")
+  stocktakeItemsCounted      StocktakeSessionItem[] @relation("StocktakeSessionItemCountedBy")
+
+  @@index([organizationId])
+}
+
+model UserClinicAssignment {
+  id       String @id @default(cuid())
+  userId   String
+  clinicId String
+
+  user   User   @relation(fields: [userId], references: [id])
+  clinic Clinic @relation(fields: [clinicId], references: [id])
+
+  @@unique([userId, clinicId])
+  @@index([clinicId])
+}
+
+model Supplier {
+  id             String   @id @default(cuid())
+  organizationId String
+  name           String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization  Organization   @relation(fields: [organizationId], references: [id])
+  products      Product[]
+  orderRequests OrderRequest[]
+
+  @@index([organizationId])
+}
+
+model Product {
+  id                  String   @id @default(cuid())
+  organizationId      String
+  productCode         String?
+  janCode             String?
+  internalCode        String?
+  name                String
+  nameKana            String?
+  category            String?
+  manufacturer        String?
+  specification       String?
+  orderUnit           String?
+  primarySupplierId   String?
+  supplierProductCode String?
+  standardPrice       Float?
+  defaultMinStock     Int      @default(0)
+  isActive            Boolean  @default(true)
+  notes               String?
+  photoFileName       String?
+  photoMimeType       String?
+  photoUpdatedAt      DateTime?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  organization    Organization           @relation(fields: [organizationId], references: [id])
+  primarySupplier Supplier?              @relation(fields: [primarySupplierId], references: [id])
+  stockItems      StockItem[]
+  stockMovements  StockMovement[]
+  favoriteCards   FavoriteProductCard[]
+  orderRequests   OrderRequest[]
+  barcodes        ProductBarcode[]
+  barcodeScanLogs BarcodeScanLog[]
+  stocktakeItems  StocktakeSessionItem[]
+
+  @@unique([organizationId, janCode])
+  @@index([organizationId])
+  @@index([primarySupplierId])
+  @@index([name])
+  @@index([janCode])
+  @@index([productCode])
+  @@index([internalCode])
+}
+
+model ProductBarcode {
+  id             String   @id @default(cuid())
+  organizationId String
+  productId      String
+  barcode        String
+  barcodeType    String   @default("JAN")
+  unitLabel      String?
+  isPrimary      Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  product      Product      @relation(fields: [productId], references: [id])
+
+  @@unique([productId, barcode])
+  @@unique([organizationId, barcode])
+  @@index([organizationId])
+  @@index([barcode])
+  @@index([productId])
+}
+
+model StockItem {
+  id        String   @id @default(cuid())
+  clinicId  String
+  productId String
+  quantity  Int      @default(0)
+  minStock  Int?
+  location  String?
+  isUsed    Boolean  @default(true)
+  updatedAt DateTime @updatedAt
+
+  clinic  Clinic  @relation(fields: [clinicId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+
+  @@unique([clinicId, productId])
+  @@index([productId])
+}
+
+model StockMovement {
+  id             String    @id @default(cuid())
+  clinicId       String
+  productId      String
+  movementType   String
+  quantity       Int
+  beforeQuantity Int
+  afterQuantity  Int
+  reason         String?
+  sourceType     String?
+  sourceId       String?
+  revertOfId     String?
+  revertedAt     DateTime?
+  revertedById   String?
+  userId         String
+  memo           String?
+  createdAt      DateTime  @default(now())
+
+  clinic  Clinic  @relation(fields: [clinicId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@index([clinicId, createdAt])
+  @@index([productId])
+  @@index([userId])
+  @@index([revertOfId])
+}
+
+model StocktakeSession {
+  id                String    @id @default(cuid())
+  clinicId          String
+  status            String    @default("IN_PROGRESS")
+  memo              String?
+  startedAt         DateTime  @default(now())
+  committedAt       DateTime?
+  discardedAt       DateTime?
+  startedByUserId   String
+  committedByUserId String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  clinic          Clinic                 @relation(fields: [clinicId], references: [id])
+  startedByUser   User                   @relation("StocktakeSessionStartedBy", fields: [startedByUserId], references: [id])
+  committedByUser User?                  @relation("StocktakeSessionCommittedBy", fields: [committedByUserId], references: [id])
+  items           StocktakeSessionItem[]
+
+  @@index([clinicId, status, startedAt])
+}
+
+model StocktakeSessionItem {
+  id               String    @id @default(cuid())
+  sessionId        String
+  productId        String
+  expectedQuantity Int
+  countedQuantity  Int?
+  diff             Int?
+  status           String    @default("PENDING")
+  memo             String?
+  countedAt        DateTime?
+  countedByUserId  String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  session       StocktakeSession @relation(fields: [sessionId], references: [id])
+  product       Product          @relation(fields: [productId], references: [id])
+  countedByUser User?            @relation("StocktakeSessionItemCountedBy", fields: [countedByUserId], references: [id])
+
+  @@unique([sessionId, productId])
+  @@index([sessionId, status])
+  @@index([productId])
+}
+
+model BarcodeScanLog {
+  id                 String    @id @default(cuid())
+  clinicId           String
+  userId             String
+  productId          String?
+  rawInput           String    @db.Text
+  extractedBarcode   String?
+  extractedJan13     String?
+  extractedGtin      String?
+  scannedAtText      String?
+  scannedAt          DateTime?
+  lotNumber          String?
+  serialNumber       String?
+  expiryDateText     String?
+  expiryDate         DateTime?
+  matchType          String    @default("NO_MATCH")
+  sampleJanCode      String?
+  sampleProductName  String?
+  sampleManufacturer String?
+  sampleSourceFile   String?
+  sampleSourceSheet  String?
+  sampleSourceRow    Int?
+  sampleJmdnCode     String?
+  sampleGenericName  String?
+  resolveStatus      String    @default("UNRESOLVED")
+  resolvedAt         DateTime?
+  resolvedByUserId   String?
+  resolvedNote       String?
+  createdAt          DateTime  @default(now())
+
+  clinic  Clinic   @relation(fields: [clinicId], references: [id])
+  user    User     @relation(fields: [userId], references: [id])
+  product Product? @relation(fields: [productId], references: [id])
+
+  @@index([clinicId, createdAt])
+  @@index([clinicId, resolveStatus, createdAt])
+  @@index([userId])
+  @@index([productId])
+  @@index([extractedBarcode])
+  @@index([matchType])
+}
+
+model FavoriteProductCard {
+  id           String  @id @default(cuid())
+  clinicId     String
+  productId    String
+  displayOrder Int     @default(0)
+  categoryTab  String?
+
+  clinic  Clinic  @relation(fields: [clinicId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+
+  @@unique([clinicId, productId])
+  @@index([productId])
+  @@index([clinicId, displayOrder])
+}
+
+enum OrderRequestStatus {
+  DRAFT
+  CONFIRMED
+  SKIPPED
+}
+
+model OrderRequest {
+  id                String             @id @default(cuid())
+  clinicId          String
+  productId         String
+  supplierId        String?
+  status            OrderRequestStatus @default(DRAFT)
+  requestedQuantity Int
+  memo              String?
+  createdByUserId   String
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  clinic        Clinic    @relation(fields: [clinicId], references: [id])
+  product       Product   @relation(fields: [productId], references: [id])
+  supplier      Supplier? @relation(fields: [supplierId], references: [id])
+  createdByUser User      @relation("OrderRequestCreatedBy", fields: [createdByUserId], references: [id])
+
+  @@index([clinicId, status])
+  @@index([productId])
+  @@index([supplierId])
+  @@index([createdByUserId])
+}

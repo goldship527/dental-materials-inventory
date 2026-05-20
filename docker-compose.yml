@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: dental-materials-inventory-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: dental_inventory
+      POSTGRES_PASSWORD: local_dev_only_password
+      POSTGRES_DB: dental_materials_inventory
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dental_inventory -d dental_materials_inventory"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres-data:
