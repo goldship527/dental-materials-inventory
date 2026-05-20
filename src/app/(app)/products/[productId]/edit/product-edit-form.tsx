@@ -161,9 +161,6 @@ export function ProductEditForm({ product, suppliers }: ProductEditFormProps) {
             />
           </label>
         </div>
-        <p className="mt-3 text-xs text-muted">
-          現在庫やクリニック別の最低在庫はこの画面では変更しません。在庫数は在庫一覧や棚卸で調整します。
-        </p>
       </section>
 
       <section className="rounded border border-line bg-white p-5 shadow-panel">
@@ -176,9 +173,7 @@ export function ProductEditForm({ product, suppliers }: ProductEditFormProps) {
             className="min-h-28 rounded border border-line px-3 py-2 text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
           />
         </label>
-        <p className="mt-3 text-xs text-muted">
-          患者情報、実在の個人名、秘密情報は入力しないでください。
-        </p>
+        <p className="mt-3 text-xs text-muted">個人情報や秘密情報は入力しないでください。</p>
       </section>
 
       {state.message ? (

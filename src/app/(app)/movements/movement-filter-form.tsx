@@ -17,6 +17,7 @@ const sourceOptions = [
   { value: "", label: "すべての操作元" },
   { value: "MANUAL", label: "在庫一覧" },
   { value: "QUICK_CARD", label: "よく使うカード" },
+  { value: "BARCODE_STOCK", label: "バーコード出入庫" },
   { value: "STOCKTAKE", label: "棚卸" },
   { value: "STOCKTAKE_SESSION", label: "棚卸セッション" },
   { value: "REVERT", label: "履歴取り消し" },

@@ -67,9 +67,6 @@ function BarcodeRow({ productId, barcode }: BarcodeRowProps) {
           </div>
           <span className="rounded bg-white px-3 py-1 text-xs font-semibold text-muted">商品基本情報から表示</span>
         </div>
-        <p className="mt-3 text-xs text-muted">
-          この行は商品マスタの代表JANから表示しています。複数バーコードとして管理する場合は、下の追加フォームから登録します。
-        </p>
       </article>
     );
   }
@@ -158,9 +155,6 @@ export function BarcodeManagement({ productId, janCode, barcodes, defaultNewBarc
       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h2 className="text-lg font-semibold">バーコード管理</h2>
-          <p className="mt-2 text-sm text-muted">
-            スキャナーや手入力で使うJANコード・包装単位ごとのバーコードを商品に紐づけます。
-          </p>
         </div>
         <span className="rounded bg-gray-50 px-3 py-1 text-xs font-semibold text-muted">
           登録 {barcodes.filter((barcode) => barcode.id).length} 件
@@ -176,7 +170,7 @@ export function BarcodeManagement({ productId, janCode, barcodes, defaultNewBarc
       {defaultNewBarcode ? (
         <p className="mt-4 rounded border border-warning/30 bg-yellow-50 px-3 py-2 text-xs text-warning">
           未登録バーコード <span className="font-mono text-ink">{defaultNewBarcode}</span>{" "}
-          をこの商品に追加する準備をしています。内容を確認して「追加」を押してください。
+          を追加します。
         </p>
       ) : null}
 
@@ -241,9 +235,7 @@ export function BarcodeManagement({ productId, janCode, barcodes, defaultNewBarc
           </button>
           <BarcodeMessage state={createState} />
         </div>
-        <p className="text-xs text-muted">
-          患者情報や秘密情報は入力しないでください。代表にしたバーコードは、同じ商品の他バーコードより優先して表示されます。
-        </p>
+        <p className="text-xs text-muted">個人情報や秘密情報は入力しないでください。</p>
       </form>
     </section>
   );

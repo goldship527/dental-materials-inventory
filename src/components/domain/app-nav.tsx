@@ -88,8 +88,8 @@ const navItems = [
 export function AppNav({ current }: AppNavProps) {
   return (
     <nav aria-label="アプリ内メニュー" className="print:hidden">
-      <div className="flex flex-col gap-2 rounded border border-line bg-white p-2 shadow-panel md:flex-row md:items-center md:justify-between">
-        <div className="flex flex-wrap gap-2">
+      <div className="flex flex-col gap-2 rounded border border-line bg-white p-2 shadow-panel lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex gap-2 overflow-x-auto pb-1 lg:flex-wrap lg:overflow-visible lg:pb-0">
           {navItems.map((item) => {
             const isCurrent = item.id === current;
 
@@ -100,8 +100,8 @@ export function AppNav({ current }: AppNavProps) {
                 aria-current={isCurrent ? "page" : undefined}
                 className={
                   isCurrent
-                    ? "rounded bg-accent px-4 py-2 text-sm font-semibold text-white"
-                    : "rounded px-4 py-2 text-sm font-semibold text-muted transition hover:bg-gray-50 hover:text-ink"
+                    ? "inline-flex h-10 shrink-0 items-center whitespace-nowrap rounded bg-accent px-4 text-sm font-semibold text-white"
+                    : "inline-flex h-10 shrink-0 items-center whitespace-nowrap rounded px-4 text-sm font-semibold text-muted transition hover:bg-gray-50 hover:text-ink"
                 }
               >
                 {item.label}
@@ -112,7 +112,7 @@ export function AppNav({ current }: AppNavProps) {
         <form action={logoutAction}>
           <button
             type="submit"
-            className="rounded border border-line px-4 py-2 text-sm font-semibold text-muted transition hover:border-danger hover:text-danger"
+            className="inline-flex h-10 shrink-0 items-center justify-center whitespace-nowrap rounded border border-line px-4 text-sm font-semibold text-muted transition hover:border-danger hover:text-danger"
           >
             ログアウト
           </button>

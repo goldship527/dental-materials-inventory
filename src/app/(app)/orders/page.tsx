@@ -107,14 +107,13 @@ export default async function OrdersPage({ searchParams }: PageProps) {
       : "条件に一致する発注候補はありません。検索語や状態フィルタを見直してください。";
 
   return (
-    <main className="min-h-screen bg-surface px-6 py-8 text-ink print:bg-white print:p-0">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 print:max-w-none print:gap-3">
-        <header className="flex flex-col gap-3 border-b border-line pb-5 md:flex-row md:items-end md:justify-between print:border-black print:pb-3">
+    <main className="min-h-screen bg-surface px-4 py-6 text-ink print:bg-white print:p-0 sm:px-6 lg:px-8">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 print:max-w-none print:gap-3">
+        <header className="flex flex-col gap-4 border-b border-line pb-5 md:flex-row md:items-end md:justify-between print:border-black print:pb-3">
           <div>
             <p className="text-sm font-semibold text-accent print:text-black">{context.clinicName}</p>
             <h1 className="mt-2 text-3xl font-semibold print:text-2xl">発注候補</h1>
             <p className="mt-2 text-sm text-muted print:text-xs print:text-black">
-              不足在庫から作成した発注候補を確認し、数量と状態を調整します。
               <span className="hidden print:inline">この一覧は発注前の確認用で、外部発注送信済みではありません。</span>
               発行日時: {generatedAt}
             </p>
@@ -263,7 +262,7 @@ export default async function OrdersPage({ searchParams }: PageProps) {
         </section>
 
         <p className="hidden text-[10px] leading-5 text-black print:block">
-          印刷後は発注数量、発注先、状態、備考を確認してください。外部発注送信、メール送信、PDF生成、納品確認はこの画面では行いません。
+          発注数量、発注先、状態、備考を確認してください。
         </p>
       </div>
     </main>

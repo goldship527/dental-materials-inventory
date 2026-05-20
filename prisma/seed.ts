@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 
 const demoLoginEmail = process.env.DEMO_LOGIN_EMAIL?.trim() || "test@example.com";
 const demoLoginPassword = process.env.DEMO_LOGIN_PASSWORD || "password";
-const demoUserName = process.env.DEMO_USER_NAME?.trim() || "自分";
+const demoUserName = process.env.DEMO_USER_NAME?.trim() || "テストユーザー";
 
 const suppliers = [
   "架空ディーラーA",

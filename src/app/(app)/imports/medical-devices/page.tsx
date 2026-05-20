@@ -145,7 +145,7 @@ export default async function MedicalDeviceImportPreviewPage({ searchParams }: P
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
             <h1 className="mt-2 text-3xl font-semibold">医療機器データ取り込みプレビュー</h1>
             <p className="mt-2 text-sm text-muted">
-              サンプルXLSから作ったローカルキャッシュを表示します。この画面では商品マスタへ登録しません。
+              取込サンプルを表示しています。
             </p>
           </div>
           <a className="text-sm font-semibold text-accent hover:underline" href="/home">

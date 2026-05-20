@@ -17,9 +17,6 @@ export default async function AccountPasswordPage() {
           <div>
             <p className="text-sm font-semibold text-accent">{session.user.email}</p>
             <h1 className="mt-2 text-3xl font-semibold">パスワード変更</h1>
-            <p className="mt-2 text-sm text-muted">
-              現在のパスワードを確認してから、新しいパスワードを保存します。
-            </p>
           </div>
           <a className="text-sm font-semibold text-accent hover:underline" href="/home">
             ホームへ戻る
@@ -27,10 +24,6 @@ export default async function AccountPasswordPage() {
         </header>
 
         <AppNav current="account" />
-
-        <section className="rounded border border-warning/30 bg-yellow-50 px-4 py-3 text-sm text-warning">
-          複数人で同じ開発用アカウントを共有している場合は、変更後のパスワードを関係者に共有し、必要に応じてログアウトして再ログインしてください。
-        </section>
 
         <PasswordForm />
       </div>

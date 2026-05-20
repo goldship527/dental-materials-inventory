@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db/prisma";
 import { analyzeBarcodeInput } from "@/lib/barcode/gs1";
 
 export type BarcodeSearchResult = {
+  stockItemId: string;
   productId: string;
   productName: string;
   productCode: string | null;
@@ -77,6 +78,7 @@ export async function searchProductsByBarcode(clinicId: string, barcode: string)
           isUsed: true,
         },
         select: {
+          id: true,
           quantity: true,
           minStock: true,
           location: true,
@@ -139,6 +141,7 @@ export async function searchProductsByBarcode(clinicId: string, barcode: string)
 
     return {
       productId: product.id,
+      stockItemId: stockItem?.id ?? "",
       productName: product.name,
       productCode: product.productCode,
       janCode: product.janCode,

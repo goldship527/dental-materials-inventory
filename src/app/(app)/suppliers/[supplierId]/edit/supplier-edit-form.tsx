@@ -31,9 +31,6 @@ export function SupplierEditForm({ supplier }: SupplierEditFormProps) {
             />
           </label>
         </div>
-        <p className="mt-3 text-xs text-muted">
-          フェーズ3-Aでは発注先名だけを編集します。住所、電話番号、メールアドレス、外部送信情報はまだ扱いません。
-        </p>
       </section>
 
       <section className="grid gap-4 md:grid-cols-3">

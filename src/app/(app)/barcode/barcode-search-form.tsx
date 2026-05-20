@@ -4,9 +4,11 @@ import { useEffect, useRef } from "react";
 
 type BarcodeSearchFormProps = {
   defaultBarcode: string;
+  actionPath?: string;
+  clearHref?: string;
 };
 
-export function BarcodeSearchForm({ defaultBarcode }: BarcodeSearchFormProps) {
+export function BarcodeSearchForm({ defaultBarcode, actionPath = "/barcode", clearHref = "/barcode" }: BarcodeSearchFormProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -17,7 +19,7 @@ export function BarcodeSearchForm({ defaultBarcode }: BarcodeSearchFormProps) {
   return (
     <form
       method="get"
-      action="/barcode"
+      action={actionPath}
       className="rounded border border-line bg-white p-5 shadow-panel"
     >
       <label className="grid gap-2 text-sm font-semibold text-muted">
@@ -28,7 +30,7 @@ export function BarcodeSearchForm({ defaultBarcode }: BarcodeSearchFormProps) {
             type="search"
             name="barcode"
             defaultValue={defaultBarcode}
-            placeholder="スキャナーで読み取り、またはJAN/GTINを入力"
+            placeholder="JAN / GTIN / バーコード"
             autoFocus
             autoComplete="off"
             spellCheck={false}
@@ -42,15 +44,12 @@ export function BarcodeSearchForm({ defaultBarcode }: BarcodeSearchFormProps) {
           </button>
           <a
             className="flex h-12 items-center justify-center rounded border border-line px-5 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
-            href="/barcode"
+            href={clearHref}
           >
             クリア
           </a>
         </div>
       </label>
-      <p className="mt-3 text-xs text-muted">
-        多くのバーコードスキャナーはキーボード入力として動きます。JANの後ろに読み取り日時が付く場合も、JANと日時を分けて扱います。
-      </p>
     </form>
   );
 }

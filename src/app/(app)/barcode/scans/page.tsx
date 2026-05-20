@@ -71,14 +71,11 @@ export default async function BarcodeScansPage({ searchParams }: PageProps) {
         <header className="flex flex-col gap-3 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-            <h1 className="mt-2 text-3xl font-semibold">バーコード読取履歴</h1>
-            <p className="mt-2 text-sm text-muted">
-              保存した読み取り記録を新しい順に表示します。直近100件まで確認できます。
-            </p>
+            <h1 className="mt-2 text-3xl font-semibold">バーコード読み取り履歴</h1>
           </div>
           <div className="flex flex-wrap gap-3 text-sm font-semibold">
             <a className="text-accent hover:underline" href="/barcode/scans/unresolved">
-              未対応を整理
+              未対応
             </a>
             <a className="text-accent hover:underline" href="/barcode">
               バーコード検索へ
@@ -206,7 +203,7 @@ export default async function BarcodeScansPage({ searchParams }: PageProps) {
                 ) : (
                   <tr>
                     <td className="px-4 py-12 text-center text-muted" colSpan={7}>
-                      まだ保存済みの読取履歴はありません。バーコード検索画面で読み取り後に保存できます。
+                      保存済みの読み取り履歴はありません。
                     </td>
                   </tr>
                 )}

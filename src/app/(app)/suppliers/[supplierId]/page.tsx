@@ -49,9 +49,6 @@ export default async function SupplierDetailPage({ params }: PageProps) {
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
             <h1 className="mt-2 text-3xl font-semibold">{supplier.name}</h1>
-            <p className="mt-2 text-sm text-muted">
-              発注先ごとの取扱商品、不足商品、発注候補を閲覧します。
-            </p>
           </div>
           <div className="flex flex-wrap gap-3 text-sm font-semibold">
             <a className="text-accent hover:underline" href={`/suppliers/${supplier.id}/edit`}>
@@ -134,7 +131,6 @@ export default async function SupplierDetailPage({ params }: PageProps) {
           <div className="overflow-hidden rounded border border-line bg-white shadow-panel">
             <div className="border-b border-line px-4 py-3">
               <h2 className="text-lg font-semibold">取扱商品</h2>
-              <p className="mt-1 text-sm text-muted">不足商品は不足数を表示します。</p>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full min-w-[760px] border-collapse text-left text-sm">

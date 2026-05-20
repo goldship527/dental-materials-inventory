@@ -201,9 +201,6 @@ export function ProductCreateForm({ suppliers }: ProductCreateFormProps) {
             {fieldError("defaultMinStock")}
           </label>
         </div>
-        <p className="mt-3 text-xs text-muted">
-          この画面では在庫行を作成しません。作成直後の商品は在庫一覧には表示されません。
-        </p>
       </section>
 
       <section className="rounded border border-line bg-white p-5 shadow-panel">
@@ -217,9 +214,7 @@ export function ProductCreateForm({ suppliers }: ProductCreateFormProps) {
           />
           {fieldError("notes")}
         </label>
-        <p className="mt-3 text-xs text-muted">
-          患者情報、実在クリニック名、会社の秘密情報、APIキーやパスワードは入力しないでください。
-        </p>
+        <p className="mt-3 text-xs text-muted">個人情報や秘密情報は入力しないでください。</p>
       </section>
 
       {state.message ? (

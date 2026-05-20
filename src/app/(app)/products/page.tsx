@@ -72,27 +72,29 @@ export default async function ProductsPage({ searchParams }: PageProps) {
   const filterLabel = [query ? `検索: ${query}` : "", category ? `カテゴリ: ${category}` : ""].filter(Boolean).join(" / ");
 
   return (
-    <main className="min-h-screen bg-surface px-6 py-8 text-ink">
-      <div className="mx-auto flex max-w-7xl flex-col gap-6">
-        <header className="flex flex-col gap-3 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
+    <main className="min-h-screen bg-surface px-4 py-6 text-ink sm:px-6 lg:px-8">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
+        <header className="flex flex-col gap-4 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
             <h1 className="mt-2 text-3xl font-semibold">商品マスタ</h1>
-            <p className="mt-2 text-sm text-muted">
-              商品コード、規格、発注単位、主発注先などの商品情報を閲覧します。
-            </p>
           </div>
-          {!attachBarcode ? (
+          <div className="flex shrink-0 flex-wrap gap-3">
+            {!attachBarcode ? (
+              <a
+                className="inline-flex h-11 items-center justify-center rounded bg-accent px-4 text-sm font-semibold text-white transition hover:bg-teal-800"
+                href="/products/new"
+              >
+                商品を新規作成
+              </a>
+            ) : null}
             <a
-              className="rounded bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-800"
-              href="/products/new"
+              className="inline-flex h-11 items-center justify-center rounded border border-line px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+              href="/home"
             >
-              商品を新規作成
+              ホームへ戻る
             </a>
-          ) : null}
-          <a className="text-sm font-semibold text-accent hover:underline" href="/home">
-            ホームへ戻る
-          </a>
+          </div>
         </header>
 
         <AppNav current="products" />
@@ -106,10 +108,10 @@ export default async function ProductsPage({ searchParams }: PageProps) {
 
         {attachBarcode ? (
           <section className="rounded border border-warning/30 bg-yellow-50 p-4 text-sm text-warning shadow-panel">
-            <p className="font-semibold">未登録バーコードを紐づける商品を選択中</p>
+            <p className="font-semibold">紐づける商品を選択中</p>
             <p className="mt-2">
               読み取ったバーコード <span className="font-mono text-ink">{attachBarcode}</span>{" "}
-              を紐づける商品を選びます。対象商品の行にある「この商品に紐づける」から編集画面へ進みます。
+              を紐づけます。
             </p>
           </section>
         ) : null}

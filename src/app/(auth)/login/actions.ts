@@ -8,10 +8,13 @@ export type LoginState = {
 };
 
 export async function loginAction(_previousState: LoginState, formData: FormData): Promise<LoginState> {
+  const email = String(formData.get("email") ?? "").trim();
+  const password = String(formData.get("password") ?? "");
+
   try {
     await signIn("credentials", {
-      email: formData.get("email"),
-      password: formData.get("password"),
+      email,
+      password,
       redirectTo: "/home",
     });
   } catch (error) {

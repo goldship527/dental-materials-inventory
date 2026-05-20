@@ -59,14 +59,14 @@ export default async function ShortagePage({ searchParams }: PageProps) {
       : "条件に一致する不足在庫はありません。検索語を見直してください。";
 
   return (
-    <main className="min-h-screen bg-surface px-6 py-8 text-ink print:bg-white print:p-0">
-      <div className="mx-auto flex max-w-6xl flex-col gap-6 print:max-w-none print:gap-3">
-        <header className="flex flex-col gap-3 border-b border-line pb-5 md:flex-row md:items-end md:justify-between print:border-black print:pb-3">
+    <main className="min-h-screen bg-surface px-4 py-6 text-ink print:bg-white print:p-0 sm:px-6 lg:px-8">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 print:max-w-none print:gap-3">
+        <header className="flex flex-col gap-4 border-b border-line pb-5 md:flex-row md:items-end md:justify-between print:border-black print:pb-3">
           <div>
             <p className="text-sm font-semibold text-accent print:text-black">{context.clinicName}</p>
             <h1 className="mt-2 text-3xl font-semibold print:text-2xl">不足在庫一覧</h1>
             <p className="mt-2 text-sm text-muted print:text-xs print:text-black">
-              現在庫が最低在庫以下の商品だけを表示しています。発行日時: {generatedAt}
+              発行日時: {generatedAt}
             </p>
           </div>
           <div className="flex gap-3 print:hidden">
@@ -202,7 +202,7 @@ export default async function ShortagePage({ searchParams }: PageProps) {
         </section>
 
         <p className="hidden text-[10px] text-black print:block">
-          印刷後は在庫棚と照合し、必要に応じて発注先へ確認してください。
+          在庫棚と照合してください。
         </p>
       </div>
     </main>

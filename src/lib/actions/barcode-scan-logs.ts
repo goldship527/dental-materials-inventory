@@ -187,7 +187,7 @@ function sampleRecordFromLog(log: {
   }
 
   return {
-    sourceFile: log.sampleSourceFile ?? "読取履歴",
+    sourceFile: log.sampleSourceFile ?? "読み取り履歴",
     sourceSheet: log.sampleSourceSheet ?? "未設定",
     sourceRow: log.sampleSourceRow ?? 1,
     janCode: log.sampleJanCode,
@@ -200,7 +200,7 @@ function sampleRecordFromLog(log: {
     approvalNumber: "",
     productNumber: "",
     classCategory: "",
-    note: "バーコード読取履歴の取込サンプル一致から作成",
+    note: "バーコード読み取り履歴の取込サンプル一致から作成",
     isDuplicateJan: false,
   };
 }
@@ -231,11 +231,11 @@ export async function promoteBarcodeScanLogForContext(options: {
   });
 
   if (!log) {
-    throw new Error("対象の読取履歴が見つかりません。");
+    throw new Error("対象の読み取り履歴が見つかりません。");
   }
 
   if (log.matchType !== "SAMPLE") {
-    throw new Error("取込サンプル一致の読取履歴だけ商品化できます。");
+    throw new Error("取込サンプル一致の読み取り履歴だけ商品化できます。");
   }
 
   if (!log.sampleJanCode) {

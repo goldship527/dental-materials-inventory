@@ -22,9 +22,6 @@ export default async function ProductNewPage() {
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
             <h1 className="mt-2 text-3xl font-semibold">商品マスタ新規作成</h1>
-            <p className="mt-2 text-sm text-muted">
-              商品を1件ずつ手動で登録します。在庫行、代表バーコード、写真は作成後に必要な画面で登録します。
-            </p>
           </div>
           <a className="text-sm font-semibold text-accent hover:underline" href="/products">
             商品マスタ一覧へ戻る

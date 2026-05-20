@@ -44,9 +44,7 @@ export function PhotoManagement({ productId, productName, photoUpdatedAt }: Phot
         <div className="grid gap-4">
           <div>
             <h2 className="text-lg font-semibold">商品写真</h2>
-            <p className="mt-2 text-sm text-muted">
-              PNG、JPEG、WebPを1枚だけ登録できます。2MB以内の画像を選択してください。
-            </p>
+            <p className="mt-2 text-sm text-muted">PNG / JPEG / WebP、2MB以内</p>
           </div>
 
           <form action={uploadAction} className="grid gap-3">

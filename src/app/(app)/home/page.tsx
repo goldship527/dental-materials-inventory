@@ -58,14 +58,14 @@ export default async function HomePage() {
       title: "未対応バーコード",
       href: "/barcode/scans/unresolved",
       value: `${summary.unresolvedBarcodeScanCount} 件`,
-      note: "商品候補が未整理の読取履歴",
+      note: "商品候補が未整理の読み取り履歴",
       isWarning: summary.unresolvedBarcodeScanCount > 0,
     },
     {
-      title: "期限が近い読取履歴",
+      title: "期限が近い読み取り履歴",
       href: "/barcode/scans",
       value: `${summary.expiringBarcodeScanCount} 件`,
-      note: "有効期限が30日以内、または期限切れの保存済み読取",
+      note: "有効期限が近い保存済み読み取り",
       isWarning: summary.expiringBarcodeScanCount > 0,
     },
     {
@@ -81,66 +81,66 @@ export default async function HomePage() {
   const menuItems = [
     {
       title: "在庫一覧",
-      description: "全商品の現在庫と最低在庫を確認します。",
+      description: "現在庫と最低在庫",
       href: "/inventory",
       badge: `${summary.stockItemCount} 件`,
     },
     {
       title: "商品マスタ",
-      description: "商品コード、規格、発注単位、主発注先を確認します。",
+      description: "商品コード、規格、発注単位",
       href: "/products",
       badge: `${summary.stockItemCount} 件`,
     },
     {
       title: "バーコード検索",
-      description: "スキャナーや手入力でJANコード・登録済みバーコードから商品を探します。",
+      description: "JAN、GTIN、登録済みバーコード",
       href: "/barcode",
       badge: "読み取り",
     },
     {
       title: "発注先マスタ",
-      description: "発注先ごとの取扱商品と発注候補を確認します。",
+      description: "取扱商品と発注候補",
       href: "/suppliers",
-      badge: "確認",
+      badge: "一覧",
     },
     {
       title: "よく使う商品カード",
-      description: "カードから+1/-1で在庫を動かします。",
+      description: "よく使う商品の入出庫",
       href: "/quick",
       badge: `${summary.favoriteCardCount} 件`,
     },
     {
       title: "不足在庫一覧",
-      description: "現在庫が最低在庫以下の商品を確認します。",
+      description: "最低在庫以下の商品",
       href: "/shortage",
       badge: `${summary.shortageCount} 件`,
       isWarning: summary.shortageCount > 0,
     },
     {
       title: "発注候補",
-      description: "不足在庫から作成した発注候補を確認します。",
+      description: "不足在庫から作成した候補",
       href: "/orders",
       badge: `未確認 ${summary.draftOrderRequestCount} 件`,
       isWarning: summary.draftOrderRequestCount > 0,
     },
     {
       title: "入出庫履歴",
-      description: "在庫数を変更した記録を新しい順に確認します。",
+      description: "在庫変更の記録",
       href: "/movements",
       badge: "直近100件",
     },
     {
       title: "棚卸",
-      description: "棚卸セッションを開始し、途中保存しながら確認します。",
+      description: "実在庫の入力と確定",
       href: "/stocktake/sessions",
-      badge: "確認",
+      badge: "入力",
     },
   ];
 
   return (
-    <main className="min-h-screen bg-surface px-6 py-8 text-ink print:bg-white print:px-0 print:py-0">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
-        <header className="flex flex-col gap-4 border-b border-line pb-6 print:border-none sm:flex-row sm:items-end sm:justify-between">
+    <main className="min-h-screen bg-surface px-4 py-6 text-ink print:bg-white print:px-0 print:py-0 sm:px-6 lg:px-8">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
+        <header className="flex flex-col gap-4 border-b border-line pb-5 print:border-none md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
             <h1 className="mt-2 text-3xl font-semibold tracking-normal">ホーム</h1>
@@ -181,9 +181,8 @@ export default async function HomePage() {
               <span className="shrink-0 rounded bg-yellow-50 px-3 py-1 text-xs font-semibold text-warning">簡易表示</span>
             </div>
             <Sparkline className="mt-4 text-accent" data={summary.shortageTrend} />
-            <p className="mt-2 text-xs text-muted">日次推移の集計は今後のフェーズで対応予定です。</p>
             <p className="mt-3 text-sm text-muted">
-              現時点の不足件数を14日分並べた軽量表示です。詳細は不足在庫一覧で確認します。
+              不足在庫一覧へ
             </p>
           </a>
 
@@ -208,7 +207,7 @@ export default async function HomePage() {
                 </div>
                 <p className="mt-2 text-2xl font-semibold">{item.value}</p>
                 <p className="mt-2 text-sm leading-6 text-muted">
-                  {item.href === "/barcode/scans" ? "今日から30日以内の有効期限が保存された読取履歴" : item.note}
+                  {item.href === "/barcode/scans" ? "有効期限が30日以内の読み取り履歴" : item.note}
                 </p>
               </a>
             ))}

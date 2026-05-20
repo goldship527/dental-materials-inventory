@@ -84,24 +84,24 @@ export default async function BarcodePage({ searchParams }: PageProps) {
   );
 
   return (
-    <main className="min-h-screen bg-surface px-6 py-8 text-ink">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
-        <header className="flex flex-col gap-3 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
+    <main className="min-h-screen bg-surface px-4 py-6 text-ink sm:px-6 lg:px-8">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
+        <header className="flex flex-col gap-4 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
             <h1 className="mt-2 text-3xl font-semibold">バーコード検索</h1>
-            <p className="mt-2 text-sm text-muted">
-              スキャナーや手入力でJANコード・登録済みバーコードから商品を探します。
-            </p>
           </div>
-          <div className="flex flex-wrap gap-3 text-sm font-semibold">
-            <a className="text-accent hover:underline" href="/barcode/scans/unresolved">
+          <div className="flex shrink-0 flex-wrap gap-3">
+            <a className="inline-flex h-11 items-center justify-center rounded bg-accent px-4 text-sm font-semibold text-white transition hover:bg-teal-800" href={`/barcode/stock${barcode ? `?barcode=${encodeURIComponent(barcode)}` : ""}`}>
+              出入庫
+            </a>
+            <a className="inline-flex h-11 items-center justify-center rounded border border-line px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent" href="/barcode/scans/unresolved">
               未対応を整理
             </a>
-            <a className="text-accent hover:underline" href="/barcode/scans">
-              読取履歴を見る
+            <a className="inline-flex h-11 items-center justify-center rounded border border-line px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent" href="/barcode/scans">
+              読み取り履歴
             </a>
-            <a className="text-accent hover:underline" href="/home">
+            <a className="inline-flex h-11 items-center justify-center rounded border border-line px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent" href="/home">
               ホームへ戻る
             </a>
           </div>
@@ -119,7 +119,7 @@ export default async function BarcodePage({ searchParams }: PageProps) {
 
         {!hasSearched ? (
           <section className="rounded border border-line bg-white p-5 text-sm text-muted shadow-panel">
-            バーコードを読み取ると、該当する商品候補がここに表示されます。まずは商品確認用として使い、在庫数は変更しません。
+            バーコードを読み取ってください。
           </section>
         ) : null}
 
@@ -136,7 +136,7 @@ export default async function BarcodePage({ searchParams }: PageProps) {
                     type="submit"
                     className="rounded border border-accent bg-white px-4 py-2 text-sm font-semibold text-accent transition hover:bg-teal-50"
                   >
-                    この読み取りを履歴に保存
+                    履歴に保存
                   </button>
                 </form>
               </div>
@@ -265,9 +265,6 @@ export default async function BarcodePage({ searchParams }: PageProps) {
               <div className="grid gap-4 px-4 py-6">
                 <div className="rounded border border-yellow-200 bg-yellow-50 p-4 text-sm text-muted">
                   <p className="font-semibold text-ink">商品マスタには未登録ですが、取込サンプルに一致しました。</p>
-                  <p className="mt-1">
-                    読み取り日時は確認用として表示しています。現時点では在庫数や履歴には保存していません。
-                  </p>
                 </div>
                 <div className="grid gap-3">
                   {sampleMatches.map((sample) => (
@@ -326,7 +323,7 @@ export default async function BarcodePage({ searchParams }: PageProps) {
             ) : (
               <div className="grid gap-4 px-4 py-12 text-center text-sm text-muted">
                 <p>
-                  該当する商品は見つかりませんでした。既存商品にこのバーコードを紐づける場合は、商品を選んでから登録します。
+                  該当する商品は見つかりませんでした。
                 </p>
                 <div>
                   <a

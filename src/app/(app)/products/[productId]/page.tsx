@@ -44,7 +44,7 @@ function getStockStatus(currentQuantity: number, minStock: number, hasStockItem:
   if (!hasStockItem) {
     return {
       label: "在庫行なし",
-      description: "この商品はまだ在庫一覧の管理対象になっていません",
+      description: "在庫一覧の対象外",
       badgeClass: "bg-gray-100 text-muted",
       panelClass: "border-line bg-white",
     };
@@ -53,7 +53,7 @@ function getStockStatus(currentQuantity: number, minStock: number, hasStockItem:
   if (currentQuantity === 0) {
     return {
       label: "在庫なし",
-      description: "すぐに補充確認が必要です",
+      description: "補充が必要",
       badgeClass: "bg-red-50 text-danger",
       panelClass: "border-danger/40 bg-red-50/40",
     };
@@ -71,7 +71,7 @@ function getStockStatus(currentQuantity: number, minStock: number, hasStockItem:
   if (currentQuantity === minStock) {
     return {
       label: "最低在庫ちょうど",
-      description: "次回使用前に補充判断を確認します",
+      description: "補充判断が必要",
       badgeClass: "bg-yellow-50 text-warning",
       panelClass: "border-warning/40 bg-yellow-50/50",
     };
@@ -123,9 +123,6 @@ export default async function ProductDetailPage({ params }: PageProps) {
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
             <h1 className="mt-2 text-3xl font-semibold">{product.name}</h1>
-            <p className="mt-2 text-sm text-muted">
-              商品マスタ、バーコード、在庫状態、直近履歴を閲覧します。
-            </p>
           </div>
           <div className="flex flex-wrap gap-3 text-sm font-semibold">
             <a className="text-accent hover:underline" href={`/products/${product.id}/edit`}>
@@ -154,9 +151,6 @@ export default async function ProductDetailPage({ params }: PageProps) {
             )}
             <div>
               <p className="text-sm font-semibold text-muted">商品写真</p>
-              <p className="mt-2 text-sm leading-6 text-muted">
-                写真は取り違え防止の補助情報です。登録や変更は商品編集画面から行います。
-              </p>
               <a className="mt-3 inline-flex text-sm font-semibold text-accent hover:underline" href={`/products/${product.id}/edit`}>
                 写真を編集する
               </a>

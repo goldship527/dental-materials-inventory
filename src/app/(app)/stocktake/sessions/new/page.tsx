@@ -31,9 +31,6 @@ export default async function NewStocktakeSessionPage() {
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
             <h1 className="mt-2 text-3xl font-semibold">棚卸セッション開始</h1>
-            <p className="mt-2 text-sm text-muted">
-              現在の在庫一覧をもとに、棚卸入力用の明細を作成します。
-            </p>
           </div>
           <a className="text-sm font-semibold text-accent hover:underline" href="/stocktake/sessions">
             セッション一覧へ戻る
@@ -46,7 +43,7 @@ export default async function NewStocktakeSessionPage() {
           <section className="rounded border border-line bg-white p-5 shadow-panel">
             <h2 className="text-lg font-semibold">入力中のセッションがあります</h2>
             <p className="mt-2 text-sm text-muted">
-              {formatDateTime(summary.inProgressSession.startedAt)} に開始した棚卸へ戻ります。同じクリニックで入力中の棚卸は1件だけにします。
+              {formatDateTime(summary.inProgressSession.startedAt)} に開始した棚卸があります。
             </p>
             <a
               className="mt-5 inline-flex h-11 items-center rounded bg-accent px-5 text-sm font-semibold text-white transition hover:bg-teal-800"
@@ -58,9 +55,6 @@ export default async function NewStocktakeSessionPage() {
         ) : (
           <form action={startStocktakeSessionAction} className="rounded border border-line bg-white p-5 shadow-panel">
             <h2 className="text-lg font-semibold">新しい棚卸を開始</h2>
-            <p className="mt-2 text-sm text-muted">
-              対象商品は現在の在庫一覧と同じく、有効な商品かつ使用中の在庫行です。開始時点の在庫数をシステム在庫として保存します。
-            </p>
             <dl className="mt-5 grid gap-3 rounded bg-gray-50 p-4 text-sm sm:grid-cols-2">
               <div>
                 <dt className="text-muted">対象クリニック</dt>

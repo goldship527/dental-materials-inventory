@@ -37,14 +37,14 @@ function getAttachBarcode(log: BarcodeScanLogRow) {
 
 function getResolutionHint(log: BarcodeScanLogRow) {
   if (log.matchType === "SAMPLE") {
-    return "取込サンプルに一致しています。正式登録前のローカル検証用商品として昇格できます。";
+    return "取込サンプルに一致しています。";
   }
 
   if (log.matchType === "PRODUCT_MULTI") {
-    return "商品候補が複数あります。検索結果を確認して、正しい商品へ紐づけてください。";
+    return "商品候補が複数あります。";
   }
 
-  return "商品マスタに一致していません。既存商品へ紐づけるか、不要な読み取りとして無視できます。";
+  return "商品マスタに一致していません。";
 }
 
 export default async function UnresolvedBarcodeScansPage() {
@@ -64,13 +64,10 @@ export default async function UnresolvedBarcodeScansPage() {
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
             <h1 className="mt-2 text-3xl font-semibold">未対応バーコード整理</h1>
-            <p className="mt-2 text-sm text-muted">
-              未一致、商品候補複数、取込サンプル一致の読取履歴を1件ずつ整理します。
-            </p>
           </div>
           <div className="flex flex-wrap gap-3 text-sm font-semibold">
             <a className="text-accent hover:underline" href="/barcode/scans">
-              読取履歴へ
+              読み取り履歴へ
             </a>
             <a className="text-accent hover:underline" href="/barcode">
               バーコード検索へ
@@ -82,7 +79,7 @@ export default async function UnresolvedBarcodeScansPage() {
 
         <section className="grid gap-3 rounded border border-line bg-white px-4 py-3 text-sm text-muted shadow-panel md:grid-cols-[1fr_auto] md:items-center">
           <p>
-            未対応 {logs.length} 件。整理操作では在庫数、発注候補、在庫変更履歴を変更しません。
+            未対応 {logs.length} 件
           </p>
           <a className="font-semibold text-accent hover:underline" href="/products">
             商品マスタを見る
@@ -185,7 +182,7 @@ export default async function UnresolvedBarcodeScansPage() {
                 ) : (
                   <tr>
                     <td className="px-4 py-12 text-center text-muted" colSpan={6}>
-                      未対応の読取履歴はありません。
+                      未対応の読み取り履歴はありません。
                     </td>
                   </tr>
                 )}

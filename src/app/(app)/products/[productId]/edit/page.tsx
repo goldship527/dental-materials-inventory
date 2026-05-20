@@ -43,9 +43,6 @@ export default async function ProductEditPage({ params, searchParams }: PageProp
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
             <h1 className="mt-2 text-3xl font-semibold">商品マスタ編集</h1>
-            <p className="mt-2 text-sm text-muted">
-              商品名、JANコード、発注先など、在庫判断に使う基本情報だけを編集します。
-            </p>
           </div>
           <a className="text-sm font-semibold text-accent hover:underline" href={`/products/${product.id}`}>
             商品詳細へ戻る
