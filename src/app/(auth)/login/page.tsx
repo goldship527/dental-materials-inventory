@@ -18,14 +18,14 @@ export default async function LoginPage() {
             一般歯科材料在庫管理システム
           </h1>
           <p className="mt-4 max-w-2xl text-base leading-7 text-muted">
-            フェーズ1では、開発用データで在庫一覧、よく使う商品カード、不足一覧、棚卸の流れを確認します。
+            在庫確認、補充判断、棚卸をまとめて確認できます。
           </p>
         </section>
 
         <section className="rounded border border-line bg-white p-6 shadow-panel">
           <h2 className="text-xl font-semibold">ログイン</h2>
           <p className="mt-2 text-sm leading-6 text-muted">
-            シード投入後は、開発用ユーザーでログインできます。
+            メールアドレスとパスワードを入力してください。
           </p>
           <div className="mt-6">
             <LoginForm />

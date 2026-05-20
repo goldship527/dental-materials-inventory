@@ -5,7 +5,24 @@ const prisma = new PrismaClient();
 
 const demoLoginEmail = process.env.DEMO_LOGIN_EMAIL?.trim() || "test@example.com";
 const demoLoginPassword = process.env.DEMO_LOGIN_PASSWORD || "password";
-const demoUserName = process.env.DEMO_USER_NAME?.trim() || "テストユーザー";
+const demoUserName = normalizeDemoUserName(process.env.DEMO_USER_NAME);
+
+function normalizeDemoUserName(value: string | undefined) {
+  const name = value?.trim() || "テストユーザー";
+  const utf8ByteLength = Buffer.byteLength(name, "utf8");
+
+  if (utf8ByteLength === 0 || utf8ByteLength > 120) {
+    throw new Error("DEMO_USER_NAME must be 1 to 120 bytes as UTF-8.");
+  }
+
+  if (name.includes("�") || /[繝譁縺螳]/.test(name)) {
+    throw new Error(
+      "DEMO_USER_NAME looks garbled. Set it again as UTF-8 text, for example テストユーザー.",
+    );
+  }
+
+  return name;
+}
 
 const suppliers = [
   "架空ディーラーA",
