@@ -1,27 +1,32 @@
 # 公開デモ環境セットアップメモ
 
-この文書は、一般歯科材料在庫管理システムを外出先で見せるためのデモ公開手順をまとめる。
+この文書は、一般歯科材料在庫管理システムを外出先で見せるための公開デモ手順をまとめる。
 
-本番運用ではなく、評価・画面確認・説明用の公開デモを目的にする。
+本番運用ではなく、評価、共有、画面確認用の安全な公開デモを目的にする。
 
-## 1. 方針
+## 1. 全体構成
 
 推奨構成:
 
 ```text
-Vercel: Next.js アプリ本体
-Supabase: PostgreSQL データベース
-GitHub: Vercel にコードを渡すリポジトリ
+GitHub
+  コードを置く場所
+
+Vercel
+  Next.jsアプリを公開する場所
+
+Supabase PostgreSQL
+  デモ用データベースを置く場所
 ```
 
-ローカル開発で使う Docker / PostgreSQL は、公開デモでは使わない。公開デモでは、Vercel から Supabase PostgreSQL へ接続する。
+ローカル開発で使うDocker/PostgreSQLは、公開デモでは使わない。公開デモではVercelからSupabase PostgreSQLへ接続する。
 
 ## 2. 安全ルール
 
 - 認証なし公開にはしない
 - 実在製品データ、患者情報、実在クリニック名、実在会社名、秘密情報を入れない
-- Supabase の接続文字列、DBパスワード、`AUTH_SECRET` はチャット、Git、ドキュメントに貼らない
-- `.env`、`.env.local`、`data/local/`、`data/local/uploads/` は Git に含めない
+- Supabaseの接続文字列、DBパスワード、`AUTH_SECRET` はチャット、Git、ドキュメントに貼らない
+- `.env`、`.env.local`、`data/local/`、`data/local/uploads/` はGitに含めない
 - 外部発注送信、メール送信、発注書PDF生成、納品確認は追加しない
 - 商品写真は現状ローカルファイル保存のため、公開デモでは永続保存対象として扱わない
 
@@ -31,16 +36,18 @@ GitHub: Vercel にコードを渡すリポジトリ
 - Vercel
 - Supabase
 
-Supabase プロジェクトは作成済みで、接続文字列をコピーできている前提にする。
+GitHubには、このプロジェクトのリポジトリを作成する。  
+VercelはGitHubリポジトリをimportしてデプロイする。  
+SupabaseはPostgreSQLデータベースとして使う。
 
-## 4. Vercel に設定する環境変数
+## 4. Vercelに設定する環境変数
 
-Vercel の Project Settings -> Environment Variables で、少なくとも次を設定する。
+Vercelの `Project Settings -> Environment Variables` に、少なくとも次を設定する。
 
 ```text
-DATABASE_URL=Supabase の PostgreSQL 接続文字列
+DATABASE_URL=Supabase PostgreSQLの接続文字列
 AUTH_SECRET=32文字以上のランダムな秘密文字列
-AUTH_URL=https://Vercelで発行されたURL
+AUTH_URL=https://Vercelで発行された公開URL
 DEMO_LOGIN_EMAIL=デモ用ログインメール
 DEMO_LOGIN_PASSWORD=デモ用ログインパスワード
 DEMO_USER_NAME=デモ用ユーザー表示名
@@ -49,16 +56,19 @@ DEMO_USER_NAME=デモ用ユーザー表示名
 補足:
 
 - `DATABASE_URL` は `postgresql://` で始まる接続文字列を使う
-- `AUTH_SECRET` は Vercel やローカルの秘密情報として扱い、Git に書かない
-- Auth.js v5 では `AUTH_SECRET` が必須。Vercel ではホスト推定が効くが、公開URLが決まったら `AUTH_URL` も設定しておく
-- `DEMO_LOGIN_PASSWORD` はデモ共有用であっても、コードやREADMEに平文で固定しない
+- `AUTH_SECRET` は認証用の秘密値であり、Gitには書かない
+- `AUTH_URL` は公開URLが決まってから設定し、Redeployする
+- `DEMO_LOGIN_PASSWORD` はコード、README、チャットに平文で固定しない
+- SupabaseのDBパスワードをリセットした場合は、Vercel側の `DATABASE_URL` も新しいパスワード入りURLに入れ替える
 
-## 5. Supabase DB 初期化
+## 5. Supabase DBの初期化
 
-Supabase の接続文字列はチャットに貼らず、ローカルの `.env` または `.env.local` に一時的に設定する。
+Supabaseの接続文字列はチャットに貼らず、ローカルの `.env.local` に一時的に設定する。
+
+例:
 
 ```powershell
-DATABASE_URL="Supabase の接続文字列"
+DATABASE_URL="Supabase PostgreSQLの接続文字列"
 AUTH_SECRET="ローカル確認用のランダム文字列"
 AUTH_URL="http://localhost:3000"
 DEMO_LOGIN_EMAIL="デモ用メール"
@@ -66,7 +76,7 @@ DEMO_LOGIN_PASSWORD="デモ用パスワード"
 DEMO_USER_NAME="デモ用ユーザー名"
 ```
 
-そのうえで、次を順番に実行する。
+そのうえで、ローカルPCからDB初期化を実行する。
 
 ```powershell
 corepack pnpm prisma:generate
@@ -76,22 +86,24 @@ corepack pnpm db:seed
 
 注意:
 
-- `db:seed` は既存データを削除して、架空の初期データを入れ直す
-- デモDBはリセット可能な前提で扱う
-- 実データが入ったDBに対して `db:seed` を実行しない
+- `db:seed` はデモDBを初期seed状態に戻すため、既存データを消して入れ直す
+- 実データが入った本番DBに対して不用意に `db:seed` を実行しない
+- SupabaseのDBパスワードをリセットした直後は、反映まで数分かかる場合がある
+- `db:push` がSupabase接続で不安定な場合は、作業ログを確認し、代替手順を慎重に検討する
 
-## 6. Vercel デプロイ手順
+## 6. Vercelデプロイ手順
 
-1. GitHub にこのプロジェクト用リポジトリを作る
-2. プロジェクトを GitHub に push する
-3. Vercel で New Project を選ぶ
-4. GitHub リポジトリを import する
-5. Framework Preset は Next.js を選ぶ
-6. Environment Variables に `DATABASE_URL`、`AUTH_SECRET`、必要なデモログイン変数を設定する
-7. Deploy を実行する
-8. 公開URLが決まったら、Vercel の `AUTH_URL` を公開URLに合わせて設定し、再デプロイする
+1. GitHubにこのプロジェクト用リポジトリを作る
+2. プロジェクトをGitHubへpushする
+3. Vercelで `New Project` を選ぶ
+4. GitHubリポジトリをimportする
+5. Framework Presetは `Next.js` を選ぶ
+6. Environment Variablesに必要な値を設定する
+7. `Deploy` を実行する
+8. 公開URLが決まったら、Vercelの `AUTH_URL` を公開URLに合わせる
+9. `AUTH_URL` や `DATABASE_URL` を変更した場合は、必ずRedeployする
 
-Vercel のインストール時には `postinstall` で `prisma generate` を実行する。DBスキーマ反映やseed投入は、Vercelビルドでは自動実行しない。
+Vercelのインストール時には `postinstall` で `prisma generate` を実行する。DBスキーマ反映やseed投入は、Vercelビルドでは自動実行しない。
 
 ## 7. 公開後の確認
 
@@ -105,9 +117,48 @@ Vercel のインストール時には `postinstall` で `prisma generate` を実
 6. 商品写真アップロードは公開デモでは永続保存を期待しない
 7. 画面やエラーにDB接続文字列、DBパスワード、`AUTH_SECRET` が表示されない
 
-## 8. 残るリスク
+## 8. よくある詰まりポイント
 
-- Vercel のサーバーレス環境では、ローカルファイル保存の写真は永続化できない
-- Supabase Free は利用制限や休止条件があるため、長期運用前にはプラン確認が必要
-- デモログイン情報を広く共有すると、誰でもデモDBを書き換えられる
+### Vercelで環境変数を変えたのに反映されない
+
+環境変数を変更しても、既存デプロイには自動反映されない。`Deployments` からRedeployする。
+
+### Supabaseに接続できない
+
+次を確認する。
+
+- `DATABASE_URL` の `[YOUR-PASSWORD]` が実際のDBパスワードに置き換わっているか
+- パスワードの角括弧 `[` `]` を残していないか
+- SupabaseのDBパスワードリセット直後ではないか
+- Vercel側の `DATABASE_URL` も新しいパスワード入りURLに入れ替えたか
+
+### ログイン後にエラーになる
+
+次を確認する。
+
+- Supabase DBにスキーマが作成されているか
+- `corepack pnpm db:seed` が成功しているか
+- Vercelの `DATABASE_URL` が正しいか
+- `AUTH_URL` が公開URLと一致しているか
+
+## 9. 残るリスク
+
+- Vercelのサーバーレス環境では、ローカルファイル保存の商品写真は永続化できない
+- Supabase Freeには利用制限や停止条件があるため、長期運用前にはプラン確認が必要
+- デモログイン情報を広く共有すると、誰でもデモDBを操作できる
 - 現時点では管理者向けのデモDBリセット画面はない
+- 本番運用では、バックアップ、監視、障害対応、権限管理、契約条件を別途設計する
+
+## 10. 本番化時の考え方
+
+公開デモは、本番導入そのものではない。本番導入では、少なくとも次を検討する。
+
+- Vercel Pro以上
+- Supabase Pro以上
+- 独自ドメイン
+- 本番DBと検証DBの分離
+- バックアップと復旧手順
+- スタッフごとのアカウントと権限
+- 商品写真のS3、R2、Supabase Storageなどへの移行
+- 実在データ投入時の確認手順
+- サポート範囲、料金、契約条件
