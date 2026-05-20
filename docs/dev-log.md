@@ -2314,3 +2314,32 @@
 ### 検証
 
 - `corepack pnpm exec tsx tests/barcode-gs1.test.ts` に成功した
+
+## 2026-05-20 SupabaseデモDB初期化
+
+### 作業内容
+
+- Supabase PostgreSQLに公開デモ用のDBスキーマを適用した
+- デモ用seedを実行し、架空の商品データとログイン用ユーザーを投入した
+- パスワードリセット直後は認証エラーが続いたため、反映待ち後に再試行して成功した
+
+### 判断
+
+- 公開デモDBにはローカルDockerではなくSupabase PostgreSQLを使う
+- 実在製品、患者情報、実在クリニック名、秘密情報は投入しない
+- DB接続文字列とデモ用パスワードは `.env.local` とVercel環境変数で扱い、Gitやドキュメントには残さない
+- Prismaの通常 `db:push` がSupabase接続で不安定だったため、作業中のみPrisma差分SQLを実行する一時スクリプトでスキーマを反映し、完了後に削除した
+
+### セキュリティメモ
+
+- Supabaseのデータベースパスワード、接続URL、Vercelの環境変数値はログに記録しない
+- デモログインのパスワードはREADMEやGitに固定せず、`DEMO_LOGIN_PASSWORD` で管理する
+- 商品写真は現状ローカルファイル保存のため、公開デモでは永続保存を期待しない
+
+### 検証
+
+- Supabase PostgreSQLへのスキーマ適用に成功した
+- `corepack pnpm db:seed` に成功した
+- seed結果として架空商品50件、不足商品10件、デモログインユーザーが作成された
+- `corepack pnpm typecheck` に成功した
+- `corepack pnpm build` に成功した
