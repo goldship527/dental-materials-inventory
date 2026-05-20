@@ -2606,3 +2606,36 @@
 - `corepack pnpm typecheck` に成功した
 - `corepack pnpm build` に成功した
 - build結果で `/barcode/stock` がDynamic routeとして含まれることを確認した
+
+## 2026-05-21 公開デモ向けの致命3点修正(続編)
+
+### 作業内容
+
+- 公開Production URLの `/login` を確認し、「フェーズ1では」「シード投入後は」の開発者向け文言が表示されないことを確認した
+- 公開Production URLへログインし、`/home` のログイン中ユーザー表示がまだ文字化けしていることを確認した
+- 手元の `.env` と `.env.local` はローカルDB向きで、Supabase本番DBへ直接接続できる `DATABASE_URL` がないことを確認した
+- `prisma/seed.ts` の `DEMO_USER_NAME` 検証が入っていることを再確認した
+- 共通ナビのログアウトを、Server Action経由の `signOut` から、`next-auth/react` の `signOut({ redirectTo: "/login" })` を使うClient Component経路に変更した
+- この変更により、NextAuth標準のCSRFトークン取得後に `/api/auth/signout` へPOSTする流れへ寄せた
+
+### 判断
+
+- ユーザー名の文字化けは、画面表示ロジックではなくSupabase本番DBの既存 `users.name` 値が壊れている状態と判断した
+- 現在の作業環境にはSupabase本番DBの接続文字列がないため、`users.name` の直接UPDATEは未実施とした
+- ログアウトは本番環境のServer Action経路で失敗している可能性を考え、NextAuthのクライアント標準実装に切り替えてCSRF付きPOSTを明示的に使う方針にした
+- 以前のVercelプレビューURLはVercelログインへリダイレクトされたため、公開確認はProduction URLで行う必要がある
+
+### セキュリティメモ
+
+- Supabase接続文字列、`AUTH_SECRET`、デモログインパスワードの実値は表示・記録していない
+- `.env.local` からデモログイン情報を読み込んだが、値はログやドキュメントに出していない
+- 本番DBに対して `db:seed` は実行していない
+- 本番DBのユーザー名更新は、Supabase接続文字列またはSupabase Studioで対象ユーザーを確認できる状態になってから、`users.name` だけを更新する
+
+### 検証
+
+- `corepack pnpm typecheck` に成功した
+- `corepack pnpm build` に成功した
+- 公開Production URLの `/login` で開発者向け文言が消えていることを確認した
+- 公開Production URLの `/home` でログイン中ユーザー名が文字化けしていることを確認した
+- Supabase本番DBの直接UPDATEと、修正後の公開デモでのユーザー名再確認は、接続情報不足のため未実施

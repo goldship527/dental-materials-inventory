@@ -1,4 +1,6 @@
-import { logoutAction } from "@/lib/actions/session";
+"use client";
+
+import { signOut } from "next-auth/react";
 
 type AppNavProps = {
   current:
@@ -109,14 +111,17 @@ export function AppNav({ current }: AppNavProps) {
             );
           })}
         </div>
-        <form action={logoutAction}>
-          <button
-            type="submit"
-            className="inline-flex h-10 shrink-0 items-center justify-center whitespace-nowrap rounded border border-line px-4 text-sm font-semibold text-muted transition hover:border-danger hover:text-danger"
-          >
-            ログアウト
-          </button>
-        </form>
+        <button
+          type="button"
+          onClick={() => {
+            void signOut({
+              redirectTo: "/login",
+            });
+          }}
+          className="inline-flex h-9 shrink-0 items-center justify-center whitespace-nowrap rounded-md border border-line bg-white px-3 text-sm font-semibold text-muted transition hover:border-danger hover:text-danger"
+        >
+          ログアウト
+        </button>
       </div>
     </nav>
   );
