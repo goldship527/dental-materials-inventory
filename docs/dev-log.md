@@ -2700,3 +2700,5 @@
 - 同じHTTPセッションで再ログイン後の `/home` が200になることを確認した
 - `corepack pnpm typecheck` に成功した
 - `corepack pnpm build` に成功した
+- GitHub push後、公開Production URLの `/login` でServer Action用の隠しフィールドが消え、新しいClient Component実装が反映されていることを確認した
+- 公開Production URLのHTTP検証で、ログイン後の `/home` が200、`POST /logout` が303、ログアウト後の `/home` が307で `/login` に保護されることを確認した
