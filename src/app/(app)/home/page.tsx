@@ -50,7 +50,7 @@ export default async function HomePage() {
     {
       label: "発注候補",
       value: `未確認 ${summary.draftOrderRequestCount} 件`,
-      note: `確認済み ${summary.orderRequestStatusCounts.CONFIRMED} / 見送り ${summary.orderRequestStatusCounts.SKIPPED}`,
+      note: `確認済み ${summary.orderRequestStatusCounts.CONFIRMED} / 取り消し ${summary.orderRequestStatusCounts.SKIPPED}`,
     },
   ];
   const attentionItems = [

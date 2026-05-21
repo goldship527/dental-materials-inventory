@@ -114,7 +114,7 @@ export default async function ManualPage() {
             <h1 className="mt-2 text-3xl font-semibold">スタッフマニュアル</h1>
             <p className="mt-2 text-sm text-muted">日常操作の確認用マニュアルです。</p>
           </div>
-          <a className="text-sm font-semibold text-accent hover:underline" href="/home">
+          <a className="inline-flex min-h-11 items-center rounded border border-line bg-white px-4 text-sm font-semibold text-accent transition hover:border-accent" href="/home">
             ホームへ戻る
           </a>
         </header>

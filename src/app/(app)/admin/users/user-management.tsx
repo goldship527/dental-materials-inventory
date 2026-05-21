@@ -61,8 +61,8 @@ export function UserManagement({ users, currentUserId }: UserManagementProps) {
   const [resetState, resetAction, isResetting] = useActionState(resetAdminUserPasswordAction, initialState);
 
   return (
-    <div className="grid gap-6">
-      <section className="rounded border border-line bg-white p-5 shadow-panel">
+    <div className="grid min-w-0 gap-6">
+      <section className="min-w-0 rounded border border-line bg-white p-5 shadow-panel">
         <h2 className="text-lg font-semibold">ユーザー追加</h2>
         <form action={createAction} className="mt-4 grid gap-4 md:grid-cols-2">
           <label className="grid gap-1 text-sm font-semibold text-muted">
@@ -109,7 +109,7 @@ export function UserManagement({ users, currentUserId }: UserManagementProps) {
           </label>
           <div className="md:col-span-2">
             <button
-              className="rounded bg-accent px-5 py-3 text-sm font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex min-h-11 items-center justify-center rounded bg-accent px-5 py-3 text-sm font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-60"
               disabled={isCreating}
               type="submit"
             >
@@ -122,7 +122,7 @@ export function UserManagement({ users, currentUserId }: UserManagementProps) {
         </div>
       </section>
 
-      <section className="rounded border border-line bg-white p-5 shadow-panel">
+      <section className="min-w-0 rounded border border-line bg-white p-5 shadow-panel">
         <div className="flex flex-col gap-2 border-b border-line pb-4 md:flex-row md:items-end md:justify-between">
           <div>
             <h2 className="text-lg font-semibold">ユーザー一覧</h2>
@@ -131,8 +131,8 @@ export function UserManagement({ users, currentUserId }: UserManagementProps) {
           <p className="text-sm font-semibold text-muted">合計 {users.length} 件</p>
         </div>
 
-        <div className="mt-4 overflow-x-auto">
-          <table className="min-w-full border-separate border-spacing-0 text-left text-sm">
+        <div className="mt-4 max-w-full overflow-x-auto">
+          <table className="min-w-[760px] border-separate border-spacing-0 text-left text-sm">
             <thead>
               <tr className="text-muted">
                 <th className="border-b border-line px-3 py-2 font-semibold">ユーザー</th>
@@ -174,7 +174,7 @@ export function UserManagement({ users, currentUserId }: UserManagementProps) {
                           <input
                             aria-label={`${user.name} の新しいパスワード`}
                             autoComplete="new-password"
-                            className="h-10 min-w-44 rounded border border-line px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                            className="h-11 min-w-44 rounded border border-line px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
                             disabled={!user.isActive}
                             minLength={8}
                             name="password"
@@ -184,7 +184,7 @@ export function UserManagement({ users, currentUserId }: UserManagementProps) {
                             type="password"
                           />
                           <button
-                            className="h-10 rounded border border-line bg-white px-3 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
+                            className="h-11 rounded border border-line bg-white px-3 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
                             disabled={!user.isActive || isResetting}
                             type="submit"
                           >
@@ -202,7 +202,7 @@ export function UserManagement({ users, currentUserId }: UserManagementProps) {
                           >
                             <input name="userId" type="hidden" value={user.id} />
                             <button
-                              className="h-10 rounded border border-line bg-white px-3 text-sm font-semibold text-muted transition hover:border-danger hover:text-danger disabled:cursor-not-allowed disabled:opacity-50"
+                              className="h-11 rounded border border-line bg-white px-3 text-sm font-semibold text-muted transition hover:border-danger hover:text-danger disabled:cursor-not-allowed disabled:opacity-50"
                               disabled={isSelf || isDeactivating}
                               type="submit"
                             >

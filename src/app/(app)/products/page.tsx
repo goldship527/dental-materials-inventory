@@ -81,17 +81,17 @@ export default async function ProductsPage({ searchParams }: PageProps) {
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
             <h1 className="mt-2 text-3xl font-semibold">商品マスタ</h1>
           </div>
-          <div className="flex shrink-0 flex-wrap gap-3">
+          <div className="grid w-full grid-cols-1 gap-3 sm:flex sm:w-auto sm:shrink-0 sm:flex-wrap">
             {!attachBarcode ? (
               <>
                 <a
-                  className="inline-flex h-11 items-center justify-center rounded bg-accent px-4 text-sm font-semibold text-white transition hover:bg-teal-800"
+                  className="inline-flex min-h-11 items-center justify-center rounded bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-800"
                   href="/products/new"
                 >
                   商品を新規作成
                 </a>
                 <a
-                  className="inline-flex h-11 items-center justify-center rounded border border-line bg-white px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+                  className="inline-flex min-h-11 items-center justify-center rounded border border-line bg-white px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
                   href="/products/import"
                 >
                   一括取り込み
@@ -99,7 +99,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
               </>
             ) : null}
             <a
-              className="inline-flex h-11 items-center justify-center rounded border border-line px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+              className="inline-flex min-h-11 items-center justify-center rounded border border-line px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
               href="/home"
             >
               ホームへ戻る
@@ -202,7 +202,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
                       {attachBarcode ? (
                         <td className="border-b border-line px-4 py-3">
                           <a
-                            className="inline-flex rounded bg-accent px-3 py-2 text-xs font-semibold text-white transition hover:bg-teal-800"
+                            className="inline-flex min-h-11 items-center justify-center rounded bg-accent px-3 py-2 text-xs font-semibold text-white transition hover:bg-teal-800"
                             href={`/products/${row.id}/edit?newBarcode=${encodeURIComponent(attachBarcode)}`}
                           >
                             この商品に紐づける

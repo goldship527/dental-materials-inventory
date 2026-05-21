@@ -15,7 +15,7 @@ export function InventoryAdjustForm({ stockItemId, quantity, stockUpdatedAt }: I
   const [state, formAction, isPending] = useActionState(adjustStockWithStateAction, initialState);
 
   return (
-    <form action={formAction} className="grid min-w-[380px] gap-2">
+    <form action={formAction} className="grid min-w-[320px] gap-2 sm:min-w-[380px]">
       <input type="hidden" name="stockItemId" value={stockItemId} />
       <input type="hidden" name="expectedQuantity" value={quantity} />
       <input type="hidden" name="expectedUpdatedAt" value={stockUpdatedAt} />
@@ -30,7 +30,7 @@ export function InventoryAdjustForm({ stockItemId, quantity, stockUpdatedAt }: I
             inputMode="numeric"
             defaultValue={quantity}
             required
-            className="h-10 rounded border border-line px-3 text-right text-sm font-semibold text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+            className="h-11 rounded border border-line px-3 text-right text-sm font-semibold text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
           />
         </label>
         <label className="grid gap-1 text-xs font-semibold text-muted">
@@ -41,13 +41,13 @@ export function InventoryAdjustForm({ stockItemId, quantity, stockUpdatedAt }: I
             placeholder="例: 棚卸差異、補充、使用"
             required
             maxLength={200}
-            className="h-10 rounded border border-line px-3 text-sm text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+            className="h-11 rounded border border-line px-3 text-sm text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
           />
         </label>
         <button
           type="submit"
           disabled={isPending}
-          className="h-10 rounded bg-ink px-4 text-xs font-semibold text-white transition hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+          className="h-11 rounded bg-ink px-4 text-xs font-semibold text-white transition hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isPending ? "更新中" : "更新"}
         </button>

@@ -98,7 +98,7 @@ export default async function BarcodeStockPage({ searchParams }: PageProps) {
         {barcode && results.length === 0 ? (
           <section className="rounded border border-warning/30 bg-yellow-50 p-5 text-sm text-warning shadow-panel">
             <p className="font-semibold">商品が見つかりませんでした。</p>
-            <a className="mt-4 inline-flex h-10 items-center rounded border border-warning/30 bg-white px-4 font-semibold" href={`/barcode?barcode=${encodeURIComponent(barcode)}`}>
+            <a className="mt-4 inline-flex h-11 items-center rounded border border-warning/30 bg-white px-4 font-semibold" href={`/barcode?barcode=${encodeURIComponent(barcode)}`}>
               商品検索へ
             </a>
           </section>

@@ -111,8 +111,8 @@ export function BarcodeStockForm({ barcode, productId, currentQuantity }: Barcod
               key={option}
               className={
                 reason === option
-                  ? "inline-flex h-10 cursor-pointer items-center rounded bg-accent px-4 text-sm font-semibold text-white"
-                  : "inline-flex h-10 cursor-pointer items-center rounded border border-line bg-white px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+                  ? "inline-flex h-11 cursor-pointer items-center rounded bg-accent px-4 text-sm font-semibold text-white"
+                  : "inline-flex h-11 cursor-pointer items-center rounded border border-line bg-white px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
               }
             >
               <input

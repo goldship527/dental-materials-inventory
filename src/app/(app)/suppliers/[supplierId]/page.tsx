@@ -244,7 +244,7 @@ export default async function SupplierDetailPage({ params }: PageProps) {
                         </a>
                         <span className="text-muted">発注数量 {request.requestedQuantity}</span>
                       </div>
-                      <p className="text-muted">
+                      <p className={request.status === "SKIPPED" ? "font-semibold text-danger" : "text-muted"}>
                         {orderRequestStatusLabels[request.status]} / {dateTimeFormatter.format(request.updatedAt)}
                       </p>
                       {request.memo ? <p className="text-muted">{request.memo}</p> : null}

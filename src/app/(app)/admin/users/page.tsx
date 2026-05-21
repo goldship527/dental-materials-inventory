@@ -43,7 +43,9 @@ export default async function AdminUsersPage() {
           </p>
         </header>
 
-        <UserManagement users={users} currentUserId={context.userId} />
+        <div className="min-w-0">
+          <UserManagement users={users} currentUserId={context.userId} />
+        </div>
       </main>
     </>
   );

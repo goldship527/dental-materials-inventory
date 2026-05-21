@@ -486,3 +486,20 @@ Codex検証範囲:
 - `corepack pnpm exec tsx tests/onboarding.test.ts`
 - `corepack pnpm typecheck`
 - `corepack pnpm build`
+
+## 完了: 優先11. タブレット/スマホ向けレイアウト調整
+
+完了日: 2026-05-21
+
+実装内容:
+
+- 共通ナビのモバイル時タップ領域を拡大
+- 商品一覧、発注先一覧、発注候補のヘッダー操作ボタンを狭い画面で縦並び化
+- よく使う商品カードのカテゴリタブ、在庫編集、発注候補編集、バーコード出入庫理由、ユーザー管理操作のタップ領域を調整
+- モバイル幅のフォーム文字サイズを調整し、iPhoneでの意図しない入力欄拡大を抑制
+- 主要一覧テーブルは横スクロール方式を維持
+
+検証:
+
+- `corepack pnpm typecheck`
+- `corepack pnpm build`

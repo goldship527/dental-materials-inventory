@@ -20,7 +20,7 @@ export default async function AccountPasswordPage() {
             <p className="text-sm font-semibold text-accent">{session.user.email}</p>
             <h1 className="mt-2 text-3xl font-semibold">パスワード変更</h1>
           </div>
-          <a className="text-sm font-semibold text-accent hover:underline" href="/home">
+          <a className="inline-flex min-h-11 items-center rounded border border-line bg-white px-4 text-sm font-semibold text-accent transition hover:border-accent" href="/home">
             ホームへ戻る
           </a>
         </header>

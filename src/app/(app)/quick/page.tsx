@@ -128,8 +128,8 @@ export default async function QuickPage({ searchParams }: PageProps) {
                 aria-current={selectedTab === "" ? "page" : undefined}
                 className={
                   selectedTab === ""
-                    ? "rounded bg-accent px-4 py-2 text-sm font-semibold text-white"
-                    : "rounded border border-line px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-ink"
+                    ? "inline-flex min-h-11 items-center rounded bg-accent px-4 py-2 text-sm font-semibold text-white"
+                    : "inline-flex min-h-11 items-center rounded border border-line px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-ink"
                 }
               >
                 すべて {cards.length}
@@ -144,8 +144,8 @@ export default async function QuickPage({ searchParams }: PageProps) {
                     aria-current={isCurrent ? "page" : undefined}
                     className={
                       isCurrent
-                        ? "rounded bg-accent px-4 py-2 text-sm font-semibold text-white"
-                        : "rounded border border-line px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-ink"
+                        ? "inline-flex min-h-11 items-center rounded bg-accent px-4 py-2 text-sm font-semibold text-white"
+                        : "inline-flex min-h-11 items-center rounded border border-line px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-ink"
                     }
                   >
                     {tab.category} {tab.count}

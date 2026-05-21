@@ -127,12 +127,12 @@ export default async function OrdersPage({ searchParams }: PageProps) {
               発行日時: {generatedAt}
             </p>
           </div>
-          <div className="flex gap-3 print:hidden">
-            <a className="rounded border border-line px-5 py-3 text-sm font-semibold hover:border-accent" href="/shortage">
+          <div className="grid w-full grid-cols-1 gap-3 print:hidden sm:flex sm:w-auto">
+            <a className="inline-flex min-h-11 items-center justify-center rounded border border-line px-5 py-3 text-sm font-semibold hover:border-accent" href="/shortage">
               不足一覧へ
             </a>
             <a
-              className="rounded border border-line px-5 py-3 text-sm font-semibold hover:border-accent"
+              className="inline-flex min-h-11 items-center justify-center rounded border border-line px-5 py-3 text-sm font-semibold hover:border-accent"
               href="/orders/print"
             >
               発注書下書き
@@ -149,14 +149,18 @@ export default async function OrdersPage({ searchParams }: PageProps) {
           <div className="border border-black px-2 py-1.5">確認済み: {countByStatus.CONFIRMED} 件</div>
         </section>
         <section className="hidden border border-black px-2 py-1.5 text-xs print:block">
-          出力条件: {filterLabel || "すべて"} / 全発注候補: {rows.length} 件 / 見送り: {countByStatus.SKIPPED} 件
+          出力条件: {filterLabel || "すべて"} / 全発注候補: {rows.length} 件 / 取り消し: {countByStatus.SKIPPED} 件
         </section>
 
         <section className="grid gap-4 md:grid-cols-3 print:hidden">
           {counts.map((item) => (
             <div key={item.status} className="rounded border border-line bg-white p-5 shadow-panel">
-              <p className="text-sm font-semibold text-muted">{item.label}</p>
-              <p className="mt-2 text-3xl font-semibold">{item.count} 件</p>
+              <p className={item.status === "SKIPPED" ? "text-sm font-semibold text-danger" : "text-sm font-semibold text-muted"}>
+                {item.label}
+              </p>
+              <p className={item.status === "SKIPPED" ? "mt-2 text-3xl font-semibold text-danger" : "mt-2 text-3xl font-semibold"}>
+                {item.count} 件
+              </p>
             </div>
           ))}
         </section>
@@ -194,9 +198,13 @@ export default async function OrdersPage({ searchParams }: PageProps) {
                 href={buildOrdersHref(filter.value as OrderRequestStatusValue | "", query)}
                 aria-current={isCurrent ? "page" : undefined}
                 className={
-                  isCurrent
-                    ? "rounded bg-accent px-4 py-2 text-sm font-semibold text-white"
-                    : "rounded border border-line bg-white px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+                  filter.value === "SKIPPED"
+                    ? isCurrent
+                      ? "inline-flex min-h-11 items-center rounded border border-danger bg-red-50 px-4 py-2 text-sm font-semibold text-danger"
+                      : "inline-flex min-h-11 items-center rounded border border-red-100 bg-white px-4 py-2 text-sm font-semibold text-danger transition hover:border-danger hover:bg-red-50"
+                    : isCurrent
+                      ? "inline-flex min-h-11 items-center rounded bg-accent px-4 py-2 text-sm font-semibold text-white"
+                      : "inline-flex min-h-11 items-center rounded border border-line bg-white px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
                 }
               >
                 {filter.label}
@@ -228,7 +236,7 @@ export default async function OrdersPage({ searchParams }: PageProps) {
                   <div className="flex items-center gap-3">
                     <span className="text-muted print:text-black">{supplierRows.length} 件</span>
                     <a
-                      className="rounded border border-line px-3 py-1.5 text-xs font-semibold text-muted transition hover:border-accent hover:text-accent print:hidden"
+                      className="inline-flex min-h-11 items-center justify-center rounded border border-line px-3 py-2 text-xs font-semibold text-muted transition hover:border-accent hover:text-accent print:hidden"
                       href={buildOrdersPrintHref(supplierRows[0]?.supplierId)}
                     >
                       この発注先の下書き

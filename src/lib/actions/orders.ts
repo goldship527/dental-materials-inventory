@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { prisma } from "@/lib/db/prisma";
+import { orderRequestStatusLabels } from "@/lib/orders/status";
 
 const orderRequestIdSchema = z.string().min(1);
 const stockItemIdSchema = z.string().min(1);
@@ -221,7 +222,7 @@ export async function updateOrderRequestStatusWithStateAction(
 
     revalidateOrderPages();
 
-    const label = status === "DRAFT" ? "未確認" : status === "CONFIRMED" ? "確認済み" : "見送り";
+    const label = orderRequestStatusLabels[status];
 
     return {
       status: "success",

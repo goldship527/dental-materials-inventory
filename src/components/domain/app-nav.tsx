@@ -127,8 +127,8 @@ function NavLink({ item, current }: { item: NavItem; current: NavItemId }) {
       aria-current={isCurrent ? "page" : undefined}
       className={
         isCurrent
-          ? "inline-flex h-9 shrink-0 items-center whitespace-nowrap rounded border border-accent bg-white px-3 text-sm font-semibold text-accent shadow-sm"
-          : "inline-flex h-9 shrink-0 items-center whitespace-nowrap rounded border border-transparent px-3 text-sm font-semibold text-muted transition hover:border-line hover:bg-white hover:text-ink"
+          ? "inline-flex h-11 shrink-0 items-center whitespace-nowrap rounded border border-accent bg-white px-3 text-sm font-semibold text-accent shadow-sm sm:h-9"
+          : "inline-flex h-11 shrink-0 items-center whitespace-nowrap rounded border border-transparent px-3 text-sm font-semibold text-muted transition hover:border-line hover:bg-white hover:text-ink sm:h-9"
       }
     >
       {item.label}
@@ -146,7 +146,7 @@ function NavGroup({
   items: readonly NavItem[];
 }) {
   return (
-    <div aria-label={ariaLabel} className="flex min-w-0 gap-1 overflow-x-auto pb-1 lg:flex-wrap lg:overflow-visible lg:pb-0">
+    <div aria-label={ariaLabel} className="flex min-w-0 gap-2 overflow-x-auto pb-1 sm:gap-1 lg:flex-wrap lg:overflow-visible lg:pb-0">
       {items.map((item) => (
         <NavLink key={item.id} item={item} current={current} />
       ))}
@@ -164,7 +164,7 @@ export async function AppNav({ current }: AppNavProps) {
   return (
     <nav
       aria-label="アプリ内メニュー"
-      className="sticky top-0 z-30 border-b border-line bg-surface/95 px-4 py-2 backdrop-blur print:hidden sm:px-6 lg:px-8"
+      className="sticky top-0 z-30 border-b border-line bg-surface/95 px-3 py-2 backdrop-blur print:hidden sm:px-4 lg:px-6"
     >
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-2">
         <div className="flex flex-col gap-2 xl:flex-row xl:items-center xl:justify-between">
@@ -174,18 +174,18 @@ export async function AppNav({ current }: AppNavProps) {
             items={modeItems}
           />
 
-          <div className="flex min-w-0 shrink-0 gap-1 overflow-x-auto pb-1 xl:overflow-visible xl:pb-0">
+          <div className="flex min-w-0 shrink-0 gap-2 overflow-x-auto pb-1 sm:gap-1 xl:overflow-visible xl:pb-0">
             {isAdminMode ? (
               <a
                 href="/home"
-                className="inline-flex h-9 shrink-0 items-center whitespace-nowrap rounded border border-line bg-white px-3 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+                className="inline-flex h-11 shrink-0 items-center whitespace-nowrap rounded border border-line bg-white px-3 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent sm:h-9"
               >
                 通常業務へ
               </a>
             ) : canUseAdminMode ? (
               <a
                 href="/admin/users"
-                className="inline-flex h-9 shrink-0 items-center whitespace-nowrap rounded border border-line bg-white px-3 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+                className="inline-flex h-11 shrink-0 items-center whitespace-nowrap rounded border border-line bg-white px-3 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent sm:h-9"
               >
                 管理
               </a>
@@ -198,7 +198,7 @@ export async function AppNav({ current }: AppNavProps) {
             <form action="/logout" method="post" className="shrink-0">
               <button
                 type="submit"
-                className="inline-flex h-9 shrink-0 items-center justify-center whitespace-nowrap rounded border border-line bg-white px-3 text-sm font-semibold text-muted transition hover:border-danger hover:text-danger"
+                className="inline-flex h-11 shrink-0 items-center justify-center whitespace-nowrap rounded border border-line bg-white px-3 text-sm font-semibold text-muted transition hover:border-danger hover:text-danger sm:h-9"
               >
                 ログアウト
               </button>

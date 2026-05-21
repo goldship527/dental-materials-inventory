@@ -232,8 +232,8 @@ export default async function ProductDetailPage({ params }: PageProps) {
             <p className="text-sm font-semibold text-muted">発注候補</p>
             <p className="mt-2 text-3xl font-semibold">{product.orderRequests.length}</p>
             <p className="mt-2 text-sm text-muted">
-              未確認 {orderRequestCounts.DRAFT} / 確認済み {orderRequestCounts.CONFIRMED} / 見送り{" "}
-              {orderRequestCounts.SKIPPED}
+              未確認 {orderRequestCounts.DRAFT} / 確認済み {orderRequestCounts.CONFIRMED} /{" "}
+              <span className="font-semibold text-danger">取り消し {orderRequestCounts.SKIPPED}</span>
             </p>
           </div>
         </section>
@@ -344,7 +344,9 @@ export default async function ProductDetailPage({ params }: PageProps) {
                 product.orderRequests.map((request) => (
                   <div key={request.id} className="grid gap-1 py-3 text-sm">
                     <div className="flex items-center justify-between gap-3">
-                      <span className="font-semibold">{orderRequestStatusLabels[request.status]}</span>
+                      <span className={request.status === "SKIPPED" ? "font-semibold text-danger" : "font-semibold"}>
+                        {orderRequestStatusLabels[request.status]}
+                      </span>
                       <span className="text-muted">発注数量 {request.requestedQuantity}</span>
                     </div>
                     <p className="text-muted">

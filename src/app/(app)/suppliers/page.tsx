@@ -57,16 +57,16 @@ export default async function SuppliersPage({ searchParams }: PageProps) {
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
             <h1 className="mt-2 text-3xl font-semibold">発注先マスタ</h1>
           </div>
-          <div className="flex shrink-0 flex-wrap gap-3">
+          <div className="grid w-full grid-cols-1 gap-3 sm:flex sm:w-auto sm:shrink-0 sm:flex-wrap">
             {canManageSuppliers ? (
               <a
-                className="inline-flex h-11 items-center justify-center rounded bg-accent px-4 text-sm font-semibold text-white transition hover:bg-teal-800"
+                className="inline-flex min-h-11 items-center justify-center rounded bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-800"
                 href="/suppliers/new"
               >
                 発注先を新規作成
               </a>
             ) : null}
-            <a className="inline-flex h-11 items-center justify-center rounded border border-line px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent" href="/home">
+            <a className="inline-flex min-h-11 items-center justify-center rounded border border-line px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent" href="/home">
               ホームへ戻る
             </a>
           </div>
@@ -116,8 +116,8 @@ export default async function SuppliersPage({ searchParams }: PageProps) {
                       <p className="mt-1 text-2xl font-semibold">{row.orderRequestCounts.CONFIRMED}</p>
                     </div>
                     <div className="rounded border border-line px-3 py-2">
-                      <p className="text-xs font-semibold text-muted">見送り</p>
-                      <p className="mt-1 text-2xl font-semibold">{row.orderRequestCounts.SKIPPED}</p>
+                      <p className="text-xs font-semibold text-danger">取り消し</p>
+                      <p className="mt-1 text-2xl font-semibold text-danger">{row.orderRequestCounts.SKIPPED}</p>
                     </div>
                   </div>
 

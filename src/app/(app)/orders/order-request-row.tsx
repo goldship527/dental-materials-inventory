@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import {
   updateOrderRequestQuantityWithStateAction,
   updateOrderRequestStatusWithStateAction,
@@ -18,6 +18,8 @@ type OrderRequestRowProps = {
 const statusOptions: OrderRequestStatusValue[] = ["DRAFT", "CONFIRMED", "SKIPPED"];
 
 export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
+  const [requestedQuantity, setRequestedQuantity] = useState(row.requestedQuantity);
+  const [selectedStatus, setSelectedStatus] = useState<OrderRequestStatusValue>(row.status);
   const [quantityState, quantityAction, isQuantityPending] = useActionState(
     updateOrderRequestQuantityWithStateAction,
     initialState,
@@ -27,6 +29,12 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
     initialState,
   );
   const activeState = statusState.message ? statusState : quantityState;
+
+  function changeRequestedQuantity(nextQuantity: number) {
+    const normalizedQuantity = Math.max(1, Math.min(9999, Math.trunc(Number.isFinite(nextQuantity) ? nextQuantity : 1)));
+
+    setRequestedQuantity(normalizedQuantity);
+  }
 
   return (
     <tr className="align-top print:break-inside-avoid">
@@ -80,18 +88,37 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
         <form action={quantityAction} className="grid gap-2">
           <input type="hidden" name="orderRequestId" value={row.id} />
           <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => changeRequestedQuantity(requestedQuantity - 1)}
+              disabled={requestedQuantity <= 1 || isQuantityPending}
+              className="h-11 w-11 rounded border border-line bg-white text-lg font-semibold text-muted transition hover:border-accent hover:text-accent disabled:cursor-not-allowed disabled:opacity-40"
+              aria-label="発注数量を1減らす"
+            >
+              -
+            </button>
             <input
               type="text"
               inputMode="numeric"
               pattern="[0-9]*"
               name="requestedQuantity"
-              defaultValue={row.requestedQuantity}
-              className="h-10 w-24 rounded border border-line px-3 text-right outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+              value={requestedQuantity}
+              onChange={(event) => changeRequestedQuantity(Number(event.target.value))}
+              className="h-11 w-24 rounded border border-line px-3 text-right outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
             />
+            <button
+              type="button"
+              onClick={() => changeRequestedQuantity(requestedQuantity + 1)}
+              disabled={requestedQuantity >= 9999 || isQuantityPending}
+              className="h-11 w-11 rounded border border-line bg-white text-lg font-semibold text-muted transition hover:border-accent hover:text-accent disabled:cursor-not-allowed disabled:opacity-40"
+              aria-label="発注数量を1増やす"
+            >
+              +
+            </button>
             <button
               type="submit"
               disabled={isQuantityPending}
-              className="h-10 rounded bg-ink px-3 text-xs font-semibold text-white transition hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+              className="h-11 rounded bg-ink px-3 text-xs font-semibold text-white transition hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isQuantityPending ? "更新中" : "更新"}
             </button>
@@ -103,8 +130,13 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
           <input type="hidden" name="orderRequestId" value={row.id} />
           <select
             name="status"
-            defaultValue={row.status}
-            className="h-10 rounded border border-line bg-white px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+            value={selectedStatus}
+            onChange={(event) => setSelectedStatus(event.target.value as OrderRequestStatusValue)}
+            className={
+              selectedStatus === "SKIPPED"
+                ? "h-11 rounded border border-danger bg-red-50 px-3 text-sm font-semibold text-danger outline-none focus:border-danger focus:ring-2 focus:ring-danger/20"
+                : "h-11 rounded border border-line bg-white px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+            }
           >
             {statusOptions.map((status) => (
               <option key={status} value={status}>
@@ -112,23 +144,32 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
               </option>
             ))}
           </select>
+          {selectedStatus === "SKIPPED" ? (
+            <p className="text-xs font-semibold text-danger">取り消しにした候補は発注書下書きに含めません。</p>
+          ) : null}
           <textarea
             name="memo"
             defaultValue={row.memo ?? ""}
-            placeholder="見送り理由・備考"
+            placeholder={selectedStatus === "SKIPPED" ? "取り消し理由・メモ" : "備考メモ"}
             maxLength={200}
             className="min-h-20 rounded border border-line px-3 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
           />
           <button
             type="submit"
             disabled={isStatusPending}
-            className="h-9 rounded border border-line px-3 text-xs font-semibold text-muted transition hover:border-accent hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
+            className="h-11 rounded border border-line px-3 text-xs font-semibold text-muted transition hover:border-accent hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isStatusPending ? "変更中" : "状態・メモ更新"}
           </button>
         </form>
       </td>
-      <td className="hidden border-b border-line px-4 py-3 print:table-cell print:border print:border-black print:px-2 print:py-1.5 print:font-semibold">
+      <td
+        className={
+          row.status === "SKIPPED"
+            ? "hidden border-b border-line px-4 py-3 text-danger print:table-cell print:border print:border-black print:px-2 print:py-1.5 print:font-semibold print:text-black"
+            : "hidden border-b border-line px-4 py-3 print:table-cell print:border print:border-black print:px-2 print:py-1.5 print:font-semibold"
+        }
+      >
         {orderRequestStatusLabels[row.status]}
       </td>
       <td className="hidden border-b border-line px-4 py-3 print:table-cell print:border print:border-black print:px-2 print:py-1.5">
