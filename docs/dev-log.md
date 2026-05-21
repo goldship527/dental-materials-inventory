@@ -2646,26 +2646,26 @@
 ### 作業内容
 
 - `src/components/domain/app-nav.tsx` のログアウトボタン実装を確認した
-- 共通ナビはClient Componentとして `next-auth/react` の `signOut` を使う構成を維持した
-- ログアウトボタンの `onClick` で `signOut` を `await` し、遷移先指定を `callbackUrl: "/login"` に変更した
+- 共通ナビのログアウトを `<form action="/logout" method="post">` と `type="submit"` の通常フォーム送信へ戻した
+- `src/app/logout/route.ts` を追加し、Auth.js/NextAuth系のセッションCookieをサーバー側で削除して `/login` へ303リダイレクトするようにした
 - `/login` 画面に「フェーズ1では」「シード投入後は」の開発者向け文言が残っていないことを確認した
 
 ### 判断
 
-- `type="button"` 自体は問題ではなく、クリック時の `signOut` 呼び出しを明示的に待つ形にして、silent failに見える挙動を避ける方針にした
-- NextAuth v5でもクライアント側の `signOut` はCSRFトークン取得後に `/api/auth/signout` へPOSTするため、この経路を採用した
-- Server Action経由のフォーム送信は本番で挙動が読みづらかったため、今回はクライアント標準実装を優先した
+- 公開デモでクライアント側 `signOut` のクリック処理が効いていない可能性が高いため、JavaScriptのイベントハンドラに依存しないフォームPOST方式に戻した
+- `/logout` では現在のリクエストCookieから `authjs` / `next-auth` を含むCookie名も拾い、固定名だけでなくチャンク化されたセッションCookieにも対応できるようにした
+- `GET /logout` でも同じCookie削除を行うが、通常UIからはPOSTだけを使う
 
 ### セキュリティメモ
 
 - 認証秘密鍵、DB接続文字列、デモログインパスワードは変更・記載していない
-- ログアウト導線のみの変更で、ログイン認証、パスワード照合、DB更新処理は変更していない
+- ログアウト導線とCookie削除だけの変更で、ログイン認証、パスワード照合、DB更新処理は変更していない
 - ローカル検証では既存の開発用テストアカウントのみを使用した
 
 ### 検証
 
 - ローカルDocker DBを起動し、`corepack pnpm dev` でローカル開発サーバーを起動した
-- ローカルで `/home` のログアウトボタンをクリックし、`/login` に遷移することを確認した
-- ログアウト後に `/home` へ直接アクセスしても `/login` にリダイレクトされ、ログインフォームが表示されることを確認した
+- ローカルHTTP検証で、ログイン後の `/home` が200かつログアウトボタンありになることを確認した
+- `POST /logout` 後に `/home` へ直接アクセスすると307で保護されることを確認した
 - `corepack pnpm typecheck` に成功した
 - `corepack pnpm build` に成功した

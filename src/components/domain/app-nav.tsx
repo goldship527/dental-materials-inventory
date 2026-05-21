@@ -1,7 +1,3 @@
-"use client";
-
-import { signOut } from "next-auth/react";
-
 type AppNavProps = {
   current:
     | "home"
@@ -111,17 +107,14 @@ export function AppNav({ current }: AppNavProps) {
             );
           })}
         </div>
-        <button
-          type="button"
-          onClick={async () => {
-            await signOut({
-              callbackUrl: "/login",
-            });
-          }}
-          className="inline-flex h-9 shrink-0 items-center justify-center whitespace-nowrap rounded-md border border-line bg-white px-3 text-sm font-semibold text-muted transition hover:border-danger hover:text-danger"
-        >
-          ログアウト
-        </button>
+        <form action="/logout" method="post">
+          <button
+            type="submit"
+            className="inline-flex h-9 shrink-0 items-center justify-center whitespace-nowrap rounded-md border border-line bg-white px-3 text-sm font-semibold text-muted transition hover:border-danger hover:text-danger"
+          >
+            ログアウト
+          </button>
+        </form>
       </div>
     </nav>
   );
