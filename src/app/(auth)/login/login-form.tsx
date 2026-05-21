@@ -1,15 +1,39 @@
 "use client";
 
-import { useActionState } from "react";
-import { loginAction, type LoginState } from "./actions";
-
-const initialState: LoginState = {};
+import { type FormEvent, useState, useTransition } from "react";
+import { signIn } from "next-auth/react";
 
 export function LoginForm() {
-  const [state, formAction, isPending] = useActionState(loginAction, initialState);
+  const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError(null);
+
+    const formData = new FormData(event.currentTarget);
+    const email = String(formData.get("email") ?? "").trim();
+    const password = String(formData.get("password") ?? "");
+
+    startTransition(async () => {
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+        callbackUrl: "/home",
+      });
+
+      if (!result || result.error) {
+        setError("メールアドレスまたはパスワードが違います。");
+        return;
+      }
+
+      window.location.assign(result.url ?? "/home");
+    });
+  }
 
   return (
-    <form action={formAction} className="grid gap-5">
+    <form onSubmit={handleSubmit} className="grid gap-5">
       <div className="grid gap-2">
         <label htmlFor="email" className="text-sm font-semibold text-ink">
           メールアドレス
@@ -40,9 +64,9 @@ export function LoginForm() {
         />
       </div>
 
-      {state.error ? (
+      {error ? (
         <p className="rounded border border-danger/30 bg-red-50 px-4 py-3 text-sm text-danger">
-          {state.error}
+          {error}
         </p>
       ) : null}
 

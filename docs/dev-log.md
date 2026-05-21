@@ -2669,3 +2669,34 @@
 - `POST /logout` 後に `/home` へ直接アクセスすると307で保護されることを確認した
 - `corepack pnpm typecheck` に成功した
 - `corepack pnpm build` に成功した
+
+## 2026-05-21 ログイン動作の修復(ログアウト改修の副作用)
+
+### 作業内容
+
+- 公開デモでログインフォーム送信後に `/login` へ留まり、セッションが成立しない事象を受けてログイン実装を確認した
+- `src/app/(auth)/login/login-form.tsx` を Server Action + `useActionState` 経由から、`next-auth/react` の `signIn("credentials")` を直接呼ぶClient Component実装へ変更した
+- ログイン成功時は `callbackUrl: "/home"` を指定し、戻り値のURLまたは `/home` へ画面遷移するようにした
+- ログイン失敗時は画面内に「メールアドレスまたはパスワードが違います。」を表示するようにした
+- 参照されなくなった `src/app/(auth)/login/actions.ts` を削除し、ログイン経路を一本化した
+
+### 判断
+
+- 認証プロバイダーやパスワード照合処理ではなく、Server Actionとクライアントフォームの境界で本番環境だけ遷移が失われる可能性を優先して切り分けた
+- Auth.js標準のクライアント `signIn` に寄せることで、CSRF取得とCredentials ProviderへのPOSTをNextAuth側の通常経路に戻した
+- ログアウトは直前に追加した `/logout` への通常フォームPOST方式を維持し、ログイン修復の対象から外した
+
+### セキュリティメモ
+
+- `AUTH_SECRET`、Supabase接続文字列、公開デモ用パスワードの実値は表示・記録していない
+- ローカル検証では既存の開発用テストアカウントだけを使用した
+- パスワード照合、JWT/sessionコールバック、DB更新処理は変更していない
+
+### 検証
+
+- ローカルDocker DBと `corepack pnpm dev` でローカル開発サーバーを起動した
+- ローカルHTTP検証で、ログイン後の `/home` が200になることを確認した
+- 同じHTTPセッションで `POST /logout` が303で `/login` へ向き、ログアウト後の `/home` が307で `/login` へ保護されることを確認した
+- 同じHTTPセッションで再ログイン後の `/home` が200になることを確認した
+- `corepack pnpm typecheck` に成功した
+- `corepack pnpm build` に成功した
