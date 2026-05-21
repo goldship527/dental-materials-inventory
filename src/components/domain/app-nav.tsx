@@ -113,9 +113,9 @@ export function AppNav({ current }: AppNavProps) {
         </div>
         <button
           type="button"
-          onClick={() => {
-            void signOut({
-              redirectTo: "/login",
+          onClick={async () => {
+            await signOut({
+              callbackUrl: "/login",
             });
           }}
           className="inline-flex h-9 shrink-0 items-center justify-center whitespace-nowrap rounded-md border border-line bg-white px-3 text-sm font-semibold text-muted transition hover:border-danger hover:text-danger"
