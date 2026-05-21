@@ -74,4 +74,14 @@ a {
   thead {
     display: table-header-group;
   }
+
+  .order-print-sheet {
+    break-after: page;
+    page-break-after: always;
+  }
+
+  .order-print-sheet:last-child {
+    break-after: auto;
+    page-break-after: auto;
+  }
 }

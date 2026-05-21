@@ -115,7 +115,7 @@ export default async function OrdersPrintPage({ searchParams }: PageProps) {
           </div>
         </section>
 
-        <section className="grid gap-3 rounded border border-line bg-white p-4 text-sm shadow-panel md:grid-cols-2 print:rounded-none print:border-black print:p-3 print:text-xs print:shadow-none">
+        <section className="grid gap-3 rounded border border-line bg-white p-4 text-sm shadow-panel md:grid-cols-2 print:hidden">
           <div>
             <h2 className="text-base font-semibold print:text-sm">発注元</h2>
             <dl className="mt-3 grid gap-2">
@@ -177,9 +177,9 @@ export default async function OrdersPrintPage({ searchParams }: PageProps) {
             {groups.map((group) => (
               <article
                 key={group.supplierKey}
-                className="break-inside-avoid rounded border border-line bg-white shadow-panel print:rounded-none print:border-black print:shadow-none"
+                className="order-print-sheet break-inside-avoid rounded border border-line bg-white shadow-panel print:rounded-none print:border-black print:shadow-none"
               >
-                <div className="grid gap-3 border-b border-line p-4 md:grid-cols-[1.2fr_1fr] print:border-black print:p-3 print:text-xs">
+                <div className="grid gap-3 border-b border-line p-4 md:grid-cols-[1.2fr_1fr] print:grid-cols-[1.1fr_1fr_1fr] print:border-black print:p-2 print:text-[10px]">
                   <div>
                     <p className="text-xs font-semibold text-muted print:text-black">発注先</p>
                     <h2 className="mt-1 text-xl font-semibold print:text-base">{group.supplierName}</h2>
@@ -192,7 +192,7 @@ export default async function OrdersPrintPage({ searchParams }: PageProps) {
                       住所: {displayValue(group.supplierAddress)}
                     </p>
                   </div>
-                  <dl className="grid gap-1 text-sm print:text-xs">
+                  <dl className="grid gap-1 text-sm print:text-[10px]">
                     <div className="grid grid-cols-[5.5rem_1fr] gap-2">
                       <dt className="text-muted print:text-black">電話</dt>
                       <dd>{displayValue(group.supplierPhone)}</dd>
@@ -208,6 +208,25 @@ export default async function OrdersPrintPage({ searchParams }: PageProps) {
                     <div className="grid grid-cols-[5.5rem_1fr] gap-2">
                       <dt className="text-muted print:text-black">担当者</dt>
                       <dd>{displayValue(group.supplierContactPersonName)}</dd>
+                    </div>
+                  </dl>
+                  <dl className="grid gap-1 border-t border-line pt-3 text-sm md:col-span-2 print:col-span-1 print:border-l print:border-t-0 print:border-black print:pl-2 print:pt-0 print:text-[10px]">
+                    <div className="font-semibold print:text-black">発注元</div>
+                    <div className="grid grid-cols-[4.5rem_1fr] gap-2">
+                      <dt className="text-muted print:text-black">名称</dt>
+                      <dd className="font-semibold">{context.clinicName}</dd>
+                    </div>
+                    <div className="grid grid-cols-[4.5rem_1fr] gap-2">
+                      <dt className="text-muted print:text-black">電話</dt>
+                      <dd>{displayValue(context.clinicPhone)}</dd>
+                    </div>
+                    <div className="grid grid-cols-[4.5rem_1fr] gap-2">
+                      <dt className="text-muted print:text-black">担当者</dt>
+                      <dd>{displayValue(context.userName ?? context.userEmail)}</dd>
+                    </div>
+                    <div className="grid grid-cols-[4.5rem_1fr] gap-2">
+                      <dt className="text-muted print:text-black">発行</dt>
+                      <dd>{issuedAtLabel}</dd>
                     </div>
                   </dl>
                 </div>
