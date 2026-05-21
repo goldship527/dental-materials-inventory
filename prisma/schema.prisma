@@ -18,6 +18,8 @@ model Organization {
   products        Product[]
   suppliers       Supplier[]
   productBarcodes ProductBarcode[]
+  productImportHistories ProductImportHistory[]
+  auditLogs       AuditLog[]
 }
 
 model Clinic {
@@ -48,7 +50,8 @@ model User {
   name           String
   email          String   @unique
   passwordHash   String
-  role           String   @default("staff")
+  role           String   @default("STAFF")
+  isActive       Boolean  @default(true)
   pinCodeHash    String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -61,6 +64,8 @@ model User {
   stocktakeSessionsStarted   StocktakeSession[]     @relation("StocktakeSessionStartedBy")
   stocktakeSessionsCommitted StocktakeSession[]     @relation("StocktakeSessionCommittedBy")
   stocktakeItemsCounted      StocktakeSessionItem[] @relation("StocktakeSessionItemCountedBy")
+  productImportHistories     ProductImportHistory[]
+  auditLogs                  AuditLog[]
 
   @@index([organizationId])
 }
@@ -77,12 +82,53 @@ model UserClinicAssignment {
   @@index([clinicId])
 }
 
-model Supplier {
+model LoginAttempt {
+  id           String    @id @default(cuid())
+  email        String
+  ipAddress    String
+  failedCount  Int       @default(0)
+  lockedUntil  DateTime?
+  lastFailedAt DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@unique([email, ipAddress])
+  @@index([lockedUntil])
+  @@index([updatedAt])
+}
+
+model AuditLog {
   id             String   @id @default(cuid())
   organizationId String
-  name           String
+  actorUserId    String?
+  action         String
+  targetType     String
+  targetId       String?
+  detailsJson    Json?
   createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  actorUser    User?        @relation(fields: [actorUserId], references: [id])
+
+  @@index([organizationId, createdAt])
+  @@index([actorUserId])
+  @@index([action])
+  @@index([targetType, targetId])
+}
+
+model Supplier {
+  id                 String   @id @default(cuid())
+  organizationId     String
+  name               String
+  address            String?
+  phone              String?
+  fax                String?
+  email              String?
+  contactPersonName  String?
+  contactPersonEmail String?
+  notes              String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
   organization  Organization   @relation(fields: [organizationId], references: [id])
   products      Product[]
@@ -132,6 +178,27 @@ model Product {
   @@index([janCode])
   @@index([productCode])
   @@index([internalCode])
+}
+
+model ProductImportHistory {
+  id             String   @id @default(cuid())
+  organizationId String
+  userId         String
+  sourceType     String
+  fileName       String?
+  totalRows      Int
+  validRows      Int
+  createdRows    Int
+  skippedRows    Int
+  errorRows      Int
+  warningRows    Int
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  user         User         @relation(fields: [userId], references: [id])
+
+  @@index([organizationId, createdAt])
+  @@index([userId])
 }
 
 model ProductBarcode {

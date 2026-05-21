@@ -72,6 +72,8 @@ export default async function StocktakeSessionsPage() {
   return (
     <main className="min-h-screen bg-surface px-4 py-6 text-ink sm:px-6 lg:px-8">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
+        <AppNav current="stocktake" />
+
         <header className="flex flex-col gap-4 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
@@ -85,7 +87,6 @@ export default async function StocktakeSessionsPage() {
           </a>
         </header>
 
-        <AppNav current="stocktake" />
 
         <section className="rounded border border-line bg-white shadow-panel">
           <div className="flex flex-col gap-2 border-b border-line px-4 py-3 md:flex-row md:items-center md:justify-between">

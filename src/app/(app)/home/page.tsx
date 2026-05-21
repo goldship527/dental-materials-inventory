@@ -40,7 +40,7 @@ export default async function HomePage() {
     {
       label: "不足",
       value: `${summary.shortageCount} 件`,
-      note: `うち在庫0が ${summary.zeroStockCount} 件`,
+      note: `在庫0 ${summary.zeroStockCount} 件 / ぎりぎり ${summary.atMinStockCount} 件`,
     },
     {
       label: "よく使うカード",
@@ -84,6 +84,12 @@ export default async function HomePage() {
       description: "現在庫と最低在庫",
       href: "/inventory",
       badge: `${summary.stockItemCount} 件`,
+    },
+    {
+      title: "初期設定チェック",
+      description: "商品、発注先、バーコード、最低在庫",
+      href: "/setup",
+      badge: "導入",
     },
     {
       title: "商品マスタ",
@@ -140,6 +146,10 @@ export default async function HomePage() {
   return (
     <main className="min-h-screen bg-surface px-4 py-6 text-ink print:bg-white print:px-0 print:py-0 sm:px-6 lg:px-8">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
+        <div className="print:hidden">
+          <AppNav current="home" />
+        </div>
+
         <header className="flex flex-col gap-4 border-b border-line pb-5 print:border-none md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
@@ -154,9 +164,6 @@ export default async function HomePage() {
           </a>
         </header>
 
-        <div className="print:hidden">
-          <AppNav current="home" />
-        </div>
 
         <section className="grid gap-4 md:grid-cols-4">
           {summaryItems.map((item) => (

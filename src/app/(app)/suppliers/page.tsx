@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { AppNav } from "@/components/domain/app-nav";
+import { isAdminRole } from "@/lib/auth/roles";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { getSupplierMasterRows } from "@/lib/db/suppliers";
 import { SupplierFilterForm } from "./supplier-filter-form";
@@ -21,6 +22,7 @@ export default async function SuppliersPage({ searchParams }: PageProps) {
   }
 
   const context = await requireActiveClinic();
+  const canManageSuppliers = isAdminRole(session.user.role);
   const params = (await searchParams) ?? {};
   const query = params.q?.trim() ?? "";
   const shortageOnly = params.shortage === "1";
@@ -48,17 +50,28 @@ export default async function SuppliersPage({ searchParams }: PageProps) {
   return (
     <main className="min-h-screen bg-surface px-4 py-6 text-ink sm:px-6 lg:px-8">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
+        <AppNav current="suppliers" />
+
         <header className="flex flex-col gap-4 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
             <h1 className="mt-2 text-3xl font-semibold">発注先マスタ</h1>
           </div>
-          <a className="inline-flex h-11 shrink-0 items-center justify-center rounded border border-line px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent" href="/home">
-            ホームへ戻る
-          </a>
+          <div className="flex shrink-0 flex-wrap gap-3">
+            {canManageSuppliers ? (
+              <a
+                className="inline-flex h-11 items-center justify-center rounded bg-accent px-4 text-sm font-semibold text-white transition hover:bg-teal-800"
+                href="/suppliers/new"
+              >
+                発注先を新規作成
+              </a>
+            ) : null}
+            <a className="inline-flex h-11 items-center justify-center rounded border border-line px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent" href="/home">
+              ホームへ戻る
+            </a>
+          </div>
         </header>
 
-        <AppNav current="suppliers" />
 
         <SupplierFilterForm
           defaultQuery={query}
@@ -106,6 +119,16 @@ export default async function SuppliersPage({ searchParams }: PageProps) {
                       <p className="text-xs font-semibold text-muted">見送り</p>
                       <p className="mt-1 text-2xl font-semibold">{row.orderRequestCounts.SKIPPED}</p>
                     </div>
+                  </div>
+
+                  <div className="mt-5">
+                    <p className="text-xs font-semibold text-muted">連絡先</p>
+                    <p className="mt-2 text-sm leading-6 text-muted">
+                      電話 {row.phone ?? "-"} / FAX {row.fax ?? "-"} / メール {row.email ?? "-"}
+                    </p>
+                    {row.contactPersonName ? (
+                      <p className="mt-1 text-sm text-muted">担当: {row.contactPersonName}</p>
+                    ) : null}
                   </div>
 
                   <div className="mt-5">

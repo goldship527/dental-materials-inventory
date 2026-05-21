@@ -56,7 +56,9 @@ export default async function MedicalDeviceImportPreviewPage({ searchParams }: P
     return (
       <main className="min-h-screen bg-surface px-6 py-8 text-ink">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
-          <header className="border-b border-line pb-5">
+          <AppNav current="imports" />
+
+        <header className="border-b border-line pb-5">
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
             <h1 className="mt-2 text-3xl font-semibold">医療機器データ取り込みプレビュー</h1>
           </header>
@@ -153,7 +155,6 @@ export default async function MedicalDeviceImportPreviewPage({ searchParams }: P
           </a>
         </header>
 
-        <AppNav current="imports" />
 
         <section className="grid gap-3 md:grid-cols-4">
           <div className="rounded border border-line bg-white p-4 shadow-panel">

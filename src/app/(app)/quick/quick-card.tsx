@@ -46,8 +46,10 @@ export function QuickCard({ categoryLabel, row }: QuickCardProps) {
           <p className="text-xs text-muted">現在庫</p>
           <p className="text-4xl font-semibold">{row.quantity}</p>
         </div>
-        {row.quantity <= row.minStock ? (
-          <span className="rounded bg-yellow-50 px-2 py-1 text-xs font-semibold text-warning">不足</span>
+        {row.stockStatus !== "ENOUGH" ? (
+          <span className={`rounded px-2 py-1 text-xs font-semibold ${row.stockStatusClassName}`}>
+            {row.stockStatusLabel}
+          </span>
         ) : null}
       </div>
       <div className="grid grid-cols-2 gap-3">

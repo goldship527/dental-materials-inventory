@@ -86,6 +86,8 @@ export default async function BarcodePage({ searchParams }: PageProps) {
   return (
     <main className="min-h-screen bg-surface px-4 py-6 text-ink sm:px-6 lg:px-8">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
+        <AppNav current="barcode" />
+
         <header className="flex flex-col gap-4 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
@@ -107,7 +109,6 @@ export default async function BarcodePage({ searchParams }: PageProps) {
           </div>
         </header>
 
-        <AppNav current="barcode" />
 
         <BarcodeSearchForm defaultBarcode={barcode} />
 

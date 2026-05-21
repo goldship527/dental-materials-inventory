@@ -1,21 +1,35 @@
+import { auth } from "@/auth";
+import { isAdminRole } from "@/lib/auth/roles";
+
+type NavItemId =
+  | "home"
+  | "setup"
+  | "inventory"
+  | "products"
+  | "suppliers"
+  | "barcode"
+  | "imports"
+  | "quick"
+  | "shortage"
+  | "orders"
+  | "movements"
+  | "manual"
+  | "stocktake"
+  | "admin"
+  | "auditLogs"
+  | "account";
+
 type AppNavProps = {
-  current:
-    | "home"
-    | "inventory"
-    | "products"
-    | "suppliers"
-    | "barcode"
-    | "imports"
-    | "quick"
-    | "shortage"
-    | "orders"
-    | "movements"
-    | "manual"
-    | "stocktake"
-    | "account";
+  current: NavItemId;
 };
 
-const navItems = [
+type NavItem = {
+  id: NavItemId;
+  label: string;
+  href: string;
+};
+
+const workNavItems = [
   {
     id: "home",
     label: "ホーム",
@@ -23,28 +37,8 @@ const navItems = [
   },
   {
     id: "inventory",
-    label: "在庫一覧",
+    label: "在庫",
     href: "/inventory",
-  },
-  {
-    id: "products",
-    label: "商品",
-    href: "/products",
-  },
-  {
-    id: "suppliers",
-    label: "発注先",
-    href: "/suppliers",
-  },
-  {
-    id: "barcode",
-    label: "バーコード",
-    href: "/barcode",
-  },
-  {
-    id: "imports",
-    label: "取込確認",
-    href: "/imports/medical-devices",
   },
   {
     id: "quick",
@@ -52,8 +46,13 @@ const navItems = [
     href: "/quick",
   },
   {
+    id: "barcode",
+    label: "バーコード",
+    href: "/barcode",
+  },
+  {
     id: "shortage",
-    label: "不足一覧",
+    label: "不足",
     href: "/shortage",
   },
   {
@@ -67,6 +66,47 @@ const navItems = [
     href: "/movements",
   },
   {
+    id: "stocktake",
+    label: "棚卸",
+    href: "/stocktake/sessions",
+  },
+  {
+    id: "products",
+    label: "商品",
+    href: "/products",
+  },
+  {
+    id: "suppliers",
+    label: "発注先",
+    href: "/suppliers",
+  },
+] as const satisfies readonly NavItem[];
+
+const adminNavItems = [
+  {
+    id: "setup",
+    label: "初期設定",
+    href: "/setup",
+  },
+  {
+    id: "imports",
+    label: "取込確認",
+    href: "/imports/medical-devices",
+  },
+  {
+    id: "admin",
+    label: "ユーザー管理",
+    href: "/admin/users",
+  },
+  {
+    id: "auditLogs",
+    label: "監査ログ",
+    href: "/admin/audit-logs",
+  },
+] as const satisfies readonly NavItem[];
+
+const helpNavItems = [
+  {
     id: "manual",
     label: "マニュアル",
     href: "/manual",
@@ -76,45 +116,95 @@ const navItems = [
     label: "アカウント",
     href: "/account/password",
   },
-  {
-    id: "stocktake",
-    label: "棚卸",
-    href: "/stocktake/sessions",
-  },
-] as const;
+] as const satisfies readonly NavItem[];
 
-export function AppNav({ current }: AppNavProps) {
+function NavLink({ item, current }: { item: NavItem; current: NavItemId }) {
+  const isCurrent = item.id === current;
+
   return (
-    <nav aria-label="アプリ内メニュー" className="print:hidden">
-      <div className="flex flex-col gap-2 rounded border border-line bg-white p-2 shadow-panel lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex gap-2 overflow-x-auto pb-1 lg:flex-wrap lg:overflow-visible lg:pb-0">
-          {navItems.map((item) => {
-            const isCurrent = item.id === current;
+    <a
+      href={item.href}
+      aria-current={isCurrent ? "page" : undefined}
+      className={
+        isCurrent
+          ? "inline-flex h-9 shrink-0 items-center whitespace-nowrap rounded border border-accent bg-white px-3 text-sm font-semibold text-accent shadow-sm"
+          : "inline-flex h-9 shrink-0 items-center whitespace-nowrap rounded border border-transparent px-3 text-sm font-semibold text-muted transition hover:border-line hover:bg-white hover:text-ink"
+      }
+    >
+      {item.label}
+    </a>
+  );
+}
 
-            return (
+function NavGroup({
+  ariaLabel,
+  current,
+  items,
+}: {
+  ariaLabel: string;
+  current: NavItemId;
+  items: readonly NavItem[];
+}) {
+  return (
+    <div aria-label={ariaLabel} className="flex min-w-0 gap-1 overflow-x-auto pb-1 lg:flex-wrap lg:overflow-visible lg:pb-0">
+      {items.map((item) => (
+        <NavLink key={item.id} item={item} current={current} />
+      ))}
+    </div>
+  );
+}
+
+export async function AppNav({ current }: AppNavProps) {
+  const session = await auth();
+  const canUseAdminMode = isAdminRole(session?.user?.role);
+  const isAdminMode =
+    canUseAdminMode && (current === "setup" || current === "imports" || current === "admin" || current === "auditLogs");
+  const modeItems = isAdminMode ? adminNavItems : workNavItems;
+
+  return (
+    <nav
+      aria-label="アプリ内メニュー"
+      className="sticky top-0 z-30 border-b border-line bg-surface/95 px-4 py-2 backdrop-blur print:hidden sm:px-6 lg:px-8"
+    >
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-2">
+        <div className="flex flex-col gap-2 xl:flex-row xl:items-center xl:justify-between">
+          <NavGroup
+            ariaLabel={isAdminMode ? "管理モードメニュー" : "通常業務メニュー"}
+            current={current}
+            items={modeItems}
+          />
+
+          <div className="flex min-w-0 shrink-0 gap-1 overflow-x-auto pb-1 xl:overflow-visible xl:pb-0">
+            {isAdminMode ? (
               <a
-                key={item.id}
-                href={item.href}
-                aria-current={isCurrent ? "page" : undefined}
-                className={
-                  isCurrent
-                    ? "inline-flex h-10 shrink-0 items-center whitespace-nowrap rounded bg-accent px-4 text-sm font-semibold text-white"
-                    : "inline-flex h-10 shrink-0 items-center whitespace-nowrap rounded px-4 text-sm font-semibold text-muted transition hover:bg-gray-50 hover:text-ink"
-                }
+                href="/home"
+                className="inline-flex h-9 shrink-0 items-center whitespace-nowrap rounded border border-line bg-white px-3 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
               >
-                {item.label}
+                通常業務へ
               </a>
-            );
-          })}
+            ) : canUseAdminMode ? (
+              <a
+                href="/admin/users"
+                className="inline-flex h-9 shrink-0 items-center whitespace-nowrap rounded border border-line bg-white px-3 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+              >
+                管理
+              </a>
+            ) : null}
+
+            {helpNavItems.map((item) => (
+              <NavLink key={item.id} item={item} current={current} />
+            ))}
+
+            <form action="/logout" method="post" className="shrink-0">
+              <button
+                type="submit"
+                className="inline-flex h-9 shrink-0 items-center justify-center whitespace-nowrap rounded border border-line bg-white px-3 text-sm font-semibold text-muted transition hover:border-danger hover:text-danger"
+              >
+                ログアウト
+              </button>
+            </form>
+          </div>
         </div>
-        <form action="/logout" method="post">
-          <button
-            type="submit"
-            className="inline-flex h-9 shrink-0 items-center justify-center whitespace-nowrap rounded-md border border-line bg-white px-3 text-sm font-semibold text-muted transition hover:border-danger hover:text-danger"
-          >
-            ログアウト
-          </button>
-        </form>
       </div>
     </nav>
   );

@@ -78,6 +78,10 @@ export default async function MedicalDeviceBarcodeLabelsPage({ searchParams }: P
         }
       `}</style>
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 print:max-w-none print:gap-0">
+        <div className="print:hidden">
+          <AppNav current="imports" />
+        </div>
+
         <header className="flex flex-col gap-3 border-b border-line pb-5 md:flex-row md:items-end md:justify-between print:hidden">
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
@@ -97,9 +101,6 @@ export default async function MedicalDeviceBarcodeLabelsPage({ searchParams }: P
           </div>
         </header>
 
-        <div className="print:hidden">
-          <AppNav current="imports" />
-        </div>
 
         <section className="rounded border border-line bg-white p-4 text-sm text-muted shadow-panel print:hidden">
           <p>

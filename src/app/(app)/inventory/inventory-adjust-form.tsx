@@ -8,14 +8,17 @@ const initialState: StockActionState = {};
 type InventoryAdjustFormProps = {
   stockItemId: string;
   quantity: number;
+  stockUpdatedAt: number;
 };
 
-export function InventoryAdjustForm({ stockItemId, quantity }: InventoryAdjustFormProps) {
+export function InventoryAdjustForm({ stockItemId, quantity, stockUpdatedAt }: InventoryAdjustFormProps) {
   const [state, formAction, isPending] = useActionState(adjustStockWithStateAction, initialState);
 
   return (
     <form action={formAction} className="grid min-w-[380px] gap-2">
       <input type="hidden" name="stockItemId" value={stockItemId} />
+      <input type="hidden" name="expectedQuantity" value={quantity} />
+      <input type="hidden" name="expectedUpdatedAt" value={stockUpdatedAt} />
       <div className="grid gap-2 sm:grid-cols-[96px_minmax(180px,1fr)_80px] sm:items-end">
         <label className="grid gap-1 text-xs font-semibold text-muted">
           新数量

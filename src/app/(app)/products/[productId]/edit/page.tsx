@@ -39,6 +39,8 @@ export default async function ProductEditPage({ params, searchParams }: PageProp
   return (
     <main className="min-h-screen bg-surface px-6 py-8 text-ink">
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
+        <AppNav current="products" />
+
         <header className="flex flex-col gap-3 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
@@ -49,7 +51,6 @@ export default async function ProductEditPage({ params, searchParams }: PageProp
           </a>
         </header>
 
-        <AppNav current="products" />
 
         <ProductEditForm product={product} suppliers={suppliers} />
         <PhotoManagement

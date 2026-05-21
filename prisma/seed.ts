@@ -132,7 +132,8 @@ async function main() {
       name: demoUserName,
       email: demoLoginEmail,
       passwordHash,
-      role: "staff",
+      role: "ADMIN",
+      isActive: true,
     },
   });
 

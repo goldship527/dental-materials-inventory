@@ -9,6 +9,12 @@ export type OrderRequestRow = {
   category: string | null;
   supplierId: string | null;
   supplierName: string | null;
+  supplierAddress: string | null;
+  supplierPhone: string | null;
+  supplierFax: string | null;
+  supplierEmail: string | null;
+  supplierContactPersonName: string | null;
+  supplierContactPersonEmail: string | null;
   quantity: number;
   minStock: number;
   shortageCount: number;
@@ -62,6 +68,14 @@ export async function getOrderRequestRows(clinicId: string): Promise<OrderReques
       category: request.product.category,
       supplierId: request.supplier?.id ?? request.product.primarySupplier?.id ?? null,
       supplierName: request.supplier?.name ?? request.product.primarySupplier?.name ?? null,
+      supplierAddress: request.supplier?.address ?? request.product.primarySupplier?.address ?? null,
+      supplierPhone: request.supplier?.phone ?? request.product.primarySupplier?.phone ?? null,
+      supplierFax: request.supplier?.fax ?? request.product.primarySupplier?.fax ?? null,
+      supplierEmail: request.supplier?.email ?? request.product.primarySupplier?.email ?? null,
+      supplierContactPersonName:
+        request.supplier?.contactPersonName ?? request.product.primarySupplier?.contactPersonName ?? null,
+      supplierContactPersonEmail:
+        request.supplier?.contactPersonEmail ?? request.product.primarySupplier?.contactPersonEmail ?? null,
       quantity,
       minStock,
       shortageCount: Math.max(0, minStock - quantity),

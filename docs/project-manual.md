@@ -227,7 +227,7 @@ corepack pnpm db:seed
 - バーコードは商品識別子として扱い、患者情報や秘密情報を入れない
 - 公開デモや本番候補環境でも、実在製品データ、実在クリニック名、患者情報、秘密情報をseedやテスト固定値に入れない
 - Vercel、Supabase、GitHubの管理画面スクリーンショットを共有する場合は、接続文字列、パスワード、トークン、メール認証情報を隠す
-- 商品写真は現状 `data/local/uploads/products/` のローカル保存であり、Vercel上では永続保存対象として扱わない
+- 商品写真は `SUPABASE_STORAGE_BUCKET` 設定時にSupabase Storageへ保存し、未設定のローカル開発では `data/local/uploads/products/` へ保存する
 
 ## 12. 公開デモ環境
 
@@ -255,6 +255,9 @@ AUTH_URL
 DEMO_LOGIN_EMAIL
 DEMO_LOGIN_PASSWORD
 DEMO_USER_NAME
+SUPABASE_URL
+SUPABASE_SERVICE_ROLE_KEY
+SUPABASE_STORAGE_BUCKET
 ```
 
 注意:
@@ -264,6 +267,9 @@ DEMO_USER_NAME
 - Vercel環境変数を変更した後は、既存デプロイには自動反映されないため、Redeployが必要
 - `AUTH_URL` はVercelの公開URLに合わせる
 - デモログインパスワードはGit、README、チャットに書かない
+- `SUPABASE_URL` はSupabaseプロジェクトURLを入れる
+- `SUPABASE_SERVICE_ROLE_KEY` は商品写真のサーバー側保存・取得に使う秘密値で、Git、README、チャットに書かない
+- `SUPABASE_STORAGE_BUCKET` は商品写真用のprivate bucket名を入れる。例: `product-photos`
 
 公開デモDBの初期化状況:
 

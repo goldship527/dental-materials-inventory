@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { AppNav } from "@/components/domain/app-nav";
+import { requireAdminUser } from "@/lib/auth/admin";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { getSupplierDetail } from "@/lib/db/suppliers";
 import { SupplierEditForm } from "./supplier-edit-form";
@@ -18,8 +19,12 @@ export default async function SupplierEditPage({ params }: PageProps) {
     redirect("/login");
   }
 
-  const context = await requireActiveClinic();
   const { supplierId } = await params;
+  await requireAdminUser({
+    unauthorizedRedirectTo: `/suppliers/${supplierId}`,
+  });
+
+  const context = await requireActiveClinic();
   const supplier = await getSupplierDetail(supplierId, context.organizationId, context.clinicId);
 
   if (!supplier) {
@@ -29,6 +34,8 @@ export default async function SupplierEditPage({ params }: PageProps) {
   return (
     <main className="min-h-screen bg-surface px-6 py-8 text-ink">
       <div className="mx-auto flex w-full max-w-4xl flex-col gap-6">
+        <AppNav current="suppliers" />
+
         <header className="flex flex-col gap-3 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
@@ -42,7 +49,6 @@ export default async function SupplierEditPage({ params }: PageProps) {
           </a>
         </header>
 
-        <AppNav current="suppliers" />
 
         <SupplierEditForm supplier={supplier} />
       </div>

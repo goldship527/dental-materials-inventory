@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
+import { auditActions, writeAuditLog } from "@/lib/audit/audit-log";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { prisma } from "@/lib/db/prisma";
 
@@ -227,6 +228,14 @@ export async function updateProductMasterWithStateAction(
       },
     });
 
+    await writeAuditLog({
+      organizationId: context.organizationId,
+      actorUserId: context.userId,
+      action: auditActions.productUpdate,
+      targetType: "Product",
+      targetId: input.productId,
+    });
+
     revalidatePath("/home");
     revalidatePath("/inventory");
     revalidatePath("/shortage");
@@ -303,6 +312,14 @@ export async function createProductAction(
       select: {
         id: true,
       },
+    });
+
+    await writeAuditLog({
+      organizationId: context.organizationId,
+      actorUserId: context.userId,
+      action: auditActions.productCreate,
+      targetType: "Product",
+      targetId: product.id,
     });
 
     revalidatePath("/home");

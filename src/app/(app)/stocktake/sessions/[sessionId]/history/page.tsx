@@ -93,6 +93,8 @@ export default async function StocktakeSessionHistoryPage({ params, searchParams
   return (
     <main className="min-h-screen bg-surface px-6 py-8 text-ink">
       <div className="mx-auto flex max-w-7xl flex-col gap-6">
+        <AppNav current="stocktake" />
+
         <header className="flex flex-col gap-3 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
@@ -106,7 +108,6 @@ export default async function StocktakeSessionHistoryPage({ params, searchParams
           </a>
         </header>
 
-        <AppNav current="stocktake" />
 
         <section className="grid gap-3 rounded border border-line bg-white p-4 text-sm shadow-panel md:grid-cols-3">
           <div>

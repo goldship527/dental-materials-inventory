@@ -2,14 +2,17 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { requireActiveClinic } from "@/lib/db/clinic";
+import { type ActiveClinicContext, requireActiveClinic } from "@/lib/db/clinic";
 import { prisma } from "@/lib/db/prisma";
 
 const stockItemIdSchema = z.string().min(1);
 const quantitySchema = z.coerce.number().int().min(0).max(9999);
+const expectedUpdatedAtSchema = z.coerce.number().int().nonnegative();
 const reasonSchema = z.string().trim().min(1, "理由メモを入力してください。").max(200);
 const deltaSchema = z.coerce.number().pipe(z.union([z.literal(-1), z.literal(1)]));
 const sourceTypeSchema = z.enum(["MANUAL", "STOCKTAKE"]).default("MANUAL");
+const stockConflictMessage =
+  "他のスタッフが先に在庫を変更しました。最新の在庫を確認してから再度操作してください。";
 
 export type StockActionState = {
   status?: "success" | "error";
@@ -20,6 +23,15 @@ type StockUpdateResult = {
   productName: string;
   beforeQuantity: number;
   afterQuantity: number;
+};
+
+export type AdjustStockInput = {
+  stockItemId: string;
+  quantity: number;
+  reason: string;
+  sourceType: "MANUAL" | "STOCKTAKE";
+  expectedQuantity: number | null;
+  expectedUpdatedAt: number | null;
 };
 
 function revalidateStockPages() {
@@ -52,17 +64,41 @@ function toActionError(error: unknown): StockActionState {
   };
 }
 
-async function adjustStock(formData: FormData): Promise<StockUpdateResult> {
-  const context = await requireActiveClinic();
-  const stockItemId = stockItemIdSchema.parse(formData.get("stockItemId"));
-  const newQuantity = quantitySchema.parse(formData.get("quantity"));
-  const reason = reasonSchema.parse(formData.get("reason"));
-  const sourceType = sourceTypeSchema.parse(formData.get("sourceType") ?? "MANUAL");
+function parseOptionalQuantity(value: FormDataEntryValue | null) {
+  if (value === null || value === "") {
+    return null;
+  }
 
+  return quantitySchema.parse(value);
+}
+
+function parseOptionalUpdatedAt(value: FormDataEntryValue | null) {
+  if (value === null || value === "") {
+    return null;
+  }
+
+  return expectedUpdatedAtSchema.parse(value);
+}
+
+function parseAdjustStockInput(formData: FormData): AdjustStockInput {
+  return {
+    stockItemId: stockItemIdSchema.parse(formData.get("stockItemId")),
+    quantity: quantitySchema.parse(formData.get("quantity")),
+    reason: reasonSchema.parse(formData.get("reason")),
+    sourceType: sourceTypeSchema.parse(formData.get("sourceType") ?? "MANUAL"),
+    expectedQuantity: parseOptionalQuantity(formData.get("expectedQuantity")),
+    expectedUpdatedAt: parseOptionalUpdatedAt(formData.get("expectedUpdatedAt")),
+  };
+}
+
+export async function adjustStockForContext(
+  context: ActiveClinicContext,
+  input: AdjustStockInput,
+): Promise<StockUpdateResult> {
   const result = await prisma.$transaction(async (tx) => {
     const stockItem = await tx.stockItem.findFirst({
       where: {
-        id: stockItemId,
+        id: input.stockItemId,
         clinicId: context.clinicId,
         isUsed: true,
       },
@@ -71,6 +107,7 @@ async function adjustStock(formData: FormData): Promise<StockUpdateResult> {
         productId: true,
         clinicId: true,
         quantity: true,
+        updatedAt: true,
         product: {
           select: {
             name: true,
@@ -83,25 +120,43 @@ async function adjustStock(formData: FormData): Promise<StockUpdateResult> {
       throw new Error("対象の在庫が見つかりません。");
     }
 
-    await tx.stockItem.update({
+    if (
+      input.expectedQuantity !== null &&
+      input.expectedUpdatedAt !== null &&
+      (stockItem.quantity !== input.expectedQuantity || stockItem.updatedAt.getTime() !== input.expectedUpdatedAt)
+    ) {
+      throw new Error(stockConflictMessage);
+    }
+
+    const updateResult = await tx.stockItem.updateMany({
       where: {
         id: stockItem.id,
+        ...(input.expectedQuantity !== null && input.expectedUpdatedAt !== null
+          ? {
+              quantity: input.expectedQuantity,
+              updatedAt: new Date(input.expectedUpdatedAt),
+            }
+          : {}),
       },
       data: {
-        quantity: newQuantity,
+        quantity: input.quantity,
       },
     });
+
+    if (updateResult.count === 0) {
+      throw new Error(stockConflictMessage);
+    }
 
     await tx.stockMovement.create({
       data: {
         clinicId: context.clinicId,
         productId: stockItem.productId,
         movementType: "ADJUST",
-        quantity: newQuantity - stockItem.quantity,
+        quantity: input.quantity - stockItem.quantity,
         beforeQuantity: stockItem.quantity,
-        afterQuantity: newQuantity,
-        reason,
-        sourceType,
+        afterQuantity: input.quantity,
+        reason: input.reason,
+        sourceType: input.sourceType,
         userId: context.userId,
       },
     });
@@ -109,9 +164,16 @@ async function adjustStock(formData: FormData): Promise<StockUpdateResult> {
     return {
       productName: stockItem.product.name,
       beforeQuantity: stockItem.quantity,
-      afterQuantity: newQuantity,
+      afterQuantity: input.quantity,
     };
   });
+
+  return result;
+}
+
+async function adjustStock(formData: FormData): Promise<StockUpdateResult> {
+  const context = await requireActiveClinic();
+  const result = await adjustStockForContext(context, parseAdjustStockInput(formData));
 
   revalidateStockPages();
 

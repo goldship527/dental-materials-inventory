@@ -3,7 +3,7 @@ import { auth } from "@/auth";
 import { AppNav } from "@/components/domain/app-nav";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { getCategories, getStockRows } from "@/lib/db/stock";
-import { InventoryAdjustForm } from "./inventory-adjust-form";
+import { InventoryAdjustCell } from "./inventory-adjust-cell";
 import { InventoryFilterForm } from "./inventory-filter-form";
 
 type PageProps = {
@@ -38,7 +38,7 @@ export default async function InventoryPage({ searchParams }: PageProps) {
       .toLowerCase();
     const matchesQuery = query ? searchText.includes(query.toLowerCase()) : true;
     const matchesCategory = category ? row.category === category : true;
-    const matchesShortage = shortageOnly ? row.quantity <= row.minStock : true;
+    const matchesShortage = shortageOnly ? row.isShortage : true;
 
     return matchesQuery && matchesCategory && matchesShortage;
   });
@@ -46,6 +46,8 @@ export default async function InventoryPage({ searchParams }: PageProps) {
   return (
     <main className="min-h-screen bg-surface px-4 py-6 text-ink sm:px-6 lg:px-8">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
+        <AppNav current="inventory" />
+
         <header className="flex flex-col gap-4 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
@@ -56,7 +58,6 @@ export default async function InventoryPage({ searchParams }: PageProps) {
           </a>
         </header>
 
-        <AppNav current="inventory" />
 
         <InventoryFilterForm
           categories={categories}
@@ -99,19 +100,17 @@ export default async function InventoryPage({ searchParams }: PageProps) {
                     </td>
                     <td className="border-b border-line px-4 py-3 text-right">{row.minStock}</td>
                     <td className="border-b border-line px-4 py-3">
-                      {row.quantity <= row.minStock ? (
-                        <span className="rounded bg-yellow-50 px-2 py-1 text-xs font-semibold text-warning">
-                          不足
-                        </span>
-                      ) : (
-                        <span className="rounded bg-emerald-50 px-2 py-1 text-xs font-semibold text-accent">
-                          十分
-                        </span>
-                      )}
+                      <span className={`rounded px-2 py-1 text-xs font-semibold ${row.stockStatusClassName}`}>
+                        {row.stockStatusLabel}
+                      </span>
                     </td>
                     <td className="border-b border-line px-4 py-3">{row.location ?? "-"}</td>
                     <td className="border-b border-line px-4 py-3">
-                      <InventoryAdjustForm stockItemId={row.stockItemId} quantity={row.quantity} />
+                      <InventoryAdjustCell
+                        stockItemId={row.stockItemId}
+                        quantity={row.quantity}
+                        stockUpdatedAt={row.stockUpdatedAt}
+                      />
                     </td>
                   </tr>
                 ))}

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { auditActions, writeAuditLog } from "@/lib/audit/audit-log";
 import { type ActiveClinicContext, requireActiveClinic } from "@/lib/db/clinic";
 import { prisma } from "@/lib/db/prisma";
 
@@ -320,6 +321,14 @@ export async function discardStocktakeSessionAction(formData: FormData) {
     },
   });
 
+  await writeAuditLog({
+    organizationId: context.organizationId,
+    actorUserId: context.userId,
+    action: auditActions.stocktakeSessionDiscard,
+    targetType: "StocktakeSession",
+    targetId: sessionId,
+  });
+
   revalidateStocktakeSessionPages(sessionId);
   redirect("/stocktake/sessions");
 }
@@ -441,4 +450,12 @@ export async function commitStocktakeSessionForContext(options: {
   if (options.revalidate ?? true) {
     revalidateStocktakeSessionPages(sessionId);
   }
+
+  await writeAuditLog({
+    organizationId: context.organizationId,
+    actorUserId: context.userId,
+    action: auditActions.stocktakeSessionCommit,
+    targetType: "StocktakeSession",
+    targetId: sessionId,
+  });
 }

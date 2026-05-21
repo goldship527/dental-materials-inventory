@@ -1,24 +1,21 @@
 "use server";
 
-import { rm, mkdir, writeFile } from "node:fs/promises";
-import path from "node:path";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { type ActiveClinicContext, requireActiveClinic } from "@/lib/db/clinic";
 import { prisma } from "@/lib/db/prisma";
+import {
+  deleteProductPhotoObjects,
+  getProductPhotoExtension,
+  productPhotoMaxSizeBytes,
+  replaceProductPhotoObject,
+} from "@/lib/storage/product-photos";
 
 export type ProductPhotoActionState = {
   status?: "success" | "error";
   message?: string;
 };
 
-const maxPhotoSizeBytes = 2 * 1024 * 1024;
-const uploadDirectory = path.join(process.cwd(), "data", "local", "uploads", "products");
-const allowedMimeTypes = new Map([
-  ["image/png", "png"],
-  ["image/jpeg", "jpg"],
-  ["image/webp", "webp"],
-]);
 const productPhotoSchema = z.object({
   productId: z.string().trim().min(1),
 });
@@ -69,20 +66,6 @@ async function assertEditableProduct(productId: string, organizationId: string, 
   return product;
 }
 
-function getPhotoFileName(productId: string, extension: string) {
-  return `${productId}.${extension}`;
-}
-
-async function removeExistingPhotoFiles(productId: string) {
-  await Promise.all(
-    Array.from(allowedMimeTypes.values()).map((extension) =>
-      rm(path.join(uploadDirectory, getPhotoFileName(productId, extension)), {
-        force: true,
-      }),
-    ),
-  );
-}
-
 function revalidateProductPhotoPaths(productId: string) {
   revalidatePath("/home");
   revalidatePath("/quick");
@@ -101,26 +84,25 @@ export async function uploadProductPhotoForContext(options: {
     throw new Error("アップロードする写真を選択してください。");
   }
 
-  if (options.photo.size > maxPhotoSizeBytes) {
+  if (options.photo.size > productPhotoMaxSizeBytes) {
     throw new Error("写真は2MB以内にしてください。");
   }
 
-  const extension = allowedMimeTypes.get(options.photo.type);
+  const extension = getProductPhotoExtension(options.photo.type);
 
   if (!extension) {
     throw new Error("写真はPNG、JPEG、WebPのいずれかを選択してください。");
   }
 
   await assertEditableProduct(options.productId, options.context.organizationId, options.context.clinicId);
-  await mkdir(uploadDirectory, {
-    recursive: true,
-  });
-  await removeExistingPhotoFiles(options.productId);
-
-  const fileName = getPhotoFileName(options.productId, extension);
   const bytes = new Uint8Array(await options.photo.arrayBuffer());
+  const { fileName } = await replaceProductPhotoObject({
+    productId: options.productId,
+    extension,
+    mimeType: options.photo.type,
+    bytes,
+  });
 
-  await writeFile(path.join(uploadDirectory, fileName), bytes);
   await prisma.product.update({
     where: {
       id: options.productId,
@@ -147,7 +129,7 @@ export async function deleteProductPhotoForContext(options: {
   revalidate?: boolean;
 }) {
   await assertEditableProduct(options.productId, options.context.organizationId, options.context.clinicId);
-  await removeExistingPhotoFiles(options.productId);
+  await deleteProductPhotoObjects(options.productId);
   await prisma.product.update({
     where: {
       id: options.productId,

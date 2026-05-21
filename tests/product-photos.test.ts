@@ -1,9 +1,12 @@
 import assert from "node:assert/strict";
 import { access, rm } from "node:fs/promises";
 import path from "node:path";
+import {
+  getProductPhotoFileName,
+  productPhotoAllowedMimeTypes,
+  productPhotoLocalDirectory,
+} from "../src/lib/storage/product-photos";
 import { resetTestDatabase } from "./helpers/db";
-
-const uploadDirectory = path.join(process.cwd(), "data", "local", "uploads", "products");
 
 async function fileExists(filePath: string) {
   try {
@@ -114,6 +117,7 @@ function makeFile(bytes: Uint8Array, type: string, name: string) {
 }
 
 async function main() {
+  process.env.SUPABASE_STORAGE_BUCKET = "";
   resetTestDatabase();
 
   const { prisma } = await import("../src/lib/db/prisma");
@@ -161,7 +165,7 @@ async function main() {
         id: data.product.id,
       },
     });
-    const pngPath = path.join(uploadDirectory, pngResult.fileName);
+    const pngPath = path.join(productPhotoLocalDirectory, pngResult.fileName);
 
     assert.equal(pngResult.fileName, `${data.product.id}.png`);
     assert.equal(productWithPng.photoFileName, pngResult.fileName);
@@ -180,7 +184,7 @@ async function main() {
         id: data.product.id,
       },
     });
-    const jpegPath = path.join(uploadDirectory, jpegResult.fileName);
+    const jpegPath = path.join(productPhotoLocalDirectory, jpegResult.fileName);
 
     assert.equal(jpegResult.fileName, `${data.product.id}.jpg`);
     assert.equal(productWithJpeg.photoFileName, jpegResult.fileName);
@@ -199,7 +203,7 @@ async function main() {
         id: data.product.id,
       },
     });
-    const webpPath = path.join(uploadDirectory, webpResult.fileName);
+    const webpPath = path.join(productPhotoLocalDirectory, webpResult.fileName);
 
     assert.equal(webpResult.fileName, `${data.product.id}.webp`);
     assert.equal(productWithWebp.photoFileName, webpResult.fileName);
@@ -233,10 +237,14 @@ async function main() {
       }),
     );
   } finally {
-    for (const productId of [seededData?.product.id, seededData?.otherClinicProduct.id].filter(Boolean)) {
+    const productIds = [seededData?.product.id, seededData?.otherClinicProduct.id].filter(
+      (productId): productId is string => typeof productId === "string",
+    );
+
+    for (const productId of productIds) {
       await Promise.all(
-        ["png", "jpg", "webp"].map((extension) =>
-          rm(path.join(uploadDirectory, `${productId}.${extension}`), {
+        Array.from(productPhotoAllowedMimeTypes.values()).map((extension) =>
+          rm(path.join(productPhotoLocalDirectory, getProductPhotoFileName(productId, extension)), {
             force: true,
           }),
         ),

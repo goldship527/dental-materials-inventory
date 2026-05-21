@@ -119,6 +119,8 @@ export default async function ProductDetailPage({ params }: PageProps) {
   return (
     <main className="min-h-screen bg-surface px-6 py-8 text-ink">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
+        <AppNav current="products" />
+
         <header className="flex flex-col gap-3 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
@@ -134,7 +136,6 @@ export default async function ProductDetailPage({ params }: PageProps) {
           </div>
         </header>
 
-        <AppNav current="products" />
 
         <section className="rounded border border-line bg-white p-5 shadow-panel">
           <div className="grid gap-5 md:grid-cols-[180px_1fr] md:items-center">
@@ -189,7 +190,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
               >
                 履歴で確認
               </a>
-              {product.hasStockItem && product.currentQuantity <= product.minStock ? (
+              {shortageCount > 0 ? (
                 <a
                   className="rounded bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-800"
                   href={shortageHref}

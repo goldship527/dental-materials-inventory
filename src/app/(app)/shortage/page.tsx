@@ -29,8 +29,13 @@ export default async function ShortagePage({ searchParams }: PageProps) {
     getActiveOrderRequestProductIds(context.clinicId),
   ]);
   const shortageRows = rows
-    .filter((row) => row.quantity <= row.minStock)
-    .sort((a, b) => b.shortageCount - a.shortageCount || a.name.localeCompare(b.name, "ja"));
+    .filter((row) => row.isShortage)
+    .sort(
+      (a, b) =>
+        Number(b.quantity === 0) - Number(a.quantity === 0) ||
+        b.shortageCount - a.shortageCount ||
+        a.name.localeCompare(b.name, "ja"),
+    );
   const filteredShortageRows = shortageRows.filter((row) => {
     const searchText = [
       row.name,
@@ -61,6 +66,8 @@ export default async function ShortagePage({ searchParams }: PageProps) {
   return (
     <main className="min-h-screen bg-surface px-4 py-6 text-ink print:bg-white print:p-0 sm:px-6 lg:px-8">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 print:max-w-none print:gap-3">
+        <AppNav current="shortage" />
+
         <header className="flex flex-col gap-4 border-b border-line pb-5 md:flex-row md:items-end md:justify-between print:border-black print:pb-3">
           <div>
             <p className="text-sm font-semibold text-accent print:text-black">{context.clinicName}</p>
@@ -77,7 +84,6 @@ export default async function ShortagePage({ searchParams }: PageProps) {
           </div>
         </header>
 
-        <AppNav current="shortage" />
 
         <form className="grid gap-3 rounded border border-line bg-white p-4 shadow-panel md:grid-cols-[1fr_auto_auto] print:hidden">
           <input

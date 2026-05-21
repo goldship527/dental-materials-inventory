@@ -14,7 +14,7 @@
 
 ## 現在の実装状況
 
-2026-05-19時点で、フェーズ3-Kまで実装済みです。
+2026-05-21時点で、商品写真ストレージ、管理者ユーザー管理、商品マスタ一括取り込みまで実装済みです。
 
 ### フェーズ1: 在庫見える化
 
@@ -65,6 +65,11 @@
 - 棚卸セッション進行中編集 `/stocktake/sessions/[sessionId]`
 - 棚卸セッション履歴詳細 `/stocktake/sessions/[sessionId]/history`
 - 棚卸セッション確定時の `StockMovement.sourceType = STOCKTAKE_SESSION` 記録
+- 商品マスタ新規作成 `/products/new`
+- 商品マスタCSV/Excel貼り付け一括取り込み `/products/import`
+- 初期設定チェック `/setup`
+- 商品写真のSupabase Storage保存
+- 管理者向けユーザー管理 `/admin/users`
 
 ## まだ作らないもの
 
@@ -75,11 +80,11 @@
 - 発注書PDF生成
 - 納品確認
 - 発注書単位の親子構造
-- 商品マスタの新規作成、削除
+- 商品マスタの削除
 - 発注先マスタの新規作成、削除
 - バーコード読み取りによる在庫の自動入出庫
 - バーコード読み取りによる棚卸自動確定
-- CSVインポート、CSVエクスポート
+- CSVエクスポート
 - 複数クリニック切替UI
 - 詳細な権限管理
 - PWA
@@ -151,6 +156,22 @@ password: password
 
 公開デモ環境では、ログインメールとパスワードを環境変数 `DEMO_LOGIN_EMAIL`、`DEMO_LOGIN_PASSWORD` で設定します。公開デモ用のパスワードやDB接続文字列は、README、Git、チャットには書かないでください。
 
+## 公開デモで必要なVercel環境変数
+
+```text
+DATABASE_URL
+AUTH_SECRET
+AUTH_URL
+DEMO_LOGIN_EMAIL
+DEMO_LOGIN_PASSWORD
+DEMO_USER_NAME
+SUPABASE_URL
+SUPABASE_SERVICE_ROLE_KEY
+SUPABASE_STORAGE_BUCKET
+```
+
+`SUPABASE_STORAGE_BUCKET` は商品写真用のprivate bucket名を設定します。未設定のローカル開発環境では、従来通り `data/local/uploads/products/` に保存します。`SUPABASE_SERVICE_ROLE_KEY` は秘密値なので、README、Git、チャットには書かないでください。
+
 ## よく使う確認コマンド
 
 ```powershell
@@ -182,7 +203,7 @@ corepack pnpm db:seed
 - Codex本体や `node_repl` のNodeプロセスは停止しないでください。
 - 確認用に `corepack pnpm dev` を起動した場合は、確認後に停止します。
 - 外出先で見せる公開デモでは、ローカルDockerではなくVercelとSupabase PostgreSQLを使います。
-- 商品写真は現状ローカルファイル保存のため、公開デモでは永続保存を期待しないでください。
+- 商品写真は `SUPABASE_STORAGE_BUCKET` 設定時にSupabase Storageへ保存し、未設定のローカル開発では `data/local/uploads/products/` へ保存します。
 
 ## 次に進めやすい候補
 

@@ -1,16 +1,12 @@
-import { readFile } from "node:fs/promises";
-import path from "node:path";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db/prisma";
+import { getProductPhotoObject, productPhotoAllowedMimeTypes } from "@/lib/storage/product-photos";
 
 type RouteContext = {
   params: Promise<{
     productId: string;
   }>;
 };
-
-const uploadDirectory = path.join(process.cwd(), "data", "local", "uploads", "products");
-const allowedMimeTypes = new Set(["image/png", "image/jpeg", "image/webp"]);
 
 export const runtime = "nodejs";
 
@@ -63,26 +59,32 @@ export async function GET(_request: Request, { params }: RouteContext) {
     },
   });
 
-  if (!product?.photoFileName || !product.photoMimeType || !allowedMimeTypes.has(product.photoMimeType)) {
+  if (!product?.photoFileName || !product.photoMimeType || !productPhotoAllowedMimeTypes.has(product.photoMimeType)) {
     return new Response("Not Found", {
       status: 404,
     });
   }
 
   try {
-    const fileName = path.basename(product.photoFileName);
-    const filePath = path.join(uploadDirectory, fileName);
-    const bytes = await readFile(filePath);
+    const photoObject = await getProductPhotoObject(product.photoFileName);
 
-    return new Response(new Uint8Array(bytes), {
+    if (!photoObject) {
+      return new Response("Not Found", {
+        status: 404,
+      });
+    }
+
+    return new Response(photoObject.body, {
       headers: {
         "Content-Type": product.photoMimeType,
         "Cache-Control": "private, max-age=60",
       },
     });
-  } catch {
-    return new Response("Not Found", {
-      status: 404,
+  } catch (error) {
+    console.error(error);
+
+    return new Response("Photo storage error", {
+      status: 500,
     });
   }
 }

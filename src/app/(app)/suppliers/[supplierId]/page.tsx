@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { AppNav } from "@/components/domain/app-nav";
+import { isAdminRole } from "@/lib/auth/roles";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { getSupplierDetail } from "@/lib/db/suppliers";
 import { orderRequestStatusLabels } from "@/lib/orders/status";
@@ -27,6 +28,7 @@ export default async function SupplierDetailPage({ params }: PageProps) {
   }
 
   const context = await requireActiveClinic();
+  const canManageSuppliers = isAdminRole(session.user.role);
   const { supplierId } = await params;
   const supplier = await getSupplierDetail(supplierId, context.organizationId, context.clinicId);
 
@@ -36,7 +38,7 @@ export default async function SupplierDetailPage({ params }: PageProps) {
 
   const orderRequestTotal =
     supplier.orderRequestCounts.DRAFT + supplier.orderRequestCounts.CONFIRMED + supplier.orderRequestCounts.SKIPPED;
-  const shortageProducts = supplier.products.filter((product) => product.quantity <= product.minStock);
+  const shortageProducts = supplier.products.filter((product) => product.shortageCount > 0);
   const supplierQuery = encodeURIComponent(supplier.name);
   const productsHref = `/products?q=${supplierQuery}`;
   const shortageHref = `/shortage?q=${supplierQuery}`;
@@ -45,22 +47,25 @@ export default async function SupplierDetailPage({ params }: PageProps) {
   return (
     <main className="min-h-screen bg-surface px-6 py-8 text-ink">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
+        <AppNav current="suppliers" />
+
         <header className="flex flex-col gap-3 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
             <h1 className="mt-2 text-3xl font-semibold">{supplier.name}</h1>
           </div>
           <div className="flex flex-wrap gap-3 text-sm font-semibold">
-            <a className="text-accent hover:underline" href={`/suppliers/${supplier.id}/edit`}>
-              編集する
-            </a>
+            {canManageSuppliers ? (
+              <a className="text-accent hover:underline" href={`/suppliers/${supplier.id}/edit`}>
+                編集する
+              </a>
+            ) : null}
             <a className="text-accent hover:underline" href="/suppliers">
               発注先マスタへ戻る
             </a>
           </div>
         </header>
 
-        <AppNav current="suppliers" />
 
         <section className="flex flex-wrap gap-2">
           <a
@@ -98,7 +103,7 @@ export default async function SupplierDetailPage({ params }: PageProps) {
             <p className={supplier.shortageProductCount > 0 ? "mt-2 text-3xl font-semibold text-danger" : "mt-2 text-3xl font-semibold"}>
               {supplier.shortageProductCount}
             </p>
-            <p className="mt-2 text-sm text-muted">最低在庫以下</p>
+            <p className="mt-2 text-sm text-muted">最低在庫未満</p>
           </div>
           <div className="rounded border border-line bg-white p-5 shadow-panel">
             <p className="text-sm font-semibold text-muted">発注候補</p>
@@ -124,6 +129,36 @@ export default async function SupplierDetailPage({ params }: PageProps) {
             ) : (
               <span className="text-sm text-muted">カテゴリ未設定</span>
             )}
+          </div>
+        </section>
+
+        <section className="rounded border border-line bg-white p-5 shadow-panel">
+          <h2 className="text-lg font-semibold">連絡先</h2>
+          <div className="mt-4 grid gap-4 text-sm md:grid-cols-2">
+            <div>
+              <p className="font-semibold text-muted">住所</p>
+              <p className="mt-1 whitespace-pre-wrap">{supplier.address ?? "-"}</p>
+            </div>
+            <div>
+              <p className="font-semibold text-muted">電話 / FAX</p>
+              <p className="mt-1">
+                {supplier.phone ?? "-"} / {supplier.fax ?? "-"}
+              </p>
+            </div>
+            <div>
+              <p className="font-semibold text-muted">メール</p>
+              <p className="mt-1">{supplier.email ?? "-"}</p>
+            </div>
+            <div>
+              <p className="font-semibold text-muted">担当者</p>
+              <p className="mt-1">
+                {supplier.contactPersonName ?? "-"} / {supplier.contactPersonEmail ?? "-"}
+              </p>
+            </div>
+            <div className="md:col-span-2">
+              <p className="font-semibold text-muted">備考</p>
+              <p className="mt-1 whitespace-pre-wrap">{supplier.notes ?? "-"}</p>
+            </div>
           </div>
         </section>
 
@@ -175,7 +210,7 @@ export default async function SupplierDetailPage({ params }: PageProps) {
 
           <div className="flex flex-col gap-4">
             <section className="rounded border border-line bg-white p-5 shadow-panel">
-              <h2 className="text-lg font-semibold">不足・最低在庫到達</h2>
+              <h2 className="text-lg font-semibold">不足商品</h2>
               <div className="mt-4 divide-y divide-line">
                 {shortageProducts.length > 0 ? (
                   shortageProducts.map((product) => (
@@ -188,13 +223,11 @@ export default async function SupplierDetailPage({ params }: PageProps) {
                           {product.quantity} / 最低 {product.minStock}
                         </p>
                       </div>
-                      <span className={product.shortageCount > 0 ? "font-semibold text-danger" : "font-semibold text-warning"}>
-                        {product.shortageCount > 0 ? `不足 ${product.shortageCount}` : "最低到達"}
-                      </span>
+                      <span className="font-semibold text-danger">不足 {product.shortageCount}</span>
                     </div>
                   ))
                 ) : (
-                  <p className="py-3 text-sm text-muted">不足・最低在庫到達の商品はありません。</p>
+                  <p className="py-3 text-sm text-muted">不足商品はありません。</p>
                 )}
               </div>
             </section>

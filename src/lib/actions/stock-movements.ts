@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { auditActions, writeAuditLog } from "@/lib/audit/audit-log";
 import { type ActiveClinicContext, requireActiveClinic } from "@/lib/db/clinic";
 import { prisma } from "@/lib/db/prisma";
 
@@ -145,6 +146,17 @@ export async function revertStockMovementForContext(options: {
   if (options.revalidate ?? true) {
     revalidateStockMovementPages();
   }
+
+  await writeAuditLog({
+    organizationId: context.organizationId,
+    actorUserId: context.userId,
+    action: auditActions.stockMovementRevert,
+    targetType: "StockMovement",
+    targetId: movementId,
+    details: {
+      productName: result.productName,
+    },
+  });
 
   return result;
 }

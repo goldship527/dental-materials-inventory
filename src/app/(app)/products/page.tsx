@@ -74,6 +74,8 @@ export default async function ProductsPage({ searchParams }: PageProps) {
   return (
     <main className="min-h-screen bg-surface px-4 py-6 text-ink sm:px-6 lg:px-8">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
+        <AppNav current="products" />
+
         <header className="flex flex-col gap-4 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
@@ -81,12 +83,20 @@ export default async function ProductsPage({ searchParams }: PageProps) {
           </div>
           <div className="flex shrink-0 flex-wrap gap-3">
             {!attachBarcode ? (
-              <a
-                className="inline-flex h-11 items-center justify-center rounded bg-accent px-4 text-sm font-semibold text-white transition hover:bg-teal-800"
-                href="/products/new"
-              >
-                商品を新規作成
-              </a>
+              <>
+                <a
+                  className="inline-flex h-11 items-center justify-center rounded bg-accent px-4 text-sm font-semibold text-white transition hover:bg-teal-800"
+                  href="/products/new"
+                >
+                  商品を新規作成
+                </a>
+                <a
+                  className="inline-flex h-11 items-center justify-center rounded border border-line bg-white px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+                  href="/products/import"
+                >
+                  一括取り込み
+                </a>
+              </>
             ) : null}
             <a
               className="inline-flex h-11 items-center justify-center rounded border border-line px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
@@ -97,7 +107,6 @@ export default async function ProductsPage({ searchParams }: PageProps) {
           </div>
         </header>
 
-        <AppNav current="products" />
 
         <ProductFilterForm
           categories={categories}

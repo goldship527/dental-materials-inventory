@@ -2,6 +2,7 @@
 
 import { useActionState, useMemo, useState } from "react";
 import { barcodeStockMoveAction, type BarcodeStockActionState } from "@/lib/actions/barcode-stock";
+import { barcodeStockInReasons, barcodeStockOutReasons } from "@/lib/barcode/stock-reasons";
 
 type BarcodeStockFormProps = {
   barcode: string;
@@ -9,8 +10,6 @@ type BarcodeStockFormProps = {
   currentQuantity: number;
 };
 
-const outReasons = ["使用", "棚卸調整", "その他"] as const;
-const inReasons = ["納品", "返品戻り", "棚卸調整", "その他"] as const;
 const initialState: BarcodeStockActionState = {};
 
 export function BarcodeStockForm({ barcode, productId, currentQuantity }: BarcodeStockFormProps) {
@@ -19,7 +18,7 @@ export function BarcodeStockForm({ barcode, productId, currentQuantity }: Barcod
   const [reason, setReason] = useState<string>("使用");
   const [quantity, setQuantity] = useState(1);
   const displayQuantity = state.afterQuantity ?? currentQuantity;
-  const reasonOptions = useMemo(() => (movementType === "OUT" ? outReasons : inReasons), [movementType]);
+  const reasonOptions = useMemo(() => (movementType === "OUT" ? barcodeStockOutReasons : barcodeStockInReasons), [movementType]);
 
   function changeMovementType(nextType: "OUT" | "IN") {
     setMovementType(nextType);

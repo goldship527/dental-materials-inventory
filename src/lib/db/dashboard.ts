@@ -11,6 +11,7 @@ export type DashboardSummary = {
   stockItemCount: number;
   shortageCount: number;
   zeroStockCount: number;
+  atMinStockCount: number;
   totalQuantity: number;
   favoriteCardCount: number;
   draftOrderRequestCount: number;
@@ -133,14 +134,16 @@ export async function getDashboardSummary(clinicId: string): Promise<DashboardSu
       },
     }),
   ]);
-  const shortageCount = rows.filter((row) => row.quantity <= row.minStock).length;
+  const shortageCount = rows.filter((row) => row.isShortage).length;
   const zeroStockCount = rows.filter((row) => row.quantity === 0).length;
+  const atMinStockCount = rows.filter((row) => row.isAtMin).length;
   const totalQuantity = rows.reduce((total, row) => total + row.quantity, 0);
 
   return {
     stockItemCount: rows.length,
     shortageCount,
     zeroStockCount,
+    atMinStockCount,
     totalQuantity,
     favoriteCardCount,
     draftOrderRequestCount: orderRequestStatusCounts.DRAFT,

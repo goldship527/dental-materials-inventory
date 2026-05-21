@@ -2702,3 +2702,432 @@
 - `corepack pnpm build` に成功した
 - GitHub push後、公開Production URLの `/login` でServer Action用の隠しフィールドが消え、新しいClient Component実装が反映されていることを確認した
 - 公開Production URLのHTTP検証で、ログイン後の `/home` が200、`POST /logout` が303、ログアウト後の `/home` が307で `/login` に保護されることを確認した
+
+## 2026-05-21 商品写真のSupabase Storage移行
+
+### 作業内容
+
+- `@supabase/supabase-js` を依存に追加した
+- `src/lib/storage/product-photos.ts` を追加し、商品写真の保存、削除、取得をストレージヘルパーに集約した
+- `SUPABASE_STORAGE_BUCKET` が未設定の場合は、従来通り `data/local/uploads/products/` に保存するローカルフォールバックを維持した
+- `SUPABASE_STORAGE_BUCKET` が設定されている場合は、`SUPABASE_URL` と `SUPABASE_SERVICE_ROLE_KEY` を使ってSupabase Storageのprivate bucketへ保存・取得するようにした
+- `src/lib/actions/product-photos.ts` のアップロード、上書き、削除処理をストレージヘルパー経由に置き換えた
+- `/api/product-photos/[productId]` をストレージヘルパー経由の配信に置き換え、画面側URLは `/api/product-photos/{productId}?v={photoUpdatedAt}` のまま維持した
+- `.env.example`、`README.md`、`docs/project-manual.md`、`docs/demo-deploy.md` にSupabase Storage用の環境変数を追記した
+- `docs/spec.md` の商品写真仕様にSupabase Storage移行仕様を追記した
+
+### 判断
+
+- Supabaseのsigned URLは画面側に直接渡さず、既存のAPIプロキシ配信を維持した
+- 上書き時はPNG、JPEG、WebPの候補オブジェクトを削除してから新しい写真を保存し、古い拡張子のオブジェクトが残らないようにした
+- `SUPABASE_STORAGE_BUCKET` だけ設定され、URLやサービスロールキーが不足している場合は、設定ミスを見つけやすいようエラーにする方針にした
+
+### セキュリティメモ
+
+- `SUPABASE_SERVICE_ROLE_KEY` はServer Action/API配下のサーバー側処理だけで参照し、Client Componentからは参照しない
+- Supabase Storageのbucketはprivate前提とし、anon keyから直接ダウンロードさせない
+- 実在製品画像、患者情報、実在クリニック名、APIキー値そのものは追加していない
+
+### 検証
+
+- `corepack pnpm typecheck` に成功した
+- `corepack pnpm exec tsx tests/product-photos.test.ts` に成功した
+- `corepack pnpm build` に成功した
+- `corepack pnpm dev` でローカル開発サーバーを起動し、認証付きHTTP検証で写真アップロード、別画像への上書き、削除を確認した
+- `/api/product-photos/[productId]` に未ログインでアクセスすると401になることを確認した
+- `SUPABASE_STORAGE_BUCKET` を設定した実バケット検証は、秘密値が必要なため未実施。利用者がローカル環境変数とSupabase private bucketを設定して確認する
+
+## 2026-05-21 第三者レビュー後ロードマップ整理
+
+### 作業内容
+
+- `docs/reviews/2026-05-21-implementation-roadmap.md` の優先1「商品写真のSupabase Storage移行」を完了扱いに更新した
+- 同ロードマップの完了済み一覧に、優先1の完了日 `2026-05-21` を追記した
+- `AGENTS.md` の秘密値検証ルール追記と、`docs/demo-deploy.md` のSupabase Storage有効化手順追記を、優先1の追加依頼として完了日付きにした
+- `docs/demo-deploy.md` に「商品写真のSupabase Storage有効化手順」セクションを追加した
+- 公開後確認リストを、商品写真アップロード、上書き、削除、再デプロイ後の再表示確認に更新した
+
+### 判断
+
+- ロードマップ本文は今後のCodex投入順として残し、優先1だけ完了状態へ変更した
+- Supabase実バケットの秘密値はドキュメントに書かず、環境変数名と管理画面での操作手順だけを記載した
+
+### セキュリティメモ
+
+- `SUPABASE_SERVICE_ROLE_KEY`、DB接続文字列、`AUTH_SECRET`、デモログインパスワードの実値は追加していない
+- Supabase Storageのbucketはprivate前提とし、anon keyから直接ダウンロードさせない確認手順を残した
+
+### 検証
+
+- ドキュメント更新のみのため、アプリのtypecheck/buildは実行していない
+- `rg` と目視で、ロードマップの優先1完了表記とSupabase Storage有効化手順の追記を確認した
+
+## 2026-05-21 管理者ユーザー管理
+
+### 作業内容
+
+- `User.role` を `ADMIN` / `STAFF` の2値運用にし、`User.isActive` を追加した
+- Credentials認証で `isActive = false` のユーザーをログイン拒否するようにした
+- `/admin/users` を追加し、管理者が同じ組織のユーザー追加、無効化、パスワードリセットを行えるようにした
+- `/admin/*` をNext.js Proxyで保護し、ページとServer Action側でも管理者権限と組織スコープを再確認するようにした
+- 新規ユーザー作成時は、同じ組織の有効なクリニックへ自動割り当てするようにした
+- ローカルseedの初期ユーザーを `ADMIN` / `isActive = true` にした
+- 管理者ユーザー操作の統合テストを追加した
+
+### 判断
+
+- ユーザー無効化は物理削除ではなく `isActive = false` にして、履歴参照や将来の監査ログ追加に備える
+- 管理者自身の無効化は禁止し、管理者不在になる事故を避ける
+- パスワードリセットはメール送信なしの管理者設定方式とし、メール送信は別フェーズに残す
+- 既存DBに小文字の `staff` が残っていても、アプリ側では `ADMIN` 以外を `STAFF` として扱う
+
+### セキュリティメモ
+
+- パスワード平文は保存・ログ出力せず、bcryptハッシュだけをDBに保存する
+- Client Componentの表示制御だけに依存せず、Next.js Proxy、ページ、Server Actionでサーバー側チェックを行う
+- 別組織のユーザーは管理操作できないように、すべての操作で `organizationId` を条件に含める
+- 実在スタッフ名、患者情報、実在クリニック名、秘密値は追加していない
+
+### 検証
+
+- `corepack pnpm prisma:generate` に成功した
+- `corepack pnpm db:push` に成功し、ローカルDBへ `User.isActive` を反映した
+- `corepack pnpm typecheck` に成功した
+- `corepack pnpm exec tsx tests/admin-users.test.ts` に成功した
+- `corepack pnpm build` に成功した
+- `corepack pnpm dev` でローカル開発サーバーを起動し、未ログインの `/admin/users` が307で `/login` にリダイレクトされることを確認した
+
+## 2026-05-21 商品マスタCSV/Excel貼り付け一括取り込み
+
+### 作業内容
+
+- `/products/import` を追加し、CSVファイルとExcel貼り付けTSVから商品マスタを一括取り込みできるようにした
+- 取り込み前にプレビューを作成し、作成予定、警告、スキップ、エラーを行ごとに表示するようにした
+- 既存JANまたは同一ファイル内の重複JANは警告として表示し、確定時はスキップするようにした
+- 確定時は `Product` だけを一括作成し、`StockItem`、`ProductBarcode`、在庫変更履歴は作成しないようにした
+- `ProductImportHistory` を追加し、実行者、方式、ファイル名、対象行数、作成件数、スキップ件数、警告件数、エラー件数を履歴として残すようにした
+- 商品一覧 `/products` から `/products/import` へ進む導線を追加した
+- `tests/product-import.test.ts` を追加した
+- `README.md` と `docs/spec.md` を現状仕様に合わせて更新した
+
+### 判断
+
+- CSV/TSVの本文そのものはDBに保存せず、履歴には件数とファイル名だけを保存する方針にした
+- 発注先名が既存マスタと一致しない行は、警告を出したうえで発注先なしの商品として作成できるようにした
+- 初期導入時の事故を避けるため、エラー行が1件でもある場合は確定不可にした
+- 一度に取り込める行数は500行までにした
+
+### セキュリティメモ
+
+- 実在患者情報、秘密情報、パスワード、APIキーを取り込みデータに入れない注意を画面に表示した
+- `organizationId` はフォームから受け取らず、ログイン中ユーザーの所属組織から決める
+- 取り込み本文は履歴テーブルに保存しない
+
+### 検証
+
+- `corepack pnpm prisma:generate`
+- `corepack pnpm db:push`
+- `corepack pnpm exec tsx tests/product-import.test.ts`
+- `corepack pnpm typecheck`
+- `corepack pnpm build`
+
+## 2026-05-21 ログインのレート制限と監査ログ
+
+### 作業内容
+
+- `LoginAttempt` を追加し、ログイン失敗を `email + IPアドレス` 単位で記録するようにした
+- Credentials認証で5回連続失敗した場合、15分間ログインを拒否するようにした
+- 正しいログインに成功した場合、該当するログイン失敗履歴を削除するようにした
+- `AuditLog` を追加し、重要操作を組織単位で記録できるようにした
+- ユーザー追加、ユーザー無効化、パスワードリセット、商品作成、商品編集、商品一括取り込み、発注先編集、履歴取り消し、棚卸破棄、棚卸確定で監査ログを残すようにした
+- 管理者向けの `/admin/audit-logs` 画面を追加し、直近100件を表示するようにした
+- 共通ナビに「監査ログ」導線を追加した
+- `tests/login-attempts.test.ts` と `tests/audit-logs.test.ts` を追加した
+
+### 判断
+
+- ログインロック中も画面側では通常のログイン失敗と同じ扱いにし、アカウント存在やロック状態を推測しやすくしない
+- 監査ログの詳細には件数や種別などの軽い情報だけを残し、パスワード平文やCSV本文は保存しない
+- 管理者画面は既存の `/admin/*` Proxy保護に加え、ページ側でも `requireAdminUser` を使う
+
+### セキュリティメモ
+
+- パスワード平文、秘密値、CSV/TSV本文はDBの監査ログに保存しない
+- IPアドレスは `x-forwarded-for` の先頭値、次に `x-real-ip` を使い、取得できない場合は `unknown` とする
+- 監査ログ閲覧は管理者限定とする
+
+### 検証
+
+- `corepack pnpm prisma:generate`
+- `corepack pnpm db:push`
+- `corepack pnpm exec tsx tests/login-attempts.test.ts`
+- `corepack pnpm exec tsx tests/audit-logs.test.ts`
+- `corepack pnpm typecheck`
+- `corepack pnpm build`
+
+## 2026-05-21 不足在庫の判定・表示改善
+
+### 作業内容
+
+- 在庫状態を `在庫切れ`、`不足`、`ぎりぎり`、`十分` の4段階で判定する共通ヘルパーを追加した
+- 不足件数と不足一覧の対象を `現在庫 < 最低在庫` に変更した
+- 最低在庫ちょうどの商品は不足一覧から外し、在庫一覧などで `ぎりぎり` と表示するようにした
+- `/inventory` のステータス表示と不足のみ絞り込みを4段階判定に合わせた
+- `/shortage` を在庫切れ優先、次に不足数の大きい順で表示するようにした
+- `/home` で不足件数、在庫0件数、ぎりぎり件数を分けて表示するようにした
+- `/quick`、発注先詳細、商品詳細、バーコード出入庫の表示も新しい判定に合わせた
+- `tests/stock-status.test.ts` を追加した
+
+### 判断
+
+- 「現在庫 = 最低在庫」は不足ではなく、補充判断が必要な `ぎりぎり` として扱う
+- 在庫切れは数量0の状態として最優先表示する。ただし最低在庫0の商品は不足件数には含めない
+- 在庫数、発注候補、履歴は自動変更せず、表示と集計条件だけを変更した
+
+### セキュリティメモ
+
+- 認証、パスワード、秘密値、外部通信には触れていない
+- テストデータは架空データのみ
+
+### 検証
+
+- `corepack pnpm exec tsx tests/stock-status.test.ts`
+- `corepack pnpm typecheck`
+- `corepack pnpm build`
+
+## 2026-05-21 バーコード出入庫の理由整理
+
+### 実装
+
+- バーコード出入庫の理由定義を `src/lib/barcode/stock-reasons.ts` に集約した
+- `/barcode/stock` の出庫理由から `棚卸調整` を削除し、`使用`、`その他` にした
+- `/barcode/stock` の入庫理由から `棚卸調整` を削除し、`納品`、`返品戻り`、`その他` にした
+- サーバー側バリデーションでも `棚卸調整` をバーコード出入庫理由として受け付けないようにした
+- `tests/barcode-stock-reasons.test.ts` を追加し、理由リストと拒否条件を確認できるようにした
+
+### 判断
+
+- `棚卸調整` は棚卸セッションの確定処理経由で扱う理由とし、日常のバーコード出入庫からは分離した
+- 既存の入出庫履歴は変更せず、今後の入力候補と受け付け条件だけを変更した
+
+### セキュリティメモ
+
+- 新しい秘密値は追加していない
+- サーバー側でも理由を検証し、画面だけの制御に依存しない
+
+## 2026-05-21 初期設定チェック
+
+### 作業内容
+
+- `/setup` を追加し、初期導入時の登録状況をまとめて確認できるようにした
+- 商品マスタ、発注先、商品側の主発注先、バーコード、未対応バーコード、在庫行、最低在庫の件数を集計する `src/lib/db/onboarding.ts` を追加した
+- 導入チェックリストを `完了`、`要確認`、`未着手` で表示し、既存の登録・整理画面へ移動できるようにした
+- 共通ナビとホーム画面に「初期設定チェック」への導線を追加した
+- `tests/onboarding.test.ts` を追加し、集計とチェックリスト判定を確認できるようにした
+- `README.md` と `docs/spec.md` を現状仕様に合わせて更新した
+
+### 判断
+
+- 初期導入フローは、まず読み取り専用のサマリー画面として小さく始める方針にした
+- 商品、発注先、バーコード、在庫の作成・編集は既存画面に任せ、`/setup` では自動変更を行わない
+- 一括取り込みで `Product` だけ作成された商品も見つけやすいよう、在庫行未設定と最低在庫未設定を分けて表示する
+
+### セキュリティメモ
+
+- 秘密値、患者情報、実在医院名、実在スタッフ個人情報は追加していない
+- 取り込み本文やバーコード読み取り本文は表示せず、件数だけを集計する
+- 読み取り専用の画面で、在庫数やマスタ情報は自動更新しない
+
+### 検証
+
+- `corepack pnpm exec tsx tests/onboarding.test.ts`
+- `corepack pnpm typecheck`
+- `corepack pnpm build`
+- ローカル開発サーバーで `/setup` を開き、初期設定チェック、サマリー、導入チェックリスト、主要導線が表示されることを確認した
+- `next-env.d.ts` は `import "./.next/types/routes.d.ts";` に戻した
+
+## 2026-05-21 在庫直接編集の楽観ロック
+
+### 作業内容
+
+- `/inventory` の在庫直接編集フォームから、表示時点の現在庫と `StockItem.updatedAt` を送るようにした
+- `src/lib/db/stock.ts` の `StockRow` に `stockUpdatedAt` を追加した
+- `src/lib/actions/stock.ts` に `adjustStockForContext` を追加し、在庫更新前に期待値とDB上の現在値を比較するようにした
+- 期待値が一致しない場合は、在庫更新と `StockMovement` 作成を行わず、競合メッセージを返すようにした
+- `tests/stock-optimistic-lock.test.ts` を追加し、古い画面相当の期待値では更新できず、履歴も増えないことを確認できるようにした
+
+### 判断
+
+- 今回の対象は `/inventory` の在庫直接編集に限定した
+- `/quick` の `+1 / -1` は既存の原子的な増減処理を維持した
+- 棚卸画面は既存Actionを共有しているため、期待値が送られた場合だけ楽観ロックを有効にし、従来の棚卸フローは壊さない形にした
+
+### セキュリティメモ
+
+- 秘密値、患者情報、実在医院名、実在スタッフ個人情報は追加していない
+- 認証済みユーザーのクリニックスコープ内でのみ在庫行を更新する既存条件を維持した
+- 競合時は在庫数も在庫変更履歴も変更しない
+
+### 検証
+
+- `corepack pnpm exec tsx tests/stock-optimistic-lock.test.ts`
+- `corepack pnpm typecheck`
+- `corepack pnpm build`
+- ローカル開発サーバーで `/inventory` を開き、在庫一覧と数量編集フォームが表示されることを確認した
+- ブラウザ上で各在庫編集フォームに `expectedQuantity` と `expectedUpdatedAt` が含まれることを確認した
+- `next-env.d.ts` は `import "./.next/types/routes.d.ts";` に戻した
+
+## 2026-05-21 在庫一覧の編集UI折りたたみ化
+
+### 作業内容
+
+- `/inventory` の数量編集欄を常時表示から折りたたみ式に変更した
+- `src/app/(app)/inventory/inventory-adjust-cell.tsx` を追加し、各行の「編集」ボタンとフォーム開閉を管理するようにした
+- 既存の `InventoryAdjustForm` は維持し、楽観ロック用の `expectedQuantity` と `expectedUpdatedAt` もそのまま送信するようにした
+- `docs/spec.md` に在庫一覧の編集UI折りたたみ仕様を追記した
+
+### 判断
+
+- まずは各行が独立して開閉できる小さな実装にした
+- 1行だけ開く制御は、必要になった時点の追加改善に分ける
+- 在庫更新のServer ActionやDBスキーマは変更せず、画面の混雑を減らすことに限定した
+
+### セキュリティメモ
+
+- 秘密値、患者情報、実在医院名、実在スタッフ個人情報は追加していない
+- UIの開閉だけでは在庫を変更せず、更新ボタン押下時だけ既存Server Actionを実行する
+- 認証、組織、クリニックスコープ確認、楽観ロックは既存のサーバー側処理を維持した
+
+### 検証
+
+- `corepack pnpm typecheck`
+- `corepack pnpm build`
+- ローカル開発サーバーで `/inventory` を開き、初期状態では編集フォームが表示されず、「編集」ボタンだけが表示されることを確認した
+- 「編集」ボタン押下後、該当行に数量編集フォーム、楽観ロック用hidden値、閉じるボタンが表示されることを確認した
+- `next-env.d.ts` は `import "./.next/types/routes.d.ts";` に戻した
+
+## 2026-05-21 発注先連絡先管理と新規作成
+
+### 作業内容
+
+- `Supplier` に住所、電話、FAX、メール、担当者名、担当者メール、備考を追加した
+- `/suppliers/new` を追加し、発注先マスタを画面から新規作成できるようにした
+- `/suppliers/[supplierId]/edit` で発注先名と連絡先情報を編集できるようにした
+- `/suppliers` に新規作成導線と簡易連絡先表示を追加した
+- `/suppliers/[supplierId]` に連絡先セクションを追加した
+- 発注先作成と編集を監査ログに記録するようにした
+- `tests/suppliers-contact.test.ts` を追加した
+
+### 判断
+
+- 優先6は大きいため、今回は発注先連絡先管理と新規作成までに限定した
+- 発注書PDF出力、メール送信、外部発注送信は次ステップへ分ける
+- 既存の商品と発注候補の表示に影響しないよう、追加項目はすべて任意項目にした
+
+### セキュリティメモ
+
+- 実在会社名、実在担当者名、秘密情報は追加していない
+- 発注先作成、編集はログインユーザーの組織スコープ内だけで行う
+- 備考欄には個人情報や秘密情報を入力しない注意を表示した
+
+### 検証
+
+- `corepack pnpm prisma:generate`
+- `corepack pnpm db:push`
+- `corepack pnpm exec tsx tests/suppliers-contact.test.ts`
+- `corepack pnpm typecheck`
+- `corepack pnpm build`
+- 開発サーバー停止後に破損していた `.next/dev/types/validator.ts` は、Git管理外のNext.js生成キャッシュとして削除し、`corepack pnpm typecheck` を再実行して成功した
+- ローカル開発サーバーで `/suppliers` を開き、新規作成導線と簡易連絡先表示があることを確認した
+- ローカル開発サーバーで `/suppliers/new` を開き、発注先名、住所、電話、FAX、メール、担当者、備考の入力欄があることを確認した
+- ローカル開発サーバーで既存発注先詳細を開き、連絡先セクションが表示されることを確認した
+- `next-env.d.ts` は `import "./.next/types/routes.d.ts";` に戻した
+
+## 2026-05-21 発注書下書き印刷ビュー
+
+### 作業内容
+
+- `/orders/print` を追加し、発注候補を発注先ごとの発注書下書きとして表示できるようにした
+- 発注元欄として、クリニック名、住所、電話、担当者、発行日時を表示するようにした
+- 発注先欄として、発注先名、住所、電話、FAX、メール、担当者を表示するようにした
+- 発注商品欄に、商品名、商品コード、カテゴリ、現在庫、最低在庫、発注数、状態、備考を表示するようにした
+- `/orders` から `/orders/print` への導線を追加した
+- `/orders` の発注先グループから、該当発注先だけの発注書下書きへ移動できる導線を追加した
+- `/orders/print` で全件と発注先指定を切り替えられるようにした
+- 発注先の住所、電話、FAX、メールに未設定項目がある場合、発注書下書き上で分かるようにした
+- 印刷対象のグループ化を `src/lib/orders/print.ts` に分離した
+- `tests/order-print.test.ts` を追加した
+
+### 判断
+
+- 今回はアプリ内でPDFバイナリを生成せず、ブラウザの印刷機能からPDF保存できる下書き画面に限定した
+- 発注元情報は既存の `Clinic.name`、`Clinic.address`、`Clinic.phone` とログインユーザー情報を使う
+- `SKIPPED` の発注候補は発注書下書きから除外し、`DRAFT` と `CONFIRMED` だけを対象にした
+- 発注先未設定の発注候補は、専用の「発注先未設定」グループとして出力する
+
+### セキュリティメモ
+
+- 外部送信、メール送信、FAX送信、外部発注API連携は実装していない
+- 発注書下書きはログインユーザーのアクティブクリニックに紐づく発注候補だけを表示する
+- 実在会社名、実在担当者名、秘密情報、患者情報は追加していない
+
+### 検証
+
+- `corepack pnpm exec tsx tests/order-print.test.ts`
+- `corepack pnpm exec tsx tests/suppliers-contact.test.ts`
+- `corepack pnpm typecheck`
+- `corepack pnpm build`
+- ローカル開発サーバーで未ログインの `/orders/print` が 307 で保護されることを確認した
+- ローカル開発サーバーで未ログインの `/orders/print?supplierId=unassigned` が 307 で保護されることを確認した
+- 認証後の自動ブラウザ確認は、今回の環境でPlaywrightを利用できなかったため未実施。表示内容はビルドと型チェック、印刷グループ化テストで確認した
+- `next-env.d.ts` は `import "./.next/types/routes.d.ts";` に戻した
+
+### 優先6の完了整理
+
+- ロードマップ上で優先6を完了扱いにした
+- アプリ内PDFバイナリ生成は未実施だが、レビュー投入前のMVPとしてはブラウザ印刷/PDF保存で完了とする
+
+## 2026-05-21 共有文脈入口の追加
+
+### 作業内容
+- AGENTS.md と CLAUDE.md に Shared Context Engine の入口を追加した。
+- 作業開始時に Obsidian 側の context-index.md を共有文脈入口として確認するルールを明記した。
+
+### 判断
+- Codex と Claude Code が同じ前提から作業を始められるようにするためのドキュメント更新。
+- 実装コード、仕様内容、依存関係、秘密情報は変更していない。
+
+## 2026-05-21 発注先マスタ作成・編集のADMIN限定
+
+### 作業内容
+- 発注先マスタの新規作成と編集を、クリニック内の管理担当者であるADMINのみに制限した。
+- 発注先作成・編集のServer Action側で、ログインユーザーの組織スコープとADMIN権限を確認するようにした。
+- `/suppliers/new` と `/suppliers/[supplierId]/edit` はADMIN以外が直接開いた場合、発注先一覧または詳細へ戻すようにした。
+- 発注先一覧と発注先詳細の作成・編集リンクはADMINのみに表示するようにした。
+- `tests/suppliers-contact.test.ts` にSTAFFでは発注先作成・編集が拒否される検証を追加した。
+- `docs/spec.md` に発注先マスタの作成・編集権限を反映した。
+
+### 判断
+- `ADMIN` は開発者ではなく、各クリニック内のメイン担当者・管理担当者として扱う。
+- STAFFは発注先情報を閲覧し、発注候補や発注書下書きで連絡先を確認できるが、マスタデータは変更できない方針にした。
+
+### セキュリティメモ
+- UIリンクを隠すだけでなく、Server Action側でもADMIN権限を確認する。
+- 秘密値、患者情報、実在医院名、実在担当者名は追加していない。
+
+## 2026-05-21 共通ナビゲーションの通常業務・管理分離
+
+### 作業内容
+- 共通ナビゲーションを、通常業務メニュー、管理モード、補助リンクに分けた。
+- 通常業務メニューには在庫、カード、バーコード、不足、発注候補、履歴、棚卸、商品、発注先などの日常操作を集約した。
+- ADMINにだけ管理モードへの導線を表示し、管理モードでは初期設定、取込確認、ユーザー管理、監査ログへ移動できるようにした。
+- マニュアル、アカウント、ログアウトは業務メニューとは別の補助リンクとして右側に寄せた。
+- `/manual` と `/account/password` は、ナビゲーションを本文の狭いコンテナ外に出し、本文幅だけを絞るレイアウトにした。
+
+### 判断
+- マニュアルとアカウントは通常業務でも管理操作でもないため、常時アクセスできる補助リンクとして扱う。
+- STAFFには管理モード導線を表示しない。URL直打ち時にも共通ナビ上では管理リンク群を出さない。
+
+### セキュリティメモ
+- 今回はナビゲーションとレイアウト整理に限定し、認証・権限の本体は変更していない。
+- 管理系ページやServer Actionの権限確認は既存のサーバー側チェックを維持する。

@@ -1,7 +1,16 @@
 import type { NextAuthConfig } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
+import { headers } from "next/headers";
 import { z } from "zod";
+import {
+  getClientIpFromHeaders,
+  isLoginLocked,
+  normalizeLoginEmail,
+  recordLoginFailure,
+  resetLoginFailures,
+} from "@/lib/auth/login-attempts";
+import { normalizeUserRole } from "@/lib/auth/roles";
 import { prisma } from "@/lib/db/prisma";
 
 const credentialsSchema = z.object({
@@ -9,9 +18,89 @@ const credentialsSchema = z.object({
   password: z.string().min(1),
 });
 
+async function getRequestIpAddress() {
+  try {
+    return getClientIpFromHeaders(await headers());
+  } catch {
+    return "unknown";
+  }
+}
+
+export async function authorizeCredentials(
+  rawCredentials: unknown,
+  options?: {
+    ipAddress?: string;
+  },
+) {
+  const parsed = credentialsSchema.safeParse(rawCredentials);
+
+  if (!parsed.success) {
+    return null;
+  }
+
+  const email = normalizeLoginEmail(parsed.data.email);
+  const ipAddress = options?.ipAddress ?? "unknown";
+
+  if (
+    await isLoginLocked({
+      email,
+      ipAddress,
+    })
+  ) {
+    return null;
+  }
+
+  const user = await prisma.user.findUnique({
+    where: {
+      email,
+    },
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      passwordHash: true,
+      role: true,
+      isActive: true,
+      organizationId: true,
+    },
+  });
+
+  if (!user || !user.isActive) {
+    await recordLoginFailure({
+      email,
+      ipAddress,
+    });
+    return null;
+  }
+
+  const passwordMatches = await bcrypt.compare(parsed.data.password, user.passwordHash);
+
+  if (!passwordMatches) {
+    await recordLoginFailure({
+      email,
+      ipAddress,
+    });
+    return null;
+  }
+
+  await resetLoginFailures({
+    email,
+    ipAddress,
+  });
+
+  return {
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    role: normalizeUserRole(user.role),
+    organizationId: user.organizationId,
+  };
+}
+
 export const authConfig = {
   session: {
     strategy: "jwt",
+    maxAge: 8 * 60 * 60,
   },
   pages: {
     signIn: "/login",
@@ -23,43 +112,9 @@ export const authConfig = {
         password: { label: "パスワード", type: "password" },
       },
       async authorize(rawCredentials) {
-        const parsed = credentialsSchema.safeParse(rawCredentials);
-
-        if (!parsed.success) {
-          return null;
-        }
-
-        const user = await prisma.user.findUnique({
-          where: {
-            email: parsed.data.email,
-          },
-          select: {
-            id: true,
-            email: true,
-            name: true,
-            passwordHash: true,
-            role: true,
-            organizationId: true,
-          },
+        return authorizeCredentials(rawCredentials, {
+          ipAddress: await getRequestIpAddress(),
         });
-
-        if (!user) {
-          return null;
-        }
-
-        const passwordMatches = await bcrypt.compare(parsed.data.password, user.passwordHash);
-
-        if (!passwordMatches) {
-          return null;
-        }
-
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-          organizationId: user.organizationId,
-        };
       },
     }),
   ],

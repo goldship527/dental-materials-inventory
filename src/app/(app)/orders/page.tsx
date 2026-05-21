@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { AppNav } from "@/components/domain/app-nav";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { getOrderRequestRows } from "@/lib/db/orders";
+import { orderPrintUnassignedSupplierId } from "@/lib/orders/print";
 import { orderRequestStatusLabels, type OrderRequestStatusValue } from "@/lib/orders/status";
 import { OrderRequestTableRow } from "./order-request-row";
 import { OrdersPrintButton } from "./print-button";
@@ -40,6 +41,12 @@ function buildOrdersHref(status: OrderRequestStatusValue | "", query: string) {
   const queryString = params.toString();
 
   return queryString ? `/orders?${queryString}` : "/orders";
+}
+
+function buildOrdersPrintHref(supplierId: string | null | undefined) {
+  const selectedSupplierId = supplierId ?? orderPrintUnassignedSupplierId;
+
+  return `/orders/print?supplierId=${encodeURIComponent(selectedSupplierId)}`;
 }
 
 export default async function OrdersPage({ searchParams }: PageProps) {
@@ -109,6 +116,8 @@ export default async function OrdersPage({ searchParams }: PageProps) {
   return (
     <main className="min-h-screen bg-surface px-4 py-6 text-ink print:bg-white print:p-0 sm:px-6 lg:px-8">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 print:max-w-none print:gap-3">
+        <AppNav current="orders" />
+
         <header className="flex flex-col gap-4 border-b border-line pb-5 md:flex-row md:items-end md:justify-between print:border-black print:pb-3">
           <div>
             <p className="text-sm font-semibold text-accent print:text-black">{context.clinicName}</p>
@@ -122,11 +131,16 @@ export default async function OrdersPage({ searchParams }: PageProps) {
             <a className="rounded border border-line px-5 py-3 text-sm font-semibold hover:border-accent" href="/shortage">
               不足一覧へ
             </a>
+            <a
+              className="rounded border border-line px-5 py-3 text-sm font-semibold hover:border-accent"
+              href="/orders/print"
+            >
+              発注書下書き
+            </a>
             <OrdersPrintButton />
           </div>
         </header>
 
-        <AppNav current="orders" />
 
         <section className="hidden grid-cols-4 gap-2 text-xs print:grid">
           <div className="border border-black px-2 py-1.5">印刷対象: {filteredRows.length} 件</div>
@@ -211,7 +225,15 @@ export default async function OrdersPage({ searchParams }: PageProps) {
               >
                 <div className="flex items-center justify-between border-b border-line px-4 py-3 text-sm print:border-black print:px-2 print:py-2 print:text-xs">
                   <h2 className="font-semibold">{supplierName}</h2>
-                  <span className="text-muted print:text-black">{supplierRows.length} 件</span>
+                  <div className="flex items-center gap-3">
+                    <span className="text-muted print:text-black">{supplierRows.length} 件</span>
+                    <a
+                      className="rounded border border-line px-3 py-1.5 text-xs font-semibold text-muted transition hover:border-accent hover:text-accent print:hidden"
+                      href={buildOrdersPrintHref(supplierRows[0]?.supplierId)}
+                    >
+                      この発注先の下書き
+                    </a>
+                  </div>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[1180px] border-collapse text-left text-sm print:min-w-0 print:text-[10.5px]">

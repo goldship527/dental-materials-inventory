@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db/prisma";
 import { getOrderRequestStatusCounts } from "@/lib/db/orders";
+import { getStockStatus, type StockStatusKey } from "@/lib/stock/status";
 
 export type StockRow = {
   stockItemId: string;
@@ -13,8 +14,14 @@ export type StockRow = {
   supplierId: string | null;
   supplierName: string | null;
   quantity: number;
+  stockUpdatedAt: number;
   minStock: number;
   shortageCount: number;
+  stockStatus: StockStatusKey;
+  stockStatusLabel: string;
+  stockStatusClassName: string;
+  isShortage: boolean;
+  isAtMin: boolean;
   location: string | null;
   photoFileName: string | null;
   photoUpdatedAt: number | null;
@@ -24,6 +31,7 @@ export function toStockRow(item: {
   id: string;
   productId: string;
   quantity: number;
+  updatedAt: Date;
   minStock: number | null;
   location: string | null;
   product: {
@@ -43,6 +51,7 @@ export function toStockRow(item: {
   };
 }): StockRow {
   const minStock = item.minStock ?? item.product.defaultMinStock;
+  const status = getStockStatus(item.quantity, minStock);
 
   return {
     stockItemId: item.id,
@@ -56,8 +65,14 @@ export function toStockRow(item: {
     supplierId: item.product.primarySupplier?.id ?? null,
     supplierName: item.product.primarySupplier?.name ?? null,
     quantity: item.quantity,
+    stockUpdatedAt: item.updatedAt.getTime(),
     minStock,
-    shortageCount: Math.max(0, minStock - item.quantity),
+    shortageCount: status.shortageCount,
+    stockStatus: status.key,
+    stockStatusLabel: status.label,
+    stockStatusClassName: status.badgeClassName,
+    isShortage: status.isShortage,
+    isAtMin: status.isAtMin,
     location: item.location,
     photoFileName: item.product.photoFileName,
     photoUpdatedAt: item.product.photoUpdatedAt?.getTime() ?? null,
@@ -100,7 +115,7 @@ export async function getStockRows(clinicId: string) {
 export async function countShortageItems(clinicId: string) {
   const rows = await getStockRows(clinicId);
 
-  return rows.filter((row) => row.quantity <= row.minStock).length;
+  return rows.filter((row) => row.isShortage).length;
 }
 
 export async function getHomeStockSummary(clinicId: string) {
@@ -128,14 +143,16 @@ export async function getHomeStockSummary(clinicId: string) {
       },
     }),
   ]);
-  const shortageCount = rows.filter((row) => row.quantity <= row.minStock).length;
+  const shortageCount = rows.filter((row) => row.isShortage).length;
   const zeroStockCount = rows.filter((row) => row.quantity === 0).length;
+  const atMinStockCount = rows.filter((row) => row.isAtMin).length;
   const totalQuantity = rows.reduce((total, row) => total + row.quantity, 0);
 
   return {
     stockItemCount: rows.length,
     shortageCount,
     zeroStockCount,
+    atMinStockCount,
     totalQuantity,
     favoriteCardCount,
     draftOrderRequestCount: orderRequestStatusCounts.DRAFT,

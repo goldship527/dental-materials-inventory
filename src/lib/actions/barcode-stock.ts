@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { isAllowedBarcodeStockReason } from "@/lib/barcode/stock-reasons";
 import { searchProductsByBarcode } from "@/lib/db/barcodes";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { prisma } from "@/lib/db/prisma";
@@ -12,9 +13,6 @@ const barcodeSchema = z.string().trim().min(1, "バーコードを読み取っ�
 const productIdSchema = z.string().min(1, "商品を選択してください。");
 const reasonSchema = z.string().trim().min(1, "理由を選択してください。").max(40, "理由が長すぎます。");
 const reasonNoteSchema = z.string().trim().max(160, "補足メモは160文字以内で入力してください。");
-
-const outReasons = new Set(["使用", "棚卸調整", "その他"]);
-const inReasons = new Set(["納品", "返品戻り", "棚卸調整", "その他"]);
 
 export type BarcodeStockActionState = {
   status?: "success" | "error";
@@ -69,9 +67,8 @@ export async function barcodeStockMoveAction(
     const quantity = quantitySchema.parse(formData.get("quantity"));
     const reason = reasonSchema.parse(formData.get("reason"));
     const reasonNote = reasonNoteSchema.parse(formData.get("reasonNote") ?? "");
-    const allowedReasons = movementType === "OUT" ? outReasons : inReasons;
 
-    if (!allowedReasons.has(reason)) {
+    if (!isAllowedBarcodeStockReason(movementType, reason)) {
       throw new Error("選択した入出庫区分に対応した理由を選んでください。");
     }
 

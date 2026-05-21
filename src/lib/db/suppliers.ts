@@ -1,9 +1,14 @@
 import { prisma } from "@/lib/db/prisma";
 import type { OrderRequestStatusValue } from "@/lib/orders/status";
+import { getStockStatus } from "@/lib/stock/status";
 
 export type SupplierMasterRow = {
   id: string;
   name: string;
+  phone: string | null;
+  fax: string | null;
+  email: string | null;
+  contactPersonName: string | null;
   productCount: number;
   shortageProductCount: number;
   categories: string[];
@@ -12,6 +17,9 @@ export type SupplierMasterRow = {
 };
 
 export type SupplierDetail = SupplierMasterRow & {
+  address: string | null;
+  contactPersonEmail: string | null;
+  notes: string | null;
   products: SupplierDetailProduct[];
   orderRequests: SupplierDetailOrderRequest[];
 };
@@ -100,7 +108,7 @@ export async function getSupplierMasterRows(organizationId: string, clinicId: st
       const quantity = stockItem?.quantity ?? 0;
       const minStock = stockItem?.minStock ?? product.defaultMinStock;
 
-      return quantity <= minStock;
+      return getStockStatus(quantity, minStock).isShortage;
     }).length;
     const orderRequestCounts: Record<OrderRequestStatusValue, number> = {
       DRAFT: 0,
@@ -115,6 +123,10 @@ export async function getSupplierMasterRows(organizationId: string, clinicId: st
     return {
       id: supplier.id,
       name: supplier.name,
+      phone: supplier.phone,
+      fax: supplier.fax,
+      email: supplier.email,
+      contactPersonName: supplier.contactPersonName,
       productCount: supplier.products.length,
       shortageProductCount,
       categories,
@@ -195,6 +207,7 @@ export async function getSupplierDetail(
     const stockItem = product.stockItems[0];
     const quantity = stockItem?.quantity ?? 0;
     const minStock = stockItem?.minStock ?? product.defaultMinStock;
+    const status = getStockStatus(quantity, minStock);
 
     return {
       id: product.id,
@@ -205,7 +218,7 @@ export async function getSupplierDetail(
       supplierProductCode: product.supplierProductCode,
       quantity,
       minStock,
-      shortageCount: Math.max(0, minStock - quantity),
+      shortageCount: status.shortageCount,
       location: stockItem?.location ?? null,
     };
   });
@@ -225,8 +238,15 @@ export async function getSupplierDetail(
   return {
     id: supplier.id,
     name: supplier.name,
+    address: supplier.address,
+    phone: supplier.phone,
+    fax: supplier.fax,
+    email: supplier.email,
+    contactPersonName: supplier.contactPersonName,
+    contactPersonEmail: supplier.contactPersonEmail,
+    notes: supplier.notes,
     productCount: products.length,
-    shortageProductCount: products.filter((product) => product.quantity <= product.minStock).length,
+    shortageProductCount: products.filter((product) => getStockStatus(product.quantity, product.minStock).isShortage).length,
     categories,
     sampleProductNames: products.slice(0, 5).map((product) => product.name),
     orderRequestCounts,
