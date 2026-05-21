@@ -1,4 +1,5 @@
 import type { OrderRequestRow } from "@/lib/db/orders";
+import { printableOrderRequestStatuses } from "@/lib/orders/status";
 
 export const orderPrintUnassignedSupplierId = "unassigned";
 
@@ -22,7 +23,7 @@ type OrderPrintFilter = {
 
 export function getPrintableOrderRows(rows: OrderRequestRow[], filter: OrderPrintFilter = {}) {
   return rows.filter((row) => {
-    if (row.status === "SKIPPED") {
+    if (!printableOrderRequestStatuses.includes(row.status)) {
       return false;
     }
 

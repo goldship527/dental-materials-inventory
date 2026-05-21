@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db/prisma";
+import type { OrderRequestStatusValue } from "@/lib/orders/status";
 
 export type ProductMasterRow = {
   id: string;
@@ -60,7 +61,7 @@ export type ProductDetailMovement = {
 
 export type ProductDetailOrderRequest = {
   id: string;
-  status: "DRAFT" | "CONFIRMED" | "SKIPPED";
+  status: OrderRequestStatusValue;
   requestedQuantity: number;
   memo: string | null;
   supplierId: string | null;

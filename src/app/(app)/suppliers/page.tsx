@@ -31,7 +31,10 @@ export default async function SuppliersPage({ searchParams }: PageProps) {
   const normalizedQuery = query.toLowerCase();
   const filteredRows = rows.filter((row) => {
     const orderRequestTotal =
-      row.orderRequestCounts.DRAFT + row.orderRequestCounts.CONFIRMED + row.orderRequestCounts.SKIPPED;
+      row.orderRequestCounts.DRAFT +
+      row.orderRequestCounts.CONFIRMED +
+      row.orderRequestCounts.ORDERED +
+      row.orderRequestCounts.SKIPPED;
     const searchText = [row.name, ...row.categories, ...row.sampleProductNames].join(" ").toLowerCase();
     const matchesQuery = normalizedQuery ? searchText.includes(normalizedQuery) : true;
     const matchesShortage = shortageOnly ? row.shortageProductCount > 0 : true;
@@ -88,7 +91,10 @@ export default async function SuppliersPage({ searchParams }: PageProps) {
           {filteredRows.length > 0 ? (
             filteredRows.map((row) => {
               const orderRequestTotal =
-                row.orderRequestCounts.DRAFT + row.orderRequestCounts.CONFIRMED + row.orderRequestCounts.SKIPPED;
+                row.orderRequestCounts.DRAFT +
+                row.orderRequestCounts.CONFIRMED +
+                row.orderRequestCounts.ORDERED +
+                row.orderRequestCounts.SKIPPED;
 
               return (
                 <article key={row.id} className="rounded border border-line bg-white p-5 shadow-panel">
@@ -106,7 +112,7 @@ export default async function SuppliersPage({ searchParams }: PageProps) {
                     </div>
                   </div>
 
-                  <div className="mt-5 grid gap-3 sm:grid-cols-3">
+                  <div className="mt-5 grid gap-3 sm:grid-cols-4">
                     <div className="rounded border border-line px-3 py-2">
                       <p className="text-xs font-semibold text-muted">未確認</p>
                       <p className="mt-1 text-2xl font-semibold">{row.orderRequestCounts.DRAFT}</p>
@@ -114,6 +120,10 @@ export default async function SuppliersPage({ searchParams }: PageProps) {
                     <div className="rounded border border-line px-3 py-2">
                       <p className="text-xs font-semibold text-muted">確認済み</p>
                       <p className="mt-1 text-2xl font-semibold">{row.orderRequestCounts.CONFIRMED}</p>
+                    </div>
+                    <div className="rounded border border-line px-3 py-2">
+                      <p className="text-xs font-semibold text-accent">発注済み</p>
+                      <p className="mt-1 text-2xl font-semibold text-accent">{row.orderRequestCounts.ORDERED}</p>
                     </div>
                     <div className="rounded border border-line px-3 py-2">
                       <p className="text-xs font-semibold text-danger">取り消し</p>

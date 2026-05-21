@@ -7,7 +7,7 @@ import {
   type OrderActionState,
 } from "@/lib/actions/orders";
 import type { OrderRequestRow } from "@/lib/db/orders";
-import { orderRequestStatusLabels, type OrderRequestStatusValue } from "@/lib/orders/status";
+import { orderRequestStatuses, orderRequestStatusLabels, type OrderRequestStatusValue } from "@/lib/orders/status";
 
 const initialState: OrderActionState = {};
 
@@ -15,7 +15,7 @@ type OrderRequestRowProps = {
   row: OrderRequestRow;
 };
 
-const statusOptions: OrderRequestStatusValue[] = ["DRAFT", "CONFIRMED", "SKIPPED"];
+const statusOptions = orderRequestStatuses;
 
 export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
   const [requestedQuantity, setRequestedQuantity] = useState(row.requestedQuantity);
@@ -135,7 +135,9 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
             className={
               selectedStatus === "SKIPPED"
                 ? "h-11 rounded border border-danger bg-red-50 px-3 text-sm font-semibold text-danger outline-none focus:border-danger focus:ring-2 focus:ring-danger/20"
-                : "h-11 rounded border border-line bg-white px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                : selectedStatus === "ORDERED"
+                  ? "h-11 rounded border border-accent bg-emerald-50 px-3 text-sm font-semibold text-accent outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                  : "h-11 rounded border border-line bg-white px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
             }
           >
             {statusOptions.map((status) => (
@@ -147,10 +149,15 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
           {selectedStatus === "SKIPPED" ? (
             <p className="text-xs font-semibold text-danger">取り消しにした候補は発注書下書きに含めません。</p>
           ) : null}
+          {selectedStatus === "ORDERED" ? (
+            <p className="text-xs font-semibold text-accent">発注済みにした候補は発注書下書きに含めません。</p>
+          ) : null}
           <textarea
             name="memo"
             defaultValue={row.memo ?? ""}
-            placeholder={selectedStatus === "SKIPPED" ? "取り消し理由・メモ" : "備考メモ"}
+            placeholder={
+              selectedStatus === "SKIPPED" ? "取り消し理由・メモ" : selectedStatus === "ORDERED" ? "送付方法・メモ" : "備考メモ"
+            }
             maxLength={200}
             className="min-h-20 rounded border border-line px-3 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
           />
@@ -167,6 +174,8 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
         className={
           row.status === "SKIPPED"
             ? "hidden border-b border-line px-4 py-3 text-danger print:table-cell print:border print:border-black print:px-2 print:py-1.5 print:font-semibold print:text-black"
+            : row.status === "ORDERED"
+              ? "hidden border-b border-line px-4 py-3 text-accent print:table-cell print:border print:border-black print:px-2 print:py-1.5 print:font-semibold print:text-black"
             : "hidden border-b border-line px-4 py-3 print:table-cell print:border print:border-black print:px-2 print:py-1.5 print:font-semibold"
         }
       >

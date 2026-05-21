@@ -4,7 +4,7 @@ import { AppNav } from "@/components/domain/app-nav";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { getProductDetail } from "@/lib/db/products";
 import { getStockMovementSourceLabel, getStockMovementTypeLabel } from "@/lib/db/stock-movements";
-import { orderRequestStatusLabels } from "@/lib/orders/status";
+import { createEmptyOrderRequestStatusCounts, orderRequestStatusLabels } from "@/lib/orders/status";
 import { buildProductPhotoUrl } from "@/lib/product-photos/url";
 
 type PageProps = {
@@ -107,7 +107,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
       counts[request.status] += 1;
       return counts;
     },
-    { DRAFT: 0, CONFIRMED: 0, SKIPPED: 0 },
+    createEmptyOrderRequestStatusCounts(),
   );
   const productQuery = encodeURIComponent(product.name);
   const inventoryHref = `/inventory?q=${productQuery}`;
@@ -233,6 +233,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
             <p className="mt-2 text-3xl font-semibold">{product.orderRequests.length}</p>
             <p className="mt-2 text-sm text-muted">
               未確認 {orderRequestCounts.DRAFT} / 確認済み {orderRequestCounts.CONFIRMED} /{" "}
+              発注済み {orderRequestCounts.ORDERED} /{" "}
               <span className="font-semibold text-danger">取り消し {orderRequestCounts.SKIPPED}</span>
             </p>
           </div>
@@ -344,7 +345,15 @@ export default async function ProductDetailPage({ params }: PageProps) {
                 product.orderRequests.map((request) => (
                   <div key={request.id} className="grid gap-1 py-3 text-sm">
                     <div className="flex items-center justify-between gap-3">
-                      <span className={request.status === "SKIPPED" ? "font-semibold text-danger" : "font-semibold"}>
+                      <span
+                        className={
+                          request.status === "SKIPPED"
+                            ? "font-semibold text-danger"
+                            : request.status === "ORDERED"
+                              ? "font-semibold text-accent"
+                              : "font-semibold"
+                        }
+                      >
                         {orderRequestStatusLabels[request.status]}
                       </span>
                       <span className="text-muted">発注数量 {request.requestedQuantity}</span>

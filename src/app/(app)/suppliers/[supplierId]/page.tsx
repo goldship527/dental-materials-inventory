@@ -37,7 +37,10 @@ export default async function SupplierDetailPage({ params }: PageProps) {
   }
 
   const orderRequestTotal =
-    supplier.orderRequestCounts.DRAFT + supplier.orderRequestCounts.CONFIRMED + supplier.orderRequestCounts.SKIPPED;
+    supplier.orderRequestCounts.DRAFT +
+    supplier.orderRequestCounts.CONFIRMED +
+    supplier.orderRequestCounts.ORDERED +
+    supplier.orderRequestCounts.SKIPPED;
   const shortageProducts = supplier.products.filter((product) => product.shortageCount > 0);
   const supplierQuery = encodeURIComponent(supplier.name);
   const productsHref = `/products?q=${supplierQuery}`;
@@ -244,7 +247,15 @@ export default async function SupplierDetailPage({ params }: PageProps) {
                         </a>
                         <span className="text-muted">発注数量 {request.requestedQuantity}</span>
                       </div>
-                      <p className={request.status === "SKIPPED" ? "font-semibold text-danger" : "text-muted"}>
+                      <p
+                        className={
+                          request.status === "SKIPPED"
+                            ? "font-semibold text-danger"
+                            : request.status === "ORDERED"
+                              ? "font-semibold text-accent"
+                              : "text-muted"
+                        }
+                      >
                         {orderRequestStatusLabels[request.status]} / {dateTimeFormatter.format(request.updatedAt)}
                       </p>
                       {request.memo ? <p className="text-muted">{request.memo}</p> : null}

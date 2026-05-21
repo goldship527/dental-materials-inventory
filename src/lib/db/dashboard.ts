@@ -19,6 +19,7 @@ export type DashboardSummary = {
     DRAFT: number;
     CONFIRMED: number;
     SKIPPED: number;
+    ORDERED: number;
   };
   shortageTrend: DashboardTrendPoint[];
   unresolvedBarcodeScanCount: number;

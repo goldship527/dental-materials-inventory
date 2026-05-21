@@ -1,5 +1,9 @@
 import { prisma } from "@/lib/db/prisma";
-import type { OrderRequestStatusValue } from "@/lib/orders/status";
+import {
+  createEmptyOrderRequestStatusCounts,
+  printableOrderRequestStatuses,
+  type OrderRequestStatusValue,
+} from "@/lib/orders/status";
 
 export type OrderRequestRow = {
   id: string;
@@ -92,7 +96,7 @@ export async function getActiveOrderRequestProductIds(clinicId: string) {
     where: {
       clinicId,
       status: {
-        in: ["DRAFT", "CONFIRMED"],
+        in: printableOrderRequestStatuses,
       },
     },
     select: {
@@ -122,11 +126,7 @@ export async function getOrderRequestStatusCounts(clinicId: string): Promise<Ord
       _all: true,
     },
   });
-  const counts: OrderRequestStatusCounts = {
-    DRAFT: 0,
-    CONFIRMED: 0,
-    SKIPPED: 0,
-  };
+  const counts: OrderRequestStatusCounts = createEmptyOrderRequestStatusCounts();
 
   for (const row of rows) {
     counts[row.status] = row._count._all;

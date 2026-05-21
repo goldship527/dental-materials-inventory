@@ -1,20 +1,25 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { AppNav } from "@/components/domain/app-nav";
+import { markOrderRequestsOrderedAction } from "@/lib/actions/orders";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { getOrderRequestRows } from "@/lib/db/orders";
 import { orderPrintUnassignedSupplierId } from "@/lib/orders/print";
-import { orderRequestStatusLabels, type OrderRequestStatusValue } from "@/lib/orders/status";
+import {
+  orderRequestStatusLabels,
+  orderRequestStatuses,
+  printableOrderRequestStatuses,
+  type OrderRequestStatusValue,
+} from "@/lib/orders/status";
 import { OrderRequestTableRow } from "./order-request-row";
 import { OrdersPrintButton } from "./print-button";
 
-const statusOrder: OrderRequestStatusValue[] = ["DRAFT", "CONFIRMED", "SKIPPED"];
 const statusFilters = [
   {
     label: "すべて",
     value: "",
   },
-  ...statusOrder.map((status) => ({
+  ...orderRequestStatuses.map((status) => ({
     label: orderRequestStatusLabels[status],
     value: status,
   })),
@@ -60,7 +65,7 @@ export default async function OrdersPage({ searchParams }: PageProps) {
   const params = (await searchParams) ?? {};
   const query = params.q?.trim() ?? "";
   const normalizedQuery = query.toLowerCase();
-  const selectedStatus = statusOrder.includes(params.status as OrderRequestStatusValue)
+  const selectedStatus = orderRequestStatuses.includes(params.status as OrderRequestStatusValue)
     ? (params.status as OrderRequestStatusValue)
     : "";
   const selectedStatusLabel = selectedStatus ? orderRequestStatusLabels[selectedStatus] : "";
@@ -74,7 +79,7 @@ export default async function OrdersPage({ searchParams }: PageProps) {
     return normalizedQuery ? searchText.includes(normalizedQuery) : true;
   });
   const filteredRows = selectedStatus ? queryFilteredRows.filter((row) => row.status === selectedStatus) : queryFilteredRows;
-  const counts = statusOrder.map((status) => ({
+  const counts = orderRequestStatuses.map((status) => ({
     status,
     label: orderRequestStatusLabels[status],
     count: queryFilteredRows.filter((row) => row.status === status).length,
@@ -149,16 +154,33 @@ export default async function OrdersPage({ searchParams }: PageProps) {
           <div className="border border-black px-2 py-1.5">確認済み: {countByStatus.CONFIRMED} 件</div>
         </section>
         <section className="hidden border border-black px-2 py-1.5 text-xs print:block">
-          出力条件: {filterLabel || "すべて"} / 全発注候補: {rows.length} 件 / 取り消し: {countByStatus.SKIPPED} 件
+          出力条件: {filterLabel || "すべて"} / 全発注候補: {rows.length} 件 / 発注済み: {countByStatus.ORDERED} 件 / 取り消し:{" "}
+          {countByStatus.SKIPPED} 件
         </section>
 
-        <section className="grid gap-4 md:grid-cols-3 print:hidden">
+        <section className="grid gap-4 md:grid-cols-4 print:hidden">
           {counts.map((item) => (
             <div key={item.status} className="rounded border border-line bg-white p-5 shadow-panel">
-              <p className={item.status === "SKIPPED" ? "text-sm font-semibold text-danger" : "text-sm font-semibold text-muted"}>
+              <p
+                className={
+                  item.status === "SKIPPED"
+                    ? "text-sm font-semibold text-danger"
+                    : item.status === "ORDERED"
+                      ? "text-sm font-semibold text-accent"
+                      : "text-sm font-semibold text-muted"
+                }
+              >
                 {item.label}
               </p>
-              <p className={item.status === "SKIPPED" ? "mt-2 text-3xl font-semibold text-danger" : "mt-2 text-3xl font-semibold"}>
+              <p
+                className={
+                  item.status === "SKIPPED"
+                    ? "mt-2 text-3xl font-semibold text-danger"
+                    : item.status === "ORDERED"
+                      ? "mt-2 text-3xl font-semibold text-accent"
+                      : "mt-2 text-3xl font-semibold"
+                }
+              >
                 {item.count} 件
               </p>
             </div>
@@ -202,6 +224,10 @@ export default async function OrdersPage({ searchParams }: PageProps) {
                     ? isCurrent
                       ? "inline-flex min-h-11 items-center rounded border border-danger bg-red-50 px-4 py-2 text-sm font-semibold text-danger"
                       : "inline-flex min-h-11 items-center rounded border border-red-100 bg-white px-4 py-2 text-sm font-semibold text-danger transition hover:border-danger hover:bg-red-50"
+                    : filter.value === "ORDERED"
+                      ? isCurrent
+                        ? "inline-flex min-h-11 items-center rounded border border-accent bg-emerald-50 px-4 py-2 text-sm font-semibold text-accent"
+                        : "inline-flex min-h-11 items-center rounded border border-emerald-100 bg-white px-4 py-2 text-sm font-semibold text-accent transition hover:border-accent hover:bg-emerald-50"
                     : isCurrent
                       ? "inline-flex min-h-11 items-center rounded bg-accent px-4 py-2 text-sm font-semibold text-white"
                       : "inline-flex min-h-11 items-center rounded border border-line bg-white px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
@@ -226,21 +252,43 @@ export default async function OrdersPage({ searchParams }: PageProps) {
             <span className="hidden print:float-right print:inline">一般歯科材料在庫管理システム</span>
           </div>
           {groupedRows.length > 0 ? (
-            groupedRows.map(([supplierName, supplierRows]) => (
-              <section
-                key={supplierName}
-                className="overflow-hidden rounded border border-line bg-white shadow-panel print:break-inside-avoid print:rounded-none print:border-black print:shadow-none"
-              >
+            groupedRows.map(([supplierName, supplierRows]) => {
+              const printableRows = supplierRows.filter((row) => printableOrderRequestStatuses.includes(row.status));
+
+              return (
+                <section
+                  key={supplierName}
+                  className="overflow-hidden rounded border border-line bg-white shadow-panel print:break-inside-avoid print:rounded-none print:border-black print:shadow-none"
+                >
                 <div className="flex items-center justify-between border-b border-line px-4 py-3 text-sm print:border-black print:px-2 print:py-2 print:text-xs">
                   <h2 className="font-semibold">{supplierName}</h2>
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-wrap items-center justify-end gap-3">
                     <span className="text-muted print:text-black">{supplierRows.length} 件</span>
-                    <a
-                      className="inline-flex min-h-11 items-center justify-center rounded border border-line px-3 py-2 text-xs font-semibold text-muted transition hover:border-accent hover:text-accent print:hidden"
-                      href={buildOrdersPrintHref(supplierRows[0]?.supplierId)}
-                    >
-                      この発注先の下書き
-                    </a>
+                    {printableRows.length > 0 ? (
+                      <a
+                        className="inline-flex min-h-11 items-center justify-center rounded border border-line px-3 py-2 text-xs font-semibold text-muted transition hover:border-accent hover:text-accent print:hidden"
+                        href={buildOrdersPrintHref(supplierRows[0]?.supplierId)}
+                      >
+                        この発注先の下書き
+                      </a>
+                    ) : null}
+                    {printableRows.length > 0 ? (
+                      <form action={markOrderRequestsOrderedAction} className="grid gap-2 rounded border border-line bg-gray-50 px-3 py-2 print:hidden">
+                        {printableRows.map((row) => (
+                          <input key={row.id} type="hidden" name="orderRequestId" value={row.id} />
+                        ))}
+                        <label className="flex items-center gap-2 text-xs font-semibold text-muted">
+                          <input type="checkbox" name="confirmOrdered" required className="h-4 w-4 accent-teal-700" />
+                          送付済み確認
+                        </label>
+                        <button
+                          type="submit"
+                          className="min-h-9 rounded bg-ink px-3 py-2 text-xs font-semibold text-white transition hover:bg-gray-700"
+                        >
+                          この発注先を発注済みにする
+                        </button>
+                      </form>
+                    ) : null}
                   </div>
                 </div>
                 <div className="overflow-x-auto">
@@ -282,8 +330,9 @@ export default async function OrdersPage({ searchParams }: PageProps) {
                     </tbody>
                   </table>
                 </div>
-              </section>
-            ))
+                </section>
+              );
+            })
           ) : (
             <div className="rounded border border-line bg-white px-4 py-12 text-center text-sm text-muted shadow-panel print:border-black print:shadow-none">
               {emptyMessage}

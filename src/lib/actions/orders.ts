@@ -4,12 +4,15 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { prisma } from "@/lib/db/prisma";
+import { printableOrderRequestStatuses } from "@/lib/orders/status";
 import { orderRequestStatusLabels } from "@/lib/orders/status";
 
 const orderRequestIdSchema = z.string().min(1);
+const orderRequestIdsSchema = z.array(orderRequestIdSchema).min(1);
 const stockItemIdSchema = z.string().min(1);
 const requestedQuantitySchema = z.coerce.number().int().min(1).max(9999);
-const orderRequestStatusSchema = z.union([z.literal("DRAFT"), z.literal("CONFIRMED"), z.literal("SKIPPED")]);
+const orderRequestStatusSchema = z.enum(["DRAFT", "CONFIRMED", "SKIPPED", "ORDERED"]);
+const orderedConfirmationSchema = z.literal("on");
 const memoSchema = z.string().trim().max(200, "メモは200文字以内で入力してください。");
 
 export type OrderActionState = {
@@ -21,6 +24,9 @@ function revalidateOrderPages() {
   revalidatePath("/home");
   revalidatePath("/shortage");
   revalidatePath("/orders");
+  revalidatePath("/orders/print");
+  revalidatePath("/suppliers");
+  revalidatePath("/products");
 }
 
 function toActionError(error: unknown): OrderActionState {
@@ -85,7 +91,7 @@ export async function createOrderRequestWithStateAction(
           clinicId: context.clinicId,
           productId: stockItem.product.id,
           status: {
-            in: ["DRAFT", "CONFIRMED"],
+            in: printableOrderRequestStatuses,
           },
         },
       });
@@ -231,4 +237,27 @@ export async function updateOrderRequestStatusWithStateAction(
   } catch (error) {
     return toActionError(error);
   }
+}
+
+export async function markOrderRequestsOrderedAction(formData: FormData) {
+  const context = await requireActiveClinic();
+  orderedConfirmationSchema.parse(formData.get("confirmOrdered"));
+  const orderRequestIds = orderRequestIdsSchema.parse(formData.getAll("orderRequestId"));
+
+  await prisma.orderRequest.updateMany({
+    where: {
+      id: {
+        in: orderRequestIds,
+      },
+      clinicId: context.clinicId,
+      status: {
+        in: printableOrderRequestStatuses,
+      },
+    },
+    data: {
+      status: "ORDERED",
+    },
+  });
+
+  revalidateOrderPages();
 }

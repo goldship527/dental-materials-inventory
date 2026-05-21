@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db/prisma";
-import type { OrderRequestStatusValue } from "@/lib/orders/status";
+import { createEmptyOrderRequestStatusCounts, type OrderRequestStatusValue } from "@/lib/orders/status";
 import { getStockStatus } from "@/lib/stock/status";
 
 export type SupplierMasterRow = {
@@ -110,11 +110,7 @@ export async function getSupplierMasterRows(organizationId: string, clinicId: st
 
       return getStockStatus(quantity, minStock).isShortage;
     }).length;
-    const orderRequestCounts: Record<OrderRequestStatusValue, number> = {
-      DRAFT: 0,
-      CONFIRMED: 0,
-      SKIPPED: 0,
-    };
+    const orderRequestCounts = createEmptyOrderRequestStatusCounts();
 
     for (const request of supplier.orderRequests) {
       orderRequestCounts[request.status] += 1;
@@ -225,11 +221,7 @@ export async function getSupplierDetail(
   const categories = Array.from(
     new Set(products.map((product) => product.category).filter((category): category is string => Boolean(category))),
   ).sort((a, b) => a.localeCompare(b, "ja"));
-  const orderRequestCounts: Record<OrderRequestStatusValue, number> = {
-    DRAFT: 0,
-    CONFIRMED: 0,
-    SKIPPED: 0,
-  };
+  const orderRequestCounts = createEmptyOrderRequestStatusCounts();
 
   for (const request of supplier.orderRequests) {
     orderRequestCounts[request.status] += 1;

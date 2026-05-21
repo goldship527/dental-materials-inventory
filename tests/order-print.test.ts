@@ -68,6 +68,12 @@ const rows = [
     requestedQuantity: 5,
     status: "SKIPPED",
   }),
+  buildRow({
+    id: "request-5",
+    productId: "product-5",
+    requestedQuantity: 6,
+    status: "ORDERED",
+  }),
 ];
 
 const printableRows = getPrintableOrderRows(rows);
