@@ -43,8 +43,21 @@ export type ProductSupplierOption = {
 export type ProductDetail = ProductMasterRow & {
   notes: string | null;
   primarySupplierId: string | null;
+  productSuppliers: ProductSupplierSummary[];
   recentMovements: ProductDetailMovement[];
   orderRequests: ProductDetailOrderRequest[];
+};
+
+export type ProductSupplierSummary = {
+  id: string | null;
+  supplierId: string;
+  supplierName: string;
+  supplierProductCode: string | null;
+  orderUnit: string | null;
+  standardPrice: number | null;
+  isPrimary: boolean;
+  isActive: boolean;
+  notes: string | null;
 };
 
 export type ProductDetailMovement = {
@@ -66,6 +79,7 @@ export type ProductDetailOrderRequest = {
   memo: string | null;
   supplierId: string | null;
   supplierName: string | null;
+  orderedAt: Date | null;
   updatedAt: Date;
 };
 
@@ -249,6 +263,26 @@ export async function getProductDetail(
           },
         ],
       },
+      productSuppliers: {
+        include: {
+          supplier: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+        orderBy: [
+          {
+            isPrimary: "desc",
+          },
+          {
+            supplier: {
+              name: "asc",
+            },
+          },
+        ],
+      },
       stockMovements: {
         where: {
           clinicId,
@@ -305,6 +339,31 @@ export async function getProductDetail(
             },
           ]
         : [];
+  const productSuppliers: ProductSupplierSummary[] = product.productSuppliers.map((productSupplier) => ({
+    id: productSupplier.id,
+    supplierId: productSupplier.supplier.id,
+    supplierName: productSupplier.supplier.name,
+    supplierProductCode: productSupplier.supplierProductCode,
+    orderUnit: productSupplier.orderUnit,
+    standardPrice: productSupplier.standardPrice,
+    isPrimary: productSupplier.isPrimary,
+    isActive: productSupplier.isActive,
+    notes: productSupplier.notes,
+  }));
+
+  if (product.primarySupplier && !productSuppliers.some((productSupplier) => productSupplier.supplierId === product.primarySupplier?.id)) {
+    productSuppliers.unshift({
+      id: null,
+      supplierId: product.primarySupplier.id,
+      supplierName: product.primarySupplier.name,
+      supplierProductCode: product.supplierProductCode,
+      orderUnit: product.orderUnit,
+      standardPrice: product.standardPrice,
+      isPrimary: true,
+      isActive: true,
+      notes: null,
+    });
+  }
 
   return {
     id: product.id,
@@ -332,6 +391,7 @@ export async function getProductDetail(
     barcodes,
     notes: product.notes,
     primarySupplierId: product.primarySupplier?.id ?? null,
+    productSuppliers,
     recentMovements: product.stockMovements.map((movement) => ({
       id: movement.id,
       movementType: movement.movementType,
@@ -350,6 +410,7 @@ export async function getProductDetail(
       memo: request.memo,
       supplierId: request.supplier?.id ?? product.primarySupplier?.id ?? null,
       supplierName: request.supplier?.name ?? null,
+      orderedAt: request.orderedAt,
       updatedAt: request.updatedAt,
     })),
   };

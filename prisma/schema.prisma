@@ -16,6 +16,7 @@ model Organization {
   clinics         Clinic[]
   users           User[]
   products        Product[]
+  productSuppliers ProductSupplier[]
   suppliers       Supplier[]
   productBarcodes ProductBarcode[]
   productImportHistories ProductImportHistory[]
@@ -132,6 +133,7 @@ model Supplier {
 
   organization  Organization   @relation(fields: [organizationId], references: [id])
   products      Product[]
+  productSuppliers ProductSupplier[]
   orderRequests OrderRequest[]
 
   @@index([organizationId])
@@ -165,6 +167,7 @@ model Product {
   primarySupplier Supplier?              @relation(fields: [primarySupplierId], references: [id])
   stockItems      StockItem[]
   stockMovements  StockMovement[]
+  productSuppliers ProductSupplier[]
   favoriteCards   FavoriteProductCard[]
   orderRequests   OrderRequest[]
   barcodes        ProductBarcode[]
@@ -199,6 +202,30 @@ model ProductImportHistory {
 
   @@index([organizationId, createdAt])
   @@index([userId])
+}
+
+model ProductSupplier {
+  id                  String   @id @default(cuid())
+  organizationId      String
+  productId           String
+  supplierId          String
+  supplierProductCode String?
+  orderUnit           String?
+  standardPrice       Float?
+  isPrimary           Boolean  @default(false)
+  isActive            Boolean  @default(true)
+  notes               String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  product      Product      @relation(fields: [productId], references: [id])
+  supplier     Supplier     @relation(fields: [supplierId], references: [id])
+
+  @@unique([productId, supplierId])
+  @@index([organizationId])
+  @@index([supplierId])
+  @@index([productId, isPrimary])
 }
 
 model ProductBarcode {
@@ -383,6 +410,7 @@ model OrderRequest {
   status            OrderRequestStatus @default(DRAFT)
   requestedQuantity Int
   memo              String?
+  orderedAt         DateTime?
   createdByUserId   String
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt

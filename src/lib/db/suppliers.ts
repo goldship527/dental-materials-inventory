@@ -45,6 +45,7 @@ export type SupplierDetailOrderRequest = {
   status: OrderRequestStatusValue;
   requestedQuantity: number;
   memo: string | null;
+  orderedAt: Date | null;
   updatedAt: Date;
 };
 
@@ -251,6 +252,7 @@ export async function getSupplierDetail(
       status: request.status,
       requestedQuantity: request.requestedQuantity,
       memo: request.memo,
+      orderedAt: request.orderedAt,
       updatedAt: request.updatedAt,
     })),
   };

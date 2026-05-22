@@ -22,6 +22,7 @@ function valueOrEmpty(value: string | number | null) {
 
 export function ProductEditForm({ product, suppliers }: ProductEditFormProps) {
   const [state, formAction, isPending] = useActionState(updateProductMasterWithStateAction, initialState);
+  const alternativeProductSuppliers = product.productSuppliers.filter((productSupplier) => !productSupplier.isPrimary);
 
   return (
     <form action={formAction} className="grid gap-6">
@@ -101,6 +102,79 @@ export function ProductEditForm({ product, suppliers }: ProductEditFormProps) {
               className="h-11 rounded border border-line px-3 text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
             />
           </label>
+        </div>
+        <div className="mt-6 border-t border-line pt-5">
+          <div className="flex flex-col gap-1">
+            <h3 className="text-sm font-semibold text-ink">代替発注先</h3>
+            <p className="text-xs text-muted">
+              主発注先以外でも購入できる発注先を、必要な分だけ登録します。発注先は自動では切り替わりません。
+            </p>
+          </div>
+          <div className="mt-4 grid gap-4">
+            {[0, 1].map((index) => {
+              const productSupplier = alternativeProductSuppliers[index];
+
+              return (
+                <div key={index} className="grid gap-3 rounded border border-line bg-gray-50 p-4 md:grid-cols-2">
+                  <label className="grid gap-1 text-sm font-semibold text-muted md:col-span-2">
+                    代替発注先 {index + 1}
+                    <select
+                      name="alternativeSupplierId"
+                      defaultValue={productSupplier?.supplierId ?? ""}
+                      className="h-11 rounded border border-line bg-white px-3 text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                    >
+                      <option value="">未設定</option>
+                      {suppliers.map((supplier) => (
+                        <option key={supplier.id} value={supplier.id}>
+                          {supplier.name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="grid gap-1 text-sm font-semibold text-muted">
+                    発注先品番
+                    <input
+                      name="alternativeSupplierProductCode"
+                      defaultValue={valueOrEmpty(productSupplier?.supplierProductCode ?? null)}
+                      maxLength={100}
+                      className="h-11 rounded border border-line bg-white px-3 text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                    />
+                  </label>
+                  <label className="grid gap-1 text-sm font-semibold text-muted">
+                    発注単位
+                    <input
+                      name="alternativeOrderUnit"
+                      defaultValue={valueOrEmpty(productSupplier?.orderUnit ?? null)}
+                      maxLength={100}
+                      className="h-11 rounded border border-line bg-white px-3 text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                    />
+                  </label>
+                  <label className="grid gap-1 text-sm font-semibold text-muted">
+                    標準価格
+                    <input
+                      type="number"
+                      name="alternativeStandardPrice"
+                      defaultValue={valueOrEmpty(productSupplier?.standardPrice ?? null)}
+                      min="0"
+                      max="9999999"
+                      step="1"
+                      inputMode="numeric"
+                      className="h-11 rounded border border-line bg-white px-3 text-right text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                    />
+                  </label>
+                  <label className="grid gap-1 text-sm font-semibold text-muted">
+                    備考
+                    <input
+                      name="alternativeNotes"
+                      defaultValue={valueOrEmpty(productSupplier?.notes ?? null)}
+                      maxLength={500}
+                      className="h-11 rounded border border-line bg-white px-3 text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                    />
+                  </label>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </section>
 

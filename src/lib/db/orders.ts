@@ -25,6 +25,7 @@ export type OrderRequestRow = {
   requestedQuantity: number;
   status: OrderRequestStatusValue;
   memo: string | null;
+  orderedAt: Date | null;
   updatedAt: Date;
 };
 
@@ -86,6 +87,7 @@ export async function getOrderRequestRows(clinicId: string): Promise<OrderReques
       requestedQuantity: request.requestedQuantity,
       status: request.status,
       memo: request.memo,
+      orderedAt: request.orderedAt,
       updatedAt: request.updatedAt,
     };
   });

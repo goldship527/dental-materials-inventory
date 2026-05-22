@@ -258,6 +258,9 @@ export default async function SupplierDetailPage({ params }: PageProps) {
                       >
                         {orderRequestStatusLabels[request.status]} / {dateTimeFormatter.format(request.updatedAt)}
                       </p>
+                      {request.status === "ORDERED" && request.orderedAt ? (
+                        <p className="text-muted">発注済み日時: {dateTimeFormatter.format(request.orderedAt)}</p>
+                      ) : null}
                       {request.memo ? <p className="text-muted">{request.memo}</p> : null}
                     </div>
                   ))

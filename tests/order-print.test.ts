@@ -27,6 +27,7 @@ function buildRow(overrides: Partial<OrderRequestRow>): OrderRequestRow {
     requestedQuantity: 2,
     status: "DRAFT",
     memo: null,
+    orderedAt: null,
     updatedAt: new Date("2026-05-21T00:00:00.000Z"),
     ...overrides,
   };

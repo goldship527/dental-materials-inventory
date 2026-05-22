@@ -105,6 +105,15 @@ export type ProductMasterActionState = {
   fieldErrors?: Partial<Record<keyof CreateProductInput, string>>;
 };
 
+type ProductSupplierInput = {
+  supplierId: string;
+  supplierProductCode: string | null;
+  orderUnit: string | null;
+  standardPrice: number | null;
+  isPrimary: boolean;
+  notes: string | null;
+};
+
 function toFieldErrors<FieldName extends string>(error: z.ZodError): Partial<Record<FieldName, string>> {
   const flattened = error.flatten().fieldErrors as Record<string, string[] | undefined>;
   const fieldErrors: Partial<Record<FieldName, string>> = {};
@@ -155,6 +164,106 @@ function isJanUniqueConflict(error: unknown) {
   return typeof target === "string" ? target.includes("janCode") : true;
 }
 
+function parseAlternativeProductSuppliers(formData: FormData): ProductSupplierInput[] {
+  const supplierIds = formData.getAll("alternativeSupplierId").map((value) => String(value).trim());
+  const supplierProductCodes = formData.getAll("alternativeSupplierProductCode");
+  const orderUnits = formData.getAll("alternativeOrderUnit");
+  const standardPrices = formData.getAll("alternativeStandardPrice");
+  const notes = formData.getAll("alternativeNotes");
+
+  return supplierIds.flatMap((supplierId, index) => {
+    if (!supplierId) {
+      return [];
+    }
+
+    return [
+      {
+        supplierId,
+        supplierProductCode: nullableTextSchema.parse(supplierProductCodes[index] ?? ""),
+        orderUnit: nullableTextSchema.parse(orderUnits[index] ?? ""),
+        standardPrice: nullablePriceSchema.parse(standardPrices[index] ?? ""),
+        isPrimary: false,
+        notes: nullableLongTextSchema.parse(notes[index] ?? ""),
+      },
+    ];
+  });
+}
+
+export async function syncProductSuppliersForContext(
+  tx: Prisma.TransactionClient,
+  input: {
+    organizationId: string;
+    productId: string;
+    primarySupplierId: string | null;
+    primarySupplierProductCode: string | null;
+    primaryOrderUnit: string | null;
+    primaryStandardPrice: number | null;
+    alternatives: ProductSupplierInput[];
+  },
+) {
+  const rows: ProductSupplierInput[] = [];
+
+  if (input.primarySupplierId) {
+    rows.push({
+      supplierId: input.primarySupplierId,
+      supplierProductCode: input.primarySupplierProductCode,
+      orderUnit: input.primaryOrderUnit,
+      standardPrice: input.primaryStandardPrice,
+      isPrimary: true,
+      notes: null,
+    });
+  }
+
+  rows.push(...input.alternatives);
+
+  const duplicateSupplierId = rows.find((row, index) =>
+    rows.some((otherRow, otherIndex) => otherIndex !== index && otherRow.supplierId === row.supplierId),
+  )?.supplierId;
+
+  if (duplicateSupplierId) {
+    throw new Error("同じ発注先が複数回選択されています。主発注先と代替発注先を見直してください。");
+  }
+
+  if (rows.length > 0) {
+    const validSupplierCount = await tx.supplier.count({
+      where: {
+        organizationId: input.organizationId,
+        id: {
+          in: rows.map((row) => row.supplierId),
+        },
+      },
+    });
+
+    if (validSupplierCount !== rows.length) {
+      throw new Error("選択した発注先が見つかりません。");
+    }
+  }
+
+  await tx.productSupplier.deleteMany({
+    where: {
+      productId: input.productId,
+    },
+  });
+
+  if (rows.length === 0) {
+    return;
+  }
+
+  await tx.productSupplier.createMany({
+    data: rows.map((row) => ({
+      organizationId: input.organizationId,
+      productId: input.productId,
+      supplierId: row.supplierId,
+      supplierProductCode: row.supplierProductCode,
+      orderUnit: row.orderUnit,
+      standardPrice: row.standardPrice,
+      isPrimary: row.isPrimary,
+      isActive: true,
+      notes: row.notes,
+    })),
+  });
+}
+
 export async function updateProductMasterWithStateAction(
   _previousState: ProductMasterActionState,
   formData: FormData,
@@ -176,6 +285,7 @@ export async function updateProductMasterWithStateAction(
       defaultMinStock: formData.get("defaultMinStock") ?? "",
       notes: formData.get("notes") ?? "",
     });
+    const alternatives = parseAlternativeProductSuppliers(formData);
 
     const product = await prisma.product.findFirst({
       where: {
@@ -208,24 +318,36 @@ export async function updateProductMasterWithStateAction(
       }
     }
 
-    await prisma.product.update({
-      where: {
-        id: input.productId,
-      },
-      data: {
-        name: input.name,
-        productCode: input.productCode,
-        janCode: input.janCode,
-        category: input.category,
-        manufacturer: input.manufacturer,
-        specification: input.specification,
-        orderUnit: input.orderUnit,
+    await prisma.$transaction(async (tx) => {
+      await tx.product.update({
+        where: {
+          id: input.productId,
+        },
+        data: {
+          name: input.name,
+          productCode: input.productCode,
+          janCode: input.janCode,
+          category: input.category,
+          manufacturer: input.manufacturer,
+          specification: input.specification,
+          orderUnit: input.orderUnit,
+          primarySupplierId: input.primarySupplierId,
+          supplierProductCode: input.supplierProductCode,
+          standardPrice: input.standardPrice,
+          defaultMinStock: input.defaultMinStock,
+          notes: input.notes,
+        },
+      });
+
+      await syncProductSuppliersForContext(tx, {
+        organizationId: context.organizationId,
+        productId: input.productId,
         primarySupplierId: input.primarySupplierId,
-        supplierProductCode: input.supplierProductCode,
-        standardPrice: input.standardPrice,
-        defaultMinStock: input.defaultMinStock,
-        notes: input.notes,
-      },
+        primarySupplierProductCode: input.supplierProductCode,
+        primaryOrderUnit: input.orderUnit,
+        primaryStandardPrice: input.standardPrice,
+        alternatives,
+      });
     });
 
     await writeAuditLog({
@@ -292,26 +414,40 @@ export async function createProductAction(
       }
     }
 
-    const product = await prisma.product.create({
-      data: {
+    const product = await prisma.$transaction(async (tx) => {
+      const createdProduct = await tx.product.create({
+        data: {
+          organizationId: context.organizationId,
+          name: input.name,
+          productCode: input.productCode,
+          janCode: input.janCode,
+          internalCode: input.internalCode,
+          category: input.category,
+          manufacturer: input.manufacturer,
+          specification: input.specification,
+          orderUnit: input.orderUnit,
+          primarySupplierId: input.primarySupplierId,
+          supplierProductCode: input.supplierProductCode,
+          standardPrice: input.standardPrice,
+          defaultMinStock: input.defaultMinStock,
+          notes: input.notes,
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      await syncProductSuppliersForContext(tx, {
         organizationId: context.organizationId,
-        name: input.name,
-        productCode: input.productCode,
-        janCode: input.janCode,
-        internalCode: input.internalCode,
-        category: input.category,
-        manufacturer: input.manufacturer,
-        specification: input.specification,
-        orderUnit: input.orderUnit,
+        productId: createdProduct.id,
         primarySupplierId: input.primarySupplierId,
-        supplierProductCode: input.supplierProductCode,
-        standardPrice: input.standardPrice,
-        defaultMinStock: input.defaultMinStock,
-        notes: input.notes,
-      },
-      select: {
-        id: true,
-      },
+        primarySupplierProductCode: input.supplierProductCode,
+        primaryOrderUnit: input.orderUnit,
+        primaryStandardPrice: input.standardPrice,
+        alternatives: [],
+      });
+
+      return createdProduct;
     });
 
     await writeAuditLog({

@@ -283,7 +283,12 @@ export default async function ProductDetailPage({ params }: PageProps) {
                       {product.supplierName}
                     </a>
                   ) : (
-                    "-"
+                    <span className="inline-flex flex-wrap items-center gap-2">
+                      <span className="font-semibold text-danger">未設定</span>
+                      <a className="font-semibold text-accent hover:underline" href={`/products/${product.id}/edit`}>
+                        主発注先を設定
+                      </a>
+                    </span>
                   )}
                 </dd>
               </div>
@@ -293,6 +298,45 @@ export default async function ProductDetailPage({ params }: PageProps) {
               </div>
             </dl>
             {product.notes ? <p className="mt-4 text-sm text-muted">{product.notes}</p> : null}
+            <div className="mt-5 border-t border-line pt-4">
+              <div className="flex items-center justify-between gap-3">
+                <h3 className="text-sm font-semibold text-ink">取扱発注先</h3>
+                <a className="text-xs font-semibold text-accent hover:underline" href={`/products/${product.id}/edit`}>
+                  編集
+                </a>
+              </div>
+              <div className="mt-3 grid gap-2">
+                {product.productSuppliers.length > 0 ? (
+                  product.productSuppliers.map((productSupplier) => (
+                    <div key={`${productSupplier.supplierId}-${productSupplier.isPrimary}`} className="rounded border border-line px-3 py-2 text-sm">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <a className="font-semibold text-accent hover:underline" href={`/suppliers/${productSupplier.supplierId}`}>
+                          {productSupplier.supplierName}
+                        </a>
+                        <span
+                          className={
+                            productSupplier.isPrimary
+                              ? "rounded bg-emerald-50 px-2 py-1 text-xs font-semibold text-accent"
+                              : "rounded bg-gray-50 px-2 py-1 text-xs font-semibold text-muted"
+                          }
+                        >
+                          {productSupplier.isPrimary ? "主発注先" : "代替"}
+                        </span>
+                      </div>
+                      <p className="mt-1 text-xs text-muted">
+                        品番 {productSupplier.supplierProductCode ?? "-"} / 単位 {productSupplier.orderUnit ?? "-"} / 価格{" "}
+                        {formatPrice(productSupplier.standardPrice)}
+                      </p>
+                      {productSupplier.notes ? <p className="mt-1 text-xs text-muted">{productSupplier.notes}</p> : null}
+                    </div>
+                  ))
+                ) : (
+                  <p className="rounded border border-dashed border-line px-3 py-2 text-sm text-muted">
+                    取扱発注先はまだ登録されていません。
+                  </p>
+                )}
+              </div>
+            </div>
           </div>
 
           <div className="rounded border border-line bg-white p-5 shadow-panel">
@@ -368,6 +412,9 @@ export default async function ProductDetailPage({ params }: PageProps) {
                       )}{" "}
                       / {dateTimeFormatter.format(request.updatedAt)}
                     </p>
+                    {request.status === "ORDERED" && request.orderedAt ? (
+                      <p className="text-muted">発注済み日時: {dateTimeFormatter.format(request.orderedAt)}</p>
+                    ) : null}
                     {request.memo ? <p className="text-muted">{request.memo}</p> : null}
                   </div>
                 ))

@@ -10,6 +10,13 @@ import type { OrderRequestRow } from "@/lib/db/orders";
 import { orderRequestStatuses, orderRequestStatusLabels, type OrderRequestStatusValue } from "@/lib/orders/status";
 
 const initialState: OrderActionState = {};
+const dateTimeFormatter = new Intl.DateTimeFormat("ja-JP", {
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit",
+});
 
 type OrderRequestRowProps = {
   row: OrderRequestRow;
@@ -78,7 +85,12 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
             {row.supplierName}
           </a>
         ) : (
-          "-"
+          <div className="grid gap-1 print:block">
+            <span className="text-danger print:text-black">発注先未設定</span>
+            <a className="text-xs font-semibold text-accent hover:underline print:hidden" href={`/products/${row.productId}/edit`}>
+              主発注先を設定
+            </a>
+          </div>
         )}
       </td>
       <td className="border-b border-line px-4 py-3 print:border print:border-black print:px-2 print:py-1.5 print:text-right">
@@ -146,11 +158,19 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
               </option>
             ))}
           </select>
+          {row.status === "ORDERED" ? (
+            <p className="rounded border border-emerald-100 bg-emerald-50 px-3 py-2 text-xs font-semibold text-accent">
+              誤って発注済みにした場合は、未確認または確認済みに戻せます。
+            </p>
+          ) : null}
           {selectedStatus === "SKIPPED" ? (
             <p className="text-xs font-semibold text-danger">取り消しにした候補は発注書下書きに含めません。</p>
           ) : null}
           {selectedStatus === "ORDERED" ? (
             <p className="text-xs font-semibold text-accent">発注済みにした候補は発注書下書きに含めません。</p>
+          ) : null}
+          {row.status === "ORDERED" && row.orderedAt ? (
+            <p className="text-xs text-muted">発注済み日時: {dateTimeFormatter.format(row.orderedAt)}</p>
           ) : null}
           <textarea
             name="memo"

@@ -5,7 +5,7 @@ import { z } from "zod";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { prisma } from "@/lib/db/prisma";
 import { printableOrderRequestStatuses } from "@/lib/orders/status";
-import { orderRequestStatusLabels } from "@/lib/orders/status";
+import { orderRequestStatusLabels, type OrderRequestStatusValue } from "@/lib/orders/status";
 
 const orderRequestIdSchema = z.string().min(1);
 const orderRequestIdsSchema = z.array(orderRequestIdSchema).min(1);
@@ -19,6 +19,8 @@ export type OrderActionState = {
   status?: "success" | "error";
   message?: string;
 };
+
+type ActiveClinicContext = Awaited<ReturnType<typeof requireActiveClinic>>;
 
 function revalidateOrderPages() {
   revalidatePath("/home");
@@ -208,35 +210,76 @@ export async function updateOrderRequestStatusWithStateAction(
     const memoValue = memoSchema.parse(formData.get("memo") ?? "");
     const memo = memoValue.length > 0 ? memoValue : null;
 
-    const request = await prisma.orderRequest.update({
-      where: {
-        id: orderRequestId,
-        clinicId: context.clinicId,
-      },
-      data: {
-        status,
-        memo,
-      },
-      include: {
-        product: {
-          select: {
-            name: true,
-          },
-        },
-      },
+    const request = await updateOrderRequestStatusForContext(context, {
+      orderRequestId,
+      status,
+      memo,
     });
-
-    revalidateOrderPages();
 
     const label = orderRequestStatusLabels[status];
 
     return {
       status: "success",
-      message: `${request.product.name} を${label}にしました。`,
+      message: `${request.productName} を${label}にしました。`,
     };
   } catch (error) {
     return toActionError(error);
   }
+}
+
+export async function updateOrderRequestStatusForContext(
+  context: ActiveClinicContext,
+  input: {
+    orderRequestId: string;
+    status: OrderRequestStatusValue;
+    memo: string | null;
+    revalidate?: boolean;
+  },
+) {
+  const target = await prisma.orderRequest.findFirst({
+    where: {
+      id: input.orderRequestId,
+      clinicId: context.clinicId,
+    },
+    select: {
+      id: true,
+      orderedAt: true,
+      status: true,
+    },
+  });
+
+  if (!target) {
+    throw new Error("対象の発注候補が見つかりません。");
+  }
+
+  const request = await prisma.orderRequest.update({
+    where: {
+      id: target.id,
+    },
+    data: {
+      status: input.status,
+      memo: input.memo,
+      orderedAt:
+        input.status === "ORDERED" ? (target.status === "ORDERED" ? target.orderedAt : new Date()) : null,
+    },
+    include: {
+      product: {
+        select: {
+          name: true,
+        },
+      },
+    },
+  });
+
+  if (input.revalidate ?? true) {
+    revalidateOrderPages();
+  }
+
+  return {
+    productName: request.product.name,
+    orderedAt: request.orderedAt,
+    status: request.status,
+  };
 }
 
 export async function markOrderRequestsOrderedAction(formData: FormData) {
@@ -256,6 +299,7 @@ export async function markOrderRequestsOrderedAction(formData: FormData) {
     },
     data: {
       status: "ORDERED",
+      orderedAt: new Date(),
     },
   });
 

@@ -254,6 +254,7 @@ export default async function OrdersPage({ searchParams }: PageProps) {
           {groupedRows.length > 0 ? (
             groupedRows.map(([supplierName, supplierRows]) => {
               const printableRows = supplierRows.filter((row) => printableOrderRequestStatuses.includes(row.status));
+              const hasUnassignedSupplier = supplierRows.some((row) => !row.supplierId);
 
               return (
                 <section
@@ -261,7 +262,14 @@ export default async function OrdersPage({ searchParams }: PageProps) {
                   className="overflow-hidden rounded border border-line bg-white shadow-panel print:break-inside-avoid print:rounded-none print:border-black print:shadow-none"
                 >
                 <div className="flex items-center justify-between border-b border-line px-4 py-3 text-sm print:border-black print:px-2 print:py-2 print:text-xs">
-                  <h2 className="font-semibold">{supplierName}</h2>
+                  <div>
+                    <h2 className="font-semibold">{supplierName}</h2>
+                    {hasUnassignedSupplier ? (
+                      <p className="mt-1 text-xs font-semibold text-danger print:hidden">
+                        発注先未設定の商品があります。商品マスタで主発注先を設定してください。
+                      </p>
+                    ) : null}
+                  </div>
                   <div className="flex flex-wrap items-center justify-end gap-3">
                     <span className="text-muted print:text-black">{supplierRows.length} 件</span>
                     {printableRows.length > 0 ? (
