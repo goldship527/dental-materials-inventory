@@ -155,20 +155,31 @@ function NavGroup({
   );
 }
 
+async function canUseAdminNavigation(userId: string | undefined) {
+  if (!userId) {
+    return false;
+  }
+
+  try {
+    const currentUser = await prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+      select: {
+        role: true,
+        isActive: true,
+      },
+    });
+
+    return Boolean(currentUser?.isActive && isAdminRole(currentUser.role));
+  } catch {
+    return false;
+  }
+}
+
 export async function AppNav({ current }: AppNavProps) {
   const session = await auth();
-  const currentUser = session?.user?.id
-    ? await prisma.user.findUnique({
-        where: {
-          id: session.user.id,
-        },
-        select: {
-          role: true,
-          isActive: true,
-        },
-      })
-    : null;
-  const canUseAdminMode = Boolean(currentUser?.isActive && isAdminRole(currentUser.role));
+  const canUseAdminMode = await canUseAdminNavigation(session?.user?.id);
   const isAdminMode =
     canUseAdminMode && (current === "setup" || current === "imports" || current === "admin" || current === "auditLogs");
   const modeItems = isAdminMode ? adminNavItems : workNavItems;
