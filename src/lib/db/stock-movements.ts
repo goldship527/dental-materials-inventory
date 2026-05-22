@@ -39,6 +39,10 @@ export function getStockMovementTypeLabel(movementType: string) {
 }
 
 export function getStockMovementSourceLabel(sourceType: string | null) {
+  if (sourceType === "ORDER_RECEIPT") {
+    return "納品確認";
+  }
+
   return sourceType ? (stockMovementSourceLabels[sourceType] ?? sourceType) : "-";
 }
 

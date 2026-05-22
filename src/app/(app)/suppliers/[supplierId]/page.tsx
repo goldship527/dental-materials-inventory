@@ -261,6 +261,12 @@ export default async function SupplierDetailPage({ params }: PageProps) {
                       {request.status === "ORDERED" && request.orderedAt ? (
                         <p className="text-muted">発注済み日時: {dateTimeFormatter.format(request.orderedAt)}</p>
                       ) : null}
+                      {request.receivedAt ? (
+                        <p className="font-semibold text-blue-800">
+                          納品確認済み {dateTimeFormatter.format(request.receivedAt)} / 数量 {request.receivedQuantity ?? "-"}
+                        </p>
+                      ) : null}
+                      {request.receivedMemo ? <p className="text-muted">{request.receivedMemo}</p> : null}
                       {request.memo ? <p className="text-muted">{request.memo}</p> : null}
                     </div>
                   ))

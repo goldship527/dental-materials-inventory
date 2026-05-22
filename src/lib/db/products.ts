@@ -80,6 +80,9 @@ export type ProductDetailOrderRequest = {
   supplierId: string | null;
   supplierName: string | null;
   orderedAt: Date | null;
+  receivedQuantity: number | null;
+  receivedAt: Date | null;
+  receivedMemo: string | null;
   updatedAt: Date;
 };
 
@@ -411,6 +414,9 @@ export async function getProductDetail(
       supplierId: request.supplier?.id ?? product.primarySupplier?.id ?? null,
       supplierName: request.supplier?.name ?? null,
       orderedAt: request.orderedAt,
+      receivedQuantity: request.receivedQuantity,
+      receivedAt: request.receivedAt,
+      receivedMemo: request.receivedMemo,
       updatedAt: request.updatedAt,
     })),
   };

@@ -14,6 +14,12 @@ const supplierIdSchema = z.string().min(1);
 const requestedQuantitySchema = z.coerce.number().int().min(1).max(9999);
 const orderRequestStatusSchema = z.enum(["DRAFT", "CONFIRMED", "SKIPPED", "ORDERED"]);
 const orderedConfirmationSchema = z.literal("on");
+const receivedQuantitySchema = z.coerce
+  .number()
+  .int("納品数量は整数で入力してください。")
+  .min(1, "納品数量は1以上で入力してください。")
+  .max(9999, "納品数量は9999以下で入力してください。");
+const receivedMemoSchema = z.string().trim().max(200, "納品メモは200文字以内で入力してください。");
 const memoSchema = z.string().trim().max(200, "メモは200文字以内で入力してください。");
 
 export type OrderActionState = {
@@ -30,6 +36,9 @@ function revalidateOrderPages() {
   revalidatePath("/orders/print");
   revalidatePath("/suppliers");
   revalidatePath("/products");
+  revalidatePath("/inventory");
+  revalidatePath("/quick");
+  revalidatePath("/movements");
 }
 
 function toActionError(error: unknown): OrderActionState {
@@ -268,12 +277,17 @@ export async function updateOrderRequestStatusForContext(
     select: {
       id: true,
       orderedAt: true,
+      receivedAt: true,
       status: true,
     },
   });
 
   if (!target) {
     throw new Error("対象の発注候補が見つかりません。");
+  }
+
+  if (target.receivedAt && input.status !== "ORDERED") {
+    throw new Error("納品確認済みの発注候補は、発注済み以外の状態へ戻せません。");
   }
 
   const request = await prisma.orderRequest.update({
@@ -392,6 +406,156 @@ export async function updateOrderRequestSupplierForContext(
     productName: target.product.name,
     supplierName: supplier.name,
   };
+}
+
+export async function receiveOrderRequestWithStateAction(
+  _previousState: OrderActionState,
+  formData: FormData,
+): Promise<OrderActionState> {
+  try {
+    const context = await requireActiveClinic();
+    const orderRequestId = orderRequestIdSchema.parse(formData.get("orderRequestId"));
+    const receivedQuantity = receivedQuantitySchema.parse(formData.get("receivedQuantity"));
+    const receivedMemoValue = receivedMemoSchema.parse(formData.get("receivedMemo") ?? "");
+    const applyToStock = formData.get("applyToStock") === "on";
+
+    const result = await receiveOrderRequestForContext(context, {
+      orderRequestId,
+      receivedQuantity,
+      receivedMemo: receivedMemoValue.length > 0 ? receivedMemoValue : null,
+      applyToStock,
+    });
+
+    return {
+      status: "success",
+      message: `${result.productName} の納品を確認しました。${result.afterQuantity == null ? "" : `現在庫は ${result.afterQuantity} です。`}`,
+    };
+  } catch (error) {
+    return toActionError(error);
+  }
+}
+
+export async function receiveOrderRequestForContext(
+  context: ActiveClinicContext,
+  input: {
+    orderRequestId: string;
+    receivedQuantity: number;
+    receivedMemo: string | null;
+    applyToStock: boolean;
+    revalidate?: boolean;
+  },
+) {
+  const result = await prisma.$transaction(async (tx) => {
+    const target = await tx.orderRequest.findFirst({
+      where: {
+        id: input.orderRequestId,
+        clinicId: context.clinicId,
+      },
+      select: {
+        id: true,
+        productId: true,
+        requestedQuantity: true,
+        status: true,
+        receivedAt: true,
+        product: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
+
+    if (!target) {
+      throw new Error("対象の発注候補が見つかりません。");
+    }
+
+    if (target.status !== "ORDERED") {
+      throw new Error("納品確認できるのは、発注済みの候補だけです。");
+    }
+
+    if (target.receivedAt) {
+      throw new Error("この発注候補はすでに納品確認済みです。");
+    }
+
+    if (input.receivedQuantity > target.requestedQuantity) {
+      throw new Error("納品数量は発注数量以下で入力してください。");
+    }
+
+    let afterQuantity: number | null = null;
+
+    if (input.applyToStock) {
+      const stockItem = await tx.stockItem.findFirst({
+        where: {
+          clinicId: context.clinicId,
+          productId: target.productId,
+          isUsed: true,
+        },
+        select: {
+          id: true,
+          quantity: true,
+        },
+      });
+
+      if (!stockItem) {
+        throw new Error("対象商品の在庫行が見つかりません。在庫一覧で在庫行を確認してください。");
+      }
+
+      const updatedStockItem = await tx.stockItem.update({
+        where: {
+          id: stockItem.id,
+        },
+        data: {
+          quantity: {
+            increment: input.receivedQuantity,
+          },
+        },
+        select: {
+          quantity: true,
+        },
+      });
+
+      afterQuantity = updatedStockItem.quantity;
+
+      await tx.stockMovement.create({
+        data: {
+          clinicId: context.clinicId,
+          productId: target.productId,
+          movementType: "IN",
+          quantity: input.receivedQuantity,
+          beforeQuantity: stockItem.quantity,
+          afterQuantity,
+          reason: "納品",
+          sourceType: "ORDER_RECEIPT",
+          sourceId: target.id,
+          userId: context.userId,
+          memo: input.receivedMemo,
+        },
+      });
+    }
+
+    await tx.orderRequest.update({
+      where: {
+        id: target.id,
+      },
+      data: {
+        receivedQuantity: input.receivedQuantity,
+        receivedAt: new Date(),
+        receivedMemo: input.receivedMemo,
+        receivedByUserId: context.userId,
+      },
+    });
+
+    return {
+      productName: target.product.name,
+      afterQuantity,
+    };
+  });
+
+  if (input.revalidate ?? true) {
+    revalidateOrderPages();
+  }
+
+  return result;
 }
 
 export async function markOrderRequestsOrderedAction(formData: FormData) {

@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import {
+  receiveOrderRequestWithStateAction,
   updateOrderRequestQuantityWithStateAction,
   updateOrderRequestSupplierWithStateAction,
   updateOrderRequestStatusWithStateAction,
@@ -51,7 +52,17 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
     updateOrderRequestStatusWithStateAction,
     initialState,
   );
-  const activeState = statusState.message ? statusState : supplierState.message ? supplierState : quantityState;
+  const [receiptState, receiptAction, isReceiptPending] = useActionState(
+    receiveOrderRequestWithStateAction,
+    initialState,
+  );
+  const activeState = receiptState.message
+    ? receiptState
+    : statusState.message
+      ? statusState
+      : supplierState.message
+        ? supplierState
+        : quantityState;
   const canChangeSupplier = printableOrderRequestStatuses.includes(row.status) && row.supplierOptions.length > 0;
 
   function changeRequestedQuantity(nextQuantity: number) {
@@ -190,6 +201,49 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
             </button>
           </div>
         </form>
+        {row.status === "ORDERED" && row.receivedAt ? (
+          <div className="mt-3 rounded border border-blue-100 bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-800">
+            納品確認済み: {dateTimeFormatter.format(row.receivedAt)}
+            <span className="block">納品数 {row.receivedQuantity ?? "-"}</span>
+            {row.receivedMemo ? <span className="block font-normal">{row.receivedMemo}</span> : null}
+          </div>
+        ) : null}
+        {row.status === "ORDERED" && !row.receivedAt ? (
+          <div className="mt-3 rounded border border-blue-100 bg-blue-50 p-3">
+            <p className="text-xs font-semibold text-blue-800">納品確認</p>
+            <form action={receiptAction} className="mt-2 grid gap-2">
+              <input type="hidden" name="orderRequestId" value={row.id} />
+              <label className="grid gap-1 text-xs font-semibold text-muted">
+                納品数量
+                <input
+                  type="number"
+                  name="receivedQuantity"
+                  min={1}
+                  max={row.requestedQuantity}
+                  defaultValue={row.requestedQuantity}
+                  className="h-10 rounded border border-line bg-white px-3 text-right text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                />
+              </label>
+              <label className="flex items-center gap-2 text-xs font-semibold text-muted">
+                <input type="checkbox" name="applyToStock" defaultChecked className="h-4 w-4 accent-teal-700" />
+                在庫へ入庫反映する
+              </label>
+              <textarea
+                name="receivedMemo"
+                placeholder="納品メモ"
+                maxLength={200}
+                className="min-h-16 rounded border border-line bg-white px-3 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+              />
+              <button
+                type="submit"
+                disabled={isReceiptPending}
+                className="h-10 rounded bg-accent px-3 text-xs font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {isReceiptPending ? "確認中" : "納品を確認"}
+              </button>
+            </form>
+          </div>
+        ) : null}
       </td>
       <td className="border-b border-line px-4 py-3 print:hidden">
         <form action={statusAction} className="grid gap-2">

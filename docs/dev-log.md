@@ -3332,3 +3332,37 @@
 - `corepack pnpm exec tsx tests/order-request-status.test.ts`
 - `corepack pnpm typecheck`
 - `corepack pnpm build`
+
+## 2026-05-22 発注済み後の納品確認MVP
+
+### 作業内容
+- `OrderRequest` に `receivedQuantity`、`receivedAt`、`receivedMemo`、`receivedByUserId` を追加した。
+- `/orders` の発注済み行に、納品数量、在庫反映チェック、納品メモを入力する納品確認フォームを追加した。
+- 納品確認済みの発注候補には、納品確認日時、数量、メモを表示するようにした。
+- 納品確認時に `在庫へ入庫反映する` が有効な場合だけ、同じクリニックの在庫数を増やし、`StockMovement` に `IN / 納品 / ORDER_RECEIPT` として履歴を残すようにした。
+- 商品詳細と発注先詳細の発注候補一覧にも、納品確認済み情報を表示するようにした。
+- 入出庫履歴の操作元フィルタと表示で `ORDER_RECEIPT` を扱えるようにした。
+- `tests/order-receipt.test.ts` を追加し、納品確認、在庫反映、入庫履歴作成、二重確認拒否、未発注候補の拒否、発注数量超過の拒否を確認した。
+- `docs/spec.md` に納品確認MVPの仕様を追記した。
+
+### 判断
+- 本格的な発注書親テーブルや分納管理はまだ作らず、発注候補単位の簡易納品確認に留めた。
+- 在庫反映はチェックボックスで選べるようにし、チェックがない場合は納品確認記録だけを保存する方針にした。
+- 二重入庫を避けるため、納品確認済みの発注候補は再度納品確認できないようにした。
+- 納品確認済みの発注候補は、発注済み以外の状態へ戻せないようにした。
+
+### セキュリティメモ
+- 納品確認処理では、ログイン中クリニックに属する発注候補と在庫行だけを更新する。
+- 画面から送られた数量やIDをそのまま信用せず、Server Action側で発注済み状態、未納品確認、数量上限を確認する。
+- 外部送信、メール送信、FAX送信、納品書画像保存は追加していない。
+- 秘密値、患者情報、実在医院名、実在担当者名は追加していない。
+
+### 検証
+- `corepack pnpm prisma:generate`
+- `corepack pnpm db:push`
+- `corepack pnpm exec tsx tests/order-receipt.test.ts`
+- `corepack pnpm exec tsx tests/order-request-status.test.ts`
+- `corepack pnpm exec tsx tests/order-print.test.ts`
+- `corepack pnpm exec tsx tests/order-request-supplier.test.ts`
+- `corepack pnpm typecheck`
+- `corepack pnpm build`

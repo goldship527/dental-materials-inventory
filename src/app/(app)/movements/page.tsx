@@ -44,7 +44,7 @@ function getMovementBadgeClass(movementType: string) {
 }
 
 const movementTypes = new Set(["IN", "OUT", "ADJUST"]);
-const movementSources = new Set(["MANUAL", "QUICK_CARD", "BARCODE_STOCK", "STOCKTAKE", "STOCKTAKE_SESSION", "REVERT"]);
+const movementSources = new Set(["MANUAL", "QUICK_CARD", "BARCODE_STOCK", "ORDER_RECEIPT", "STOCKTAKE", "STOCKTAKE_SESSION", "REVERT"]);
 
 export default async function MovementsPage({ searchParams }: PageProps) {
   const session = await auth();

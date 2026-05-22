@@ -61,6 +61,7 @@ model User {
   clinicAssignments          UserClinicAssignment[]
   stockMovements             StockMovement[]
   orderRequests              OrderRequest[]         @relation("OrderRequestCreatedBy")
+  receivedOrderRequests      OrderRequest[]         @relation("OrderRequestReceivedBy")
   barcodeScanLogs            BarcodeScanLog[]
   stocktakeSessionsStarted   StocktakeSession[]     @relation("StocktakeSessionStartedBy")
   stocktakeSessionsCommitted StocktakeSession[]     @relation("StocktakeSessionCommittedBy")
@@ -411,6 +412,10 @@ model OrderRequest {
   requestedQuantity Int
   memo              String?
   orderedAt         DateTime?
+  receivedQuantity  Int?
+  receivedAt        DateTime?
+  receivedMemo      String?
+  receivedByUserId  String?
   createdByUserId   String
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
@@ -419,9 +424,11 @@ model OrderRequest {
   product       Product   @relation(fields: [productId], references: [id])
   supplier      Supplier? @relation(fields: [supplierId], references: [id])
   createdByUser User      @relation("OrderRequestCreatedBy", fields: [createdByUserId], references: [id])
+  receivedByUser User?    @relation("OrderRequestReceivedBy", fields: [receivedByUserId], references: [id])
 
   @@index([clinicId, status])
   @@index([productId])
   @@index([supplierId])
   @@index([createdByUserId])
+  @@index([receivedByUserId])
 }

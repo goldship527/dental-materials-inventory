@@ -14,6 +14,7 @@ const typeOptions = [
 ];
 
 const sourceOptions = [
+  { value: "ORDER_RECEIPT", label: "納品確認" },
   { value: "", label: "すべての操作元" },
   { value: "MANUAL", label: "在庫一覧" },
   { value: "QUICK_CARD", label: "よく使うカード" },

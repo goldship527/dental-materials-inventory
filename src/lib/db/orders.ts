@@ -30,6 +30,9 @@ export type OrderRequestRow = {
   status: OrderRequestStatusValue;
   memo: string | null;
   orderedAt: Date | null;
+  receivedQuantity: number | null;
+  receivedAt: Date | null;
+  receivedMemo: string | null;
   updatedAt: Date;
 };
 
@@ -155,6 +158,9 @@ export async function getOrderRequestRows(clinicId: string): Promise<OrderReques
       status: request.status,
       memo: request.memo,
       orderedAt: request.orderedAt,
+      receivedQuantity: request.receivedQuantity,
+      receivedAt: request.receivedAt,
+      receivedMemo: request.receivedMemo,
       updatedAt: request.updatedAt,
     };
   });
