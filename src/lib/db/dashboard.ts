@@ -57,6 +57,14 @@ function createRepeatedShortageTrend(shortageCount: number): DashboardTrendPoint
   });
 }
 
+async function fallbackOnError<T>(promise: Promise<T>, fallbackValue: T): Promise<T> {
+  try {
+    return await promise;
+  } catch {
+    return fallbackValue;
+  }
+}
+
 export async function getDashboardSummary(clinicId: string): Promise<DashboardSummary> {
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
@@ -72,68 +80,91 @@ export async function getDashboardSummary(clinicId: string): Promise<DashboardSu
     expiringBarcodeScanCount,
     latestStocktakeSession,
   ] = await Promise.all([
-    getStockRows(clinicId),
-    prisma.favoriteProductCard.count({
-      where: {
-        clinicId,
+    fallbackOnError(getStockRows(clinicId), []),
+    fallbackOnError(
+      prisma.favoriteProductCard.count({
+        where: {
+          clinicId,
+        },
+      }),
+      0,
+    ),
+    fallbackOnError(
+      getOrderRequestStatusCounts(clinicId),
+      {
+        DRAFT: 0,
+        CONFIRMED: 0,
+        SKIPPED: 0,
+        ORDERED: 0,
       },
-    }),
-    getOrderRequestStatusCounts(clinicId),
-    prisma.stockMovement.findFirst({
-      where: {
-        clinicId,
-      },
-      include: {
-        product: {
-          select: {
-            name: true,
+    ),
+    fallbackOnError(
+      prisma.stockMovement.findFirst({
+        where: {
+          clinicId,
+        },
+        include: {
+          product: {
+            select: {
+              name: true,
+            },
           },
         },
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    }),
-    prisma.barcodeScanLog.count({
-      where: {
-        clinicId,
-        resolveStatus: "UNRESOLVED",
-        matchType: {
-          in: ["NO_MATCH", "PRODUCT_MULTI", "SAMPLE"],
+        orderBy: {
+          createdAt: "desc",
         },
-      },
-    }),
-    prisma.barcodeScanLog.count({
-      where: {
-        clinicId,
-        resolveStatus: {
-          not: "RESOLVED_IGNORED",
-        },
-        expiryDate: {
-          gte: todayStart,
-          lte: thirtyDaysLater,
-        },
-      },
-    }),
-    prisma.stocktakeSession.findFirst({
-      where: {
-        clinicId,
-        status: "COMMITTED",
-      },
-      select: {
-        id: true,
-        committedAt: true,
-        items: {
-          select: {
-            status: true,
-            diff: true,
+      }),
+      null,
+    ),
+    fallbackOnError(
+      prisma.barcodeScanLog.count({
+        where: {
+          clinicId,
+          resolveStatus: "UNRESOLVED",
+          matchType: {
+            in: ["NO_MATCH", "PRODUCT_MULTI", "SAMPLE"],
           },
         },
-      },
-      orderBy: {
-        committedAt: "desc",
-      },
-    }),
+      }),
+      0,
+    ),
+    fallbackOnError(
+      prisma.barcodeScanLog.count({
+        where: {
+          clinicId,
+          resolveStatus: {
+            not: "RESOLVED_IGNORED",
+          },
+          expiryDate: {
+            gte: todayStart,
+            lte: thirtyDaysLater,
+          },
+        },
+      }),
+      0,
+    ),
+    fallbackOnError(
+      prisma.stocktakeSession.findFirst({
+        where: {
+          clinicId,
+          status: "COMMITTED",
+        },
+        select: {
+          id: true,
+          committedAt: true,
+          items: {
+            select: {
+              status: true,
+              diff: true,
+            },
+          },
+        },
+        orderBy: {
+          committedAt: "desc",
+        },
+      }),
+      null,
+    ),
   ]);
   const shortageCount = rows.filter((row) => row.isShortage).length;
   const zeroStockCount = rows.filter((row) => row.quantity === 0).length;
