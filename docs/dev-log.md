@@ -3616,6 +3616,7 @@
 - `corepack pnpm db:push`
 - `corepack pnpm db:seed`
 - ローカルブラウザで `/stock-lots`、`/home` の期限ロット導線、商品詳細の期限ロット導線を確認
+- Vercelデプロイで古いPrisma Clientが使われて `stockLot` が型エラーになったため、`build` の前に `prisma generate` を実行するようにした
 - `corepack pnpm exec tsx tests/stock-lots.test.ts`
 - `corepack pnpm exec tsx tests/order-receipt.test.ts`
 - `corepack pnpm typecheck`
