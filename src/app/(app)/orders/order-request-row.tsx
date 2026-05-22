@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import {
   receiveOrderRequestWithStateAction,
+  revertOrderReceiptWithStateAction,
   updateOrderRequestQuantityWithStateAction,
   updateOrderRequestSupplierWithStateAction,
   updateOrderRequestStatusWithStateAction,
@@ -56,7 +57,13 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
     receiveOrderRequestWithStateAction,
     initialState,
   );
-  const activeState = receiptState.message
+  const [receiptRevertState, receiptRevertAction, isReceiptRevertPending] = useActionState(
+    revertOrderReceiptWithStateAction,
+    initialState,
+  );
+  const activeState = receiptRevertState.message
+    ? receiptRevertState
+    : receiptState.message
     ? receiptState
     : statusState.message
       ? statusState
@@ -206,6 +213,16 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
             納品確認済み: {dateTimeFormatter.format(row.receivedAt)}
             <span className="block">納品数 {row.receivedQuantity ?? "-"}</span>
             {row.receivedMemo ? <span className="block font-normal">{row.receivedMemo}</span> : null}
+            <form action={receiptRevertAction} className="mt-2">
+              <input type="hidden" name="orderRequestId" value={row.id} />
+              <button
+                type="submit"
+                disabled={isReceiptRevertPending}
+                className="h-9 rounded border border-blue-200 bg-white px-3 text-xs font-semibold text-blue-800 transition hover:border-danger hover:text-danger disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {isReceiptRevertPending ? "取り消し中" : "納品確認を取り消す"}
+              </button>
+            </form>
           </div>
         ) : null}
         {row.status === "ORDERED" && !row.receivedAt ? (

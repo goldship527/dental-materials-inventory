@@ -44,7 +44,16 @@ function getMovementBadgeClass(movementType: string) {
 }
 
 const movementTypes = new Set(["IN", "OUT", "ADJUST"]);
-const movementSources = new Set(["MANUAL", "QUICK_CARD", "BARCODE_STOCK", "ORDER_RECEIPT", "STOCKTAKE", "STOCKTAKE_SESSION", "REVERT"]);
+const movementSources = new Set([
+  "MANUAL",
+  "QUICK_CARD",
+  "BARCODE_STOCK",
+  "ORDER_RECEIPT",
+  "ORDER_RECEIPT_REVERT",
+  "STOCKTAKE",
+  "STOCKTAKE_SESSION",
+  "REVERT",
+]);
 
 export default async function MovementsPage({ searchParams }: PageProps) {
   const session = await auth();
@@ -138,7 +147,11 @@ export default async function MovementsPage({ searchParams }: PageProps) {
                 {filteredMovements.length > 0 ? (
                   filteredMovements.map((movement) => {
                     const canRevert =
-                      !movement.revertedAt && !movement.revertOfId && movement.sourceType !== "STOCKTAKE_SESSION";
+                      !movement.revertedAt &&
+                      !movement.revertOfId &&
+                      movement.sourceType !== "STOCKTAKE_SESSION" &&
+                      movement.sourceType !== "ORDER_RECEIPT" &&
+                      movement.sourceType !== "ORDER_RECEIPT_REVERT";
 
                     return (
                       <tr key={movement.id} className="align-top">

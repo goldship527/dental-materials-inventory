@@ -80,6 +80,10 @@ export async function revertStockMovementForContext(options: {
       throw new Error("棚卸セッション由来の履歴は、この画面からは取り消せません。");
     }
 
+    if (movement.sourceType === "ORDER_RECEIPT" || movement.sourceType === "ORDER_RECEIPT_REVERT") {
+      throw new Error("納品確認由来の履歴は、発注候補画面の納品確認取り消しから操作してください。");
+    }
+
     if (movement.revertedAt) {
       throw new Error("この履歴はすでに取り消し済みです。");
     }

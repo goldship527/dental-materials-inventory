@@ -558,6 +558,175 @@ export async function receiveOrderRequestForContext(
   return result;
 }
 
+export async function revertOrderReceiptWithStateAction(
+  _previousState: OrderActionState,
+  formData: FormData,
+): Promise<OrderActionState> {
+  try {
+    const context = await requireActiveClinic();
+    const orderRequestId = orderRequestIdSchema.parse(formData.get("orderRequestId"));
+
+    const result = await revertOrderReceiptForContext(context, {
+      orderRequestId,
+    });
+
+    return {
+      status: "success",
+      message: `${result.productName} の納品確認を取り消しました。${result.afterQuantity == null ? "" : `現在庫は ${result.afterQuantity} です。`}`,
+    };
+  } catch (error) {
+    return toActionError(error);
+  }
+}
+
+export async function revertOrderReceiptForContext(
+  context: ActiveClinicContext,
+  input: {
+    orderRequestId: string;
+    revalidate?: boolean;
+  },
+) {
+  const result = await prisma.$transaction(async (tx) => {
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`order-receipt:${input.orderRequestId}`}))`;
+
+    const target = await tx.orderRequest.findFirst({
+      where: {
+        id: input.orderRequestId,
+        clinicId: context.clinicId,
+      },
+      select: {
+        id: true,
+        productId: true,
+        status: true,
+        receivedQuantity: true,
+        receivedAt: true,
+        product: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
+
+    if (!target) {
+      throw new Error("対象の発注候補が見つかりません。");
+    }
+
+    if (target.status !== "ORDERED") {
+      throw new Error("納品確認を取り消せるのは、発注済みの候補だけです。");
+    }
+
+    if (!target.receivedAt || target.receivedQuantity == null) {
+      throw new Error("この発注候補はまだ納品確認されていません。");
+    }
+
+    let afterQuantity: number | null = null;
+
+    const receiptMovement = await tx.stockMovement.findFirst({
+      where: {
+        clinicId: context.clinicId,
+        productId: target.productId,
+        sourceType: "ORDER_RECEIPT",
+        sourceId: target.id,
+        revertedAt: null,
+        revertOfId: null,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (receiptMovement) {
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`stock-item:${context.clinicId}:${target.productId}`}))`;
+
+      const stockItem = await tx.stockItem.findFirst({
+        where: {
+          clinicId: context.clinicId,
+          productId: target.productId,
+          isUsed: true,
+        },
+        select: {
+          id: true,
+          quantity: true,
+        },
+      });
+
+      if (!stockItem) {
+        throw new Error("対象商品の在庫行が見つかりません。在庫一覧で在庫行を確認してください。");
+      }
+
+      if (stockItem.quantity < target.receivedQuantity) {
+        throw new Error("現在庫が納品確認数より少ないため、在庫反映済みの納品確認を取り消せません。");
+      }
+
+      const updatedStockItem = await tx.stockItem.update({
+        where: {
+          id: stockItem.id,
+        },
+        data: {
+          quantity: {
+            decrement: target.receivedQuantity,
+          },
+        },
+        select: {
+          quantity: true,
+        },
+      });
+
+      afterQuantity = updatedStockItem.quantity;
+
+      await tx.stockMovement.create({
+        data: {
+          clinicId: context.clinicId,
+          productId: target.productId,
+          movementType: "OUT",
+          quantity: -target.receivedQuantity,
+          beforeQuantity: stockItem.quantity,
+          afterQuantity,
+          reason: "納品確認取り消し",
+          sourceType: "ORDER_RECEIPT_REVERT",
+          sourceId: target.id,
+          revertOfId: receiptMovement.id,
+          userId: context.userId,
+        },
+      });
+
+      await tx.stockMovement.update({
+        where: {
+          id: receiptMovement.id,
+        },
+        data: {
+          revertedAt: new Date(),
+          revertedById: context.userId,
+        },
+      });
+    }
+
+    await tx.orderRequest.update({
+      where: {
+        id: target.id,
+      },
+      data: {
+        receivedQuantity: null,
+        receivedAt: null,
+        receivedMemo: null,
+        receivedByUserId: null,
+      },
+    });
+
+    return {
+      productName: target.product.name,
+      afterQuantity,
+    };
+  });
+
+  if (input.revalidate ?? true) {
+    revalidateOrderPages();
+  }
+
+  return result;
+}
+
 export async function markOrderRequestsOrderedAction(formData: FormData) {
   const context = await requireActiveClinic();
   orderedConfirmationSchema.parse(formData.get("confirmOrdered"));

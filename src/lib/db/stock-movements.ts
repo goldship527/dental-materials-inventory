@@ -43,6 +43,10 @@ export function getStockMovementSourceLabel(sourceType: string | null) {
     return "納品確認";
   }
 
+  if (sourceType === "ORDER_RECEIPT_REVERT") {
+    return "納品確認取り消し";
+  }
+
   return sourceType ? (stockMovementSourceLabels[sourceType] ?? sourceType) : "-";
 }
 

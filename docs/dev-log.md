@@ -3366,3 +3366,34 @@
 - `corepack pnpm exec tsx tests/order-request-supplier.test.ts`
 - `corepack pnpm typecheck`
 - `corepack pnpm build`
+
+## 2026-05-22 納品確認の取り消し
+
+### 作業内容
+- `/orders` の納品確認済み行に、納品確認を取り消す操作を追加した。
+- 納品確認の取り消し時に、`OrderRequest` の納品確認数量、日時、メモ、確認者を空に戻すようにした。
+- 在庫へ反映済みの納品確認を取り消す場合は、在庫数を納品確認数だけ戻し、元の `ORDER_RECEIPT` 履歴に取り消し済み情報を記録するようにした。
+- 取り消し操作は `StockMovement` に `OUT / 納品確認取り消し / ORDER_RECEIPT_REVERT` として残すようにした。
+- 入出庫履歴の操作元フィルタと表示で `ORDER_RECEIPT_REVERT` を扱えるようにした。
+- 納品確認由来の履歴は、入出庫履歴画面の汎用取り消しではなく、発注候補画面の専用操作から取り消すようにした。
+- `docs/spec.md` に納品確認取り消しの仕様を追記した。
+
+### 判断
+- 在庫へ反映していない納品確認は、在庫数や履歴を変えずに納品確認記録だけを空に戻す方針にした。
+- 在庫へ反映済みの納品確認は、履歴を消さず、逆向きの履歴を追加して追跡できる形にした。
+- 現在庫が納品確認数より少ない場合は、在庫数がマイナスになるため取り消しを拒否する。
+- 分納、一部取り消し、納品書画像保存、納品確認編集画面は今回追加しない。
+
+### セキュリティメモ
+- 取り消し処理では、ログイン中クリニックに属する発注候補と在庫行だけを更新する。
+- 画面から送られたIDをそのまま信用せず、Server Action側で発注済み状態、納品確認済み状態、在庫反映履歴の有無を確認する。
+- 外部送信、メール送信、FAX送信、納品書画像保存は追加していない。
+- 秘密値、患者情報、実在医院名、実在担当者名は追加していない。
+
+### 検証
+- `corepack pnpm exec tsx tests/order-receipt.test.ts`
+- `corepack pnpm exec tsx tests/stock-movements.test.ts`
+- `corepack pnpm exec tsx tests/order-request-status.test.ts`
+- `corepack pnpm typecheck`
+- `corepack pnpm build`
+- `git diff --check`
