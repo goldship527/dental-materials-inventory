@@ -25,6 +25,7 @@ function ManualContent({ markdown }: { markdown: string }) {
   const lines = markdown.split(/\r?\n/);
   const elements: React.ReactNode[] = [];
   let listItems: string[] = [];
+  let orderedItems: string[] = [];
 
   function flushList() {
     if (listItems.length === 0) {
@@ -41,13 +42,41 @@ function ManualContent({ markdown }: { markdown: string }) {
     listItems = [];
   }
 
+  function flushOrderedList() {
+    if (orderedItems.length === 0) {
+      return;
+    }
+
+    elements.push(
+      <ol key={`ordered-list-${elements.length}`} className="my-3 list-decimal space-y-1 pl-6 text-sm leading-7 text-ink">
+        {orderedItems.map((item, index) => (
+          <li key={index}>{renderInline(item)}</li>
+        ))}
+      </ol>,
+    );
+    orderedItems = [];
+  }
+
+  function flushLists() {
+    flushList();
+    flushOrderedList();
+  }
+
   lines.forEach((line) => {
     if (line.startsWith("- ")) {
+      flushOrderedList();
       listItems.push(line.slice(2));
       return;
     }
 
-    flushList();
+    const orderedMatch = line.match(/^\d+\.\s+(.*)$/);
+    if (orderedMatch) {
+      flushList();
+      orderedItems.push(orderedMatch[1]);
+      return;
+    }
+
+    flushLists();
 
     if (line.startsWith("# ")) {
       elements.push(
@@ -88,7 +117,7 @@ function ManualContent({ markdown }: { markdown: string }) {
     );
   });
 
-  flushList();
+  flushLists();
 
   return <div>{elements}</div>;
 }
@@ -108,21 +137,23 @@ export default async function ManualPage() {
       <AppNav current="manual" />
       <main className="min-h-screen bg-surface px-4 py-8 text-ink sm:px-6 lg:px-8">
         <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
-        <header className="flex flex-col gap-3 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
-          <div>
-            <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-            <h1 className="mt-2 text-3xl font-semibold">スタッフマニュアル</h1>
-            <p className="mt-2 text-sm text-muted">日常操作の確認用マニュアルです。</p>
-          </div>
-          <a className="inline-flex min-h-11 items-center rounded border border-line bg-white px-4 text-sm font-semibold text-accent transition hover:border-accent" href="/home">
-            ホームへ戻る
-          </a>
-        </header>
+          <header className="flex flex-col gap-3 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
+              <h1 className="mt-2 text-3xl font-semibold">スタッフマニュアル</h1>
+              <p className="mt-2 text-sm text-muted">日常操作の確認用マニュアルです。</p>
+            </div>
+            <a
+              className="inline-flex min-h-11 items-center rounded border border-line bg-white px-4 text-sm font-semibold text-accent transition hover:border-accent"
+              href="/home"
+            >
+              ホームへ戻る
+            </a>
+          </header>
 
-
-        <section className="rounded border border-line bg-white p-6 shadow-panel">
-          <ManualContent markdown={markdown} />
-        </section>
+          <section className="rounded border border-line bg-white p-6 shadow-panel">
+            <ManualContent markdown={markdown} />
+          </section>
         </div>
       </main>
     </>
