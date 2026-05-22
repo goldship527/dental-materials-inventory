@@ -8,6 +8,13 @@ export type AdminUserContext = {
   organizationId: string;
 };
 
+function redirectUnauthorizedAdmin(basePath: string | undefined, reason: string): never {
+  const redirectTo = basePath ?? "/home";
+  const separator = redirectTo.includes("?") ? "&" : "?";
+
+  redirect(`${redirectTo}${separator}adminDenied=${reason}`);
+}
+
 export async function requireAdminUser(options?: {
   unauthorizedRedirectTo?: string;
 }): Promise<AdminUserContext> {
@@ -29,8 +36,16 @@ export async function requireAdminUser(options?: {
     },
   });
 
-  if (!user?.isActive || !isAdminRole(user.role)) {
-    redirect(options?.unauthorizedRedirectTo ?? "/home");
+  if (!user) {
+    redirectUnauthorizedAdmin(options?.unauthorizedRedirectTo, "user-not-found");
+  }
+
+  if (!user.isActive) {
+    redirectUnauthorizedAdmin(options?.unauthorizedRedirectTo, "inactive");
+  }
+
+  if (!isAdminRole(user.role)) {
+    redirectUnauthorizedAdmin(options?.unauthorizedRedirectTo, "role");
   }
 
   return {
