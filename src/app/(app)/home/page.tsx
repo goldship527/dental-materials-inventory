@@ -5,12 +5,6 @@ import { Sparkline } from "@/components/domain/sparkline";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { getDashboardSummary } from "@/lib/db/dashboard";
 
-type HomePageProps = {
-  searchParams?: Promise<{
-    adminDenied?: string | string[];
-  }>;
-};
-
 const movementDateFormatter = new Intl.DateTimeFormat("ja-JP", {
   month: "2-digit",
   day: "2-digit",
@@ -24,17 +18,13 @@ const stocktakeDateFormatter = new Intl.DateTimeFormat("ja-JP", {
   day: "2-digit",
 });
 
-export default async function HomePage({ searchParams }: HomePageProps) {
+export default async function HomePage() {
   const session = await auth();
 
   if (!session?.user) {
     redirect("/login");
   }
 
-  const resolvedSearchParams = searchParams ? await searchParams : {};
-  const adminDenied = Array.isArray(resolvedSearchParams.adminDenied)
-    ? resolvedSearchParams.adminDenied[0]
-    : resolvedSearchParams.adminDenied;
   const context = await requireActiveClinic();
   const summary = await getDashboardSummary(context.clinicId);
   const latestMovementAt = summary.latestMovement ? movementDateFormatter.format(summary.latestMovement.createdAt) : null;
@@ -173,29 +163,6 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             不足 {summary.shortageCount} 件
           </a>
         </header>
-
-        {adminDenied ? (
-          <section className="rounded border border-danger/30 bg-red-50 p-4 text-sm leading-6 text-danger print:hidden">
-            <p className="font-semibold">管理画面へ移動できませんでした。</p>
-            <p>拒否理由: {adminDenied}</p>
-            <p>ログイン中ユーザーID: {session.user.id}</p>
-          </section>
-        ) : null}
-
-        <section className="rounded border border-line bg-white p-4 shadow-panel print:hidden">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-sm font-semibold text-muted">管理画面診断</p>
-              <p className="mt-1 text-sm text-muted">管理画面への直接遷移を確認します。</p>
-            </div>
-            <a
-              className="inline-flex h-11 items-center justify-center rounded border border-accent bg-accent px-4 text-sm font-semibold text-white transition hover:bg-accent-dark"
-              href="/admin/users"
-            >
-              管理画面を開く
-            </a>
-          </div>
-        </section>
 
 
         <section className="grid gap-4 md:grid-cols-4">
