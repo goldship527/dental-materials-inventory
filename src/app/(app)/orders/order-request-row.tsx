@@ -3,11 +3,17 @@
 import { useActionState, useState } from "react";
 import {
   updateOrderRequestQuantityWithStateAction,
+  updateOrderRequestSupplierWithStateAction,
   updateOrderRequestStatusWithStateAction,
   type OrderActionState,
 } from "@/lib/actions/orders";
 import type { OrderRequestRow } from "@/lib/db/orders";
-import { orderRequestStatuses, orderRequestStatusLabels, type OrderRequestStatusValue } from "@/lib/orders/status";
+import {
+  orderRequestStatuses,
+  orderRequestStatusLabels,
+  printableOrderRequestStatuses,
+  type OrderRequestStatusValue,
+} from "@/lib/orders/status";
 
 const initialState: OrderActionState = {};
 const dateTimeFormatter = new Intl.DateTimeFormat("ja-JP", {
@@ -16,6 +22,11 @@ const dateTimeFormatter = new Intl.DateTimeFormat("ja-JP", {
   day: "2-digit",
   hour: "2-digit",
   minute: "2-digit",
+});
+const priceFormatter = new Intl.NumberFormat("ja-JP", {
+  style: "currency",
+  currency: "JPY",
+  maximumFractionDigits: 0,
 });
 
 type OrderRequestRowProps = {
@@ -27,15 +38,21 @@ const statusOptions = orderRequestStatuses;
 export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
   const [requestedQuantity, setRequestedQuantity] = useState(row.requestedQuantity);
   const [selectedStatus, setSelectedStatus] = useState<OrderRequestStatusValue>(row.status);
+  const [selectedSupplierId, setSelectedSupplierId] = useState(row.supplierId ?? "");
   const [quantityState, quantityAction, isQuantityPending] = useActionState(
     updateOrderRequestQuantityWithStateAction,
+    initialState,
+  );
+  const [supplierState, supplierAction, isSupplierPending] = useActionState(
+    updateOrderRequestSupplierWithStateAction,
     initialState,
   );
   const [statusState, statusAction, isStatusPending] = useActionState(
     updateOrderRequestStatusWithStateAction,
     initialState,
   );
-  const activeState = statusState.message ? statusState : quantityState;
+  const activeState = statusState.message ? statusState : supplierState.message ? supplierState : quantityState;
+  const canChangeSupplier = printableOrderRequestStatuses.includes(row.status) && row.supplierOptions.length > 0;
 
   function changeRequestedQuantity(nextQuantity: number) {
     const normalizedQuantity = Math.max(1, Math.min(9999, Math.trunc(Number.isFinite(nextQuantity) ? nextQuantity : 1)));
@@ -78,12 +95,19 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
       </td>
       <td className="border-b border-line px-4 py-3 print:border print:border-black print:px-2 print:py-1.5">
         {row.supplierId && row.supplierName ? (
-          <a
-            className="text-accent hover:underline print:text-black print:no-underline"
-            href={`/suppliers/${row.supplierId}`}
-          >
-            {row.supplierName}
-          </a>
+          <div className="grid gap-1 print:block">
+            <a
+              className="text-accent hover:underline print:text-black print:no-underline"
+              href={`/suppliers/${row.supplierId}`}
+            >
+              {row.supplierName}
+            </a>
+            <div className="grid gap-0.5 text-xs text-muted print:text-[9px] print:text-black">
+              {row.supplierProductCode ? <span>発注先品番: {row.supplierProductCode}</span> : null}
+              {row.orderUnit ? <span>単位: {row.orderUnit}</span> : null}
+              {row.standardPrice != null ? <span>標準価格: {priceFormatter.format(row.standardPrice)}</span> : null}
+            </div>
+          </div>
         ) : (
           <div className="grid gap-1 print:block">
             <span className="text-danger print:text-black">発注先未設定</span>
@@ -92,6 +116,36 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
             </a>
           </div>
         )}
+        {canChangeSupplier ? (
+          <form action={supplierAction} className="mt-3 grid gap-2 print:hidden">
+            <input type="hidden" name="orderRequestId" value={row.id} />
+            <select
+              name="supplierId"
+              value={selectedSupplierId}
+              onChange={(event) => setSelectedSupplierId(event.target.value)}
+              className="h-11 rounded border border-line bg-white px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+            >
+              {row.supplierId ? null : (
+                <option value="" disabled>
+                  発注先を選択
+                </option>
+              )}
+              {row.supplierOptions.map((supplierOption) => (
+                <option key={supplierOption.supplierId} value={supplierOption.supplierId}>
+                  {supplierOption.supplierName}
+                  {supplierOption.isPrimary ? "（主）" : ""}
+                </option>
+              ))}
+            </select>
+            <button
+              type="submit"
+              disabled={isSupplierPending || !selectedSupplierId || selectedSupplierId === (row.supplierId ?? "")}
+              className="h-10 rounded border border-line px-3 text-xs font-semibold text-muted transition hover:border-accent hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {isSupplierPending ? "変更中" : "発注先を変更"}
+            </button>
+          </form>
+        ) : null}
       </td>
       <td className="border-b border-line px-4 py-3 print:border print:border-black print:px-2 print:py-1.5 print:text-right">
         {row.requestedQuantity}

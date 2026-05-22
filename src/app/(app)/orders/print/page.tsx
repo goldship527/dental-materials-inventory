@@ -25,6 +25,16 @@ function displayValue(value: string | null | undefined) {
   return value && value.trim().length > 0 ? value : "未設定";
 }
 
+function formatPrice(value: number | null | undefined) {
+  return value == null
+    ? "-"
+    : new Intl.NumberFormat("ja-JP", {
+        style: "currency",
+        currency: "JPY",
+        maximumFractionDigits: 0,
+      }).format(value);
+}
+
 function buildPrintHref(supplierId?: string) {
   return supplierId ? `/orders/print?supplierId=${encodeURIComponent(supplierId)}` : "/orders/print";
 }
@@ -232,7 +242,7 @@ export default async function OrdersPrintPage({ searchParams }: PageProps) {
                 </div>
 
                 <div className="overflow-x-auto">
-                  <table className="w-full min-w-[860px] border-collapse text-left text-sm print:min-w-0 print:text-[10.5px]">
+                  <table className="w-full min-w-[980px] border-collapse text-left text-sm print:min-w-0 print:text-[10.5px]">
                     <thead className="bg-gray-50 text-xs text-muted print:bg-white print:text-[10px] print:text-black">
                       <tr>
                         <th className="border-b border-line px-4 py-3 print:border print:border-black print:px-2 print:py-1.5">
@@ -266,6 +276,9 @@ export default async function OrdersPrintPage({ searchParams }: PageProps) {
                           </td>
                           <td className="border-b border-line px-4 py-3 print:border print:border-black print:px-2 print:py-1.5">
                             {row.productCode ?? "-"}
+                            {row.supplierProductCode ? (
+                              <span className="block text-xs text-muted print:text-black">発注先品番: {row.supplierProductCode}</span>
+                            ) : null}
                           </td>
                           <td className="border-b border-line px-4 py-3 print:border print:border-black print:px-2 print:py-1.5">
                             {row.category ?? "-"}
@@ -278,9 +291,13 @@ export default async function OrdersPrintPage({ searchParams }: PageProps) {
                           </td>
                           <td className="border-b border-line px-4 py-3 text-right font-semibold print:border print:border-black print:px-2 print:py-1.5">
                             {row.requestedQuantity}
+                            {row.orderUnit ? <span className="block text-xs font-normal text-muted print:text-black">{row.orderUnit}</span> : null}
                           </td>
                           <td className="border-b border-line px-4 py-3 print:border print:border-black print:px-2 print:py-1.5">
                             {orderRequestStatusLabels[row.status]}
+                            {row.standardPrice != null ? (
+                              <span className="block text-muted print:text-black">標準価格: {formatPrice(row.standardPrice)}</span>
+                            ) : null}
                             {row.memo ? <span className="block text-muted print:text-black">{row.memo}</span> : null}
                           </td>
                         </tr>

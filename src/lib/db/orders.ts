@@ -19,6 +19,10 @@ export type OrderRequestRow = {
   supplierEmail: string | null;
   supplierContactPersonName: string | null;
   supplierContactPersonEmail: string | null;
+  supplierProductCode: string | null;
+  orderUnit: string | null;
+  standardPrice: number | null;
+  supplierOptions: OrderRequestSupplierOption[];
   quantity: number;
   minStock: number;
   shortageCount: number;
@@ -27,6 +31,16 @@ export type OrderRequestRow = {
   memo: string | null;
   orderedAt: Date | null;
   updatedAt: Date;
+};
+
+export type OrderRequestSupplierOption = {
+  supplierId: string;
+  supplierName: string;
+  supplierProductCode: string | null;
+  orderUnit: string | null;
+  standardPrice: number | null;
+  isPrimary: boolean;
+  isActive: boolean;
 };
 
 export type OrderRequestStatusCounts = Record<OrderRequestStatusValue, number>;
@@ -46,6 +60,26 @@ export async function getOrderRequestRows(clinicId: string): Promise<OrderReques
             },
           },
           primarySupplier: true,
+          productSuppliers: {
+            include: {
+              supplier: {
+                select: {
+                  id: true,
+                  name: true,
+                },
+              },
+            },
+            orderBy: [
+              {
+                isPrimary: "desc",
+              },
+              {
+                supplier: {
+                  name: "asc",
+                },
+              },
+            ],
+          },
         },
       },
       supplier: true,
@@ -64,6 +98,35 @@ export async function getOrderRequestRows(clinicId: string): Promise<OrderReques
     const stockItem = request.product.stockItems[0];
     const quantity = stockItem?.quantity ?? 0;
     const minStock = stockItem?.minStock ?? request.product.defaultMinStock;
+    const supplierOptions: OrderRequestSupplierOption[] = request.product.productSuppliers.map((productSupplier) => ({
+      supplierId: productSupplier.supplier.id,
+      supplierName: productSupplier.supplier.name,
+      supplierProductCode: productSupplier.supplierProductCode,
+      orderUnit: productSupplier.orderUnit,
+      standardPrice: productSupplier.standardPrice,
+      isPrimary: productSupplier.isPrimary,
+      isActive: productSupplier.isActive,
+    }));
+    const hasPrimarySupplierOption =
+      request.product.primarySupplier &&
+      supplierOptions.some((supplierOption) => supplierOption.supplierId === request.product.primarySupplier?.id);
+
+    if (request.product.primarySupplier && !hasPrimarySupplierOption) {
+      supplierOptions.unshift({
+        supplierId: request.product.primarySupplier.id,
+        supplierName: request.product.primarySupplier.name,
+        supplierProductCode: request.product.supplierProductCode,
+        orderUnit: request.product.orderUnit,
+        standardPrice: request.product.standardPrice,
+        isPrimary: true,
+        isActive: true,
+      });
+    }
+
+    const selectedSupplierId = request.supplier?.id ?? request.product.primarySupplier?.id ?? null;
+    const selectedSupplierOption = supplierOptions.find(
+      (supplierOption) => supplierOption.supplierId === selectedSupplierId,
+    );
 
     return {
       id: request.id,
@@ -81,6 +144,10 @@ export async function getOrderRequestRows(clinicId: string): Promise<OrderReques
         request.supplier?.contactPersonName ?? request.product.primarySupplier?.contactPersonName ?? null,
       supplierContactPersonEmail:
         request.supplier?.contactPersonEmail ?? request.product.primarySupplier?.contactPersonEmail ?? null,
+      supplierProductCode: selectedSupplierOption?.supplierProductCode ?? null,
+      orderUnit: selectedSupplierOption?.orderUnit ?? request.product.orderUnit,
+      standardPrice: selectedSupplierOption?.standardPrice ?? null,
+      supplierOptions,
       quantity,
       minStock,
       shortageCount: Math.max(0, minStock - quantity),

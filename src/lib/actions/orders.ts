@@ -10,6 +10,7 @@ import { orderRequestStatusLabels, type OrderRequestStatusValue } from "@/lib/or
 const orderRequestIdSchema = z.string().min(1);
 const orderRequestIdsSchema = z.array(orderRequestIdSchema).min(1);
 const stockItemIdSchema = z.string().min(1);
+const supplierIdSchema = z.string().min(1);
 const requestedQuantitySchema = z.coerce.number().int().min(1).max(9999);
 const orderRequestStatusSchema = z.enum(["DRAFT", "CONFIRMED", "SKIPPED", "ORDERED"]);
 const orderedConfirmationSchema = z.literal("on");
@@ -227,6 +228,29 @@ export async function updateOrderRequestStatusWithStateAction(
   }
 }
 
+export async function updateOrderRequestSupplierWithStateAction(
+  _previousState: OrderActionState,
+  formData: FormData,
+): Promise<OrderActionState> {
+  try {
+    const context = await requireActiveClinic();
+    const orderRequestId = orderRequestIdSchema.parse(formData.get("orderRequestId"));
+    const supplierId = supplierIdSchema.parse(formData.get("supplierId"));
+
+    const result = await updateOrderRequestSupplierForContext(context, {
+      orderRequestId,
+      supplierId,
+    });
+
+    return {
+      status: "success",
+      message: `${result.productName} の発注先を ${result.supplierName} に変更しました。`,
+    };
+  } catch (error) {
+    return toActionError(error);
+  }
+}
+
 export async function updateOrderRequestStatusForContext(
   context: ActiveClinicContext,
   input: {
@@ -279,6 +303,94 @@ export async function updateOrderRequestStatusForContext(
     productName: request.product.name,
     orderedAt: request.orderedAt,
     status: request.status,
+  };
+}
+
+export async function updateOrderRequestSupplierForContext(
+  context: ActiveClinicContext,
+  input: {
+    orderRequestId: string;
+    supplierId: string;
+    revalidate?: boolean;
+  },
+) {
+  const target = await prisma.orderRequest.findFirst({
+    where: {
+      id: input.orderRequestId,
+      clinicId: context.clinicId,
+    },
+    include: {
+      product: {
+        select: {
+          id: true,
+          name: true,
+          organizationId: true,
+          primarySupplierId: true,
+          productSuppliers: {
+            where: {
+              supplierId: input.supplierId,
+              isActive: true,
+            },
+            select: {
+              supplierId: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!target) {
+    throw new Error("対象の発注候補が見つかりません。");
+  }
+
+  if (!printableOrderRequestStatuses.includes(target.status)) {
+    throw new Error("発注先を変更できるのは、未確認または確認済みの発注候補だけです。");
+  }
+
+  if (target.product.organizationId !== context.organizationId) {
+    throw new Error("対象の商品が見つかりません。");
+  }
+
+  const supplier = await prisma.supplier.findFirst({
+    where: {
+      id: input.supplierId,
+      organizationId: context.organizationId,
+    },
+    select: {
+      id: true,
+      name: true,
+    },
+  });
+
+  if (!supplier) {
+    throw new Error("対象の発注先が見つかりません。");
+  }
+
+  const canUseSupplier =
+    target.product.primarySupplierId === supplier.id ||
+    target.product.productSuppliers.some((productSupplier) => productSupplier.supplierId === supplier.id);
+
+  if (!canUseSupplier) {
+    throw new Error("この商品に登録されていない発注先は選択できません。");
+  }
+
+  await prisma.orderRequest.update({
+    where: {
+      id: target.id,
+    },
+    data: {
+      supplierId: supplier.id,
+    },
+  });
+
+  if (input.revalidate ?? true) {
+    revalidateOrderPages();
+  }
+
+  return {
+    productName: target.product.name,
+    supplierName: supplier.name,
   };
 }
 

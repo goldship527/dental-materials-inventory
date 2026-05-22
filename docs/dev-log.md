@@ -3304,3 +3304,31 @@
 - 発注先は同じ組織内のものだけを登録対象にする。
 - 外部送信、メール送信、FAX送信、納品確認、在庫自動入庫は追加していない。
 - 秘密値、患者情報、実在医院名、実在担当者名は追加していない。
+
+## 2026-05-22 発注候補ごとの発注先切り替え
+
+### 作業内容
+- `/orders` の発注候補行で、商品に登録された取扱発注先から発注先を選択できるようにした。
+- 選択した発注先は `OrderRequest.supplierId` に保存し、発注書下書きの発注先グルーピングにも反映するようにした。
+- 発注候補行に、選択中の発注先品番、発注単位、標準価格を表示した。
+- `/orders/print` の商品コード欄に発注先品番を補足表示し、発注数量欄に発注単位、状態欄に標準価格を表示した。
+- 発注先変更処理を `updateOrderRequestSupplierForContext` として切り出し、同じ組織・同じ商品に登録された発注先だけ選択できるようにした。
+- `tests/order-request-supplier.test.ts` を追加し、代替発注先への切り替え、未登録発注先の拒否、別組織発注先の拒否、発注済み候補の変更拒否を確認した。
+- `docs/spec.md` に発注候補ごとの発注先切り替え仕様を追記した。
+
+### 判断
+- 今回は新しいDBカラムや発注書親テーブルを増やさず、既存の `OrderRequest.supplierId` を使うMVPにした。
+- 発注先品番、発注単位、標準価格は `ProductSupplier` の現在値を表示し、発注候補へのスナップショット保存は次段階に分けた。
+- 発注先変更は未確認・確認済みの発注候補に限定し、発注済みや取り消しの候補は先に状態を戻す運用にした。
+
+### セキュリティメモ
+- 画面から送られた発注先IDをそのまま信用せず、Server Action側でクリニック、組織、対象商品の取扱発注先であることを確認する。
+- 外部送信、メール送信、FAX送信、納品確認、在庫自動入庫は追加していない。
+- 秘密値、患者情報、実在医院名、実在担当者名は追加していない。
+
+### 検証
+- `corepack pnpm exec tsx tests/order-request-supplier.test.ts`
+- `corepack pnpm exec tsx tests/order-print.test.ts`
+- `corepack pnpm exec tsx tests/order-request-status.test.ts`
+- `corepack pnpm typecheck`
+- `corepack pnpm build`

@@ -90,15 +90,19 @@ export default async function OrdersPage({ searchParams }: PageProps) {
   >;
   const groupedRows = Array.from(
     filteredRows.reduce((groups, row) => {
+      const supplierKey = row.supplierId ?? orderPrintUnassignedSupplierId;
       const supplierName = row.supplierName ?? "発注先未設定";
-      const currentRows = groups.get(supplierName) ?? [];
+      const currentGroup = groups.get(supplierKey) ?? {
+        supplierName,
+        rows: [] as typeof queryFilteredRows,
+      };
 
-      currentRows.push(row);
-      groups.set(supplierName, currentRows);
+      currentGroup.rows.push(row);
+      groups.set(supplierKey, currentGroup);
 
       return groups;
-    }, new Map<string, typeof queryFilteredRows>()),
-  ).sort(([a], [b]) => a.localeCompare(b, "ja"));
+    }, new Map<string, { supplierName: string; rows: typeof queryFilteredRows }>()),
+  ).sort(([, a], [, b]) => a.supplierName.localeCompare(b.supplierName, "ja"));
   const generatedAt = new Intl.DateTimeFormat("ja-JP", {
     year: "numeric",
     month: "2-digit",
@@ -252,13 +256,15 @@ export default async function OrdersPage({ searchParams }: PageProps) {
             <span className="hidden print:float-right print:inline">一般歯科材料在庫管理システム</span>
           </div>
           {groupedRows.length > 0 ? (
-            groupedRows.map(([supplierName, supplierRows]) => {
+            groupedRows.map(([supplierKey, group]) => {
+              const supplierName = group.supplierName;
+              const supplierRows = group.rows;
               const printableRows = supplierRows.filter((row) => printableOrderRequestStatuses.includes(row.status));
               const hasUnassignedSupplier = supplierRows.some((row) => !row.supplierId);
 
               return (
                 <section
-                  key={supplierName}
+                  key={supplierKey}
                   className="overflow-hidden rounded border border-line bg-white shadow-panel print:break-inside-avoid print:rounded-none print:border-black print:shadow-none"
                 >
                 <div className="flex items-center justify-between border-b border-line px-4 py-3 text-sm print:border-black print:px-2 print:py-2 print:text-xs">
