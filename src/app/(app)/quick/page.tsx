@@ -99,22 +99,22 @@ export default async function QuickPage({ searchParams }: PageProps) {
   });
 
   return (
-    <main className="min-h-screen bg-surface px-4 py-6 text-ink sm:px-6 lg:px-8">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
+    <main className="min-h-screen bg-surface px-4 py-5 text-ink sm:px-6 lg:px-8">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-5">
         <AppNav current="quick" />
 
-        <header className="flex flex-col gap-4 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
+        <header className="flex flex-col gap-3 border-b border-line pb-4 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
             <h1 className="mt-2 text-3xl font-semibold">よく使う商品カード</h1>
           </div>
-          <a className="inline-flex h-11 shrink-0 items-center justify-center rounded border border-line px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent" href="/home">
+          <a className="inline-flex h-11 shrink-0 items-center justify-center rounded border border-line bg-white/75 px-4 text-sm font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent" href="/home">
             ホームへ戻る
           </a>
         </header>
 
 
-        <section className="rounded border border-line bg-white p-4 shadow-panel">
+        <section className="rounded border border-line/90 bg-panel/95 p-3 shadow-panel">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="text-sm font-semibold text-muted">カテゴリ</p>
@@ -128,8 +128,8 @@ export default async function QuickPage({ searchParams }: PageProps) {
                 aria-current={selectedTab === "" ? "page" : undefined}
                 className={
                   selectedTab === ""
-                    ? "inline-flex min-h-11 items-center rounded bg-accent px-4 py-2 text-sm font-semibold text-white"
-                    : "inline-flex min-h-11 items-center rounded border border-line px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-ink"
+                    ? "inline-flex min-h-10 items-center rounded border border-accent bg-accent px-3 py-2 text-sm font-semibold text-white shadow-sm"
+                    : "inline-flex min-h-10 items-center rounded border border-line bg-white/70 px-3 py-2 text-sm font-semibold text-muted transition hover:border-accent/50 hover:bg-subtle hover:text-ink"
                 }
               >
                 すべて {cards.length}
@@ -144,8 +144,8 @@ export default async function QuickPage({ searchParams }: PageProps) {
                     aria-current={isCurrent ? "page" : undefined}
                     className={
                       isCurrent
-                        ? "inline-flex min-h-11 items-center rounded bg-accent px-4 py-2 text-sm font-semibold text-white"
-                        : "inline-flex min-h-11 items-center rounded border border-line px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-ink"
+                        ? "inline-flex min-h-10 items-center rounded border border-accent bg-accent px-3 py-2 text-sm font-semibold text-white shadow-sm"
+                        : "inline-flex min-h-10 items-center rounded border border-line bg-white/70 px-3 py-2 text-sm font-semibold text-muted transition hover:border-accent/50 hover:bg-subtle hover:text-ink"
                     }
                   >
                     {tab.category} {tab.count}
@@ -156,13 +156,13 @@ export default async function QuickPage({ searchParams }: PageProps) {
           </div>
         </section>
 
-        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {visibleCards.map(({ id, categoryTab, row }) => (
             <QuickCard key={id} categoryLabel={categoryTab ?? row.category ?? "未分類"} row={row} />
           ))}
         </section>
 
-        <section className="rounded border border-line bg-white p-4 shadow-panel">
+        <section className="rounded border border-line/90 bg-panel/95 p-4 shadow-panel">
           <h2 className="text-base font-semibold">直近のカード操作</h2>
           <div className="mt-3 divide-y divide-line">
             {recentMovements.length > 0 ? (

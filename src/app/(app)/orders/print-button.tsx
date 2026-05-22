@@ -5,7 +5,7 @@ export function OrdersPrintButton() {
     <button
       type="button"
       onClick={() => window.print()}
-      className="inline-flex min-h-11 items-center justify-center rounded bg-accent px-5 py-3 text-sm font-semibold text-white transition hover:bg-teal-800 print:hidden"
+      className="inline-flex min-h-10 items-center justify-center rounded bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-accentDeep print:hidden"
     >
       印刷
     </button>

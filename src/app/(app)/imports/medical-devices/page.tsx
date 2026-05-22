@@ -58,11 +58,10 @@ export default async function MedicalDeviceImportPreviewPage({ searchParams }: P
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
           <AppNav current="imports" />
 
-        <header className="border-b border-line pb-5">
+          <header className="border-b border-line pb-5">
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
             <h1 className="mt-2 text-3xl font-semibold">医療機器データ取り込みプレビュー</h1>
           </header>
-          <AppNav current="imports" />
           <section className="rounded border border-line bg-white p-5 text-sm text-muted shadow-panel">
             <p className="font-semibold text-ink">ローカルキャッシュがまだありません。</p>
             <p className="mt-2">
@@ -142,6 +141,8 @@ export default async function MedicalDeviceImportPreviewPage({ searchParams }: P
   return (
     <main className="min-h-screen bg-surface px-6 py-8 text-ink">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
+        <AppNav current="imports" />
+
         <header className="flex flex-col gap-3 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
@@ -150,9 +151,20 @@ export default async function MedicalDeviceImportPreviewPage({ searchParams }: P
               取込サンプルを表示しています。
             </p>
           </div>
-          <a className="text-sm font-semibold text-accent hover:underline" href="/home">
-            ホームへ戻る
-          </a>
+          <div className="flex flex-wrap gap-2">
+            <a
+              className="rounded border border-line bg-white px-4 py-2 text-sm font-semibold text-ink transition hover:border-accent hover:bg-teal-50 hover:text-accent"
+              href="/setup"
+            >
+              初期設定へ戻る
+            </a>
+            <a
+              className="rounded border border-line bg-white px-4 py-2 text-sm font-semibold text-ink transition hover:border-accent hover:bg-teal-50 hover:text-accent"
+              href="/home"
+            >
+              ホームへ戻る
+            </a>
+          </div>
         </header>
 
 

@@ -4,8 +4,8 @@
 
 :root {
   color-scheme: light;
-  background: #f7f7f4;
-  color: #1f2933;
+  background: #f8fafc;
+  color: #0f172a;
 }
 
 * {
@@ -19,9 +19,14 @@ body {
 
 body {
   margin: 0;
-  background: #f7f7f4;
-  color: #1f2933;
+  background:
+    linear-gradient(180deg, rgba(240, 253, 250, 0.75) 0, rgba(248, 250, 252, 0) 260px),
+    #f8fafc;
+  color: #0f172a;
   font-family:
+    "Inter",
+    "Noto Sans JP",
+    "Yu Gothic UI",
     system-ui,
     -apple-system,
     BlinkMacSystemFont,
@@ -32,6 +37,11 @@ body {
 a {
   color: inherit;
   text-decoration: none;
+}
+
+::selection {
+  background: #cfe9e4;
+  color: #0f172a;
 }
 
 @media (max-width: 640px) {

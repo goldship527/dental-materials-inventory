@@ -79,39 +79,39 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
   }
 
   return (
-    <tr className="align-top print:break-inside-avoid">
-      <td className="border-b border-line px-4 py-3 print:border print:border-black print:px-2 print:py-1.5">
+    <tr className="align-top transition hover:bg-subtle/60 print:break-inside-avoid">
+      <td className="border-b border-line px-3 py-2 print:border print:border-black print:px-2 print:py-1.5">
         <a
           className="font-semibold text-accent hover:underline print:text-black print:no-underline"
           href={`/products/${row.productId}`}
         >
           {row.name}
         </a>
-        <p className="mt-1 text-xs text-muted print:mt-0.5 print:text-[9px] print:text-black">
+        <p className="mt-0.5 text-xs text-muted print:mt-0.5 print:text-[9px] print:text-black">
           {row.productCode ?? "コード未設定"} / {row.category ?? "未分類"}
         </p>
         {activeState.message ? (
           <p
             className={
               activeState.status === "success"
-                ? "mt-2 rounded bg-emerald-50 px-3 py-2 text-xs font-semibold text-accent print:hidden"
-                : "mt-2 rounded bg-red-50 px-3 py-2 text-xs font-semibold text-danger print:hidden"
+                ? "mt-1.5 rounded bg-green-50 px-3 py-1.5 text-xs font-semibold text-success print:hidden"
+                : "mt-1.5 rounded bg-red-50 px-3 py-1.5 text-xs font-semibold text-danger print:hidden"
             }
           >
             {activeState.message}
           </p>
         ) : null}
       </td>
-      <td className="border-b border-line px-4 py-3 text-right font-semibold print:border print:border-black print:px-2 print:py-1.5">
-        {row.quantity}
+      <td className="border-b border-line px-3 py-2 text-right font-semibold print:border print:border-black print:px-2 print:py-1.5">
+        <span className="font-bold tabular-nums">{row.quantity}</span>
       </td>
-      <td className="border-b border-line px-4 py-3 text-right print:border print:border-black print:px-2 print:py-1.5">
-        {row.minStock}
+      <td className="border-b border-line px-3 py-2 text-right print:border print:border-black print:px-2 print:py-1.5">
+        <span className="tabular-nums">{row.minStock}</span>
       </td>
-      <td className="border-b border-line px-4 py-3 text-right text-danger print:border print:border-black print:px-2 print:py-1.5 print:text-black">
-        {row.shortageCount}
+      <td className="border-b border-line px-3 py-2 text-right text-danger print:border print:border-black print:px-2 print:py-1.5 print:text-black">
+        <span className="font-bold tabular-nums">{row.shortageCount}</span>
       </td>
-      <td className="border-b border-line px-4 py-3 print:border print:border-black print:px-2 print:py-1.5">
+      <td className="border-b border-line px-3 py-2 print:border print:border-black print:px-2 print:py-1.5">
         {row.supplierId && row.supplierName ? (
           <div className="grid gap-1 print:block">
             <a
@@ -135,13 +135,13 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
           </div>
         )}
         {canChangeSupplier ? (
-          <form action={supplierAction} className="mt-3 grid gap-2 print:hidden">
+          <form action={supplierAction} className="mt-2 grid gap-1.5 print:hidden">
             <input type="hidden" name="orderRequestId" value={row.id} />
             <select
               name="supplierId"
               value={selectedSupplierId}
               onChange={(event) => setSelectedSupplierId(event.target.value)}
-              className="h-11 rounded border border-line bg-white px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+              className="h-10 rounded border border-line bg-white/90 px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
             >
               {row.supplierId ? null : (
                 <option value="" disabled>
@@ -158,25 +158,25 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
             <button
               type="submit"
               disabled={isSupplierPending || !selectedSupplierId || selectedSupplierId === (row.supplierId ?? "")}
-              className="h-10 rounded border border-line px-3 text-xs font-semibold text-muted transition hover:border-accent hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
+              className="h-9 rounded border border-line bg-white/75 px-3 text-xs font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isSupplierPending ? "変更中" : "発注先を変更"}
             </button>
           </form>
         ) : null}
       </td>
-      <td className="border-b border-line px-4 py-3 print:border print:border-black print:px-2 print:py-1.5 print:text-right">
-        {row.requestedQuantity}
+      <td className="border-b border-line px-3 py-2 print:border print:border-black print:px-2 print:py-1.5 print:text-right">
+        <span className="font-bold tabular-nums">{row.requestedQuantity}</span>
       </td>
-      <td className="border-b border-line px-4 py-3 print:hidden">
-        <form action={quantityAction} className="grid gap-2">
+      <td className="border-b border-line px-3 py-2 print:hidden">
+        <form action={quantityAction} className="grid gap-1.5">
           <input type="hidden" name="orderRequestId" value={row.id} />
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={() => changeRequestedQuantity(requestedQuantity - 1)}
               disabled={requestedQuantity <= 1 || isQuantityPending}
-              className="h-11 w-11 rounded border border-line bg-white text-lg font-semibold text-muted transition hover:border-accent hover:text-accent disabled:cursor-not-allowed disabled:opacity-40"
+              className="h-9 w-9 rounded border border-line bg-white/75 text-base font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent disabled:cursor-not-allowed disabled:opacity-40"
               aria-label="発注数量を1減らす"
             >
               -
@@ -188,13 +188,13 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
               name="requestedQuantity"
               value={requestedQuantity}
               onChange={(event) => changeRequestedQuantity(Number(event.target.value))}
-              className="h-11 w-24 rounded border border-line px-3 text-right outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+              className="h-9 w-20 rounded border border-line bg-white/90 px-3 text-right outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
             />
             <button
               type="button"
               onClick={() => changeRequestedQuantity(requestedQuantity + 1)}
               disabled={requestedQuantity >= 9999 || isQuantityPending}
-              className="h-11 w-11 rounded border border-line bg-white text-lg font-semibold text-muted transition hover:border-accent hover:text-accent disabled:cursor-not-allowed disabled:opacity-40"
+              className="h-9 w-9 rounded border border-line bg-white/75 text-base font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent disabled:cursor-not-allowed disabled:opacity-40"
               aria-label="発注数量を1増やす"
             >
               +
@@ -202,14 +202,14 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
             <button
               type="submit"
               disabled={isQuantityPending}
-              className="h-11 rounded bg-ink px-3 text-xs font-semibold text-white transition hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+              className="h-9 rounded bg-ink px-3 text-xs font-semibold text-white transition hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isQuantityPending ? "更新中" : "更新"}
             </button>
           </div>
         </form>
         {row.status === "ORDERED" && row.receivedAt ? (
-          <div className="mt-3 rounded border border-blue-100 bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-800">
+          <div className="mt-2 rounded border border-teal-100 bg-teal-50 px-3 py-2 text-xs font-semibold text-accent">
             納品確認済み: {dateTimeFormatter.format(row.receivedAt)}
             <span className="block">納品数 {row.receivedQuantity ?? "-"}</span>
             {row.receivedMemo ? <span className="block font-normal">{row.receivedMemo}</span> : null}
@@ -218,7 +218,7 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
               <button
                 type="submit"
                 disabled={isReceiptRevertPending}
-                className="h-9 rounded border border-blue-200 bg-white px-3 text-xs font-semibold text-blue-800 transition hover:border-danger hover:text-danger disabled:cursor-not-allowed disabled:opacity-50"
+                className="h-9 rounded border border-teal-200 bg-white px-3 text-xs font-semibold text-accent transition hover:border-danger hover:text-danger disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isReceiptRevertPending ? "取り消し中" : "納品確認を取り消す"}
               </button>
@@ -226,9 +226,9 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
           </div>
         ) : null}
         {row.status === "ORDERED" && !row.receivedAt ? (
-          <div className="mt-3 rounded border border-blue-100 bg-blue-50 p-3">
-            <p className="text-xs font-semibold text-blue-800">納品確認</p>
-            <form action={receiptAction} className="mt-2 grid gap-2">
+          <div className="mt-2 rounded border border-teal-100 bg-teal-50 p-2.5">
+            <p className="text-xs font-semibold text-accent">納品確認</p>
+            <form action={receiptAction} className="mt-2 grid gap-1.5">
               <input type="hidden" name="orderRequestId" value={row.id} />
               <label className="grid gap-1 text-xs font-semibold text-muted">
                 納品数量
@@ -238,7 +238,7 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
                   min={1}
                   max={row.requestedQuantity}
                   defaultValue={row.requestedQuantity}
-                  className="h-10 rounded border border-line bg-white px-3 text-right text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                  className="h-9 rounded border border-line bg-white px-3 text-right text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
                 />
               </label>
               <label className="flex items-center gap-2 text-xs font-semibold text-muted">
@@ -249,12 +249,12 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
                 name="receivedMemo"
                 placeholder="納品メモ"
                 maxLength={200}
-                className="min-h-16 rounded border border-line bg-white px-3 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                className="min-h-12 rounded border border-line bg-white px-3 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
               />
               <button
                 type="submit"
                 disabled={isReceiptPending}
-                className="h-10 rounded bg-accent px-3 text-xs font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-50"
+                className="h-9 rounded bg-accent px-3 text-xs font-semibold text-white transition hover:bg-accentDeep disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isReceiptPending ? "確認中" : "納品を確認"}
               </button>
@@ -262,8 +262,8 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
           </div>
         ) : null}
       </td>
-      <td className="border-b border-line px-4 py-3 print:hidden">
-        <form action={statusAction} className="grid gap-2">
+      <td className="border-b border-line px-3 py-2 print:hidden">
+        <form action={statusAction} className="grid gap-1.5">
           <input type="hidden" name="orderRequestId" value={row.id} />
           <select
             name="status"
@@ -271,10 +271,10 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
             onChange={(event) => setSelectedStatus(event.target.value as OrderRequestStatusValue)}
             className={
               selectedStatus === "SKIPPED"
-                ? "h-11 rounded border border-danger bg-red-50 px-3 text-sm font-semibold text-danger outline-none focus:border-danger focus:ring-2 focus:ring-danger/20"
+                ? "h-10 rounded border border-danger bg-red-50 px-3 text-sm font-semibold text-danger outline-none focus:border-danger focus:ring-2 focus:ring-danger/20"
                 : selectedStatus === "ORDERED"
-                  ? "h-11 rounded border border-accent bg-emerald-50 px-3 text-sm font-semibold text-accent outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
-                  : "h-11 rounded border border-line bg-white px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                  ? "h-10 rounded border border-success bg-green-50 px-3 text-sm font-semibold text-success outline-none focus:border-success focus:ring-2 focus:ring-success/20"
+                  : "h-10 rounded border border-line bg-white px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
             }
           >
             {statusOptions.map((status) => (
@@ -284,7 +284,7 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
             ))}
           </select>
           {row.status === "ORDERED" ? (
-            <p className="rounded border border-emerald-100 bg-emerald-50 px-3 py-2 text-xs font-semibold text-accent">
+            <p className="rounded border border-green-100 bg-green-50 px-3 py-2 text-xs font-semibold text-success">
               誤って発注済みにした場合は、未確認または確認済みに戻せます。
             </p>
           ) : null}
@@ -292,7 +292,7 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
             <p className="text-xs font-semibold text-danger">取り消しにした候補は発注書下書きに含めません。</p>
           ) : null}
           {selectedStatus === "ORDERED" ? (
-            <p className="text-xs font-semibold text-accent">発注済みにした候補は発注書下書きに含めません。</p>
+            <p className="text-xs font-semibold text-success">発注済みにした候補は発注書下書きに含めません。</p>
           ) : null}
           {row.status === "ORDERED" && row.orderedAt ? (
             <p className="text-xs text-muted">発注済み日時: {dateTimeFormatter.format(row.orderedAt)}</p>
@@ -304,12 +304,12 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
               selectedStatus === "SKIPPED" ? "取り消し理由・メモ" : selectedStatus === "ORDERED" ? "送付方法・メモ" : "備考メモ"
             }
             maxLength={200}
-            className="min-h-20 rounded border border-line px-3 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+            className="min-h-14 rounded border border-line px-3 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
           />
           <button
             type="submit"
             disabled={isStatusPending}
-            className="h-11 rounded border border-line px-3 text-xs font-semibold text-muted transition hover:border-accent hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
+            className="h-10 rounded border border-line bg-white/75 px-3 text-xs font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isStatusPending ? "変更中" : "状態・メモ更新"}
           </button>
@@ -320,7 +320,7 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
           row.status === "SKIPPED"
             ? "hidden border-b border-line px-4 py-3 text-danger print:table-cell print:border print:border-black print:px-2 print:py-1.5 print:font-semibold print:text-black"
             : row.status === "ORDERED"
-              ? "hidden border-b border-line px-4 py-3 text-accent print:table-cell print:border print:border-black print:px-2 print:py-1.5 print:font-semibold print:text-black"
+              ? "hidden border-b border-line px-4 py-3 text-success print:table-cell print:border print:border-black print:px-2 print:py-1.5 print:font-semibold print:text-black"
             : "hidden border-b border-line px-4 py-3 print:table-cell print:border print:border-black print:px-2 print:py-1.5 print:font-semibold"
         }
       >

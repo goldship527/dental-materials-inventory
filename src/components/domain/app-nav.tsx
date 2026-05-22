@@ -127,8 +127,8 @@ function NavLink({ item, current }: { item: NavItem; current: NavItemId }) {
       aria-current={isCurrent ? "page" : undefined}
       className={
         isCurrent
-          ? "inline-flex h-11 shrink-0 items-center whitespace-nowrap rounded border border-accent bg-white px-3 text-sm font-semibold text-accent shadow-sm sm:h-9"
-          : "inline-flex h-11 shrink-0 items-center whitespace-nowrap rounded border border-transparent px-3 text-sm font-semibold text-muted transition hover:border-line hover:bg-white hover:text-ink sm:h-9"
+          ? "inline-flex h-11 shrink-0 items-center whitespace-nowrap rounded border border-accent/30 bg-teal-50 px-3 text-sm font-semibold text-accent shadow-sm sm:h-9"
+          : "inline-flex h-11 shrink-0 items-center whitespace-nowrap rounded border border-transparent px-3 text-sm font-semibold text-muted transition hover:border-line hover:bg-white/80 hover:text-ink sm:h-9"
       }
     >
       {item.label}
@@ -164,7 +164,7 @@ export async function AppNav({ current }: AppNavProps) {
   return (
     <nav
       aria-label="アプリ内メニュー"
-      className="sticky top-0 z-30 border-b border-line bg-surface/95 px-3 py-2 backdrop-blur print:hidden sm:px-4 lg:px-6"
+      className="sticky top-0 z-30 border-b border-line bg-surface/90 px-3 py-2 backdrop-blur print:hidden sm:px-4 lg:px-6"
     >
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-2">
         <div className="flex flex-col gap-2 xl:flex-row xl:items-center xl:justify-between">
@@ -178,14 +178,14 @@ export async function AppNav({ current }: AppNavProps) {
             {isAdminMode ? (
               <a
                 href="/home"
-                className="inline-flex h-11 shrink-0 items-center whitespace-nowrap rounded border border-line bg-white px-3 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent sm:h-9"
+                className="inline-flex h-11 shrink-0 items-center whitespace-nowrap rounded border border-line bg-white/80 px-3 text-sm font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent sm:h-9"
               >
                 通常業務へ
               </a>
             ) : canUseAdminMode ? (
               <a
                 href="/admin/users"
-                className="inline-flex h-11 shrink-0 items-center whitespace-nowrap rounded border border-line bg-white px-3 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent sm:h-9"
+                className="inline-flex h-11 shrink-0 items-center whitespace-nowrap rounded border border-line bg-white/80 px-3 text-sm font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent sm:h-9"
               >
                 管理
               </a>
@@ -198,7 +198,7 @@ export async function AppNav({ current }: AppNavProps) {
             <form action="/logout" method="post" className="shrink-0">
               <button
                 type="submit"
-                className="inline-flex h-11 shrink-0 items-center justify-center whitespace-nowrap rounded border border-line bg-white px-3 text-sm font-semibold text-muted transition hover:border-danger hover:text-danger sm:h-9"
+                className="inline-flex h-11 shrink-0 items-center justify-center whitespace-nowrap rounded border border-line bg-white/80 px-3 text-sm font-semibold text-muted transition hover:border-danger hover:bg-white hover:text-danger sm:h-9"
               >
                 ログアウト
               </button>

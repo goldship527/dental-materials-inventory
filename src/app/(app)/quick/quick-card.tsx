@@ -20,12 +20,12 @@ export function QuickCard({ categoryLabel, row }: QuickCardProps) {
   });
 
   return (
-    <article className="grid min-h-56 gap-4 rounded border border-line bg-white p-5 shadow-panel">
+    <article className="grid min-h-52 gap-3 rounded border border-line/90 bg-panel p-4 shadow-panel transition hover:border-accent/40 hover:bg-white">
       <div className="grid grid-cols-[64px_1fr] gap-3">
         {photoUrl ? (
           <img alt={`${row.name}の商品写真`} className="aspect-square rounded border border-line object-cover" src={photoUrl} />
         ) : (
-          <div className="grid aspect-square place-items-center rounded border border-dashed border-line bg-gray-50 text-[10px] font-semibold text-muted">
+          <div className="grid aspect-square place-items-center rounded border border-dashed border-line bg-subtle text-[10px] font-semibold text-muted">
             写真なし
           </div>
         )}
@@ -44,7 +44,7 @@ export function QuickCard({ categoryLabel, row }: QuickCardProps) {
       <div className="flex items-end justify-between gap-3">
         <div>
           <p className="text-xs text-muted">現在庫</p>
-          <p className="text-4xl font-semibold">{row.quantity}</p>
+          <p className="text-4xl font-bold tabular-nums">{row.quantity}</p>
         </div>
         {row.stockStatus !== "ENOUGH" ? (
           <span className={`rounded px-2 py-1 text-xs font-semibold ${row.stockStatusClassName}`}>
@@ -59,7 +59,7 @@ export function QuickCard({ categoryLabel, row }: QuickCardProps) {
           <button
             type="submit"
             disabled={row.quantity <= 0 || isPending}
-            className="h-14 w-full rounded border border-line bg-white text-2xl font-semibold transition hover:border-danger hover:text-danger disabled:cursor-not-allowed disabled:opacity-40"
+            className="h-12 w-full rounded border border-line bg-white text-2xl font-semibold transition hover:border-danger hover:bg-red-50 hover:text-danger disabled:cursor-not-allowed disabled:opacity-40"
           >
             {isPending ? "..." : "-1"}
           </button>
@@ -70,7 +70,7 @@ export function QuickCard({ categoryLabel, row }: QuickCardProps) {
           <button
             type="submit"
             disabled={isPending}
-            className="h-14 w-full rounded bg-accent text-2xl font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-50"
+            className="h-12 w-full rounded bg-accent text-2xl font-semibold text-white transition hover:bg-accentDeep disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isPending ? "..." : "+1"}
           </button>
@@ -80,7 +80,7 @@ export function QuickCard({ categoryLabel, row }: QuickCardProps) {
         <p
           className={
             state.status === "success"
-              ? "rounded bg-emerald-50 px-3 py-2 text-xs font-semibold text-accent"
+              ? "rounded bg-green-50 px-3 py-2 text-xs font-semibold text-success"
               : "rounded bg-red-50 px-3 py-2 text-xs font-semibold text-danger"
           }
         >

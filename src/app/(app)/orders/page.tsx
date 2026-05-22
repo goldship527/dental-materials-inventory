@@ -123,11 +123,11 @@ export default async function OrdersPage({ searchParams }: PageProps) {
       : "条件に一致する発注候補はありません。検索語や状態フィルタを見直してください。";
 
   return (
-    <main className="min-h-screen bg-surface px-4 py-6 text-ink print:bg-white print:p-0 sm:px-6 lg:px-8">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 print:max-w-none print:gap-3">
+    <main className="min-h-screen bg-surface px-4 py-5 text-ink print:bg-white print:p-0 sm:px-6 lg:px-8">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 print:max-w-none print:gap-3">
         <AppNav current="orders" />
 
-        <header className="flex flex-col gap-4 border-b border-line pb-5 md:flex-row md:items-end md:justify-between print:border-black print:pb-3">
+        <header className="flex flex-col gap-3 border-b border-line pb-4 md:flex-row md:items-end md:justify-between print:border-black print:pb-3">
           <div>
             <p className="text-sm font-semibold text-accent print:text-black">{context.clinicName}</p>
             <h1 className="mt-2 text-3xl font-semibold print:text-2xl">発注候補</h1>
@@ -137,11 +137,11 @@ export default async function OrdersPage({ searchParams }: PageProps) {
             </p>
           </div>
           <div className="grid w-full grid-cols-1 gap-3 print:hidden sm:flex sm:w-auto">
-            <a className="inline-flex min-h-11 items-center justify-center rounded border border-line px-5 py-3 text-sm font-semibold hover:border-accent" href="/shortage">
+            <a className="inline-flex min-h-10 items-center justify-center rounded border border-line bg-white/75 px-4 py-2 text-sm font-semibold hover:border-accent hover:bg-white" href="/shortage">
               不足一覧へ
             </a>
             <a
-              className="inline-flex min-h-11 items-center justify-center rounded border border-line px-5 py-3 text-sm font-semibold hover:border-accent"
+              className="inline-flex min-h-10 items-center justify-center rounded border border-line bg-white/75 px-4 py-2 text-sm font-semibold hover:border-accent hover:bg-white"
               href="/orders/print"
             >
               発注書下書き
@@ -162,15 +162,15 @@ export default async function OrdersPage({ searchParams }: PageProps) {
           {countByStatus.SKIPPED} 件
         </section>
 
-        <section className="grid gap-4 md:grid-cols-4 print:hidden">
+        <section className="grid gap-3 md:grid-cols-4 print:hidden">
           {counts.map((item) => (
-            <div key={item.status} className="rounded border border-line bg-white p-5 shadow-panel">
+            <div key={item.status} className="rounded border border-line/90 bg-panel/95 p-4 shadow-panel">
               <p
                 className={
                   item.status === "SKIPPED"
                     ? "text-sm font-semibold text-danger"
                     : item.status === "ORDERED"
-                      ? "text-sm font-semibold text-accent"
+                      ? "text-sm font-semibold text-success"
                       : "text-sm font-semibold text-muted"
                 }
               >
@@ -179,10 +179,10 @@ export default async function OrdersPage({ searchParams }: PageProps) {
               <p
                 className={
                   item.status === "SKIPPED"
-                    ? "mt-2 text-3xl font-semibold text-danger"
+                    ? "mt-2 text-3xl font-bold tabular-nums text-danger"
                     : item.status === "ORDERED"
-                      ? "mt-2 text-3xl font-semibold text-accent"
-                      : "mt-2 text-3xl font-semibold"
+                      ? "mt-2 text-3xl font-bold tabular-nums text-success"
+                      : "mt-2 text-3xl font-bold tabular-nums"
                 }
               >
                 {item.count} 件
@@ -191,23 +191,23 @@ export default async function OrdersPage({ searchParams }: PageProps) {
           ))}
         </section>
 
-        <form className="grid gap-3 rounded border border-line bg-white p-4 shadow-panel md:grid-cols-[1fr_auto_auto] print:hidden">
+        <form className="grid gap-3 rounded border border-line/90 bg-panel/95 p-3 shadow-panel md:grid-cols-[1fr_auto_auto] print:hidden">
           <input
             type="search"
             name="q"
             defaultValue={query}
             placeholder="商品名・商品コード・カテゴリ・発注先・メモ"
-            className="h-11 rounded border border-line px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+            className="h-10 rounded border border-line bg-white/90 px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
           />
           {selectedStatus ? <input type="hidden" name="status" value={selectedStatus} /> : null}
           <button
             type="submit"
-            className="h-11 rounded bg-accent px-5 text-sm font-semibold text-white transition hover:bg-teal-800"
+            className="h-10 rounded bg-accent px-4 text-sm font-semibold text-white transition hover:bg-accentDeep"
           >
             検索
           </button>
           <a
-            className="flex h-11 items-center justify-center rounded border border-line px-5 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+            className="flex h-10 items-center justify-center rounded border border-line bg-white/75 px-4 text-sm font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent"
             href={selectedStatus ? buildOrdersHref(selectedStatus, "") : "/orders"}
           >
             クリア
@@ -226,15 +226,15 @@ export default async function OrdersPage({ searchParams }: PageProps) {
                 className={
                   filter.value === "SKIPPED"
                     ? isCurrent
-                      ? "inline-flex min-h-11 items-center rounded border border-danger bg-red-50 px-4 py-2 text-sm font-semibold text-danger"
-                      : "inline-flex min-h-11 items-center rounded border border-red-100 bg-white px-4 py-2 text-sm font-semibold text-danger transition hover:border-danger hover:bg-red-50"
+                      ? "inline-flex min-h-10 items-center rounded border border-danger bg-red-50 px-3 py-2 text-sm font-semibold text-danger"
+                      : "inline-flex min-h-10 items-center rounded border border-red-100 bg-white/75 px-3 py-2 text-sm font-semibold text-danger transition hover:border-danger hover:bg-red-50"
                     : filter.value === "ORDERED"
                       ? isCurrent
-                        ? "inline-flex min-h-11 items-center rounded border border-accent bg-emerald-50 px-4 py-2 text-sm font-semibold text-accent"
-                        : "inline-flex min-h-11 items-center rounded border border-emerald-100 bg-white px-4 py-2 text-sm font-semibold text-accent transition hover:border-accent hover:bg-emerald-50"
+                        ? "inline-flex min-h-10 items-center rounded border border-success bg-green-50 px-3 py-2 text-sm font-semibold text-success"
+                        : "inline-flex min-h-10 items-center rounded border border-green-100 bg-white/75 px-3 py-2 text-sm font-semibold text-success transition hover:border-success hover:bg-green-50"
                     : isCurrent
-                      ? "inline-flex min-h-11 items-center rounded bg-accent px-4 py-2 text-sm font-semibold text-white"
-                      : "inline-flex min-h-11 items-center rounded border border-line bg-white px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+                      ? "inline-flex min-h-10 items-center rounded border border-accent bg-accent px-3 py-2 text-sm font-semibold text-white"
+                      : "inline-flex min-h-10 items-center rounded border border-line bg-white/75 px-3 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent"
                 }
               >
                 {filter.label}
@@ -249,8 +249,8 @@ export default async function OrdersPage({ searchParams }: PageProps) {
           <div className="min-h-12 border border-black px-3 py-2">印刷備考</div>
         </section>
 
-        <section className="flex flex-col gap-4 print:gap-3">
-          <div className="rounded border border-line bg-white px-4 py-3 text-sm text-muted shadow-panel print:rounded-none print:border-black print:px-2 print:py-2 print:text-xs print:text-black print:shadow-none">
+        <section className="flex flex-col gap-3 print:gap-3">
+          <div className="rounded border border-line/90 bg-panel/95 px-4 py-2 text-sm text-muted shadow-panel print:rounded-none print:border-black print:px-2 print:py-2 print:text-xs print:text-black print:shadow-none">
             表示 {filteredRows.length} 件 / 検索後 {queryFilteredRows.length} 件 / 全 {rows.length} 件
             {hasFilter ? `（${filterLabel}）` : ""}
             <span className="hidden print:float-right print:inline">一般歯科材料在庫管理システム</span>
@@ -265,9 +265,9 @@ export default async function OrdersPage({ searchParams }: PageProps) {
               return (
                 <section
                   key={supplierKey}
-                  className="overflow-hidden rounded border border-line bg-white shadow-panel print:break-inside-avoid print:rounded-none print:border-black print:shadow-none"
+                  className="overflow-hidden rounded border border-line/90 bg-panel/95 shadow-panel print:break-inside-avoid print:rounded-none print:border-black print:shadow-none"
                 >
-                <div className="flex items-center justify-between border-b border-line px-4 py-3 text-sm print:border-black print:px-2 print:py-2 print:text-xs">
+                <div className="flex items-center justify-between border-b border-line px-4 py-2 text-sm print:border-black print:px-2 print:py-2 print:text-xs">
                   <div>
                     <h2 className="font-semibold">{supplierName}</h2>
                     {hasUnassignedSupplier ? (
@@ -280,14 +280,14 @@ export default async function OrdersPage({ searchParams }: PageProps) {
                     <span className="text-muted print:text-black">{supplierRows.length} 件</span>
                     {printableRows.length > 0 ? (
                       <a
-                        className="inline-flex min-h-11 items-center justify-center rounded border border-line px-3 py-2 text-xs font-semibold text-muted transition hover:border-accent hover:text-accent print:hidden"
+                        className="inline-flex min-h-9 items-center justify-center rounded border border-line bg-white/75 px-3 py-1.5 text-xs font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent print:hidden"
                         href={buildOrdersPrintHref(supplierRows[0]?.supplierId)}
                       >
                         この発注先の下書き
                       </a>
                     ) : null}
                     {printableRows.length > 0 ? (
-                      <form action={markOrderRequestsOrderedAction} className="grid gap-2 rounded border border-line bg-gray-50 px-3 py-2 print:hidden">
+                      <form action={markOrderRequestsOrderedAction} className="grid gap-1.5 rounded border border-line bg-subtle/70 px-3 py-2 print:hidden">
                         {printableRows.map((row) => (
                           <input key={row.id} type="hidden" name="orderRequestId" value={row.id} />
                         ))}
@@ -297,7 +297,7 @@ export default async function OrdersPage({ searchParams }: PageProps) {
                         </label>
                         <button
                           type="submit"
-                          className="min-h-9 rounded bg-ink px-3 py-2 text-xs font-semibold text-white transition hover:bg-gray-700"
+                          className="min-h-9 rounded bg-ink px-3 py-2 text-xs font-semibold text-white transition hover:bg-slate-700"
                         >
                           この発注先を発注済みにする
                         </button>
@@ -307,7 +307,7 @@ export default async function OrdersPage({ searchParams }: PageProps) {
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[1180px] border-collapse text-left text-sm print:min-w-0 print:text-[10.5px]">
-                    <thead className="bg-gray-50 text-xs text-muted print:bg-white print:text-[10px] print:text-black">
+                    <thead className="bg-subtle text-xs text-muted print:bg-white print:text-[10px] print:text-black">
                       <tr>
                         <th className="border-b border-line px-4 py-3 print:border print:border-black print:px-2 print:py-1.5">
                           商品
