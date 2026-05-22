@@ -1,6 +1,5 @@
 import { auth } from "@/auth";
 import { isAdminRole } from "@/lib/auth/roles";
-import { prisma } from "@/lib/db/prisma";
 
 type NavItemId =
   | "home"
@@ -155,31 +154,9 @@ function NavGroup({
   );
 }
 
-async function canUseAdminNavigation(userId: string | undefined) {
-  if (!userId) {
-    return false;
-  }
-
-  try {
-    const currentUser = await prisma.user.findUnique({
-      where: {
-        id: userId,
-      },
-      select: {
-        role: true,
-        isActive: true,
-      },
-    });
-
-    return Boolean(currentUser?.isActive && isAdminRole(currentUser.role));
-  } catch {
-    return false;
-  }
-}
-
 export async function AppNav({ current }: AppNavProps) {
   const session = await auth();
-  const canUseAdminMode = await canUseAdminNavigation(session?.user?.id);
+  const canUseAdminMode = isAdminRole(session?.user?.role);
   const isAdminMode =
     canUseAdminMode && (current === "setup" || current === "imports" || current === "admin" || current === "auditLogs");
   const modeItems = isAdminMode ? adminNavItems : workNavItems;
