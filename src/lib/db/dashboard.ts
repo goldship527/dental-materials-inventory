@@ -1,6 +1,7 @@
 import { getOrderRequestStatusCounts } from "@/lib/db/orders";
 import { prisma } from "@/lib/db/prisma";
 import { getStockRows } from "@/lib/db/stock";
+import { countAttentionStockLots } from "@/lib/db/stock-lots";
 
 export type DashboardTrendPoint = {
   label: string;
@@ -24,6 +25,7 @@ export type DashboardSummary = {
   shortageTrend: DashboardTrendPoint[];
   unresolvedBarcodeScanCount: number;
   expiringBarcodeScanCount: number;
+  attentionStockLotCount: number;
   latestStocktakeSession: {
     id: string;
     committedAt: Date | null;
@@ -78,6 +80,7 @@ export async function getDashboardSummary(clinicId: string): Promise<DashboardSu
     latestMovement,
     unresolvedBarcodeScanCount,
     expiringBarcodeScanCount,
+    attentionStockLotCount,
     latestStocktakeSession,
   ] = await Promise.all([
     fallbackOnError(getStockRows(clinicId), []),
@@ -143,6 +146,7 @@ export async function getDashboardSummary(clinicId: string): Promise<DashboardSu
       }),
       0,
     ),
+    fallbackOnError(countAttentionStockLots(clinicId, todayStart), 0),
     fallbackOnError(
       prisma.stocktakeSession.findFirst({
         where: {
@@ -183,6 +187,7 @@ export async function getDashboardSummary(clinicId: string): Promise<DashboardSu
     shortageTrend: createRepeatedShortageTrend(shortageCount),
     unresolvedBarcodeScanCount,
     expiringBarcodeScanCount,
+    attentionStockLotCount,
     latestStocktakeSession: latestStocktakeSession
       ? {
           id: latestStocktakeSession.id,

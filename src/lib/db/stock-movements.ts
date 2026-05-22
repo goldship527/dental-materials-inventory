@@ -15,6 +15,9 @@ export type StockMovementRow = {
   sourceId: string | null;
   revertOfId: string | null;
   revertedAt: Date | null;
+  lotNumber: string | null;
+  expiryDateText: string | null;
+  expiryDate: Date | null;
   userName: string;
   createdAt: Date;
 };
@@ -94,6 +97,9 @@ export async function getRecentStockMovementRows(clinicId: string, take = 100): 
       sourceId: movement.sourceId,
       revertOfId: movement.revertOfId,
       revertedAt: movement.revertedAt,
+      lotNumber: movement.lotNumber,
+      expiryDateText: movement.expiryDateText,
+      expiryDate: movement.expiryDate,
       userName: movement.user.name,
       createdAt: movement.createdAt,
     };

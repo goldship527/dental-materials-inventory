@@ -25,6 +25,11 @@ const dateTimeFormatter = new Intl.DateTimeFormat("ja-JP", {
   hour: "2-digit",
   minute: "2-digit",
 });
+const dateFormatter = new Intl.DateTimeFormat("ja-JP", {
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
 
 function formatPrice(value: number | null) {
   return value === null ? "-" : yenFormatter.format(value);
@@ -32,6 +37,14 @@ function formatPrice(value: number | null) {
 
 function formatSignedQuantity(quantity: number) {
   return quantity > 0 ? `+${quantity}` : `${quantity}`;
+}
+
+function formatLotExpiryDate(expiryDate: Date | null, expiryDateText: string | null | undefined) {
+  if (expiryDate) {
+    return dateFormatter.format(expiryDate);
+  }
+
+  return expiryDateText || "-";
 }
 
 function formatBarcodeLabel(barcode: { barcodeType: string; unitLabel: string | null; isPrimary: boolean }) {
@@ -239,6 +252,49 @@ export default async function ProductDetailPage({ params }: PageProps) {
           </div>
         </section>
 
+        <section className="rounded border border-line bg-white p-5 shadow-panel">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 className="text-lg font-semibold">ロット別在庫</h2>
+              <p className="mt-1 text-sm text-muted">バーコード入出庫や納品確認で記録したロット番号と有効期限を表示します。</p>
+            </div>
+            <div className="flex flex-wrap items-center gap-3">
+              <a className="text-sm font-semibold text-accent hover:underline" href={`/stock-lots?q=${encodeURIComponent(product.name)}`}>
+                期限ロット一覧で確認
+              </a>
+              <span className="text-sm font-semibold text-muted">表示 {product.stockLots.length} 件</span>
+            </div>
+          </div>
+          {product.stockLots.length > 0 ? (
+            <div className="mt-4 overflow-x-auto">
+              <table className="w-full min-w-[640px] border-collapse text-left text-sm">
+                <thead className="bg-gray-50 text-xs text-muted">
+                  <tr>
+                    <th className="border-b border-line px-3 py-2">ロット番号</th>
+                    <th className="border-b border-line px-3 py-2">有効期限</th>
+                    <th className="border-b border-line px-3 py-2 text-right">数量</th>
+                    <th className="border-b border-line px-3 py-2">更新日時</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {product.stockLots.map((lot) => (
+                    <tr key={lot.id}>
+                      <td className="border-b border-line px-3 py-2 font-mono">{lot.lotNumber || "-"}</td>
+                      <td className="border-b border-line px-3 py-2">{formatLotExpiryDate(lot.expiryDate, lot.expiryDateText)}</td>
+                      <td className="border-b border-line px-3 py-2 text-right font-semibold">{lot.quantity}</td>
+                      <td className="border-b border-line px-3 py-2 text-muted">{dateTimeFormatter.format(lot.updatedAt)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p className="mt-4 rounded border border-dashed border-line px-4 py-3 text-sm text-muted">
+              ロット番号・有効期限つきの在庫はまだ記録されていません。
+            </p>
+          )}
+        </section>
+
         <section className="grid gap-4 lg:grid-cols-[1.3fr_1fr]">
           <div className="rounded border border-line bg-white p-5 shadow-panel">
             <h2 className="text-lg font-semibold">基本情報</h2>
@@ -373,6 +429,12 @@ export default async function ProductDetailPage({ params }: PageProps) {
                       {movement.beforeQuantity} → {movement.afterQuantity} /{" "}
                       {getStockMovementSourceLabel(movement.sourceType)} / {movement.userName}
                     </p>
+                    {movement.lotNumber || movement.expiryDateText || movement.expiryDate ? (
+                      <p className="text-muted">
+                        ロット {movement.lotNumber || "-"} / 有効期限{" "}
+                        {formatLotExpiryDate(movement.expiryDate, movement.expiryDateText)}
+                      </p>
+                    ) : null}
                     {movement.reason ? <p className="text-muted">{movement.reason}</p> : null}
                   </div>
                 ))
@@ -418,6 +480,12 @@ export default async function ProductDetailPage({ params }: PageProps) {
                     {request.receivedAt ? (
                       <p className="font-semibold text-blue-800">
                         納品確認済み {dateTimeFormatter.format(request.receivedAt)} / 数量 {request.receivedQuantity ?? "-"}
+                      </p>
+                    ) : null}
+                    {request.receivedLotNumber || request.receivedExpiryDateText || request.receivedExpiryDate ? (
+                      <p className="text-muted">
+                        ロット {request.receivedLotNumber || "-"} / 有効期限{" "}
+                        {formatLotExpiryDate(request.receivedExpiryDate, request.receivedExpiryDateText)}
                       </p>
                     ) : null}
                     {request.receivedMemo ? <p className="text-muted">{request.receivedMemo}</p> : null}

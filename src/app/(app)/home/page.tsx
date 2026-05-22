@@ -69,6 +69,13 @@ export default async function HomePage() {
       isWarning: summary.expiringBarcodeScanCount > 0,
     },
     {
+      title: "期限ロット",
+      href: "/stock-lots",
+      value: `${summary.attentionStockLotCount} 件`,
+      note: "期限切れまたは30日以内のロット別在庫",
+      isWarning: summary.attentionStockLotCount > 0,
+    },
+    {
       title: "直近の棚卸",
       href: "/stocktake/sessions",
       value: latestStocktakeAt ?? "未確定",
@@ -134,6 +141,13 @@ export default async function HomePage() {
       description: "在庫変更の記録",
       href: "/movements",
       badge: "直近100件",
+    },
+    {
+      title: "期限ロット一覧",
+      description: "ロット番号と有効期限",
+      href: "/stock-lots",
+      badge: `${summary.attentionStockLotCount} 件`,
+      isWarning: summary.attentionStockLotCount > 0,
     },
     {
       title: "棚卸",

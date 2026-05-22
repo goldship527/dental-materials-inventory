@@ -25,6 +25,11 @@ const dateTimeFormatter = new Intl.DateTimeFormat("ja-JP", {
   hour: "2-digit",
   minute: "2-digit",
 });
+const dateFormatter = new Intl.DateTimeFormat("ja-JP", {
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
 const priceFormatter = new Intl.NumberFormat("ja-JP", {
   style: "currency",
   currency: "JPY",
@@ -36,6 +41,14 @@ type OrderRequestRowProps = {
 };
 
 const statusOptions = orderRequestStatuses;
+
+function formatReceiptExpiryDate(expiryDate: Date | null, expiryDateText: string | null) {
+  if (expiryDate) {
+    return dateFormatter.format(expiryDate);
+  }
+
+  return expiryDateText || "-";
+}
 
 export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
   const [requestedQuantity, setRequestedQuantity] = useState(row.requestedQuantity);
@@ -212,6 +225,12 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
           <div className="mt-2 rounded border border-teal-100 bg-teal-50 px-3 py-2 text-xs font-semibold text-accent">
             納品確認済み: {dateTimeFormatter.format(row.receivedAt)}
             <span className="block">納品数 {row.receivedQuantity ?? "-"}</span>
+            {row.receivedLotNumber || row.receivedExpiryDateText || row.receivedExpiryDate ? (
+              <span className="block">
+                ロット {row.receivedLotNumber || "-"} / 有効期限{" "}
+                {formatReceiptExpiryDate(row.receivedExpiryDate, row.receivedExpiryDateText)}
+              </span>
+            ) : null}
             {row.receivedMemo ? <span className="block font-normal">{row.receivedMemo}</span> : null}
             <form action={receiptRevertAction} className="mt-2">
               <input type="hidden" name="orderRequestId" value={row.id} />
@@ -244,6 +263,24 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
               <label className="flex items-center gap-2 text-xs font-semibold text-muted">
                 <input type="checkbox" name="applyToStock" defaultChecked className="h-4 w-4 accent-teal-700" />
                 在庫へ入庫反映する
+              </label>
+              <label className="grid gap-1 text-xs font-semibold text-muted">
+                ロット番号
+                <input
+                  type="text"
+                  name="receivedLotNumber"
+                  maxLength={120}
+                  placeholder="任意"
+                  className="h-9 rounded border border-line bg-white px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                />
+              </label>
+              <label className="grid gap-1 text-xs font-semibold text-muted">
+                有効期限
+                <input
+                  type="date"
+                  name="receivedExpiryDate"
+                  className="h-9 rounded border border-line bg-white px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                />
               </label>
               <textarea
                 name="receivedMemo"

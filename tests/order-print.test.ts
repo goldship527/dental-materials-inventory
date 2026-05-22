@@ -35,6 +35,9 @@ function buildRow(overrides: Partial<OrderRequestRow>): OrderRequestRow {
     receivedQuantity: null,
     receivedAt: null,
     receivedMemo: null,
+    receivedLotNumber: null,
+    receivedExpiryDateText: null,
+    receivedExpiryDate: null,
     updatedAt: new Date("2026-05-21T00:00:00.000Z"),
     ...overrides,
   };

@@ -3444,6 +3444,7 @@
 - `corepack pnpm typecheck`
 - `corepack pnpm build`
 - `git diff --check`
+- `corepack pnpm dev` 起動後、`/login` が HTTP 200 で応答することを確認
 
 ## 2026-05-22 管理画面権限判定の原因切り分け
 
@@ -3519,3 +3520,104 @@
 ### セキュリティメモ
 - 秘密値、パスワード、APIキー、DB接続文字列は追加していない。
 - 非管理者が管理画面へ入れるような変更はしていない。
+
+## 2026-05-22 ロット番号・有効期限の在庫側保存MVP
+
+### 作業内容
+- `StockLot` を追加し、クリニック、商品、ロット番号、有効期限ごとの在庫数量を保存できるようにした。
+- `StockMovement` に `lotNumber`、`expiryDateText`、`expiryDate` を追加し、ロット情報つきの入出庫履歴を追えるようにした。
+- `/barcode/stock` でGS1バーコードからロット番号または有効期限を検出した場合、入庫時に `StockLot` へ加算するようにした。
+- ロット情報つきバーコードで出庫する場合は、同じロットの在庫数量が足りる場合だけ出庫できるようにした。
+- 入出庫履歴の取り消し時に、ロット情報つき履歴であれば `StockLot` の数量も戻すようにした。
+- 商品詳細にロット別在庫一覧を追加し、入出庫履歴にもロット番号と有効期限を表示するようにした。
+- `tests/barcode-stock-lots.test.ts` を追加し、ロット入庫、追加入庫、ロット出庫、ロット不足拒否、履歴取り消し時のロット数量復旧を確認した。
+
+### 判断
+- 既存の `StockItem.quantity` は商品単位の合計在庫として維持し、`StockLot` はロット別の補助台帳として追加した。
+- 発注済み候補の納品確認フォームからロット番号や有効期限を入力する機能は、今回のMVPには含めず次段階に分けた。
+- 期限切れアラート、先入れ先出し、ロット別棚卸、納品書照合はまだ追加していない。
+
+### セキュリティメモ
+- バーコード由来のロット番号と有効期限は、Server Action側で再解析して保存する。
+- 秘密値、パスワード、APIキー、DB接続文字列は追加していない。
+- 患者情報、個人情報、実在医院名、実在発注先名は追加していない。
+
+### 検証
+- `corepack pnpm prisma:generate`
+- `corepack pnpm exec tsx tests/barcode-stock-lots.test.ts`
+- `corepack pnpm exec tsx tests/barcode-stock-reasons.test.ts`
+- `corepack pnpm exec tsx tests/barcode-gs1.test.ts`
+- `corepack pnpm exec tsx tests/order-receipt.test.ts`
+- `corepack pnpm exec tsx tests/stock-movements.test.ts`
+- `corepack pnpm db:push`
+- `corepack pnpm typecheck`
+- `corepack pnpm build`
+- `git diff --check`
+
+## 2026-05-23 納品確認フォームでのロット番号・有効期限入力
+
+### 作業内容
+- `OrderRequest` に `receivedLotNumber`、`receivedExpiryDateText`、`receivedExpiryDate` を追加した。
+- `/orders` の納品確認フォームに、ロット番号と有効期限の任意入力欄を追加した。
+- 納品確認時にロット番号・有効期限を `OrderRequest` と `StockMovement` に保存するようにした。
+- 在庫反映ONでロット番号または有効期限が入力されている場合、`StockLot` にも数量を加算するようにした。
+- 納品確認取り消し時に、元の納品確認履歴にロット情報があれば `StockLot` の数量も戻すようにした。
+- `/orders`、商品詳細、発注先詳細で、納品確認済みのロット番号と有効期限を表示するようにした。
+- `tests/order-receipt.test.ts` を更新し、ロット情報つき納品確認、在庫反映、取り消し、在庫反映OFF時の挙動を確認するようにした。
+
+### 判断
+- 1回の納品確認につき、ロット番号・有効期限は1組だけ扱うMVPにした。
+- 複数ロット、分納、納品書照合、期限アラートは次段階に分けた。
+- 在庫反映OFFの場合は、納品確認記録だけにロット情報を残し、`StockLot` は変更しない方針にした。
+
+### セキュリティメモ
+- ロット番号欄には患者情報、個人情報、秘密情報を入力しない前提で扱う。
+- 秘密値、パスワード、APIキー、DB接続文字列は追加していない。
+- 対象発注候補、在庫行、ロット別在庫はログイン中クリニックの範囲で更新する。
+
+### 検証
+- `corepack pnpm prisma format`
+- `corepack pnpm prisma:generate`
+- `corepack pnpm exec tsx tests/order-receipt.test.ts`
+- `corepack pnpm exec tsx tests/barcode-stock-lots.test.ts`
+- `corepack pnpm exec tsx tests/order-print.test.ts`
+- `corepack pnpm exec tsx tests/order-request-status.test.ts`
+- `corepack pnpm exec tsx tests/stock-movements.test.ts`
+- `corepack pnpm typecheck`
+- `corepack pnpm db:push`
+- `corepack pnpm build`
+- `git diff --check`
+
+## 2026-05-23 期限切れ・期限間近ロットの確認導線
+
+### 作業内容
+- `StockLot` を商品情報つきで取得し、期限切れ、30日以内、期限あり、期限未登録に分類するDBヘルパーを追加した。
+- `/stock-lots` に期限ロット一覧画面を追加し、要確認、期限切れ、30日以内、すべてのフィルターと検索を用意した。
+- 期限ロット一覧では、商品、ロット番号、有効期限、残日数、状態、数量、更新日時を表示し、商品詳細へ移動できるようにした。
+- ホーム画面に期限切れまたは30日以内のロット件数と一覧への導線を追加した。
+- 商品詳細のロット別在庫から、期限ロット一覧へ移動できる導線を追加した。
+- `tests/stock-lots.test.ts` を追加し、期限分類、要確認件数、フィルター判定、数量0や無効商品の除外を確認するようにした。
+- ローカル確認時に既存の棚卸明細が残った状態で `db:seed` が失敗したため、seedの削除順に棚卸、ロット、監査ログ、取込履歴などの関連テーブルを追加した。
+- `README.md` と `docs/spec.md` に期限ロット一覧の現状仕様を追記した。
+
+### 判断
+- 今回は閲覧専用のMVPにし、在庫数変更、廃棄、通知、先入れ先出しの自動出庫は追加しない。
+- 期限間近はまず30日以内として扱う。
+- 共通ナビゲーションは文字コード事故の影響が残っているため今回は直接編集せず、ホームと商品詳細からの導線を優先した。
+- `.env.local` は公開デモ向け接続を含む可能性があるため、ローカル目視確認では `.env` のローカルDocker接続をプロセス環境変数で優先して起動した。
+
+### セキュリティメモ
+- 期限ロット一覧はログイン中クリニックの `StockLot` だけを表示する。
+- 画面から在庫数や履歴を変更する処理は追加していない。
+- 秘密値、パスワード、APIキー、DB接続文字列は追加していない。
+- 患者情報、個人情報、実在医院名、実在発注先名は追加していない。
+
+### 検証
+- `corepack pnpm db:push`
+- `corepack pnpm db:seed`
+- ローカルブラウザで `/stock-lots`、`/home` の期限ロット導線、商品詳細の期限ロット導線を確認
+- `corepack pnpm exec tsx tests/stock-lots.test.ts`
+- `corepack pnpm exec tsx tests/order-receipt.test.ts`
+- `corepack pnpm typecheck`
+- `corepack pnpm build`
+- `git diff --check`

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { AppNav } from "@/components/domain/app-nav";
+import { analyzeBarcodeInput } from "@/lib/barcode/gs1";
 import { searchProductsByBarcode } from "@/lib/db/barcodes";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { BarcodeSearchForm } from "../barcode-search-form";
@@ -11,6 +12,20 @@ type PageProps = {
     barcode?: string;
   }>;
 };
+
+const dateFormatter = new Intl.DateTimeFormat("ja-JP", {
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+
+function formatLotExpiryDate(expiryDate: Date | null, expiryDateText: string | null) {
+  if (expiryDate) {
+    return dateFormatter.format(expiryDate);
+  }
+
+  return expiryDateText || "-";
+}
 
 function getStockStatusLabel(quantity: number, minStock: number) {
   if (quantity === 0) {
@@ -50,6 +65,7 @@ export default async function BarcodeStockPage({ searchParams }: PageProps) {
   const context = await requireActiveClinic();
   const params = (await searchParams) ?? {};
   const barcode = params.barcode?.trim() ?? "";
+  const barcodeAnalysis = barcode ? analyzeBarcodeInput(barcode) : null;
   const results = barcode ? await searchProductsByBarcode(context.clinicId, barcode) : [];
   const selectedProduct = results.length === 1 ? results[0] : null;
   const status = selectedProduct ? getStockStatusLabel(selectedProduct.quantity, selectedProduct.minStock) : null;
@@ -160,6 +176,18 @@ export default async function BarcodeStockPage({ searchParams }: PageProps) {
               <div className="mt-5 rounded bg-gray-50 px-4 py-3 text-xs text-muted">
                 読み取ったバーコード: <span className="font-mono text-ink">{barcode}</span>
               </div>
+              {barcodeAnalysis?.lotNumber || barcodeAnalysis?.expiryDateText || barcodeAnalysis?.expiryDate ? (
+                <div className="mt-3 rounded border border-blue-100 bg-blue-50 px-4 py-3 text-xs text-blue-900">
+                  <p className="font-semibold">ロット・有効期限情報を検出しました。</p>
+                  <p className="mt-1">
+                    ロット: <span className="font-mono">{barcodeAnalysis.lotNumber ?? "-"}</span> / 有効期限:{" "}
+                    <span className="font-mono">{formatLotExpiryDate(barcodeAnalysis.expiryDate, barcodeAnalysis.expiryDateText)}</span>
+                  </p>
+                  <p className="mt-1 text-blue-800">
+                    入庫時はロット別在庫にも反映します。出庫時は同じロットの在庫がある場合だけ確定できます。
+                  </p>
+                </div>
+              ) : null}
               {selectedProduct.matchedBarcodes.length > 0 ? (
                 <div className="mt-3 flex flex-wrap gap-2 text-xs text-muted">
                   {selectedProduct.matchedBarcodes.map((match) => (

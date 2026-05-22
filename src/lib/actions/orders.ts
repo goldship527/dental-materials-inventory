@@ -1,5 +1,6 @@
 "use server";
 
+import type { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireActiveClinic } from "@/lib/db/clinic";
@@ -20,6 +21,11 @@ const receivedQuantitySchema = z.coerce
   .min(1, "納品数量は1以上で入力してください。")
   .max(9999, "納品数量は9999以下で入力してください。");
 const receivedMemoSchema = z.string().trim().max(200, "納品メモは200文字以内で入力してください。");
+const receivedLotNumberSchema = z.string().trim().max(120, "ロット番号は120文字以内で入力してください。");
+const receivedExpiryDateSchema = z
+  .string()
+  .trim()
+  .refine((value) => value === "" || /^\d{4}-\d{2}-\d{2}$/.test(value), "有効期限は日付形式で入力してください。");
 const memoSchema = z.string().trim().max(200, "メモは200文字以内で入力してください。");
 
 export type OrderActionState = {
@@ -60,6 +66,135 @@ function toActionError(error: unknown): OrderActionState {
     status: "error",
     message: "発注候補を更新できませんでした。",
   };
+}
+
+function parseReceivedExpiryDate(value: string) {
+  if (!value) {
+    return null;
+  }
+
+  const [yearText, monthText, dayText] = value.split("-");
+  const year = Number(yearText);
+  const month = Number(monthText);
+  const day = Number(dayText);
+  const parsedDate = new Date(Date.UTC(year, month - 1, day));
+
+  if (
+    parsedDate.getUTCFullYear() !== year ||
+    parsedDate.getUTCMonth() !== month - 1 ||
+    parsedDate.getUTCDate() !== day
+  ) {
+    throw new Error("有効期限の日付を確認してください。");
+  }
+
+  return parsedDate;
+}
+
+function buildReceiptLotData(input: {
+  receivedLotNumber: string | null;
+  receivedExpiryDateText: string | null;
+  receivedExpiryDate: Date | null;
+}) {
+  const lotNumber = input.receivedLotNumber?.trim() ?? "";
+  const expiryDateText = input.receivedExpiryDateText?.trim() ?? "";
+
+  if (!lotNumber && !expiryDateText) {
+    return null;
+  }
+
+  return {
+    lotNumber,
+    expiryDateText,
+    expiryDate: input.receivedExpiryDate,
+  };
+}
+
+async function incrementReceiptStockLot(
+  tx: Prisma.TransactionClient,
+  input: {
+    clinicId: string;
+    productId: string;
+    quantity: number;
+    lotData: NonNullable<ReturnType<typeof buildReceiptLotData>>;
+  },
+) {
+  const lot = await tx.stockLot.findFirst({
+    where: {
+      clinicId: input.clinicId,
+      productId: input.productId,
+      lotNumber: input.lotData.lotNumber,
+      expiryDateText: input.lotData.expiryDateText,
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  if (lot) {
+    await tx.stockLot.update({
+      where: {
+        id: lot.id,
+      },
+      data: {
+        quantity: {
+          increment: input.quantity,
+        },
+        expiryDate: input.lotData.expiryDate,
+      },
+    });
+
+    return;
+  }
+
+  await tx.stockLot.create({
+    data: {
+      clinicId: input.clinicId,
+      productId: input.productId,
+      lotNumber: input.lotData.lotNumber,
+      expiryDateText: input.lotData.expiryDateText,
+      expiryDate: input.lotData.expiryDate,
+      quantity: input.quantity,
+    },
+  });
+}
+
+async function decrementReceiptStockLot(
+  tx: Prisma.TransactionClient,
+  input: {
+    clinicId: string;
+    productId: string;
+    quantity: number;
+    lotData: NonNullable<ReturnType<typeof buildReceiptLotData>>;
+  },
+) {
+  const lot = await tx.stockLot.findFirst({
+    where: {
+      clinicId: input.clinicId,
+      productId: input.productId,
+      lotNumber: input.lotData.lotNumber,
+      expiryDateText: input.lotData.expiryDateText,
+    },
+    select: {
+      id: true,
+      quantity: true,
+    },
+  });
+
+  if (!lot || lot.quantity < input.quantity) {
+    throw new Error("指定ロットの在庫が納品確認数より少ないため、納品確認を取り消せません。");
+  }
+
+  await tx.stockLot.update({
+    where: {
+      id: lot.id,
+    },
+    data: {
+      quantity: {
+        decrement: input.quantity,
+      },
+      expiryDate: input.lotData.expiryDate,
+    },
+  });
 }
 
 export async function createOrderRequestWithStateAction(
@@ -417,12 +552,17 @@ export async function receiveOrderRequestWithStateAction(
     const orderRequestId = orderRequestIdSchema.parse(formData.get("orderRequestId"));
     const receivedQuantity = receivedQuantitySchema.parse(formData.get("receivedQuantity"));
     const receivedMemoValue = receivedMemoSchema.parse(formData.get("receivedMemo") ?? "");
+    const receivedLotNumberValue = receivedLotNumberSchema.parse(formData.get("receivedLotNumber") ?? "");
+    const receivedExpiryDateValue = receivedExpiryDateSchema.parse(formData.get("receivedExpiryDate") ?? "");
     const applyToStock = formData.get("applyToStock") === "on";
 
     const result = await receiveOrderRequestForContext(context, {
       orderRequestId,
       receivedQuantity,
       receivedMemo: receivedMemoValue.length > 0 ? receivedMemoValue : null,
+      receivedLotNumber: receivedLotNumberValue.length > 0 ? receivedLotNumberValue : null,
+      receivedExpiryDateText: receivedExpiryDateValue.length > 0 ? receivedExpiryDateValue : null,
+      receivedExpiryDate: parseReceivedExpiryDate(receivedExpiryDateValue),
       applyToStock,
     });
 
@@ -441,10 +581,18 @@ export async function receiveOrderRequestForContext(
     orderRequestId: string;
     receivedQuantity: number;
     receivedMemo: string | null;
+    receivedLotNumber?: string | null;
+    receivedExpiryDateText?: string | null;
+    receivedExpiryDate?: Date | null;
     applyToStock: boolean;
     revalidate?: boolean;
   },
 ) {
+  const lotData = buildReceiptLotData({
+    receivedLotNumber: input.receivedLotNumber ?? null,
+    receivedExpiryDateText: input.receivedExpiryDateText ?? null,
+    receivedExpiryDate: input.receivedExpiryDate ?? null,
+  });
   const result = await prisma.$transaction(async (tx) => {
     const target = await tx.orderRequest.findFirst({
       where: {
@@ -516,6 +664,15 @@ export async function receiveOrderRequestForContext(
 
       afterQuantity = updatedStockItem.quantity;
 
+      if (lotData) {
+        await incrementReceiptStockLot(tx, {
+          clinicId: context.clinicId,
+          productId: target.productId,
+          quantity: input.receivedQuantity,
+          lotData,
+        });
+      }
+
       await tx.stockMovement.create({
         data: {
           clinicId: context.clinicId,
@@ -527,6 +684,9 @@ export async function receiveOrderRequestForContext(
           reason: "納品",
           sourceType: "ORDER_RECEIPT",
           sourceId: target.id,
+          lotNumber: lotData?.lotNumber || null,
+          expiryDateText: lotData?.expiryDateText || null,
+          expiryDate: lotData?.expiryDate ?? null,
           userId: context.userId,
           memo: input.receivedMemo,
         },
@@ -541,6 +701,9 @@ export async function receiveOrderRequestForContext(
         receivedQuantity: input.receivedQuantity,
         receivedAt: new Date(),
         receivedMemo: input.receivedMemo,
+        receivedLotNumber: lotData?.lotNumber || null,
+        receivedExpiryDateText: lotData?.expiryDateText || null,
+        receivedExpiryDate: lotData?.expiryDate ?? null,
         receivedByUserId: context.userId,
       },
     });
@@ -633,6 +796,9 @@ export async function revertOrderReceiptForContext(
       },
       select: {
         id: true,
+        lotNumber: true,
+        expiryDateText: true,
+        expiryDate: true,
       },
     });
 
@@ -675,6 +841,21 @@ export async function revertOrderReceiptForContext(
 
       afterQuantity = updatedStockItem.quantity;
 
+      const receiptLotData = buildReceiptLotData({
+        receivedLotNumber: receiptMovement.lotNumber,
+        receivedExpiryDateText: receiptMovement.expiryDateText,
+        receivedExpiryDate: receiptMovement.expiryDate,
+      });
+
+      if (receiptLotData) {
+        await decrementReceiptStockLot(tx, {
+          clinicId: context.clinicId,
+          productId: target.productId,
+          quantity: target.receivedQuantity,
+          lotData: receiptLotData,
+        });
+      }
+
       await tx.stockMovement.create({
         data: {
           clinicId: context.clinicId,
@@ -687,6 +868,9 @@ export async function revertOrderReceiptForContext(
           sourceType: "ORDER_RECEIPT_REVERT",
           sourceId: target.id,
           revertOfId: receiptMovement.id,
+          lotNumber: receiptLotData?.lotNumber || null,
+          expiryDateText: receiptLotData?.expiryDateText || null,
+          expiryDate: receiptLotData?.expiryDate ?? null,
           userId: context.userId,
         },
       });
@@ -710,6 +894,9 @@ export async function revertOrderReceiptForContext(
         receivedQuantity: null,
         receivedAt: null,
         receivedMemo: null,
+        receivedLotNumber: null,
+        receivedExpiryDateText: null,
+        receivedExpiryDate: null,
         receivedByUserId: null,
       },
     });

@@ -13,14 +13,14 @@ model Organization {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  clinics         Clinic[]
-  users           User[]
-  products        Product[]
-  productSuppliers ProductSupplier[]
-  suppliers       Supplier[]
-  productBarcodes ProductBarcode[]
+  clinics                Clinic[]
+  users                  User[]
+  products               Product[]
+  productSuppliers       ProductSupplier[]
+  suppliers              Supplier[]
+  productBarcodes        ProductBarcode[]
   productImportHistories ProductImportHistory[]
-  auditLogs       AuditLog[]
+  auditLogs              AuditLog[]
 }
 
 model Clinic {
@@ -35,6 +35,7 @@ model Clinic {
 
   organization          Organization           @relation(fields: [organizationId], references: [id])
   stockItems            StockItem[]
+  stockLots             StockLot[]
   stockMovements        StockMovement[]
   barcodeScanLogs       BarcodeScanLog[]
   favoriteCards         FavoriteProductCard[]
@@ -132,16 +133,16 @@ model Supplier {
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
-  organization  Organization   @relation(fields: [organizationId], references: [id])
-  products      Product[]
+  organization     Organization      @relation(fields: [organizationId], references: [id])
+  products         Product[]
   productSuppliers ProductSupplier[]
-  orderRequests OrderRequest[]
+  orderRequests    OrderRequest[]
 
   @@index([organizationId])
 }
 
 model Product {
-  id                  String   @id @default(cuid())
+  id                  String    @id @default(cuid())
   organizationId      String
   productCode         String?
   janCode             String?
@@ -155,25 +156,26 @@ model Product {
   primarySupplierId   String?
   supplierProductCode String?
   standardPrice       Float?
-  defaultMinStock     Int      @default(0)
-  isActive            Boolean  @default(true)
+  defaultMinStock     Int       @default(0)
+  isActive            Boolean   @default(true)
   notes               String?
   photoFileName       String?
   photoMimeType       String?
   photoUpdatedAt      DateTime?
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 
-  organization    Organization           @relation(fields: [organizationId], references: [id])
-  primarySupplier Supplier?              @relation(fields: [primarySupplierId], references: [id])
-  stockItems      StockItem[]
-  stockMovements  StockMovement[]
+  organization     Organization           @relation(fields: [organizationId], references: [id])
+  primarySupplier  Supplier?              @relation(fields: [primarySupplierId], references: [id])
+  stockItems       StockItem[]
+  stockLots        StockLot[]
+  stockMovements   StockMovement[]
   productSuppliers ProductSupplier[]
-  favoriteCards   FavoriteProductCard[]
-  orderRequests   OrderRequest[]
-  barcodes        ProductBarcode[]
-  barcodeScanLogs BarcodeScanLog[]
-  stocktakeItems  StocktakeSessionItem[]
+  favoriteCards    FavoriteProductCard[]
+  orderRequests    OrderRequest[]
+  barcodes         ProductBarcode[]
+  barcodeScanLogs  BarcodeScanLog[]
+  stocktakeItems   StocktakeSessionItem[]
 
   @@unique([organizationId, janCode])
   @@index([organizationId])
@@ -267,6 +269,25 @@ model StockItem {
   @@index([productId])
 }
 
+model StockLot {
+  id             String    @id @default(cuid())
+  clinicId       String
+  productId      String
+  lotNumber      String    @default("")
+  expiryDateText String    @default("")
+  expiryDate     DateTime?
+  quantity       Int       @default(0)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  clinic  Clinic  @relation(fields: [clinicId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+
+  @@unique([clinicId, productId, lotNumber, expiryDateText])
+  @@index([clinicId, productId])
+  @@index([clinicId, expiryDate])
+}
+
 model StockMovement {
   id             String    @id @default(cuid())
   clinicId       String
@@ -281,6 +302,9 @@ model StockMovement {
   revertOfId     String?
   revertedAt     DateTime?
   revertedById   String?
+  lotNumber      String?
+  expiryDateText String?
+  expiryDate     DateTime?
   userId         String
   memo           String?
   createdAt      DateTime  @default(now())
@@ -404,27 +428,30 @@ enum OrderRequestStatus {
 }
 
 model OrderRequest {
-  id                String             @id @default(cuid())
-  clinicId          String
-  productId         String
-  supplierId        String?
-  status            OrderRequestStatus @default(DRAFT)
-  requestedQuantity Int
-  memo              String?
-  orderedAt         DateTime?
-  receivedQuantity  Int?
-  receivedAt        DateTime?
-  receivedMemo      String?
-  receivedByUserId  String?
-  createdByUserId   String
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
+  id                     String             @id @default(cuid())
+  clinicId               String
+  productId              String
+  supplierId             String?
+  status                 OrderRequestStatus @default(DRAFT)
+  requestedQuantity      Int
+  memo                   String?
+  orderedAt              DateTime?
+  receivedQuantity       Int?
+  receivedAt             DateTime?
+  receivedMemo           String?
+  receivedLotNumber      String?
+  receivedExpiryDateText String?
+  receivedExpiryDate     DateTime?
+  receivedByUserId       String?
+  createdByUserId        String
+  createdAt              DateTime           @default(now())
+  updatedAt              DateTime           @updatedAt
 
-  clinic        Clinic    @relation(fields: [clinicId], references: [id])
-  product       Product   @relation(fields: [productId], references: [id])
-  supplier      Supplier? @relation(fields: [supplierId], references: [id])
-  createdByUser User      @relation("OrderRequestCreatedBy", fields: [createdByUserId], references: [id])
-  receivedByUser User?    @relation("OrderRequestReceivedBy", fields: [receivedByUserId], references: [id])
+  clinic         Clinic    @relation(fields: [clinicId], references: [id])
+  product        Product   @relation(fields: [productId], references: [id])
+  supplier       Supplier? @relation(fields: [supplierId], references: [id])
+  createdByUser  User      @relation("OrderRequestCreatedBy", fields: [createdByUserId], references: [id])
+  receivedByUser User?     @relation("OrderRequestReceivedBy", fields: [receivedByUserId], references: [id])
 
   @@index([clinicId, status])
   @@index([productId])

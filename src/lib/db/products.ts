@@ -44,6 +44,7 @@ export type ProductDetail = ProductMasterRow & {
   notes: string | null;
   primarySupplierId: string | null;
   productSuppliers: ProductSupplierSummary[];
+  stockLots: ProductStockLotSummary[];
   recentMovements: ProductDetailMovement[];
   orderRequests: ProductDetailOrderRequest[];
 };
@@ -68,8 +69,20 @@ export type ProductDetailMovement = {
   afterQuantity: number;
   reason: string | null;
   sourceType: string | null;
+  lotNumber: string | null;
+  expiryDateText: string | null;
+  expiryDate: Date | null;
   userName: string;
   createdAt: Date;
+};
+
+export type ProductStockLotSummary = {
+  id: string;
+  lotNumber: string;
+  expiryDateText: string;
+  expiryDate: Date | null;
+  quantity: number;
+  updatedAt: Date;
 };
 
 export type ProductDetailOrderRequest = {
@@ -83,6 +96,9 @@ export type ProductDetailOrderRequest = {
   receivedQuantity: number | null;
   receivedAt: Date | null;
   receivedMemo: string | null;
+  receivedLotNumber: string | null;
+  receivedExpiryDateText: string | null;
+  receivedExpiryDate: Date | null;
   updatedAt: Date;
 };
 
@@ -302,6 +318,22 @@ export async function getProductDetail(
         },
         take: 8,
       },
+      stockLots: {
+        where: {
+          clinicId,
+          quantity: {
+            gt: 0,
+          },
+        },
+        orderBy: [
+          {
+            expiryDate: "asc",
+          },
+          {
+            lotNumber: "asc",
+          },
+        ],
+      },
       orderRequests: {
         where: {
           clinicId,
@@ -395,6 +427,14 @@ export async function getProductDetail(
     notes: product.notes,
     primarySupplierId: product.primarySupplier?.id ?? null,
     productSuppliers,
+    stockLots: product.stockLots.map((lot) => ({
+      id: lot.id,
+      lotNumber: lot.lotNumber,
+      expiryDateText: lot.expiryDateText,
+      expiryDate: lot.expiryDate,
+      quantity: lot.quantity,
+      updatedAt: lot.updatedAt,
+    })),
     recentMovements: product.stockMovements.map((movement) => ({
       id: movement.id,
       movementType: movement.movementType,
@@ -403,6 +443,9 @@ export async function getProductDetail(
       afterQuantity: movement.afterQuantity,
       reason: movement.reason,
       sourceType: movement.sourceType,
+      lotNumber: movement.lotNumber,
+      expiryDateText: movement.expiryDateText,
+      expiryDate: movement.expiryDate,
       userName: movement.user.name,
       createdAt: movement.createdAt,
     })),
@@ -417,6 +460,9 @@ export async function getProductDetail(
       receivedQuantity: request.receivedQuantity,
       receivedAt: request.receivedAt,
       receivedMemo: request.receivedMemo,
+      receivedLotNumber: request.receivedLotNumber,
+      receivedExpiryDateText: request.receivedExpiryDateText,
+      receivedExpiryDate: request.receivedExpiryDate,
       updatedAt: request.updatedAt,
     })),
   };

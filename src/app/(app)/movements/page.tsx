@@ -26,9 +26,22 @@ const dateTimeFormatter = new Intl.DateTimeFormat("ja-JP", {
   hour: "2-digit",
   minute: "2-digit",
 });
+const dateFormatter = new Intl.DateTimeFormat("ja-JP", {
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
 
 function formatSignedQuantity(quantity: number) {
   return quantity > 0 ? `+${quantity}` : `${quantity}`;
+}
+
+function formatLotExpiryDate(expiryDate: Date | null, expiryDateText: string | null | undefined) {
+  if (expiryDate) {
+    return dateFormatter.format(expiryDate);
+  }
+
+  return expiryDateText || "-";
 }
 
 function getMovementBadgeClass(movementType: string) {
@@ -76,6 +89,8 @@ export default async function MovementsPage({ searchParams }: PageProps) {
       movement.productCode,
       movement.category,
       movement.reason,
+      movement.lotNumber,
+      movement.expiryDateText,
       movement.userName,
       getStockMovementTypeLabel(movement.movementType),
       getStockMovementSourceLabel(movement.sourceType),
@@ -176,7 +191,15 @@ export default async function MovementsPage({ searchParams }: PageProps) {
                         </td>
                         <td className="border-b border-line px-4 py-3 text-right">{movement.beforeQuantity}</td>
                         <td className="border-b border-line px-4 py-3 text-right">{movement.afterQuantity}</td>
-                        <td className="border-b border-line px-4 py-3 text-muted">{movement.reason ?? "-"}</td>
+                        <td className="border-b border-line px-4 py-3 text-muted">
+                          {movement.reason ?? "-"}
+                          {movement.lotNumber || movement.expiryDateText || movement.expiryDate ? (
+                            <p className="mt-1 text-xs">
+                              ロット {movement.lotNumber || "-"} / 有効期限{" "}
+                              {formatLotExpiryDate(movement.expiryDate, movement.expiryDateText)}
+                            </p>
+                          ) : null}
+                        </td>
                         <td className="border-b border-line px-4 py-3 text-muted">
                           {getStockMovementSourceLabel(movement.sourceType)}
                           {movement.sourceType === "STOCKTAKE_SESSION" ? (

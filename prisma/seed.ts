@@ -101,9 +101,17 @@ async function main() {
   await prisma.orderRequest.deleteMany();
   await prisma.favoriteProductCard.deleteMany();
   await prisma.productBarcode.deleteMany();
+  await prisma.barcodeScanLog.deleteMany();
+  await prisma.productImportHistory.deleteMany();
+  await prisma.auditLog.deleteMany();
   await prisma.stockMovement.deleteMany();
+  await prisma.stockLot.deleteMany();
+  await prisma.stocktakeSessionItem.deleteMany();
+  await prisma.stocktakeSession.deleteMany();
   await prisma.stockItem.deleteMany();
+  await prisma.productSupplier.deleteMany();
   await prisma.userClinicAssignment.deleteMany();
+  await prisma.loginAttempt.deleteMany();
   await prisma.product.deleteMany();
   await prisma.supplier.deleteMany();
   await prisma.user.deleteMany();

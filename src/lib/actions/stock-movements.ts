@@ -63,6 +63,9 @@ export async function revertStockMovementForContext(options: {
         sourceType: true,
         revertedAt: true,
         revertOfId: true,
+        lotNumber: true,
+        expiryDateText: true,
+        expiryDate: true,
         product: {
           select: {
             name: true,
@@ -114,6 +117,69 @@ export async function revertStockMovementForContext(options: {
 
     const revertedAt = new Date();
 
+    if (movement.lotNumber || movement.expiryDateText || movement.expiryDate) {
+      const lot = await tx.stockLot.findFirst({
+        where: {
+          clinicId: context.clinicId,
+          productId: movement.productId,
+          lotNumber: movement.lotNumber ?? "",
+          expiryDateText: movement.expiryDateText ?? "",
+        },
+        select: {
+          id: true,
+          quantity: true,
+        },
+      });
+      const lotDelta = movement.beforeQuantity - movement.afterQuantity;
+
+      if (lotDelta > 0) {
+        if (lot) {
+          await tx.stockLot.update({
+            where: {
+              id: lot.id,
+            },
+            data: {
+              quantity: {
+                increment: lotDelta,
+              },
+              expiryDate: movement.expiryDate,
+            },
+          });
+        } else {
+          await tx.stockLot.create({
+            data: {
+              clinicId: context.clinicId,
+              productId: movement.productId,
+              lotNumber: movement.lotNumber ?? "",
+              expiryDateText: movement.expiryDateText ?? "",
+              expiryDate: movement.expiryDate,
+              quantity: lotDelta,
+            },
+          });
+        }
+      }
+
+      if (lotDelta < 0) {
+        const decrementQuantity = Math.abs(lotDelta);
+
+        if (!lot || lot.quantity < decrementQuantity) {
+          throw new Error("指定ロットの在庫が不足しているため、この履歴は取り消しできません。");
+        }
+
+        await tx.stockLot.update({
+          where: {
+            id: lot.id,
+          },
+          data: {
+            quantity: {
+              decrement: decrementQuantity,
+            },
+            expiryDate: movement.expiryDate,
+          },
+        });
+      }
+    }
+
     await tx.stockMovement.create({
       data: {
         clinicId: context.clinicId,
@@ -126,6 +192,9 @@ export async function revertStockMovementForContext(options: {
         sourceType: "REVERT",
         sourceId: movement.id,
         revertOfId: movement.id,
+        lotNumber: movement.lotNumber,
+        expiryDateText: movement.expiryDateText,
+        expiryDate: movement.expiryDate,
         userId: context.userId,
       },
     });

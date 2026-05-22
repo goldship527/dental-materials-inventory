@@ -74,6 +74,9 @@ async function main() {
       orderRequestId: request.id,
       receivedQuantity: 2,
       receivedMemo: "Arrived in two boxes",
+      receivedLotNumber: "LOT-ORDER-001",
+      receivedExpiryDateText: "2027-05-31",
+      receivedExpiryDate: new Date("2027-05-31T00:00:00.000Z"),
       applyToStock: true,
       revalidate: false,
     });
@@ -90,6 +93,9 @@ async function main() {
     assert.equal(receivedRequest.receivedQuantity, 2);
     assert.notEqual(receivedRequest.receivedAt, null);
     assert.equal(receivedRequest.receivedMemo, "Arrived in two boxes");
+    assert.equal(receivedRequest.receivedLotNumber, "LOT-ORDER-001");
+    assert.equal(receivedRequest.receivedExpiryDateText, "2027-05-31");
+    assert.equal(receivedRequest.receivedExpiryDate?.toISOString(), "2027-05-31T00:00:00.000Z");
     assert.equal(receivedRequest.receivedByUserId, user.id);
 
     const stockItem = await prisma.stockItem.findFirstOrThrow({
@@ -115,6 +121,22 @@ async function main() {
     assert.equal(movement.afterQuantity, 4);
     assert.equal(movement.reason, "納品");
     assert.equal(movement.sourceId, request.id);
+    assert.equal(movement.lotNumber, "LOT-ORDER-001");
+    assert.equal(movement.expiryDateText, "2027-05-31");
+    assert.equal(movement.expiryDate?.toISOString(), "2027-05-31T00:00:00.000Z");
+
+    const receiptLot = await prisma.stockLot.findUniqueOrThrow({
+      where: {
+        clinicId_productId_lotNumber_expiryDateText: {
+          clinicId: clinic.id,
+          productId: product.id,
+          lotNumber: "LOT-ORDER-001",
+          expiryDateText: "2027-05-31",
+        },
+      },
+    });
+
+    assert.equal(receiptLot.quantity, 2);
 
     await assert.rejects(() =>
       revertStockMovementForContext({
@@ -151,6 +173,9 @@ async function main() {
     assert.equal(revertedRequest.receivedQuantity, null);
     assert.equal(revertedRequest.receivedAt, null);
     assert.equal(revertedRequest.receivedMemo, null);
+    assert.equal(revertedRequest.receivedLotNumber, null);
+    assert.equal(revertedRequest.receivedExpiryDateText, null);
+    assert.equal(revertedRequest.receivedExpiryDate, null);
     assert.equal(revertedRequest.receivedByUserId, null);
 
     const stockItemAfterRevert = await prisma.stockItem.findFirstOrThrow({
@@ -186,6 +211,21 @@ async function main() {
     assert.equal(revertMovement.afterQuantity, 2);
     assert.equal(revertMovement.reason, "納品確認取り消し");
     assert.equal(revertMovement.sourceId, request.id);
+    assert.equal(revertMovement.lotNumber, "LOT-ORDER-001");
+    assert.equal(revertMovement.expiryDateText, "2027-05-31");
+
+    const receiptLotAfterRevert = await prisma.stockLot.findUniqueOrThrow({
+      where: {
+        clinicId_productId_lotNumber_expiryDateText: {
+          clinicId: clinic.id,
+          productId: product.id,
+          lotNumber: "LOT-ORDER-001",
+          expiryDateText: "2027-05-31",
+        },
+      },
+    });
+
+    assert.equal(receiptLotAfterRevert.quantity, 0);
 
     await assert.rejects(() =>
       revertOrderReceiptForContext(context, {
@@ -238,9 +278,31 @@ async function main() {
       orderRequestId: orderedRequest.id,
       receivedQuantity: 1,
       receivedMemo: "Record only",
+      receivedLotNumber: "LOT-RECORD-ONLY",
+      receivedExpiryDateText: "2028-01-31",
+      receivedExpiryDate: new Date("2028-01-31T00:00:00.000Z"),
       applyToStock: false,
       revalidate: false,
     });
+
+    const recordOnlyReceivedRequest = await prisma.orderRequest.findUniqueOrThrow({
+      where: {
+        id: orderedRequest.id,
+      },
+    });
+
+    assert.equal(recordOnlyReceivedRequest.receivedLotNumber, "LOT-RECORD-ONLY");
+    assert.equal(recordOnlyReceivedRequest.receivedExpiryDateText, "2028-01-31");
+    assert.equal(
+      await prisma.stockLot.count({
+        where: {
+          clinicId: clinic.id,
+          productId: product.id,
+          lotNumber: "LOT-RECORD-ONLY",
+        },
+      }),
+      0,
+    );
 
     const recordOnlyRevertResult = await revertOrderReceiptForContext(context, {
       orderRequestId: orderedRequest.id,

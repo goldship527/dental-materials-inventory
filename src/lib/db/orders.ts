@@ -33,6 +33,9 @@ export type OrderRequestRow = {
   receivedQuantity: number | null;
   receivedAt: Date | null;
   receivedMemo: string | null;
+  receivedLotNumber: string | null;
+  receivedExpiryDateText: string | null;
+  receivedExpiryDate: Date | null;
   updatedAt: Date;
 };
 
@@ -161,6 +164,9 @@ export async function getOrderRequestRows(clinicId: string): Promise<OrderReques
       receivedQuantity: request.receivedQuantity,
       receivedAt: request.receivedAt,
       receivedMemo: request.receivedMemo,
+      receivedLotNumber: request.receivedLotNumber,
+      receivedExpiryDateText: request.receivedExpiryDateText,
+      receivedExpiryDate: request.receivedExpiryDate,
       updatedAt: request.updatedAt,
     };
   });

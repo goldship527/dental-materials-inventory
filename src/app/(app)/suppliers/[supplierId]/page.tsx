@@ -19,6 +19,19 @@ const dateTimeFormatter = new Intl.DateTimeFormat("ja-JP", {
   hour: "2-digit",
   minute: "2-digit",
 });
+const dateFormatter = new Intl.DateTimeFormat("ja-JP", {
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+
+function formatReceiptExpiryDate(expiryDate: Date | null, expiryDateText: string | null) {
+  if (expiryDate) {
+    return dateFormatter.format(expiryDate);
+  }
+
+  return expiryDateText || "-";
+}
 
 export default async function SupplierDetailPage({ params }: PageProps) {
   const session = await auth();
@@ -264,6 +277,12 @@ export default async function SupplierDetailPage({ params }: PageProps) {
                       {request.receivedAt ? (
                         <p className="font-semibold text-blue-800">
                           納品確認済み {dateTimeFormatter.format(request.receivedAt)} / 数量 {request.receivedQuantity ?? "-"}
+                        </p>
+                      ) : null}
+                      {request.receivedLotNumber || request.receivedExpiryDateText || request.receivedExpiryDate ? (
+                        <p className="text-muted">
+                          ロット {request.receivedLotNumber || "-"} / 有効期限{" "}
+                          {formatReceiptExpiryDate(request.receivedExpiryDate, request.receivedExpiryDateText)}
                         </p>
                       ) : null}
                       {request.receivedMemo ? <p className="text-muted">{request.receivedMemo}</p> : null}
