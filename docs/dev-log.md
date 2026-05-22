@@ -3617,6 +3617,9 @@
 - `corepack pnpm db:seed`
 - ローカルブラウザで `/stock-lots`、`/home` の期限ロット導線、商品詳細の期限ロット導線を確認
 - Vercelデプロイで古いPrisma Clientが使われて `stockLot` が型エラーになったため、`build` の前に `prisma generate` を実行するようにした
+- `a2db4b9` をpush後、VercelのProductionデプロイがPrisma Client未更新で失敗したことを確認し、`ea36842` でビルド前生成を追加してProductionデプロイ成功を確認した。
+- 公開Supabase DBには `db:seed` を実行せず、`StockLot` とロット関連カラムのスキーマ差分だけを反映した。
+- 公開環境で `/home`、`/orders`、`/barcode/stock`、`/products`、`/stock-lots` がログイン後に表示できることを確認した。
 - `corepack pnpm exec tsx tests/stock-lots.test.ts`
 - `corepack pnpm exec tsx tests/order-receipt.test.ts`
 - `corepack pnpm typecheck`
