@@ -30,7 +30,7 @@ export const stockMovementTypeLabels: Record<string, string> = {
 
 export const stockMovementSourceLabels: Record<string, string> = {
   MANUAL: "在庫一覧",
-  QUICK_CARD: "よく使うカード",
+  QUICK_CARD: "クイック出庫",
   BARCODE_STOCK: "バーコード出入庫",
   STOCKTAKE: "棚卸",
   STOCKTAKE_SESSION: "棚卸セッション",

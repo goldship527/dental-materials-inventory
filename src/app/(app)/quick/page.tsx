@@ -106,7 +106,8 @@ export default async function QuickPage({ searchParams }: PageProps) {
         <header className="flex flex-col gap-3 border-b border-line pb-4 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-            <h1 className="mt-2 text-3xl font-semibold">よく使う商品カード</h1>
+            <h1 className="mt-2 text-3xl font-semibold">クイック出庫</h1>
+            <p className="mt-2 text-sm text-muted">よく使う材料をワンタップで出庫・戻しできます。</p>
           </div>
           <a className="inline-flex h-11 shrink-0 items-center justify-center rounded border border-line bg-white/75 px-4 text-sm font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent" href="/home">
             ホームへ戻る
@@ -163,7 +164,7 @@ export default async function QuickPage({ searchParams }: PageProps) {
         </section>
 
         <section className="rounded border border-line/90 bg-panel/95 p-4 shadow-panel">
-          <h2 className="text-base font-semibold">直近のカード操作</h2>
+          <h2 className="text-base font-semibold">直近のクイック出庫操作</h2>
           <div className="mt-3 divide-y divide-line">
             {recentMovements.length > 0 ? (
               recentMovements.map((movement) => (
@@ -178,7 +179,7 @@ export default async function QuickPage({ searchParams }: PageProps) {
                 </div>
               ))
             ) : (
-              <p className="py-3 text-sm text-muted">まだカード操作はありません。</p>
+              <p className="py-3 text-sm text-muted">まだクイック出庫操作はありません。</p>
             )}
           </div>
         </section>

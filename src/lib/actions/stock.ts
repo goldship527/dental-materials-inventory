@@ -258,7 +258,7 @@ async function quickMove(stockItemId: string, delta: number): Promise<StockUpdat
         quantity: parsedDelta,
         beforeQuantity,
         afterQuantity: updatedStockItem.quantity,
-        reason: parsedDelta > 0 ? "よく使うカード +1" : "よく使うカード -1",
+        reason: parsedDelta > 0 ? "クイック出庫 +1" : "クイック出庫 -1",
         sourceType: "QUICK_CARD",
         userId: context.userId,
       },

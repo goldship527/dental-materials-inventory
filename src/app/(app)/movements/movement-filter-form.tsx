@@ -18,7 +18,7 @@ const sourceOptions = [
   { value: "ORDER_RECEIPT", label: "納品確認" },
   { value: "ORDER_RECEIPT_REVERT", label: "納品確認取り消し" },
   { value: "MANUAL", label: "在庫一覧" },
-  { value: "QUICK_CARD", label: "よく使うカード" },
+  { value: "QUICK_CARD", label: "クイック出庫" },
   { value: "BARCODE_STOCK", label: "バーコード出入庫" },
   { value: "STOCKTAKE", label: "棚卸" },
   { value: "STOCKTAKE_SESSION", label: "棚卸セッション" },

@@ -43,7 +43,7 @@ const workNavItems = [
   },
   {
     id: "quick",
-    label: "カード",
+    label: "出庫",
     href: "/quick",
   },
   {
