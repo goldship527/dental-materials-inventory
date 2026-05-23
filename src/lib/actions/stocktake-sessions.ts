@@ -24,6 +24,10 @@ const skipItemSchema = z.object({
   memo: memoSchema,
 });
 
+const commitSessionSchema = z.object({
+  sessionId: idSchema,
+});
+
 export type StocktakeSessionActionState = {
   status: "success" | "error";
   message: string;
@@ -343,6 +347,28 @@ export async function commitStocktakeSessionAction(formData: FormData) {
   });
 
   redirect(`/stocktake/sessions/${sessionId}`);
+}
+
+export async function commitStocktakeSessionFromClient(
+  input: z.input<typeof commitSessionSchema>,
+): Promise<StocktakeSessionActionState & { redirectTo?: string }> {
+  try {
+    const context = await requireActiveClinic();
+    const parsedInput = commitSessionSchema.parse(input);
+
+    await commitStocktakeSessionForContext({
+      context,
+      sessionId: parsedInput.sessionId,
+    });
+
+    return {
+      status: "success",
+      message: "棚卸セッションを確定しました。",
+      redirectTo: `/stocktake/sessions/${parsedInput.sessionId}/history`,
+    };
+  } catch (error) {
+    return toActionError(error);
+  }
 }
 
 export async function commitStocktakeSessionForContext(options: {

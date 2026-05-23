@@ -1,8 +1,9 @@
 "use client";
 
 import { useMemo, useRef, useState, useTransition, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
 import {
-  commitStocktakeSessionAction,
+  commitStocktakeSessionFromClient,
   discardStocktakeSessionAction,
   skipStocktakeSessionItemAction,
   updateStocktakeSessionItemAction,
@@ -14,10 +15,11 @@ type StocktakeSessionScanFormProps = {
   session: StocktakeSessionDetail;
 };
 
-type StatusTab = "PENDING" | "COUNTED" | "SKIPPED";
+type StatusTab = "ALL" | "PENDING" | "COUNTED" | "SKIPPED";
 
 const statusTabs: Array<{ id: StatusTab; label: string }> = [
-  { id: "PENDING", label: "未入力" },
+  { id: "ALL", label: "すべて" },
+  { id: "PENDING", label: "未入力のみ" },
   { id: "COUNTED", label: "入力済み" },
   { id: "SKIPPED", label: "スキップ" },
 ];
@@ -61,6 +63,62 @@ function formatDifference(diff: number | null) {
   }
 
   return `${diff > 0 ? "+" : ""}${diff}`;
+}
+
+function getStatusLabel(status: string) {
+  if (status === "COUNTED") {
+    return "入力済み";
+  }
+
+  if (status === "SKIPPED") {
+    return "スキップ";
+  }
+
+  return "未入力";
+}
+
+function getRowClass(row: StocktakeSessionItemRow, highlighted: boolean) {
+  if (highlighted) {
+    return "bg-amber-50 align-top ring-2 ring-inset ring-amber-200";
+  }
+
+  if (row.status === "COUNTED") {
+    return "bg-emerald-50/70 align-top";
+  }
+
+  if (row.status === "SKIPPED") {
+    return "bg-gray-50 align-top text-muted";
+  }
+
+  return "align-top bg-white";
+}
+
+function getRowAccentClass(row: StocktakeSessionItemRow, highlighted: boolean) {
+  if (highlighted) {
+    return "border-l-4 border-l-amber-400";
+  }
+
+  if (row.status === "COUNTED") {
+    return "border-l-4 border-l-emerald-500";
+  }
+
+  if (row.status === "SKIPPED") {
+    return "border-l-4 border-l-gray-400";
+  }
+
+  return "border-l-4 border-l-transparent";
+}
+
+function getStatusBadgeClass(status: string) {
+  if (status === "COUNTED") {
+    return "bg-emerald-100 text-accent";
+  }
+
+  if (status === "SKIPPED") {
+    return "bg-gray-200 text-muted";
+  }
+
+  return "bg-white text-muted";
 }
 
 type StocktakeItemRowProps = {
@@ -153,8 +211,8 @@ function StocktakeItemRow({ sessionId, row, editable, highlighted, registerInput
   }
 
   return (
-    <tr id={`stocktake-item-${row.id}`} className={highlighted ? "bg-amber-50 align-top" : "align-top"}>
-      <td className="border-b border-line px-4 py-3">
+    <tr id={`stocktake-item-${row.id}`} className={`${getRowClass(row, highlighted)} transition-colors`}>
+      <td className={`border-b border-line px-4 py-3 ${getRowAccentClass(row, highlighted)}`}>
         <a className="font-semibold text-accent hover:underline" href={`/products/${row.productId}`}>
           {row.name}
         </a>
@@ -202,7 +260,10 @@ function StocktakeItemRow({ sessionId, row, editable, highlighted, registerInput
         />
       </td>
       <td className="border-b border-line px-4 py-3 text-xs text-muted">
-        <p>{row.status === "COUNTED" ? "入力済み" : row.status === "SKIPPED" ? "スキップ" : "未入力"}</p>
+        <span className={`inline-flex rounded px-2 py-1 font-semibold ${getStatusBadgeClass(row.status)}`}>
+          {getStatusLabel(row.status)}
+        </span>
+        {highlighted ? <p className="mt-1 font-semibold text-amber-700">直近操作</p> : null}
         <p className="mt-1">{formatDateTime(row.countedAt)}</p>
         {row.countedByUserName ? <p className="mt-1">{row.countedByUserName}</p> : null}
       </td>
@@ -221,23 +282,26 @@ function StocktakeItemRow({ sessionId, row, editable, highlighted, registerInput
 }
 
 export function StocktakeSessionScanForm({ session }: StocktakeSessionScanFormProps) {
+  const router = useRouter();
   const [rows, setRows] = useState(session.rows);
-  const [statusTab, setStatusTab] = useState<StatusTab>("PENDING");
+  const [statusTab, setStatusTab] = useState<StatusTab>("ALL");
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("");
   const [barcodeInput, setBarcodeInput] = useState("");
   const [message, setMessage] = useState<string | null>(null);
+  const [commitError, setCommitError] = useState<string | null>(null);
   const [highlightedItemId, setHighlightedItemId] = useState<string | null>(null);
   const [isCommitModalOpen, setIsCommitModalOpen] = useState(false);
+  const [isCommitPending, startCommitTransition] = useTransition();
   const inputRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const editable = session.status === "IN_PROGRESS";
-  const commitFormId = `commit-stocktake-session-${session.id}`;
   const categories = useMemo(
     () => Array.from(new Set(rows.map((row) => row.category).filter((value): value is string => Boolean(value)))).sort(),
     [rows],
   );
   const counts = useMemo(
     () => ({
+      ALL: rows.length,
       PENDING: rows.filter((row) => row.status === "PENDING").length,
       COUNTED: rows.filter((row) => row.status === "COUNTED").length,
       SKIPPED: rows.filter((row) => row.status === "SKIPPED").length,
@@ -256,7 +320,7 @@ export function StocktakeSessionScanForm({ session }: StocktakeSessionScanFormPr
     const normalizedQuery = query.trim().toLowerCase();
 
     return rows.filter((row) => {
-      if (normalizeStatus(row.status) !== statusTab) {
+      if (statusTab !== "ALL" && normalizeStatus(row.status) !== statusTab) {
         return false;
       }
 
@@ -283,6 +347,28 @@ export function StocktakeSessionScanForm({ session }: StocktakeSessionScanFormPr
   function updateRow(nextRow: StocktakeSessionItemRow, nextMessage: string) {
     setRows((currentRows) => currentRows.map((row) => (row.id === nextRow.id ? nextRow : row)));
     setMessage(nextMessage);
+    setHighlightedItemId(nextRow.id);
+  }
+
+  function commitSession() {
+    if (isCommitPending) {
+      return;
+    }
+
+    setCommitError(null);
+    startCommitTransition(async () => {
+      const result = await commitStocktakeSessionFromClient({
+        sessionId: session.id,
+      });
+
+      if (result.status === "success") {
+        router.push(result.redirectTo ?? `/stocktake/sessions/${session.id}/history`);
+        router.refresh();
+        return;
+      }
+
+      setCommitError(result.message);
+    });
   }
 
   function handleBarcodeSubmit(event: FormEvent<HTMLFormElement>) {
@@ -307,7 +393,7 @@ export function StocktakeSessionScanForm({ session }: StocktakeSessionScanFormPr
     }
 
     const matchedRow = matches[0];
-    setStatusTab(normalizeStatus(matchedRow.status));
+    setStatusTab("ALL");
     setQuery("");
     setCategory("");
     setHighlightedItemId(matchedRow.id);
@@ -405,12 +491,12 @@ export function StocktakeSessionScanForm({ session }: StocktakeSessionScanFormPr
           <div className="flex flex-wrap gap-2">
             {editable ? (
               <>
-                <form id={commitFormId} action={commitStocktakeSessionAction}>
-                  <input type="hidden" name="sessionId" value={session.id} />
-                </form>
                 <button
                   type="button"
-                  onClick={() => setIsCommitModalOpen(true)}
+                  onClick={() => {
+                    setCommitError(null);
+                    setIsCommitModalOpen(true);
+                  }}
                   className="h-10 rounded bg-ink px-4 text-xs font-semibold text-white transition hover:bg-gray-700"
                 >
                   確定する
@@ -497,20 +583,27 @@ export function StocktakeSessionScanForm({ session }: StocktakeSessionScanFormPr
             <p className="mt-4 text-sm text-muted">
               未入力の商品は在庫を変更しません。確定後、このセッションは編集できません。
             </p>
+            {commitError ? (
+              <p className="mt-4 rounded border border-danger/30 bg-red-50 px-3 py-2 text-sm font-semibold text-danger">
+                {commitError}
+              </p>
+            ) : null}
             <div className="mt-5 flex justify-end gap-3">
               <button
                 type="button"
                 onClick={() => setIsCommitModalOpen(false)}
+                disabled={isCommitPending}
                 className="h-10 rounded border border-line px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
               >
                 破棄しない
               </button>
               <button
-                type="submit"
-                form={commitFormId}
-                className="h-10 rounded bg-ink px-4 text-sm font-semibold text-white transition hover:bg-gray-700"
+                type="button"
+                onClick={commitSession}
+                disabled={isCommitPending}
+                className="h-10 rounded bg-ink px-4 text-sm font-semibold text-white transition hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                確定する
+                {isCommitPending ? "確定中" : "確定する"}
               </button>
             </div>
           </section>
