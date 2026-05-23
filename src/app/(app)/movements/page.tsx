@@ -3,9 +3,11 @@ import { auth } from "@/auth";
 import { AppNav } from "@/components/domain/app-nav";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import {
-  getRecentStockMovementRows,
+  getStockMovementCount,
+  getStockMovementRows,
   getStockMovementSourceLabel,
   getStockMovementTypeLabel,
+  normalizeStockMovementFilters,
 } from "@/lib/db/stock-movements";
 import { MovementFilterForm } from "./movement-filter-form";
 import { RevertMovementButton } from "./revert-movement-button";
@@ -16,6 +18,8 @@ type PageProps = {
     type?: string;
     source?: string;
     sourceId?: string;
+    startDate?: string;
+    endDate?: string;
   }>;
 };
 
@@ -56,17 +60,44 @@ function getMovementBadgeClass(movementType: string) {
   return "bg-gray-100 text-muted";
 }
 
-const movementTypes = new Set(["IN", "OUT", "ADJUST"]);
-const movementSources = new Set([
-  "MANUAL",
-  "QUICK_CARD",
-  "BARCODE_STOCK",
-  "ORDER_RECEIPT",
-  "ORDER_RECEIPT_REVERT",
-  "STOCKTAKE",
-  "STOCKTAKE_SESSION",
-  "REVERT",
-]);
+function buildMovementExportHref(filters: {
+  query: string;
+  movementType: string;
+  sourceType: string;
+  sourceId: string;
+  startDate: string;
+  endDate: string;
+}) {
+  const params = new URLSearchParams();
+
+  if (filters.query) {
+    params.set("q", filters.query);
+  }
+
+  if (filters.movementType) {
+    params.set("type", filters.movementType);
+  }
+
+  if (filters.sourceType) {
+    params.set("source", filters.sourceType);
+  }
+
+  if (filters.sourceId) {
+    params.set("sourceId", filters.sourceId);
+  }
+
+  if (filters.startDate) {
+    params.set("startDate", filters.startDate);
+  }
+
+  if (filters.endDate) {
+    params.set("endDate", filters.endDate);
+  }
+
+  const queryString = params.toString();
+
+  return queryString ? `/movements/export?${queryString}` : "/movements/export";
+}
 
 export default async function MovementsPage({ searchParams }: PageProps) {
   const session = await auth();
@@ -77,44 +108,29 @@ export default async function MovementsPage({ searchParams }: PageProps) {
 
   const context = await requireActiveClinic();
   const params = (await searchParams) ?? {};
-  const query = params.q?.trim() ?? "";
-  const movementType = movementTypes.has(params.type ?? "") ? (params.type ?? "") : "";
-  const sourceType = movementSources.has(params.source ?? "") ? (params.source ?? "") : "";
-  const sourceId = params.sourceId?.trim() ?? "";
-  const movements = await getRecentStockMovementRows(context.clinicId);
-  const normalizedQuery = query.toLowerCase();
-  const filteredMovements = movements.filter((movement) => {
-    const searchText = [
-      movement.productName,
-      movement.productCode,
-      movement.category,
-      movement.reason,
-      movement.lotNumber,
-      movement.expiryDateText,
-      movement.userName,
-      getStockMovementTypeLabel(movement.movementType),
-      getStockMovementSourceLabel(movement.sourceType),
-    ]
-      .filter(Boolean)
-      .join(" ")
-      .toLowerCase();
-    const matchesQuery = normalizedQuery ? searchText.includes(normalizedQuery) : true;
-    const matchesType = movementType ? movement.movementType === movementType : true;
-    const matchesSource = sourceType ? movement.sourceType === sourceType : true;
-    const matchesSourceId = sourceId ? movement.sourceId === sourceId : true;
-
-    return matchesQuery && matchesType && matchesSource && matchesSourceId;
+  const filters = normalizeStockMovementFilters({
+    query: params.q,
+    movementType: params.type,
+    sourceType: params.source,
+    sourceId: params.sourceId,
+    startDate: params.startDate,
+    endDate: params.endDate,
   });
+  const movements = await getStockMovementRows(context.clinicId, filters);
+  const movementCount = await getStockMovementCount(context.clinicId, filters);
+  const exportHref = buildMovementExportHref(filters);
   const filterLabel = [
-    query ? `検索: ${query}` : "",
-    movementType ? `区分: ${getStockMovementTypeLabel(movementType)}` : "",
-    sourceType ? `操作元: ${getStockMovementSourceLabel(sourceType)}` : "",
-    sourceId ? "棚卸セッション指定あり" : "",
+    filters.query ? `検索: ${filters.query}` : "",
+    filters.movementType ? `区分: ${getStockMovementTypeLabel(filters.movementType)}` : "",
+    filters.sourceType ? `操作元: ${getStockMovementSourceLabel(filters.sourceType)}` : "",
+    filters.startDate ? `開始日: ${filters.startDate}` : "",
+    filters.endDate ? `終了日: ${filters.endDate}` : "",
+    filters.sourceId ? "棚卸セッション指定あり" : "",
   ]
     .filter(Boolean)
     .join(" / ");
   const emptyMessage =
-    movements.length === 0
+    movementCount === 0
       ? "まだ入出庫履歴はありません。"
       : "条件に一致する入出庫履歴はありません。検索語や絞り込みを見直してください。";
 
@@ -134,11 +150,19 @@ export default async function MovementsPage({ searchParams }: PageProps) {
         </header>
 
 
-        <MovementFilterForm defaultQuery={query} defaultType={movementType} defaultSource={sourceType} />
+        <MovementFilterForm
+          defaultQuery={filters.query}
+          defaultType={filters.movementType}
+          defaultSource={filters.sourceType}
+          defaultStartDate={filters.startDate}
+          defaultEndDate={filters.endDate}
+          exportHref={exportHref}
+        />
 
         <section className="rounded border border-line bg-white px-4 py-3 text-sm text-muted shadow-panel">
-          表示 {filteredMovements.length} 件 / 全 {movements.length} 件
+          表示 {movements.length} 件 / 条件一致 {movementCount} 件
           {filterLabel ? `（${filterLabel}）` : ""}
+          {movementCount > movements.length ? " / 画面表示は最新100件までです" : ""}
         </section>
 
         <section className="overflow-hidden rounded border border-line bg-white shadow-panel">
@@ -159,8 +183,8 @@ export default async function MovementsPage({ searchParams }: PageProps) {
                 </tr>
               </thead>
               <tbody>
-                {filteredMovements.length > 0 ? (
-                  filteredMovements.map((movement) => {
+                {movements.length > 0 ? (
+                  movements.map((movement) => {
                     const canRevert =
                       !movement.revertedAt &&
                       !movement.revertOfId &&

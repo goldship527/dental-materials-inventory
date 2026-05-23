@@ -4,6 +4,9 @@ type MovementFilterFormProps = {
   defaultQuery: string;
   defaultType: string;
   defaultSource: string;
+  defaultStartDate: string;
+  defaultEndDate: string;
+  exportHref: string;
 };
 
 const typeOptions = [
@@ -25,9 +28,16 @@ const sourceOptions = [
   { value: "REVERT", label: "履歴取り消し" },
 ];
 
-export function MovementFilterForm({ defaultQuery, defaultType, defaultSource }: MovementFilterFormProps) {
+export function MovementFilterForm({
+  defaultQuery,
+  defaultType,
+  defaultSource,
+  defaultStartDate,
+  defaultEndDate,
+  exportHref,
+}: MovementFilterFormProps) {
   return (
-    <form className="grid gap-3 rounded border border-line bg-white p-4 shadow-panel lg:grid-cols-[1fr_180px_200px_auto_auto]">
+    <form className="grid gap-3 rounded border border-line bg-white p-4 shadow-panel lg:grid-cols-[1fr_140px_170px_145px_145px_auto_auto_auto]">
       <input
         type="search"
         name="q"
@@ -57,6 +67,22 @@ export function MovementFilterForm({ defaultQuery, defaultType, defaultSource }:
           </option>
         ))}
       </select>
+      <input
+        type="date"
+        name="startDate"
+        defaultValue={defaultStartDate}
+        aria-label="開始日"
+        title="開始日"
+        className="h-11 rounded border border-line px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+      />
+      <input
+        type="date"
+        name="endDate"
+        defaultValue={defaultEndDate}
+        aria-label="終了日"
+        title="終了日"
+        className="h-11 rounded border border-line px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+      />
       <button
         type="submit"
         className="h-11 rounded bg-accent px-5 text-sm font-semibold text-white transition hover:bg-teal-800"
@@ -68,6 +94,12 @@ export function MovementFilterForm({ defaultQuery, defaultType, defaultSource }:
         href="/movements"
       >
         クリア
+      </a>
+      <a
+        className="flex h-11 items-center justify-center rounded border border-accent/30 bg-teal-50 px-5 text-sm font-semibold text-accent transition hover:border-accent hover:bg-white"
+        href={exportHref}
+      >
+        CSV出力
       </a>
     </form>
   );
