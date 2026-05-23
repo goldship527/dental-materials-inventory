@@ -3625,3 +3625,71 @@
 - `corepack pnpm typecheck`
 - `corepack pnpm build`
 - `git diff --check`
+
+## 2026-05-23 発注済み送付方法・送付メモ・先方対応メモ
+
+### 作業内容
+- `OrderRequest` に `orderedMethod`、`orderedMemo`、`supplierResponseMemo` を追加した。
+- 送付方法は `FAX`、`メール`、`電話`、`LINE` の4種類から選択するようにした。
+- `/orders` の発注先グループ単位の `発注済み` 操作で、送付方法、送付メモ、先方対応メモを入力できるようにした。
+- `/orders` の行ごとの状態変更でも、`発注済み` を選んだ場合に同じ送付記録を保存できるようにした。
+- `/orders`、商品詳細、発注先詳細で、発注済み日時とあわせて送付方法、送付メモ、先方対応メモを表示するようにした。
+- `発注済み` から未確認、確認済み、取り消しへ戻した場合は、発注済み日時と送付記録を空に戻すようにした。
+- `README.md` と `docs/spec.md` に送付記録の仕様を追記した。
+
+### 判断
+- 送付メモは、こちらから何をどう送ったかの記録として残す方針にした。
+- 先方対応メモは、相手先からの返答や確認事項を送付メモと分けて残す方針にした。
+- 外部送信は行わず、人がFAX、メール、電話、LINEで発注した後の記録だけを扱うMVPに留めた。
+- 既存の `ORDERED` データで送付方法が空のものは、過去データとして表示できるようにした。
+
+### セキュリティメモ
+- 送付記録の保存対象は、ログイン中クリニックに属する発注候補だけに限定する。
+- メモ欄には患者情報、個人情報、秘密情報を書かない運用にする。
+- 秘密値、パスワード、APIキー、DB接続文字列は追加していない。
+
+### 検証
+- `corepack pnpm prisma format`
+- `corepack pnpm prisma:generate`
+- `corepack pnpm db:push`
+- `corepack pnpm exec tsx tests/order-request-status.test.ts`
+- `corepack pnpm exec tsx tests/order-print.test.ts`
+- `corepack pnpm exec tsx tests/order-receipt.test.ts`
+- `corepack pnpm typecheck`
+- `corepack pnpm build`
+- `git diff --check`
+
+### 補足
+- `tests/order-receipt.test.ts` は、DB初期化を行うテストを並列実行した影響で一度だけ競合失敗した。単独で再実行して成功した。
+
+## 2026-05-23 発注記録MVP
+
+### 作業内容
+- `OrderRecord` を追加し、画面上では「発注記録」と呼ぶことにした。
+- `OrderRequest` に `orderRecordId` を追加し、発注済み候補がどの発注記録に属するか保存できるようにした。
+- `/orders` の発注先グループ単位で `発注済み` にした場合、対象候補を1つの発注記録に紐づけるようにした。
+- `/orders` の行ごとの状態変更で1件だけ `発注済み` にした場合も、1件だけの発注記録を作るようにした。
+- `発注済み` から未確認、確認済み、取り消しへ戻した場合は、発注記録との紐づけを外し、紐づく候補がなくなった発注記録は削除するようにした。
+- `/orders`、商品詳細、発注先詳細で、発注済み候補に発注記録の短い識別子を表示するようにした。
+- `README.md` と `docs/spec.md` に発注記録MVPの仕様を追記した。
+
+### 判断
+- 発注記録のDBモデル名は英語で `OrderRecord`、利用者向け表示は「発注記録」とした。
+- 今回は親テーブルと紐づけのMVPに留め、発注記録一覧画面や詳細画面は後続に分けた。
+- 発注済み日時、送付方法、送付メモ、先方対応メモは、発注候補側にも残しつつ、発注記録側にも保存する方針にした。
+
+### セキュリティメモ
+- 発注記録はログイン中クリニックに属する発注候補だけから作成する。
+- 発注先が異なる候補を1つの発注記録にまとめる操作はServer Action側で拒否する。
+- 秘密値、パスワード、APIキー、DB接続文字列は追加していない。
+
+### 検証
+- `corepack pnpm prisma format`
+- `corepack pnpm prisma:generate`
+- `corepack pnpm db:push`
+- `corepack pnpm exec tsx tests/order-request-status.test.ts`
+- `corepack pnpm exec tsx tests/order-print.test.ts`
+- `corepack pnpm exec tsx tests/order-receipt.test.ts`
+- `corepack pnpm typecheck`
+- `corepack pnpm build`
+- `git diff --check`

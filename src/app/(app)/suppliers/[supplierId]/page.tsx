@@ -4,6 +4,7 @@ import { AppNav } from "@/components/domain/app-nav";
 import { isAdminRole } from "@/lib/auth/roles";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { getSupplierDetail } from "@/lib/db/suppliers";
+import { orderSendMethodLabels } from "@/lib/orders/send-method";
 import { orderRequestStatusLabels } from "@/lib/orders/status";
 
 type PageProps = {
@@ -31,6 +32,10 @@ function formatReceiptExpiryDate(expiryDate: Date | null, expiryDateText: string
   }
 
   return expiryDateText || "-";
+}
+
+function formatOrderRecordId(orderRecordId: string | null) {
+  return orderRecordId ? orderRecordId.slice(-8) : "-";
 }
 
 export default async function SupplierDetailPage({ params }: PageProps) {
@@ -273,6 +278,18 @@ export default async function SupplierDetailPage({ params }: PageProps) {
                       </p>
                       {request.status === "ORDERED" && request.orderedAt ? (
                         <p className="text-muted">発注済み日時: {dateTimeFormatter.format(request.orderedAt)}</p>
+                      ) : null}
+                      {request.status === "ORDERED" && request.orderRecordId ? (
+                        <p className="text-muted">発注記録: {formatOrderRecordId(request.orderRecordId)}</p>
+                      ) : null}
+                      {request.status === "ORDERED" && request.orderedMethod ? (
+                        <p className="text-muted">送付方法: {orderSendMethodLabels[request.orderedMethod]}</p>
+                      ) : null}
+                      {request.status === "ORDERED" && request.orderedMemo ? (
+                        <p className="text-muted">送付メモ: {request.orderedMemo}</p>
+                      ) : null}
+                      {request.status === "ORDERED" && request.supplierResponseMemo ? (
+                        <p className="text-muted">先方対応メモ: {request.supplierResponseMemo}</p>
                       ) : null}
                       {request.receivedAt ? (
                         <p className="font-semibold text-blue-800">

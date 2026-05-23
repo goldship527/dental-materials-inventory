@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db/prisma";
+import type { OrderSendMethodValue } from "@/lib/orders/send-method";
 import { createEmptyOrderRequestStatusCounts, type OrderRequestStatusValue } from "@/lib/orders/status";
 import { getStockStatus } from "@/lib/stock/status";
 
@@ -45,7 +46,11 @@ export type SupplierDetailOrderRequest = {
   status: OrderRequestStatusValue;
   requestedQuantity: number;
   memo: string | null;
+  orderRecordId: string | null;
   orderedAt: Date | null;
+  orderedMethod: OrderSendMethodValue | null;
+  orderedMemo: string | null;
+  supplierResponseMemo: string | null;
   receivedQuantity: number | null;
   receivedAt: Date | null;
   receivedMemo: string | null;
@@ -258,7 +263,11 @@ export async function getSupplierDetail(
       status: request.status,
       requestedQuantity: request.requestedQuantity,
       memo: request.memo,
+      orderRecordId: request.orderRecordId,
       orderedAt: request.orderedAt,
+      orderedMethod: request.orderedMethod,
+      orderedMemo: request.orderedMemo,
+      supplierResponseMemo: request.supplierResponseMemo,
       receivedQuantity: request.receivedQuantity,
       receivedAt: request.receivedAt,
       receivedMemo: request.receivedMemo,

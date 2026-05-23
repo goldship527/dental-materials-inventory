@@ -5,6 +5,7 @@ import { markOrderRequestsOrderedAction } from "@/lib/actions/orders";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { getOrderRequestRows } from "@/lib/db/orders";
 import { orderPrintUnassignedSupplierId } from "@/lib/orders/print";
+import { orderSendMethodLabels, orderSendMethodValues } from "@/lib/orders/send-method";
 import {
   orderRequestStatusLabels,
   orderRequestStatuses,
@@ -295,6 +296,36 @@ export default async function OrdersPage({ searchParams }: PageProps) {
                           <input type="checkbox" name="confirmOrdered" required className="h-4 w-4 accent-teal-700" />
                           送付済み確認
                         </label>
+                        <label className="grid gap-1 text-xs font-semibold text-muted">
+                          送付方法
+                          <select
+                            name="orderedMethod"
+                            required
+                            defaultValue=""
+                            className="h-9 rounded border border-line bg-white px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                          >
+                            <option value="" disabled>
+                              選択してください
+                            </option>
+                            {orderSendMethodValues.map((method) => (
+                              <option key={method} value={method}>
+                                {orderSendMethodLabels[method]}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                        <textarea
+                          name="orderedMemo"
+                          placeholder="送付メモ（任意）"
+                          maxLength={300}
+                          className="min-h-12 rounded border border-line bg-white px-3 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                        />
+                        <textarea
+                          name="supplierResponseMemo"
+                          placeholder="先方対応メモ（任意）"
+                          maxLength={300}
+                          className="min-h-12 rounded border border-line bg-white px-3 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                        />
                         <button
                           type="submit"
                           className="min-h-9 rounded bg-ink px-3 py-2 text-xs font-semibold text-white transition hover:bg-slate-700"
@@ -337,7 +368,7 @@ export default async function OrdersPage({ searchParams }: PageProps) {
                     <tbody>
                       {supplierRows.map((row) => (
                         <OrderRequestTableRow
-                          key={`${row.id}-${row.status}-${row.requestedQuantity}-${row.memo ?? ""}`}
+                          key={`${row.id}-${row.status}-${row.requestedQuantity}-${row.memo ?? ""}-${row.orderedMethod ?? ""}-${row.orderedMemo ?? ""}-${row.supplierResponseMemo ?? ""}`}
                           row={row}
                         />
                       ))}

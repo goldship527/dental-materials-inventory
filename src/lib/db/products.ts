@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db/prisma";
+import type { OrderSendMethodValue } from "@/lib/orders/send-method";
 import type { OrderRequestStatusValue } from "@/lib/orders/status";
 
 export type ProductMasterRow = {
@@ -91,8 +92,12 @@ export type ProductDetailOrderRequest = {
   requestedQuantity: number;
   memo: string | null;
   supplierId: string | null;
+  orderRecordId: string | null;
   supplierName: string | null;
   orderedAt: Date | null;
+  orderedMethod: OrderSendMethodValue | null;
+  orderedMemo: string | null;
+  supplierResponseMemo: string | null;
   receivedQuantity: number | null;
   receivedAt: Date | null;
   receivedMemo: string | null;
@@ -455,8 +460,12 @@ export async function getProductDetail(
       requestedQuantity: request.requestedQuantity,
       memo: request.memo,
       supplierId: request.supplier?.id ?? product.primarySupplier?.id ?? null,
+      orderRecordId: request.orderRecordId,
       supplierName: request.supplier?.name ?? null,
       orderedAt: request.orderedAt,
+      orderedMethod: request.orderedMethod,
+      orderedMemo: request.orderedMemo,
+      supplierResponseMemo: request.supplierResponseMemo,
       receivedQuantity: request.receivedQuantity,
       receivedAt: request.receivedAt,
       receivedMemo: request.receivedMemo,

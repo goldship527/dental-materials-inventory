@@ -99,6 +99,7 @@ function quantityFor(index: number, minStock: number) {
 
 async function main() {
   await prisma.orderRequest.deleteMany();
+  await prisma.orderRecord.deleteMany();
   await prisma.favoriteProductCard.deleteMany();
   await prisma.productBarcode.deleteMany();
   await prisma.barcodeScanLog.deleteMany();

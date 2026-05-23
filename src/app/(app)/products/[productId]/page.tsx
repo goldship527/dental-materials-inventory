@@ -4,6 +4,7 @@ import { AppNav } from "@/components/domain/app-nav";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { getProductDetail } from "@/lib/db/products";
 import { getStockMovementSourceLabel, getStockMovementTypeLabel } from "@/lib/db/stock-movements";
+import { orderSendMethodLabels } from "@/lib/orders/send-method";
 import { createEmptyOrderRequestStatusCounts, orderRequestStatusLabels } from "@/lib/orders/status";
 import { buildProductPhotoUrl } from "@/lib/product-photos/url";
 
@@ -45,6 +46,10 @@ function formatLotExpiryDate(expiryDate: Date | null, expiryDateText: string | n
   }
 
   return expiryDateText || "-";
+}
+
+function formatOrderRecordId(orderRecordId: string | null) {
+  return orderRecordId ? orderRecordId.slice(-8) : "-";
 }
 
 function formatBarcodeLabel(barcode: { barcodeType: string; unitLabel: string | null; isPrimary: boolean }) {
@@ -476,6 +481,18 @@ export default async function ProductDetailPage({ params }: PageProps) {
                     </p>
                     {request.status === "ORDERED" && request.orderedAt ? (
                       <p className="text-muted">発注済み日時: {dateTimeFormatter.format(request.orderedAt)}</p>
+                    ) : null}
+                    {request.status === "ORDERED" && request.orderRecordId ? (
+                      <p className="text-muted">発注記録: {formatOrderRecordId(request.orderRecordId)}</p>
+                    ) : null}
+                    {request.status === "ORDERED" && request.orderedMethod ? (
+                      <p className="text-muted">送付方法: {orderSendMethodLabels[request.orderedMethod]}</p>
+                    ) : null}
+                    {request.status === "ORDERED" && request.orderedMemo ? (
+                      <p className="text-muted">送付メモ: {request.orderedMemo}</p>
+                    ) : null}
+                    {request.status === "ORDERED" && request.supplierResponseMemo ? (
+                      <p className="text-muted">先方対応メモ: {request.supplierResponseMemo}</p>
                     ) : null}
                     {request.receivedAt ? (
                       <p className="font-semibold text-blue-800">

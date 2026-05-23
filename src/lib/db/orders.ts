@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db/prisma";
+import type { OrderSendMethodValue } from "@/lib/orders/send-method";
 import {
   createEmptyOrderRequestStatusCounts,
   printableOrderRequestStatuses,
@@ -12,6 +13,7 @@ export type OrderRequestRow = {
   name: string;
   category: string | null;
   supplierId: string | null;
+  orderRecordId: string | null;
   supplierName: string | null;
   supplierAddress: string | null;
   supplierPhone: string | null;
@@ -30,6 +32,9 @@ export type OrderRequestRow = {
   status: OrderRequestStatusValue;
   memo: string | null;
   orderedAt: Date | null;
+  orderedMethod: OrderSendMethodValue | null;
+  orderedMemo: string | null;
+  supplierResponseMemo: string | null;
   receivedQuantity: number | null;
   receivedAt: Date | null;
   receivedMemo: string | null;
@@ -141,6 +146,7 @@ export async function getOrderRequestRows(clinicId: string): Promise<OrderReques
       name: request.product.name,
       category: request.product.category,
       supplierId: request.supplier?.id ?? request.product.primarySupplier?.id ?? null,
+      orderRecordId: request.orderRecordId,
       supplierName: request.supplier?.name ?? request.product.primarySupplier?.name ?? null,
       supplierAddress: request.supplier?.address ?? request.product.primarySupplier?.address ?? null,
       supplierPhone: request.supplier?.phone ?? request.product.primarySupplier?.phone ?? null,
@@ -161,6 +167,9 @@ export async function getOrderRequestRows(clinicId: string): Promise<OrderReques
       status: request.status,
       memo: request.memo,
       orderedAt: request.orderedAt,
+      orderedMethod: request.orderedMethod,
+      orderedMemo: request.orderedMemo,
+      supplierResponseMemo: request.supplierResponseMemo,
       receivedQuantity: request.receivedQuantity,
       receivedAt: request.receivedAt,
       receivedMemo: request.receivedMemo,

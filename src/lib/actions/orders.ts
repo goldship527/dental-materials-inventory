@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { prisma } from "@/lib/db/prisma";
+import { orderSendMethodValues } from "@/lib/orders/send-method";
 import { printableOrderRequestStatuses } from "@/lib/orders/status";
 import { orderRequestStatusLabels, type OrderRequestStatusValue } from "@/lib/orders/status";
 
@@ -14,6 +15,9 @@ const stockItemIdSchema = z.string().min(1);
 const supplierIdSchema = z.string().min(1);
 const requestedQuantitySchema = z.coerce.number().int().min(1).max(9999);
 const orderRequestStatusSchema = z.enum(["DRAFT", "CONFIRMED", "SKIPPED", "ORDERED"]);
+const orderSendMethodSchema = z.enum(orderSendMethodValues, {
+  message: "送付方法を選択してください。",
+});
 const orderedConfirmationSchema = z.literal("on");
 const receivedQuantitySchema = z.coerce
   .number()
@@ -27,6 +31,8 @@ const receivedExpiryDateSchema = z
   .trim()
   .refine((value) => value === "" || /^\d{4}-\d{2}-\d{2}$/.test(value), "有効期限は日付形式で入力してください。");
 const memoSchema = z.string().trim().max(200, "メモは200文字以内で入力してください。");
+const orderedMemoSchema = z.string().trim().max(300, "送付メモは300文字以内で入力してください。");
+const supplierResponseMemoSchema = z.string().trim().max(300, "先方対応メモは300文字以内で入力してください。");
 
 export type OrderActionState = {
   status?: "success" | "error";
@@ -353,12 +359,19 @@ export async function updateOrderRequestStatusWithStateAction(
     const orderRequestId = orderRequestIdSchema.parse(formData.get("orderRequestId"));
     const status = orderRequestStatusSchema.parse(formData.get("status"));
     const memoValue = memoSchema.parse(formData.get("memo") ?? "");
+    const orderedMethodValue = formData.get("orderedMethod");
+    const orderedMemoValue = orderedMemoSchema.parse(formData.get("orderedMemo") ?? "");
+    const supplierResponseMemoValue = supplierResponseMemoSchema.parse(formData.get("supplierResponseMemo") ?? "");
     const memo = memoValue.length > 0 ? memoValue : null;
 
     const request = await updateOrderRequestStatusForContext(context, {
       orderRequestId,
       status,
       memo,
+      orderedMethod:
+        status === "ORDERED" ? orderSendMethodSchema.parse(orderedMethodValue || undefined) : null,
+      orderedMemo: orderedMemoValue.length > 0 ? orderedMemoValue : null,
+      supplierResponseMemo: supplierResponseMemoValue.length > 0 ? supplierResponseMemoValue : null,
     });
 
     const label = orderRequestStatusLabels[status];
@@ -401,6 +414,9 @@ export async function updateOrderRequestStatusForContext(
     orderRequestId: string;
     status: OrderRequestStatusValue;
     memo: string | null;
+    orderedMethod?: (typeof orderSendMethodValues)[number] | null;
+    orderedMemo?: string | null;
+    supplierResponseMemo?: string | null;
     revalidate?: boolean;
   },
 ) {
@@ -411,7 +427,12 @@ export async function updateOrderRequestStatusForContext(
     },
     select: {
       id: true,
+      supplierId: true,
+      orderRecordId: true,
       orderedAt: true,
+      orderedMethod: true,
+      orderedMemo: true,
+      supplierResponseMemo: true,
       receivedAt: true,
       status: true,
     },
@@ -425,23 +446,111 @@ export async function updateOrderRequestStatusForContext(
     throw new Error("納品確認済みの発注候補は、発注済み以外の状態へ戻せません。");
   }
 
-  const request = await prisma.orderRequest.update({
-    where: {
-      id: target.id,
-    },
-    data: {
-      status: input.status,
-      memo: input.memo,
-      orderedAt:
-        input.status === "ORDERED" ? (target.status === "ORDERED" ? target.orderedAt : new Date()) : null,
-    },
-    include: {
-      product: {
-        select: {
-          name: true,
+  if (input.status === "ORDERED" && target.status !== "ORDERED" && !input.orderedMethod) {
+    throw new Error("発注済みにする場合は、送付方法を選択してください。");
+  }
+
+  const request = await prisma.$transaction(async (tx) => {
+    const orderedAt =
+      input.status === "ORDERED" ? (target.status === "ORDERED" ? target.orderedAt ?? new Date() : new Date()) : null;
+    const orderedMethod = input.status === "ORDERED" ? input.orderedMethod ?? target.orderedMethod ?? null : null;
+    const orderedMemo =
+      input.status === "ORDERED"
+        ? input.orderedMemo !== undefined
+          ? input.orderedMemo
+          : target.orderedMemo
+        : null;
+    const supplierResponseMemo =
+      input.status === "ORDERED"
+        ? input.supplierResponseMemo !== undefined
+          ? input.supplierResponseMemo
+          : target.supplierResponseMemo
+        : null;
+
+    if (input.status === "ORDERED" && !orderedMethod) {
+      throw new Error("発注済みにする場合は、送付方法を選択してください。");
+    }
+
+    let orderRecordId: string | null = null;
+
+    if (input.status === "ORDERED" && orderedAt && orderedMethod) {
+      if (target.orderRecordId) {
+        const orderRecord = await tx.orderRecord.update({
+          where: {
+            id: target.orderRecordId,
+          },
+          data: {
+            supplierId: target.supplierId,
+            orderedAt,
+            orderedMethod,
+            orderedMemo,
+            supplierResponseMemo,
+          },
+          select: {
+            id: true,
+          },
+        });
+
+        orderRecordId = orderRecord.id;
+      } else {
+        const orderRecord = await tx.orderRecord.create({
+          data: {
+            clinicId: context.clinicId,
+            supplierId: target.supplierId,
+            orderedAt,
+            orderedMethod,
+            orderedMemo,
+            supplierResponseMemo,
+            createdByUserId: context.userId,
+          },
+          select: {
+            id: true,
+          },
+        });
+
+        orderRecordId = orderRecord.id;
+      }
+    }
+
+    const updatedRequest = await tx.orderRequest.update({
+      where: {
+        id: target.id,
+      },
+      data: {
+        status: input.status,
+        memo: input.memo,
+        orderRecordId,
+        orderedAt,
+        orderedMethod,
+        orderedMemo,
+        supplierResponseMemo,
+      },
+      include: {
+        product: {
+          select: {
+            name: true,
+          },
         },
       },
-    },
+    });
+
+    if (input.status !== "ORDERED" && target.orderRecordId) {
+      const remainingCount = await tx.orderRequest.count({
+        where: {
+          orderRecordId: target.orderRecordId,
+        },
+      });
+
+      if (remainingCount === 0) {
+        await tx.orderRecord.delete({
+          where: {
+            id: target.orderRecordId,
+          },
+        });
+      }
+    }
+
+    return updatedRequest;
   });
 
   if (input.revalidate ?? true) {
@@ -918,22 +1027,96 @@ export async function markOrderRequestsOrderedAction(formData: FormData) {
   const context = await requireActiveClinic();
   orderedConfirmationSchema.parse(formData.get("confirmOrdered"));
   const orderRequestIds = orderRequestIdsSchema.parse(formData.getAll("orderRequestId"));
+  const orderedMethod = orderSendMethodSchema.parse(formData.get("orderedMethod") || undefined);
+  const orderedMemoValue = orderedMemoSchema.parse(formData.get("orderedMemo") ?? "");
+  const supplierResponseMemoValue = supplierResponseMemoSchema.parse(formData.get("supplierResponseMemo") ?? "");
 
-  await prisma.orderRequest.updateMany({
-    where: {
-      id: {
-        in: orderRequestIds,
+  await markOrderRequestsOrderedForContext(context, {
+    orderRequestIds,
+    orderedMethod,
+    orderedMemo: orderedMemoValue.length > 0 ? orderedMemoValue : null,
+    supplierResponseMemo: supplierResponseMemoValue.length > 0 ? supplierResponseMemoValue : null,
+  });
+}
+
+export async function markOrderRequestsOrderedForContext(
+  context: ActiveClinicContext,
+  input: {
+    orderRequestIds: string[];
+    orderedMethod: (typeof orderSendMethodValues)[number];
+    orderedMemo: string | null;
+    supplierResponseMemo: string | null;
+    revalidate?: boolean;
+  },
+) {
+  const orderRequestIds = orderRequestIdsSchema.parse(input.orderRequestIds);
+
+  await prisma.$transaction(async (tx) => {
+    const targets = await tx.orderRequest.findMany({
+      where: {
+        id: {
+          in: orderRequestIds,
+        },
+        clinicId: context.clinicId,
+        status: {
+          in: printableOrderRequestStatuses,
+        },
       },
-      clinicId: context.clinicId,
-      status: {
-        in: printableOrderRequestStatuses,
+      select: {
+        id: true,
+        supplierId: true,
       },
-    },
-    data: {
-      status: "ORDERED",
-      orderedAt: new Date(),
-    },
+    });
+
+    if (targets.length === 0) {
+      throw new Error("発注済みにできる発注候補が見つかりません。");
+    }
+
+    const supplierIds = new Set(targets.map((target) => target.supplierId ?? ""));
+
+    if (supplierIds.size > 1) {
+      throw new Error("発注記録は発注先ごとに作成してください。");
+    }
+
+    const orderedAt = new Date();
+    const supplierId = targets[0]?.supplierId ?? null;
+    const orderRecord = await tx.orderRecord.create({
+      data: {
+        clinicId: context.clinicId,
+        supplierId,
+        orderedAt,
+        orderedMethod: input.orderedMethod,
+        orderedMemo: input.orderedMemo,
+        supplierResponseMemo: input.supplierResponseMemo,
+        createdByUserId: context.userId,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    await tx.orderRequest.updateMany({
+      where: {
+        id: {
+          in: targets.map((target) => target.id),
+        },
+        clinicId: context.clinicId,
+        status: {
+          in: printableOrderRequestStatuses,
+        },
+      },
+      data: {
+        status: "ORDERED",
+        orderRecordId: orderRecord.id,
+        orderedAt,
+        orderedMethod: input.orderedMethod,
+        orderedMemo: input.orderedMemo,
+        supplierResponseMemo: input.supplierResponseMemo,
+      },
+    });
   });
 
-  revalidateOrderPages();
+  if (input.revalidate ?? true) {
+    revalidateOrderPages();
+  }
 }

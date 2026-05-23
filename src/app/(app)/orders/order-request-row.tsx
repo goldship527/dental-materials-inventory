@@ -10,6 +10,7 @@ import {
   type OrderActionState,
 } from "@/lib/actions/orders";
 import type { OrderRequestRow } from "@/lib/db/orders";
+import { orderSendMethodLabels, orderSendMethodValues } from "@/lib/orders/send-method";
 import {
   orderRequestStatuses,
   orderRequestStatusLabels,
@@ -48,6 +49,10 @@ function formatReceiptExpiryDate(expiryDate: Date | null, expiryDateText: string
   }
 
   return expiryDateText || "-";
+}
+
+function formatOrderRecordId(orderRecordId: string | null) {
+  return orderRecordId ? orderRecordId.slice(-8) : "-";
 }
 
 export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
@@ -333,6 +338,54 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
           ) : null}
           {row.status === "ORDERED" && row.orderedAt ? (
             <p className="text-xs text-muted">発注済み日時: {dateTimeFormatter.format(row.orderedAt)}</p>
+          ) : null}
+          {row.status === "ORDERED" && row.orderRecordId ? (
+            <p className="text-xs text-muted">発注記録: {formatOrderRecordId(row.orderRecordId)}</p>
+          ) : null}
+          {row.status === "ORDERED" && row.orderedMethod ? (
+            <p className="text-xs text-muted">送付方法: {orderSendMethodLabels[row.orderedMethod]}</p>
+          ) : null}
+          {row.status === "ORDERED" && row.orderedMemo ? (
+            <p className="text-xs text-muted">送付メモ: {row.orderedMemo}</p>
+          ) : null}
+          {row.status === "ORDERED" && row.supplierResponseMemo ? (
+            <p className="text-xs text-muted">先方対応メモ: {row.supplierResponseMemo}</p>
+          ) : null}
+          {selectedStatus === "ORDERED" ? (
+            <>
+              <label className="grid gap-1 text-xs font-semibold text-muted">
+                送付方法
+                <select
+                  name="orderedMethod"
+                  required
+                  defaultValue={row.orderedMethod ?? ""}
+                  className="h-10 rounded border border-line bg-white px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                >
+                  <option value="" disabled>
+                    選択してください
+                  </option>
+                  {orderSendMethodValues.map((method) => (
+                    <option key={method} value={method}>
+                      {orderSendMethodLabels[method]}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <textarea
+                name="orderedMemo"
+                defaultValue={row.orderedMemo ?? ""}
+                placeholder="送付メモ（任意）"
+                maxLength={300}
+                className="min-h-12 rounded border border-line px-3 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+              />
+              <textarea
+                name="supplierResponseMemo"
+                defaultValue={row.supplierResponseMemo ?? ""}
+                placeholder="先方対応メモ（任意）"
+                maxLength={300}
+                className="min-h-12 rounded border border-line px-3 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+              />
+            </>
           ) : null}
           <textarea
             name="memo"

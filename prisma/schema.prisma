@@ -39,6 +39,7 @@ model Clinic {
   stockMovements        StockMovement[]
   barcodeScanLogs       BarcodeScanLog[]
   favoriteCards         FavoriteProductCard[]
+  orderRecords          OrderRecord[]
   orderRequests         OrderRequest[]
   stocktakeSessions     StocktakeSession[]
   userClinicAssignments UserClinicAssignment[]
@@ -61,6 +62,7 @@ model User {
   organization               Organization           @relation(fields: [organizationId], references: [id])
   clinicAssignments          UserClinicAssignment[]
   stockMovements             StockMovement[]
+  orderRecords               OrderRecord[]          @relation("OrderRecordCreatedBy")
   orderRequests              OrderRequest[]         @relation("OrderRequestCreatedBy")
   receivedOrderRequests      OrderRequest[]         @relation("OrderRequestReceivedBy")
   barcodeScanLogs            BarcodeScanLog[]
@@ -136,6 +138,7 @@ model Supplier {
   organization     Organization      @relation(fields: [organizationId], references: [id])
   products         Product[]
   productSuppliers ProductSupplier[]
+  orderRecords     OrderRecord[]
   orderRequests    OrderRequest[]
 
   @@index([organizationId])
@@ -427,15 +430,26 @@ enum OrderRequestStatus {
   ORDERED
 }
 
+enum OrderSendMethod {
+  FAX
+  EMAIL
+  PHONE
+  LINE
+}
+
 model OrderRequest {
   id                     String             @id @default(cuid())
   clinicId               String
   productId              String
   supplierId             String?
+  orderRecordId          String?
   status                 OrderRequestStatus @default(DRAFT)
   requestedQuantity      Int
   memo                   String?
   orderedAt              DateTime?
+  orderedMethod          OrderSendMethod?
+  orderedMemo            String?
+  supplierResponseMemo   String?
   receivedQuantity       Int?
   receivedAt             DateTime?
   receivedMemo           String?
@@ -447,15 +461,39 @@ model OrderRequest {
   createdAt              DateTime           @default(now())
   updatedAt              DateTime           @updatedAt
 
-  clinic         Clinic    @relation(fields: [clinicId], references: [id])
-  product        Product   @relation(fields: [productId], references: [id])
-  supplier       Supplier? @relation(fields: [supplierId], references: [id])
-  createdByUser  User      @relation("OrderRequestCreatedBy", fields: [createdByUserId], references: [id])
-  receivedByUser User?     @relation("OrderRequestReceivedBy", fields: [receivedByUserId], references: [id])
+  clinic         Clinic       @relation(fields: [clinicId], references: [id])
+  product        Product      @relation(fields: [productId], references: [id])
+  supplier       Supplier?    @relation(fields: [supplierId], references: [id])
+  orderRecord    OrderRecord? @relation(fields: [orderRecordId], references: [id])
+  createdByUser  User         @relation("OrderRequestCreatedBy", fields: [createdByUserId], references: [id])
+  receivedByUser User?        @relation("OrderRequestReceivedBy", fields: [receivedByUserId], references: [id])
 
   @@index([clinicId, status])
   @@index([productId])
   @@index([supplierId])
+  @@index([orderRecordId])
   @@index([createdByUserId])
   @@index([receivedByUserId])
+}
+
+model OrderRecord {
+  id                   String          @id @default(cuid())
+  clinicId             String
+  supplierId           String?
+  orderedAt            DateTime
+  orderedMethod        OrderSendMethod
+  orderedMemo          String?
+  supplierResponseMemo String?
+  createdByUserId      String
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+
+  clinic        Clinic         @relation(fields: [clinicId], references: [id])
+  supplier      Supplier?      @relation(fields: [supplierId], references: [id])
+  createdByUser User           @relation("OrderRecordCreatedBy", fields: [createdByUserId], references: [id])
+  orderRequests OrderRequest[]
+
+  @@index([clinicId, orderedAt])
+  @@index([supplierId])
+  @@index([createdByUserId])
 }
