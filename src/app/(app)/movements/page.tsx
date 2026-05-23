@@ -167,12 +167,12 @@ export default async function MovementsPage({ searchParams }: PageProps) {
 
         <section className="overflow-hidden rounded border border-line bg-white shadow-panel">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[1120px] border-collapse text-left text-sm">
+            <table className="w-full min-w-[1200px] border-collapse text-left text-sm">
               <thead className="bg-gray-50 text-xs text-muted">
                 <tr>
                   <th className="border-b border-line px-4 py-3">日時</th>
                   <th className="border-b border-line px-4 py-3">商品</th>
-                  <th className="border-b border-line px-4 py-3">区分</th>
+                  <th className="w-24 border-b border-line px-4 py-3">区分</th>
                   <th className="border-b border-line px-4 py-3 text-right">増減</th>
                   <th className="border-b border-line px-4 py-3 text-right">変更前</th>
                   <th className="border-b border-line px-4 py-3 text-right">変更後</th>
@@ -205,8 +205,8 @@ export default async function MovementsPage({ searchParams }: PageProps) {
                             {movement.productCode ?? "コード未設定"} / {movement.category ?? "未分類"}
                           </p>
                         </td>
-                        <td className="border-b border-line px-4 py-3">
-                          <span className={`rounded px-2 py-1 text-xs font-semibold ${getMovementBadgeClass(movement.movementType)}`}>
+                        <td className="w-24 border-b border-line px-4 py-3">
+                          <span className={`inline-flex whitespace-nowrap rounded px-2 py-1 text-xs font-semibold ${getMovementBadgeClass(movement.movementType)}`}>
                             {getStockMovementTypeLabel(movement.movementType)}
                           </span>
                         </td>
@@ -227,7 +227,7 @@ export default async function MovementsPage({ searchParams }: PageProps) {
                         <td className="border-b border-line px-4 py-3 text-muted">
                           {getStockMovementSourceLabel(movement.sourceType)}
                           {movement.sourceType === "STOCKTAKE_SESSION" ? (
-                            <p className="mt-1 text-xs text-danger">棚卸セッション由来は対象外</p>
+                            <p className="mt-1 text-xs text-danger">棚卸確定の履歴は取り消せません</p>
                           ) : null}
                           {movement.revertedAt ? <p className="mt-1 text-xs text-muted">取り消し済み</p> : null}
                           {movement.revertOfId ? <p className="mt-1 text-xs text-muted">取り消し操作</p> : null}
