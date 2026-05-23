@@ -3626,6 +3626,30 @@
 - `corepack pnpm build`
 - `git diff --check`
 
+## 2026-05-23 公開環境での発注済み・納品確認フロー確認
+
+### 作業内容
+- Vercel公開環境 `https://dental-materials-inventory.vercel.app` にログイン後、`/home` と `/orders` を確認した。
+- `/orders` で未確認の発注候補を1件、発注先グループ単位で `発注済み` に変更した。
+- 送付方法、送付メモ、先方対応メモ、発注記録の短い識別子が `/orders` に表示されることを確認した。
+- 同じ発注候補で納品確認を実行し、在庫反映ON、ロット番号、有効期限、納品メモが保存・表示されることを確認した。
+- 納品確認取り消しを実行し、在庫数が元に戻り、納品確認済み表示が消えることを確認した。
+- 商品詳細と発注先詳細で、発注済み日時、発注記録、送付方法、送付メモ、先方対応メモが表示されることを確認した。
+- 検証に使った発注候補は最後に `未確認` へ戻し、発注済み日時、送付記録、発注記録表示が消えることを確認した。
+
+### 確認結果
+- 公開環境で、発注済み記録、発注記録MVP、納品確認、納品確認取り消し、商品詳細・発注先詳細への表示は期待どおり動作した。
+- 検証後の `/orders` 件数は、未確認5件、確認済み0件、取り消し0件、発注済み1件に戻した。
+- 検証中に作成された入出庫履歴には、納品確認と納品確認取り消しの履歴が残る。
+
+### セキュリティメモ
+- 公開デモ用のログイン情報、環境変数、DB接続文字列、Supabaseキーは記録していない。
+- 検証メモには患者情報、個人情報、実在医院名、実在発注先名、秘密情報を含めていない。
+
+### 残タスク
+- 発注記録詳細画面は未実装のまま。
+- 発注記録単位での納品状況表示は後続で検討する。
+
 ## 2026-05-23 発注済み送付方法・送付メモ・先方対応メモ
 
 ### 作業内容
@@ -3655,6 +3679,59 @@
 - `corepack pnpm exec tsx tests/order-request-status.test.ts`
 - `corepack pnpm exec tsx tests/order-print.test.ts`
 - `corepack pnpm exec tsx tests/order-receipt.test.ts`
+- `corepack pnpm typecheck`
+- `corepack pnpm build`
+- `git diff --check`
+
+## 2026-05-23 発注記録一覧画面MVP
+
+### 作業内容
+- `src/lib/db/order-records.ts` を追加し、ログイン中クリニックの発注記録を一覧用に取得できるようにした。
+- `/order-records` に発注記録一覧画面を追加した。
+- 一覧では、発注日時、発注記録ID、発注先、送付方法、候補件数、発注数量合計、納品確認状況、商品、送付メモ、先方対応メモを表示するようにした。
+- 発注先名から発注先詳細、商品名から商品詳細へ移動できるようにした。
+- 発注先、商品名、商品コード、発注記録ID、メモで検索できるようにした。
+- `/orders` のヘッダーに発注記録一覧への導線を追加した。
+- `tests/order-records.test.ts` を追加し、クリニック単位の絞り込み、候補件数、発注数量合計、納品確認済み件数、納品数量合計を確認するようにした。
+- `docs/spec.md` に発注記録一覧画面MVPの仕様を追記した。
+
+### 判断
+- 今回は閲覧専用の一覧画面に留め、発注記録の編集、削除、詳細画面、PDF生成、外部送信は追加しない。
+- 既存の `OrderRecord` と `OrderRequest.orderRecordId` を使うため、追加のDBカラムやSupabase SQLは不要。
+- 発注記録単位での納品状況は、まず候補件数に対する納品確認済み件数として表示する。
+
+### セキュリティメモ
+- 発注記録一覧はログイン中クリニックの `OrderRecord` だけを表示する。
+- 今回追加した画面は閲覧専用で、在庫数、発注候補、発注記録を変更しない。
+- 秘密値、パスワード、APIキー、DB接続文字列は追加していない。
+- 患者情報、個人情報、実在医院名、実在発注先名は追加していない。
+
+### 検証
+- `corepack pnpm exec tsx tests/order-records.test.ts`
+- `corepack pnpm exec tsx tests/order-request-status.test.ts`
+- `corepack pnpm typecheck`
+- `corepack pnpm build`
+- `git diff --check`
+
+## 2026-05-23 公開環境の商品写真ストレージ未設定エラー改善
+
+### 作業内容
+- 公開環境で商品写真アップロード時に `ENOENT: no such file or directory, mkdir '/var/task/data'` が表示される事象を確認した。
+- 原因は、Vercel環境で `SUPABASE_STORAGE_BUCKET` が未設定の場合に、ローカル保存へフォールバックしてしまうことと判断した。
+- `src/lib/storage/product-photos.ts` で、Vercel環境かつ `SUPABASE_STORAGE_BUCKET` 未設定の場合は、ローカル保存へ進まず分かりやすいエラーを返すようにした。
+- `tests/product-photos.test.ts` に、Vercel環境で商品写真ストレージ未設定の場合のエラー確認を追加した。
+
+### 判断
+- ローカル開発では従来どおり、`SUPABASE_STORAGE_BUCKET` 未設定時に `data/local/uploads/products/` へ保存する。
+- Vercel公開環境ではローカルディスク保存を使わず、Supabase Storage設定を必須にする。
+- 本対応として、VercelのProduction環境変数に `SUPABASE_URL`、`SUPABASE_SERVICE_ROLE_KEY`、`SUPABASE_STORAGE_BUCKET` を設定する必要がある。
+
+### セキュリティメモ
+- 秘密値、Supabaseキー、DB接続文字列は表示・記録していない。
+- `SUPABASE_SERVICE_ROLE_KEY` はVercel環境変数にだけ設定し、Git、README、チャットには書かない。
+
+### 検証
+- `corepack pnpm exec tsx tests/product-photos.test.ts`
 - `corepack pnpm typecheck`
 - `corepack pnpm build`
 - `git diff --check`
@@ -3690,6 +3767,29 @@
 - `corepack pnpm exec tsx tests/order-request-status.test.ts`
 - `corepack pnpm exec tsx tests/order-print.test.ts`
 - `corepack pnpm exec tsx tests/order-receipt.test.ts`
+- `corepack pnpm typecheck`
+- `corepack pnpm build`
+- `git diff --check`
+
+## 2026-05-23 商品写真ストレージ診断画面
+
+### 作業内容
+- 管理者向けに `/admin/storage` を追加し、商品写真用Supabase Storage設定を診断できるようにした。
+- 診断画面では `SUPABASE_URL`、`SUPABASE_SERVICE_ROLE_KEY`、`SUPABASE_STORAGE_BUCKET` の設定有無や形式、Storage bucket接続結果を表示する。
+- `SUPABASE_SERVICE_ROLE_KEY` などの秘密値そのものは画面、ログ、ドキュメントに表示しない。
+- `SUPABASE_STORAGE_BUCKET` にURL、引用符、スラッシュ、空白が入っている場合は、bucket名だけを設定するよう分かりやすく表示する。
+- 管理メニューに「ストレージ診断」への導線を追加した。
+
+### 判断
+- Vercel環境変数の設定ミスはコードだけでは見えにくいため、管理者だけが使える秘密値非表示の診断画面で切り分ける。
+- 公開環境では商品写真のローカル保存を使わず、Supabase Storage設定を必須にする方針は維持する。
+
+### セキュリティメモ
+- 秘密値、Supabaseキー、DB接続文字列は表示・記録していない。
+- 診断画面は `requireAdminUser()` で管理者に限定する。
+
+### 検証
+- `corepack pnpm exec tsx tests/product-photos.test.ts`
 - `corepack pnpm typecheck`
 - `corepack pnpm build`
 - `git diff --check`

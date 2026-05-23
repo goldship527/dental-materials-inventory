@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { access, rm } from "node:fs/promises";
 import path from "node:path";
 import {
+  getProductPhotoStorageDiagnostics,
   getProductPhotoFileName,
   productPhotoAllowedMimeTypes,
   productPhotoLocalDirectory,
@@ -117,7 +118,12 @@ function makeFile(bytes: Uint8Array, type: string, name: string) {
 }
 
 async function main() {
+  const previousVercel = process.env.VERCEL;
+  const previousSupabaseUrl = process.env.SUPABASE_URL;
+  const previousServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const previousStorageBucket = process.env.SUPABASE_STORAGE_BUCKET;
   process.env.SUPABASE_STORAGE_BUCKET = "";
+  process.env.VERCEL = "";
   resetTestDatabase();
 
   const { prisma } = await import("../src/lib/db/prisma");
@@ -152,6 +158,64 @@ async function main() {
         photo: gifFile,
         revalidate: false,
       }),
+    );
+
+    process.env.VERCEL = "1";
+    await assert.rejects(
+      () =>
+        uploadProductPhotoForContext({
+          context: data.context,
+          productId: data.product.id,
+          photo: pngFile,
+          revalidate: false,
+        }),
+      /SUPABASE_STORAGE_BUCKET/,
+    );
+    process.env.VERCEL = "";
+
+    const localStorageDiagnostics = await getProductPhotoStorageDiagnostics({
+      checkBucketConnection: false,
+      env: {
+        SUPABASE_STORAGE_BUCKET: "",
+        VERCEL: "",
+      },
+    });
+
+    assert.equal(localStorageDiagnostics.mode, "local");
+    assert.equal(localStorageDiagnostics.items.some((item) => item.label === "SUPABASE_STORAGE_BUCKET" && item.status === "warning"), true);
+
+    const invalidBucketDiagnostics = await getProductPhotoStorageDiagnostics({
+      checkBucketConnection: false,
+      env: {
+        SUPABASE_URL: "https://example.supabase.co",
+        SUPABASE_SERVICE_ROLE_KEY: "secret-key-for-test",
+        SUPABASE_STORAGE_BUCKET: "https://example.supabase.co/storage/v1/object/product-photos",
+        VERCEL: "1",
+      },
+    });
+
+    assert.equal(
+      invalidBucketDiagnostics.items.some(
+        (item) => item.label === "SUPABASE_STORAGE_BUCKET" && item.status === "error" && item.message.includes("bucket名だけ"),
+      ),
+      true,
+    );
+
+    const invalidUrlDiagnostics = await getProductPhotoStorageDiagnostics({
+      checkBucketConnection: false,
+      env: {
+        SUPABASE_URL: "postgresql://example.test/database",
+        SUPABASE_SERVICE_ROLE_KEY: "secret-key-for-test",
+        SUPABASE_STORAGE_BUCKET: "product-photos",
+        VERCEL: "1",
+      },
+    });
+
+    assert.equal(
+      invalidUrlDiagnostics.items.some(
+        (item) => item.label === "SUPABASE_URL" && item.status === "error" && item.message.includes("Database URL"),
+      ),
+      true,
     );
 
     const pngResult = await uploadProductPhotoForContext({
@@ -251,6 +315,26 @@ async function main() {
       );
     }
     await prisma.$disconnect();
+    if (previousVercel === undefined) {
+      delete process.env.VERCEL;
+    } else {
+      process.env.VERCEL = previousVercel;
+    }
+    if (previousSupabaseUrl === undefined) {
+      delete process.env.SUPABASE_URL;
+    } else {
+      process.env.SUPABASE_URL = previousSupabaseUrl;
+    }
+    if (previousServiceRoleKey === undefined) {
+      delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+    } else {
+      process.env.SUPABASE_SERVICE_ROLE_KEY = previousServiceRoleKey;
+    }
+    if (previousStorageBucket === undefined) {
+      delete process.env.SUPABASE_STORAGE_BUCKET;
+    } else {
+      process.env.SUPABASE_STORAGE_BUCKET = previousStorageBucket;
+    }
   }
 }
 

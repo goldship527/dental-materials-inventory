@@ -147,6 +147,12 @@ export default async function OrdersPage({ searchParams }: PageProps) {
             >
               発注書下書き
             </a>
+            <a
+              className="inline-flex min-h-10 items-center justify-center rounded border border-line bg-white/75 px-4 py-2 text-sm font-semibold hover:border-accent hover:bg-white"
+              href="/order-records"
+            >
+              発注記録
+            </a>
             <OrdersPrintButton />
           </div>
         </header>

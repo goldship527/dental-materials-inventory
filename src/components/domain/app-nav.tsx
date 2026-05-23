@@ -17,6 +17,7 @@ type NavItemId =
   | "stocktake"
   | "admin"
   | "auditLogs"
+  | "storage"
   | "account";
 
 type AppNavProps = {
@@ -103,6 +104,11 @@ const adminNavItems = [
     label: "監査ログ",
     href: "/admin/audit-logs",
   },
+  {
+    id: "storage",
+    label: "ストレージ診断",
+    href: "/admin/storage",
+  },
 ] as const satisfies readonly NavItem[];
 
 const helpNavItems = [
@@ -158,7 +164,8 @@ export async function AppNav({ current }: AppNavProps) {
   const session = await auth();
   const canUseAdminMode = isAdminRole(session?.user?.role);
   const isAdminMode =
-    canUseAdminMode && (current === "setup" || current === "imports" || current === "admin" || current === "auditLogs");
+    canUseAdminMode &&
+    (current === "setup" || current === "imports" || current === "admin" || current === "auditLogs" || current === "storage");
   const modeItems = isAdminMode ? adminNavItems : workNavItems;
 
   return (
