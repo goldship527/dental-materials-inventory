@@ -26,9 +26,9 @@ export function PhotoManagement({ productId, productName, photoUpdatedAt }: Phot
   const hasPhoto = photoUrl !== null;
 
   return (
-    <section className="rounded border border-line bg-white p-5 shadow-panel">
-      <div className="grid gap-5 md:grid-cols-[180px_1fr]">
-        <div>
+    <section className="overflow-hidden rounded border border-line bg-white p-4 shadow-panel sm:p-5">
+      <div className="grid min-w-0 gap-5 md:grid-cols-[180px_minmax(0,1fr)]">
+        <div className="w-full max-w-[180px] md:max-w-none">
           {hasPhoto ? (
             <img
               alt={`${productName}の商品写真`}
@@ -41,23 +41,23 @@ export function PhotoManagement({ productId, productName, photoUpdatedAt }: Phot
             </div>
           )}
         </div>
-        <div className="grid gap-4">
+        <div className="grid min-w-0 gap-4">
           <div>
             <h2 className="text-lg font-semibold">商品写真</h2>
             <p className="mt-2 text-sm text-muted">PNG / JPEG / WebP、2MB以内</p>
           </div>
 
-          <form action={uploadAction} className="grid gap-3">
+          <form action={uploadAction} className="grid min-w-0 gap-3">
             <input type="hidden" name="productId" value={productId} />
-            <input
-              accept="image/png,image/jpeg,image/webp"
-              className="block w-full rounded border border-line px-3 py-2 text-sm text-muted file:mr-3 file:rounded file:border-0 file:bg-accent file:px-3 file:py-2 file:text-sm file:font-semibold file:text-white"
-              name="photo"
-              type="file"
-            />
-            <div className="flex flex-wrap gap-3">
+            <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center">
+              <input
+                accept="image/png,image/jpeg,image/webp"
+                className="block h-11 min-w-0 flex-1 rounded border border-line text-sm text-muted file:mr-3 file:h-full file:border-0 file:bg-accent file:px-3 file:text-sm file:font-semibold file:text-white"
+                name="photo"
+                type="file"
+              />
               <button
-                className="rounded bg-ink px-5 py-3 text-sm font-semibold text-white transition hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex h-11 shrink-0 items-center justify-center rounded bg-ink px-5 text-sm font-semibold text-white transition hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={isUploading}
                 type="submit"
               >
@@ -78,7 +78,7 @@ export function PhotoManagement({ productId, productName, photoUpdatedAt }: Phot
             >
               <input type="hidden" name="productId" value={productId} />
               <button
-                className="rounded border border-line bg-white px-5 py-3 text-sm font-semibold text-muted transition hover:border-danger hover:text-danger disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex h-11 items-center justify-center rounded border border-line bg-white px-5 text-sm font-semibold text-muted transition hover:border-danger hover:text-danger disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={isDeleting}
                 type="submit"
               >
