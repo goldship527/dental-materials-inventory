@@ -176,12 +176,6 @@ export default async function HomePage() {
             <h1 className="mt-2 text-3xl font-semibold tracking-normal">ホーム</h1>
             <p className="mt-2 text-sm text-muted">{session.user.name} としてログイン中</p>
           </div>
-          <a
-            className="rounded border border-accent/30 bg-teal-50 px-4 py-3 text-sm font-semibold text-accent transition hover:border-accent print:hidden"
-            href="/quick"
-          >
-            クイック出庫へ
-          </a>
         </header>
 
         <section className="grid gap-3 print:hidden sm:grid-cols-2 lg:grid-cols-4">
