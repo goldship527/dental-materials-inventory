@@ -4148,3 +4148,25 @@
 - `corepack pnpm exec tsx tests/staff-operators.test.ts`
 - `corepack pnpm exec tsx tests/barcode-stock-lots.test.ts`
 - `corepack pnpm exec tsx tests/barcode-scan-logs.test.ts`
+
+## 2026-05-24 バーコード出入庫のスキャン入力改善
+
+### 作業内容
+- `/barcode/stock` の商品バーコード欄で、スキャナー入力後に短い待ち時間で自動検索するようにした。
+- 商品が1件に特定された場合、上部の商品バーコード欄ではなく、担当者バーコード欄へ自動フォーカスするようにした。
+- 担当者バーコード欄に読み取られた文字列を表示し、スキャンが入ったことを分かりやすくした。
+- 仕様書とスタッフマニュアルに、商品スキャン後の自動検索と担当者欄への自動移動を追記した。
+
+### 判断
+- スキャナー運用では、読み取り後に毎回検索ボタンを押すより、商品バーコードの読み取りで商品確認まで進む方が自然と判断した。
+- 担当者バーコードを読んだだけでは在庫を変更せず、従来通り数量、理由、確定ボタンで入出庫する安全仕様を維持する。
+
+### セキュリティメモ
+- DBスキーマ、秘密値、Supabase設定は変更していない。
+- 在庫数はバーコード読み取りだけでは変更しない。
+
+### 検証
+- `corepack pnpm typecheck`
+- `corepack pnpm exec tsx tests/barcode-normalize.test.ts`
+- `corepack pnpm build`
+- `Invoke-WebRequest -UseBasicParsing -Uri 'http://localhost:3000/barcode/stock'`

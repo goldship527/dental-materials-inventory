@@ -1,7 +1,8 @@
 "use client";
 
-import { useActionState, useMemo, useState } from "react";
+import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 import { barcodeStockMoveAction, type BarcodeStockActionState } from "@/lib/actions/barcode-stock";
+import { normalizeBarcodeText } from "@/lib/barcode/normalize";
 import { barcodeStockInReasons, barcodeStockOutReasons } from "@/lib/barcode/stock-reasons";
 
 type BarcodeStockFormProps = {
@@ -14,11 +15,19 @@ const initialState: BarcodeStockActionState = {};
 
 export function BarcodeStockForm({ barcode, productId, currentQuantity }: BarcodeStockFormProps) {
   const [state, formAction, isPending] = useActionState(barcodeStockMoveAction, initialState);
+  const staffInputRef = useRef<HTMLInputElement>(null);
+  const [staffBarcode, setStaffBarcode] = useState("");
   const [movementType, setMovementType] = useState<"OUT" | "IN">("OUT");
   const [reason, setReason] = useState<string>("使用");
   const [quantity, setQuantity] = useState(1);
   const displayQuantity = state.afterQuantity ?? currentQuantity;
   const reasonOptions = useMemo(() => (movementType === "OUT" ? barcodeStockOutReasons : barcodeStockInReasons), [movementType]);
+
+  useEffect(() => {
+    setStaffBarcode("");
+    staffInputRef.current?.focus();
+    staffInputRef.current?.select();
+  }, [barcode, productId]);
 
   function changeMovementType(nextType: "OUT" | "IN") {
     setMovementType(nextType);
@@ -39,14 +48,23 @@ export function BarcodeStockForm({ barcode, productId, currentQuantity }: Barcod
         <label className="grid gap-2 text-sm font-semibold text-blue-900">
           担当者バーコード
           <input
+            ref={staffInputRef}
+            autoFocus
             autoComplete="off"
             className="h-12 rounded border border-blue-200 bg-white px-3 font-mono text-base text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
             maxLength={64}
             name="staffBarcode"
+            value={staffBarcode}
+            onChange={(event) => setStaffBarcode(normalizeBarcodeText(event.target.value).toUpperCase())}
             placeholder="STAFF-0001"
             required
           />
         </label>
+        {staffBarcode ? (
+          <p className="mt-2 rounded border border-blue-200 bg-white px-3 py-2 text-xs font-semibold text-blue-900">
+            担当者バーコード読み取り済み: <span className="font-mono">{staffBarcode}</span>
+          </p>
+        ) : null}
         <p className="mt-2 text-xs leading-5 text-blue-800">
           ログインユーザーとは別に、実際に作業した担当者を履歴へ残します。複数クリニックで作業する担当者は、管理画面で利用できるクリニックを追加します。
         </p>

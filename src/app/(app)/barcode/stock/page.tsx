@@ -103,7 +103,13 @@ export default async function BarcodeStockPage({ searchParams }: PageProps) {
         </header>
 
 
-        <BarcodeSearchForm defaultBarcode={barcode} actionPath="/barcode/stock" clearHref="/barcode/stock" />
+        <BarcodeSearchForm
+          defaultBarcode={barcode}
+          actionPath="/barcode/stock"
+          autoFocusInput={!selectedProduct}
+          autoSubmitOnScan
+          clearHref="/barcode/stock"
+        />
 
         {!barcode ? (
           <section className="rounded border border-line bg-white p-5 text-sm text-muted shadow-panel">
