@@ -109,7 +109,6 @@ export default async function BarcodeScansPage({ searchParams }: PageProps) {
               <thead className="bg-gray-50 text-xs text-muted">
                 <tr>
                   <th className="border-b border-line px-4 py-3">保存日時</th>
-                  <th className="border-b border-line px-4 py-3">読み取り日時</th>
                   <th className="border-b border-line px-4 py-3">判定</th>
                   <th className="border-b border-line px-4 py-3">読み取り値</th>
                   <th className="border-b border-line px-4 py-3">抽出コード</th>
@@ -144,9 +143,6 @@ export default async function BarcodeScansPage({ searchParams }: PageProps) {
                       <tr key={log.id} className="align-top">
                         <td className="border-b border-line px-4 py-3 text-muted">
                           {dateTimeFormatter.format(log.createdAt)}
-                        </td>
-                        <td className="border-b border-line px-4 py-3 text-muted">
-                          {log.scannedAt ? dateTimeFormatter.format(log.scannedAt) : log.scannedAtText ?? "-"}
                         </td>
                         <td className="border-b border-line px-4 py-3">
                           <div className="flex flex-col gap-2">

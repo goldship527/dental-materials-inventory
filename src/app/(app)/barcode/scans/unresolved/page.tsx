@@ -138,9 +138,6 @@ export default async function UnresolvedBarcodeScansPage() {
                           >
                             {log.rawInput}
                           </a>
-                          <p className="mt-1 text-xs text-muted">
-                            読み取り日時: {log.scannedAt ? dateTimeFormatter.format(log.scannedAt) : log.scannedAtText ?? "-"}
-                          </p>
                         </td>
                         <td className="border-b border-line px-4 py-3 text-xs text-muted">
                           <div className="grid gap-1">

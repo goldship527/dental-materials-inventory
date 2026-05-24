@@ -77,7 +77,6 @@ export default async function BarcodePage({ searchParams }: PageProps) {
   const expiryDateLabel = formatGs1ExpiryDate(barcodeAnalysis.expiryDate, barcodeAnalysis.expiryDateText);
   const hasAnalysisBadges = Boolean(
     barcodeAnalysis.extractedBarcode ||
-      barcodeAnalysis.scannedAtText ||
       expiryDateLabel ||
       barcodeAnalysis.lotNumber ||
       barcodeAnalysis.serialNumber,
@@ -151,11 +150,6 @@ export default async function BarcodePage({ searchParams }: PageProps) {
                   {barcodeAnalysis.extractedJan13 ? (
                     <span className="rounded bg-gray-50 px-2 py-1 font-semibold text-muted">
                       抽出JAN: <span className="font-mono">{barcodeAnalysis.extractedJan13}</span>
-                    </span>
-                  ) : null}
-                  {barcodeAnalysis.scannedAtText ? (
-                    <span className="rounded bg-gray-50 px-2 py-1 font-semibold text-muted">
-                      読み取り日時: <span className="font-mono">{barcodeAnalysis.scannedAtText}</span>
                     </span>
                   ) : null}
                   {expiryDateLabel ? (

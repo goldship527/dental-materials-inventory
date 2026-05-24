@@ -168,7 +168,7 @@ async function main() {
   try {
     const productLog = await createBarcodeScanLogForContext({
       context,
-      rawInput: `${productJan} 2024/12/16 11:57`,
+      rawInput: productJan,
       findSampleRecordsByJan,
     });
 
@@ -177,6 +177,8 @@ async function main() {
     assert.equal(productLog.productId, data.product.id);
     assert.equal(productLog.clinicId, data.clinic.id);
     assert.equal(productLog.extractedJan13, productJan);
+    assert.equal(productLog.scannedAtText, null);
+    assert.equal(productLog.scannedAt, null);
     assert.equal(productLog.lotNumber, null);
     assert.equal(productLog.serialNumber, null);
     assert.equal(productLog.expiryDateText, null);

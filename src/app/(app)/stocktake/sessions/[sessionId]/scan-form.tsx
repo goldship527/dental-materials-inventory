@@ -419,7 +419,7 @@ export function StocktakeSessionScanForm({ session }: StocktakeSessionScanFormPr
               type="search"
               value={barcodeInput}
               onChange={(event) => setBarcodeInput(event.target.value)}
-              placeholder="JAN / GTIN / GS1 / 日時付きJAN"
+              placeholder="JAN / GTIN / GS1"
               autoFocus
               autoComplete="off"
               spellCheck={false}

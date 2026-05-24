@@ -61,7 +61,7 @@
   - `/barcode?barcode=...`
   - `/products?attachBarcode=...`
   - `/products/[productId]/edit?newBarcode=...`
-- GS1形式や日時付き読み取り値からの商品コード抽出
+- GS1形式からの商品コード、有効期限、ロット番号、シリアル番号の抽出
 - 取込サンプル確認とテスト用JANバーコード表示
 - 取込サンプルからローカル検証用商品を1件ずつ追加する導線
 - バーコード読取履歴の手動保存と一覧表示 `/barcode/scans`

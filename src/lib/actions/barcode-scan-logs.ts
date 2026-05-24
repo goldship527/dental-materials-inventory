@@ -43,43 +43,6 @@ function uniqueValues(values: Array<string | null | undefined>) {
   return Array.from(new Set(values.filter((value): value is string => typeof value === "string" && value.trim().length > 0)));
 }
 
-export async function parseScannedAtText(scannedAtText: string | null) {
-  if (!scannedAtText) {
-    return null;
-  }
-
-  const match = scannedAtText.match(/^(\d{4})[/-](\d{1,2})[/-](\d{1,2})\s+(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
-
-  if (!match) {
-    return null;
-  }
-
-  const year = Number(match[1]);
-  const month = Number(match[2]);
-  const day = Number(match[3]);
-  const hour = Number(match[4]);
-  const minute = Number(match[5]);
-  const second = Number(match[6] ?? "0");
-  const date = new Date(year, month - 1, day, hour, minute, second);
-
-  if (Number.isNaN(date.getTime())) {
-    return null;
-  }
-
-  if (
-    date.getFullYear() !== year ||
-    date.getMonth() !== month - 1 ||
-    date.getDate() !== day ||
-    date.getHours() !== hour ||
-    date.getMinutes() !== minute ||
-    date.getSeconds() !== second
-  ) {
-    return null;
-  }
-
-  return date;
-}
-
 type CreateBarcodeScanLogForContextOptions = {
   context: ActiveClinicContext;
   rawInput: string;
@@ -113,8 +76,8 @@ export async function createBarcodeScanLogForContext(options: CreateBarcodeScanL
       extractedBarcode: analysis.extractedBarcode,
       extractedJan13: analysis.extractedJan13,
       extractedGtin: analysis.extractedGtin,
-      scannedAtText: analysis.scannedAtText,
-      scannedAt: await parseScannedAtText(analysis.scannedAtText),
+      scannedAtText: null,
+      scannedAt: null,
       lotNumber: analysis.lotNumber,
       serialNumber: analysis.serialNumber,
       expiryDateText: analysis.expiryDateText,

@@ -9,7 +9,6 @@ export type BarcodeInputAnalysis = {
   extractedGtin: string | null;
   extractedJan13: string | null;
   extractedBarcode: string | null;
-  scannedAtText: string | null;
   lotNumber: string | null;
   serialNumber: string | null;
   expiryDateText: string | null;
@@ -204,35 +203,6 @@ function extractJan13Candidate(value: string) {
   return candidates.find((candidate) => isValidEan13(candidate)) ?? candidates[0] ?? null;
 }
 
-function extractScannedAtText(value: string, extractedBarcode: string | null) {
-  if (!extractedBarcode) {
-    return null;
-  }
-
-  const remainder = value.replace(extractedBarcode, "").trim();
-  const datePattern = "(\\d{4}[/-]\\d{1,2}[/-]\\d{1,2})";
-  const timePattern = "(\\d{1,2}:\\d{2}(?::\\d{2})?)";
-  const timeThenDateMatch = remainder.match(new RegExp(`${timePattern}\\s+${datePattern}`));
-
-  if (timeThenDateMatch) {
-    return `${timeThenDateMatch[2]} ${timeThenDateMatch[1]}`;
-  }
-
-  const dateThenTimeMatch = remainder.match(new RegExp(`${datePattern}\\s+${timePattern}`));
-
-  if (dateThenTimeMatch) {
-    return `${dateThenTimeMatch[1]} ${dateThenTimeMatch[2]}`;
-  }
-
-  const isoLikeMatch = remainder.match(new RegExp(`${datePattern}T${timePattern}`));
-
-  if (isoLikeMatch) {
-    return `${isoLikeMatch[1]} ${isoLikeMatch[2]}`;
-  }
-
-  return null;
-}
-
 export function analyzeBarcodeInput(input: string): BarcodeInputAnalysis {
   const rawInput = input.trim();
   const normalizedInput = normalizeVisibleInput(rawInput);
@@ -245,7 +215,6 @@ export function analyzeBarcodeInput(input: string): BarcodeInputAnalysis {
   const jan13FromInput = extractJan13Candidate(rawInput);
   const jan13 = jan13FromGtin ?? jan13FromInput;
   const extractedBarcode = jan13 ?? gtin ?? null;
-  const scannedAtText = extractScannedAtText(rawInput, extractedBarcode);
   const isGs1Like =
     Boolean(extractedGtin) ||
     rawInput.startsWith("]C1") ||
@@ -271,7 +240,6 @@ export function analyzeBarcodeInput(input: string): BarcodeInputAnalysis {
     extractedGtin: gtin,
     extractedJan13: jan13,
     extractedBarcode,
-    scannedAtText,
     lotNumber: gs1ApplicationIdentifiers.lotNumber,
     serialNumber: gs1ApplicationIdentifiers.serialNumber,
     expiryDateText: gs1ApplicationIdentifiers.expiryDateText,

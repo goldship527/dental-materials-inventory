@@ -4096,3 +4096,29 @@
 - `corepack pnpm exec tsx tests/code128.test.ts`
 - `corepack pnpm build`
 - `git diff --check`
+
+## 2026-05-24 スキャナー日時付与の廃止整理
+
+### 作業内容
+- スキャナー設定で読み取り値に日付・時刻を付けない運用に合わせ、日時付きJANの読み取り日時抽出を停止した。
+- `analyzeBarcodeInput` から `scannedAtText` の抽出を外した。
+- 読取履歴保存時に `scannedAtText` / `scannedAt` を保存しないようにした。
+- `/barcode`、読取履歴一覧、未対応バーコード整理画面から読み取り日時表示を外した。
+- 棚卸セッションのスキャナー入力欄プレースホルダーから `日時付きJAN` を外した。
+- READMEと仕様書を、日付・時刻付き読み取りではなくJAN、GTIN、GS1を扱う方針に更新した。
+
+### 判断
+- 入出庫や読取履歴の時刻は、スキャナーが付けた時刻ではなく、アプリ側の保存時刻または確定時刻を正とする。
+- DB列 `BarcodeScanLog.scannedAtText` / `scannedAt` は互換性のため今回は残すが、新規保存では使わない。
+- GS1の有効期限、ロット番号、シリアル番号解析は在庫・期限管理に必要なため維持する。
+
+### セキュリティメモ
+- 秘密値、DB接続文字列、Supabaseキーは扱っていない。
+- スキャナー入力値に余計な日時を含めないことで、履歴の意味を保存時刻・確定時刻に統一する。
+
+### 検証
+- `corepack pnpm typecheck`
+- `corepack pnpm exec tsx tests/barcode-gs1.test.ts`
+- `corepack pnpm exec tsx tests/barcode-scan-logs.test.ts`
+- `corepack pnpm build`
+- `git diff --check`
