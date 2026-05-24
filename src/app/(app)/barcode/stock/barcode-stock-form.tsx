@@ -4,6 +4,7 @@ import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 import { barcodeStockMoveAction, type BarcodeStockActionState } from "@/lib/actions/barcode-stock";
 import { normalizeBarcodeText } from "@/lib/barcode/normalize";
 import { barcodeStockInReasons, barcodeStockOutReasons } from "@/lib/barcode/stock-reasons";
+import { barcodeStockStaffScanEvent } from "./barcode-stock-scan-capture";
 
 type BarcodeStockFormProps = {
   barcode: string;
@@ -28,6 +29,25 @@ export function BarcodeStockForm({ barcode, productId, currentQuantity }: Barcod
     staffInputRef.current?.focus();
     staffInputRef.current?.select();
   }, [barcode, productId]);
+
+  useEffect(() => {
+    function handleStaffScan(event: Event) {
+      const scannedText = (event as CustomEvent<{ barcode?: string }>).detail?.barcode;
+
+      if (!scannedText) {
+        return;
+      }
+
+      setStaffBarcode(normalizeBarcodeText(scannedText).toUpperCase());
+      staffInputRef.current?.focus();
+    }
+
+    window.addEventListener(barcodeStockStaffScanEvent, handleStaffScan);
+
+    return () => {
+      window.removeEventListener(barcodeStockStaffScanEvent, handleStaffScan);
+    };
+  }, []);
 
   function changeMovementType(nextType: "OUT" | "IN") {
     setMovementType(nextType);
