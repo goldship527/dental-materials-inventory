@@ -67,6 +67,7 @@
 - 未対応バーコード整理 `/barcode/scans/unresolved`
 - GS1バーコード由来のロット番号・有効期限をバーコード入出庫時に在庫側へ保存
 - バーコード入出庫時のスタッフ担当者バーコード記録
+- スタッフ担当者は種別を分けず、応援や臨時作業では利用できるクリニックを複数紐づける
 - 棚卸セッション一覧 `/stocktake/sessions`
 - 棚卸セッション開始 `/stocktake/sessions/new`
 - 棚卸セッション進行中編集 `/stocktake/sessions/[sessionId]`

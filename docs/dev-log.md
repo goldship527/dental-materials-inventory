@@ -4017,3 +4017,30 @@
 - `.env.supabase.local` の `DATABASE_URL` がSupabase向きであることを、値を表示せずに確認した。
 - `scripts/push-supabase-schema.ps1` をPowerShellのscriptblockとして構文確認した。
 - Supabase DBへの `db:push` はリモートDB変更を伴うため、この時点では未実行。
+
+## 2026-05-24 スタッフ担当者のヘルプ種別整理
+
+### 作業内容
+- スタッフ担当者管理画面から `通常スタッフ / ヘルプ` の種別選択を外した。
+- 新規スタッフ担当者は内部的に `REGULAR` として保存するようにした。
+- `HELP-0001` の画面例とseedデータを削除し、担当者バーコード例を `STAFF-0001` に寄せた。
+- バーコード出入庫画面とスタッフマニュアルに、担当者バーコードは登録済み文字列と一致させること、応援や臨時作業では担当者を複数クリニックへ紐づけることを追記した。
+- 仕様書を、ヘルプ種別ではなく「複数クリニックで作業する担当者」の扱いに更新した。
+
+### 判断
+- `ヘルプ` は担当者の種類ではなく勤務状況として扱う。
+- 別クリニックで作業する担当者は、同じ担当者バーコードを使い、利用可能クリニックを複数選ぶ。
+- DBの `operatorType` は既存データとの互換性のため今回は残し、スキーマ変更は増やさない。
+- 既存の `HELP` データがSupabase側にある場合も自動削除せず、不要なら管理画面から無効化する。
+
+### セキュリティメモ
+- 担当者バーコードには氏名、個人情報、患者情報を入れない。
+- 担当者バーコードはログイン中クリニックに紐づく有効な担当者だけを許可する。
+- 秘密値、DB接続文字列、Supabaseキーは扱っていない。
+
+### 検証
+- `corepack pnpm typecheck`
+- `corepack pnpm exec tsx tests/staff-operators.test.ts`
+- `corepack pnpm exec tsx tests/barcode-stock-lots.test.ts`
+- `corepack pnpm build`
+- `git diff --check`

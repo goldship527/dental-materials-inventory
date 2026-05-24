@@ -13,7 +13,6 @@ export type StaffOperatorActionState = {
   message?: string;
 };
 
-const staffOperatorTypeSchema = z.enum([staffOperatorTypes.regular, staffOperatorTypes.help]);
 const createStaffOperatorSchema = z.object({
   displayName: z.string().trim().min(1, "担当者名を入力してください。").max(100, "担当者名は100文字以内で入力してください。"),
   barcode: z
@@ -23,7 +22,6 @@ const createStaffOperatorSchema = z.object({
     .max(64, "担当者バーコードは64文字以内で入力してください。")
     .regex(/^[A-Za-z0-9][A-Za-z0-9_-]*$/, "担当者バーコードは英数字、ハイフン、アンダーバーで入力してください。")
     .transform((value) => normalizeStaffOperatorBarcode(value)),
-  operatorType: staffOperatorTypeSchema,
   clinicIds: z.array(z.string().trim().min(1)).min(1, "利用できるクリニックを1つ以上選んでください。"),
 });
 const staffOperatorIdSchema = z.object({
@@ -92,7 +90,6 @@ export async function createStaffOperatorForContext(options: {
   organizationId: string;
   displayName: string;
   barcode: string;
-  operatorType: string;
   clinicIds: string[];
 }) {
   const input = createStaffOperatorSchema.parse(options);
@@ -120,7 +117,7 @@ export async function createStaffOperatorForContext(options: {
           organizationId: options.organizationId,
           displayName: input.displayName,
           barcode: input.barcode,
-          operatorType: input.operatorType,
+          operatorType: staffOperatorTypes.regular,
           isActive: true,
         },
         select: {
@@ -145,7 +142,6 @@ export async function createStaffOperatorForContext(options: {
       targetType: "StaffOperator",
       targetId: staffOperator.id,
       details: {
-        operatorType: input.operatorType,
         clinicCount: clinicIds.length,
       },
     });
@@ -215,7 +211,6 @@ export async function createStaffOperatorAction(
       organizationId: context.organizationId,
       displayName: String(formData.get("displayName") ?? ""),
       barcode: String(formData.get("barcode") ?? ""),
-      operatorType: String(formData.get("operatorType") ?? staffOperatorTypes.regular),
       clinicIds: formData.getAll("clinicIds").map(String),
     });
     revalidatePath("/admin/staff-operators");

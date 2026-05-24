@@ -14,14 +14,6 @@ type StaffOperatorManagementProps = {
 };
 
 const initialState: StaffOperatorActionState = {};
-const staffOperatorTypes = {
-  regular: "REGULAR",
-  help: "HELP",
-} as const;
-const staffOperatorTypeLabels: Record<string, string> = {
-  REGULAR: "通常スタッフ",
-  HELP: "ヘルプ",
-};
 const dateTimeFormatter = new Intl.DateTimeFormat("ja-JP", {
   year: "numeric",
   month: "2-digit",
@@ -63,7 +55,7 @@ export function StaffOperatorManagement({ operators, clinics }: StaffOperatorMan
               className="h-11 rounded border border-line px-3 text-base text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
               maxLength={100}
               name="displayName"
-              placeholder="例: 山田 / ヘルプ"
+              placeholder="例: 山田"
               required
             />
           </label>
@@ -73,20 +65,9 @@ export function StaffOperatorManagement({ operators, clinics }: StaffOperatorMan
               className="h-11 rounded border border-line px-3 font-mono text-base text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
               maxLength={64}
               name="barcode"
-              placeholder="例: STAFF-0001 / HELP-0001"
+              placeholder="例: STAFF-0001"
               required
             />
-          </label>
-          <label className="grid gap-1 text-sm font-semibold text-muted">
-            種別
-            <select
-              className="h-11 rounded border border-line px-3 text-base text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
-              defaultValue={staffOperatorTypes.regular}
-              name="operatorType"
-            >
-              <option value={staffOperatorTypes.regular}>通常スタッフ</option>
-              <option value={staffOperatorTypes.help}>ヘルプ</option>
-            </select>
           </label>
           <fieldset className="grid gap-2 rounded border border-line p-3 md:row-span-2">
             <legend className="px-1 text-sm font-semibold text-muted">利用できるクリニック</legend>
@@ -135,7 +116,6 @@ export function StaffOperatorManagement({ operators, clinics }: StaffOperatorMan
               <tr className="text-muted">
                 <th className="border-b border-line px-3 py-2 font-semibold">担当者</th>
                 <th className="border-b border-line px-3 py-2 font-semibold">バーコード</th>
-                <th className="border-b border-line px-3 py-2 font-semibold">種別</th>
                 <th className="border-b border-line px-3 py-2 font-semibold">クリニック</th>
                 <th className="border-b border-line px-3 py-2 font-semibold">状態</th>
                 <th className="border-b border-line px-3 py-2 font-semibold">更新日</th>
@@ -147,9 +127,6 @@ export function StaffOperatorManagement({ operators, clinics }: StaffOperatorMan
                 <tr key={operator.id}>
                   <td className="border-b border-line px-3 py-3 align-top font-semibold">{operator.displayName}</td>
                   <td className="border-b border-line px-3 py-3 align-top font-mono text-muted">{operator.barcode}</td>
-                  <td className="border-b border-line px-3 py-3 align-top">
-                    {staffOperatorTypeLabels[operator.operatorType] ?? operator.operatorType}
-                  </td>
                   <td className="border-b border-line px-3 py-3 align-top text-muted">
                     {operator.assignedClinics.length > 0 ? operator.assignedClinics.map((clinic) => clinic.name).join(" / ") : "-"}
                   </td>

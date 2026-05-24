@@ -43,12 +43,12 @@ export function BarcodeStockForm({ barcode, productId, currentQuantity }: Barcod
             className="h-12 rounded border border-blue-200 bg-white px-3 font-mono text-base text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
             maxLength={64}
             name="staffBarcode"
-            placeholder="STAFF-0001 / HELP-0001"
+            placeholder="STAFF-0001"
             required
           />
         </label>
         <p className="mt-2 text-xs leading-5 text-blue-800">
-          ログインユーザーとは別に、実際に作業した担当者を履歴へ残します。ヘルプ担当者のバーコードも利用できます。
+          ログインユーザーとは別に、実際に作業した担当者を履歴へ残します。複数クリニックで作業する担当者は、管理画面で利用できるクリニックを追加します。
         </p>
       </section>
 

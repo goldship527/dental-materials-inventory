@@ -169,20 +169,6 @@ async function main() {
     },
   });
 
-  await prisma.staffOperator.create({
-    data: {
-      organizationId: organization.id,
-      displayName: "ヘルプ",
-      barcode: "HELP-0001",
-      operatorType: "HELP",
-      clinicAssignments: {
-        create: {
-          clinicId: clinic.id,
-        },
-      },
-    },
-  });
-
   const supplierRecords = [];
   for (const name of suppliers) {
     supplierRecords.push(

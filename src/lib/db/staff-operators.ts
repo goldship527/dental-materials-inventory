@@ -2,15 +2,7 @@ import { prisma } from "@/lib/db/prisma";
 
 export const staffOperatorTypes = {
   regular: "REGULAR",
-  help: "HELP",
 } as const;
-
-export type StaffOperatorType = (typeof staffOperatorTypes)[keyof typeof staffOperatorTypes];
-
-export const staffOperatorTypeLabels: Record<string, string> = {
-  REGULAR: "通常スタッフ",
-  HELP: "ヘルプ",
-};
 
 export type StaffOperatorRow = {
   id: string;
@@ -59,9 +51,6 @@ export async function getStaffOperatorRows(organizationId: string): Promise<Staf
     orderBy: [
       {
         isActive: "desc",
-      },
-      {
-        operatorType: "asc",
       },
       {
         displayName: "asc",

@@ -50,10 +50,9 @@ async function main() {
     const staff = await createStaffOperatorForContext({
       adminUserId: data.admin.id,
       organizationId: data.organization.id,
-      displayName: "Help Staff",
-      barcode: "help-001",
-      operatorType: "HELP",
-      clinicIds: [data.clinic.id],
+      displayName: "Roaming Staff",
+      barcode: "staff-001",
+      clinicIds: [data.clinic.id, data.otherClinic.id],
     });
 
     const created = await prisma.staffOperator.findUniqueOrThrow({
@@ -65,15 +64,18 @@ async function main() {
       },
     });
 
-    assert.equal(created.barcode, "HELP-001");
-    assert.equal(created.operatorType, "HELP");
-    assert.equal(created.clinicAssignments.length, 1);
-    assert.equal(created.clinicAssignments[0].clinicId, data.clinic.id);
+    assert.equal(created.barcode, "STAFF-001");
+    assert.equal(created.operatorType, "REGULAR");
+    assert.equal(created.clinicAssignments.length, 2);
+    assert.deepEqual(
+      created.clinicAssignments.map((assignment) => assignment.clinicId).sort(),
+      [data.clinic.id, data.otherClinic.id].sort(),
+    );
 
     const resolved = await findActiveStaffOperatorForClinic({
       organizationId: data.organization.id,
       clinicId: data.clinic.id,
-      barcode: "help-001",
+      barcode: "staff-001",
     });
 
     assert.equal(resolved?.id, staff.id);
@@ -81,18 +83,17 @@ async function main() {
     const otherClinicResolved = await findActiveStaffOperatorForClinic({
       organizationId: data.organization.id,
       clinicId: data.otherClinic.id,
-      barcode: "HELP-001",
+      barcode: "STAFF-001",
     });
 
-    assert.equal(otherClinicResolved, null);
+    assert.equal(otherClinicResolved?.id, staff.id);
 
     await assert.rejects(() =>
       createStaffOperatorForContext({
         adminUserId: data.admin.id,
         organizationId: data.organization.id,
-        displayName: "Duplicate Help",
-        barcode: "HELP-001",
-        operatorType: "HELP",
+        displayName: "Duplicate Staff",
+        barcode: "STAFF-001",
         clinicIds: [data.clinic.id],
       }),
     );
@@ -106,7 +107,7 @@ async function main() {
     const inactiveResolved = await findActiveStaffOperatorForClinic({
       organizationId: data.organization.id,
       clinicId: data.clinic.id,
-      barcode: "HELP-001",
+      barcode: "STAFF-001",
     });
 
     assert.equal(inactiveResolved, null);
