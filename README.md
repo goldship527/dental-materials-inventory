@@ -190,6 +190,16 @@ corepack pnpm typecheck
 corepack pnpm build
 ```
 
+Supabase DBへスキーマだけ反映する場合は、`.env.local` を書き換えず、`.env.supabase.local` を用意して次を実行します。
+
+```powershell
+.\scripts\push-supabase-schema.ps1
+```
+
+このスクリプトに必要なのは `.env.supabase.local` の `DATABASE_URL` です。写真アップロード用の `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` / `SUPABASE_STORAGE_BUCKET` はアプリ実行時の設定なので、Vercelだけで確認する場合はローカルに入れなくても構いません。
+
+公開デモや本番候補DBに対して `corepack pnpm db:seed` は不用意に実行しないでください。既存データを初期化する可能性があります。
+
 開発DBを初期seed状態に戻す場合:
 
 ```powershell

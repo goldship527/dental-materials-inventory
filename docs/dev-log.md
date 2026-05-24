@@ -3992,3 +3992,28 @@
 - `corepack pnpm exec tsx tests/staff-operators.test.ts`
 - `corepack pnpm exec tsx tests/barcode-stock-lots.test.ts`
 - `corepack pnpm exec tsx tests/stock-movements-csv.test.ts`
+
+## 2026-05-24 Supabase DB反映用env分離
+
+### 作業内容
+- Supabase向けのDB接続設定を `.env.local` から切り離し、ローカル開発では `.env.local` をDocker PostgreSQL向きに戻す方針にした。
+- 既存のSupabase向け設定は `.env.supabase.local` に分け、Git管理外のまま保持する運用にした。
+- `.env.local` を書き換えずにSupabase DBへPrismaスキーマだけ反映するため、`scripts/push-supabase-schema.ps1` を追加した。
+- READMEと手順書に、`.env.local` / `.env.supabase.local` の使い分け、`db:push` と `db:seed` の違い、Storage系環境変数の扱いを追記した。
+
+### 判断
+- 普段の開発は `.env.local` をローカルDB固定にし、毎回Supabase接続文字列をコピーし直さなくてよい形にする。
+- Supabase DBへ必要なのはスキーマ反映の `db:push` であり、公開デモや本番候補DBに `db:seed` は実行しない。
+- 写真アップロードをVercel上だけで確認する場合、ローカルの `.env.local` に `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` / `SUPABASE_STORAGE_BUCKET` を入れる必要はない。
+- ローカルでSupabase Storageまで含めて写真アップロードを確認したい場合だけ、ローカル環境変数にStorage系の値を設定する。
+
+### セキュリティメモ
+- `.env.local` と `.env.supabase.local` はGit管理外のままにする。
+- DB接続文字列、Supabaseサービスロールキー、Storage bucket名などの秘密値はドキュメントやログに記録しない。
+- `scripts/push-supabase-schema.ps1` は `.env.supabase.local` の `DATABASE_URL` をプロセス内で一時的に読み込み、実行後に元の環境変数へ戻す。
+
+### 検証
+- `.env.local` の `DATABASE_URL` がローカルPostgreSQL向きであることを確認した。
+- `.env.supabase.local` の `DATABASE_URL` がSupabase向きであることを、値を表示せずに確認した。
+- `scripts/push-supabase-schema.ps1` をPowerShellのscriptblockとして構文確認した。
+- Supabase DBへの `db:push` はリモートDB変更を伴うため、この時点では未実行。

@@ -170,6 +170,18 @@ Copy-Item .env.example .env.local
 Copy-Item .env.example .env
 ```
 
+通常のローカル開発では `.env.local` はローカルDocker DB用にしておく。Supabase PostgreSQLの接続文字列は `.env.local` に直接置かず、必要な場合だけ `.env.supabase.local` に分けて保存する。
+
+```text
+.env.local
+  ローカル開発用。DATABASE_URL は localhost のDocker DBを指す。
+
+.env.supabase.local
+  Supabase DBスキーマ反映用。DATABASE_URL はSupabase PostgreSQLを指す。
+  DBスキーマ反映だけならStorage系の値は不要。
+  Gitには含めない。
+```
+
 Prisma ClientとDBスキーマを準備する。
 
 ```powershell
@@ -217,6 +229,8 @@ corepack pnpm db:seed
 - 確認用に `corepack pnpm dev` を起動した場合は、確認後に停止する
 - 棚卸セッション関連のDBスキーマ反映には `corepack pnpm db:push` が必要
 - Docker DesktopやPostgreSQLが停止している場合、`db:push` とブラウザでの棚卸セッション確認はできない
+- Supabase DBへスキーマだけ反映する場合は `.env.local` を書き換えず、`scripts/push-supabase-schema.ps1` を使う
+- Supabase DBに対して `corepack pnpm db:seed` は不用意に実行しない。既存データを初期化する可能性がある
 
 ## 11. セキュリティとデータの注意
 
@@ -299,6 +313,27 @@ SUPABASE_STORAGE_BUCKET
 ```
 
 商品写真は `SUPABASE_STORAGE_BUCKET` 設定時にSupabase Storageへ保存する。公開デモでも、サービスロールキーとprivate bucketを使うため、秘密値はGitやチャットに書かない。
+
+### Supabase DBスキーマ反映
+
+コード変更でPrisma schemaが変わった場合、公開デモまたは本番候補のSupabase DBにもスキーマ反映が必要になる。
+
+`.env.local` はローカル開発用のまま維持し、Supabase用の接続文字列は `.env.supabase.local` に保存する。
+
+```powershell
+cd C:\Dev\dental-materials-inventory
+.\scripts\push-supabase-schema.ps1
+```
+
+このスクリプトは `.env.supabase.local` の `DATABASE_URL` を一時的に現在のPowerShellプロセスへ読み込み、`corepack pnpm db:push` だけを実行する。実行後はPowerShellプロセスの `DATABASE_URL` を元に戻す。
+
+注意:
+
+- `.env.supabase.local` は秘密値を含むためGitに入れない
+- `db:push` はテーブルやカラムなどDBの形を反映する
+- `db:seed` は初期データ投入・リセット用なので、公開デモや本番候補DBには不用意に実行しない
+- Vercelの環境変数を変更した場合はRedeployが必要
+- 写真アップロード用の `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` / `SUPABASE_STORAGE_BUCKET` はアプリ実行時の設定。Vercel上のアップロード確認だけでよい場合、ローカルの `.env.local` に入れる必要はない
 
 ## 13. 本番導入を考える場合
 
