@@ -4,7 +4,6 @@ import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 import { barcodeStockMoveAction, type BarcodeStockActionState } from "@/lib/actions/barcode-stock";
 import { normalizeBarcodeText } from "@/lib/barcode/normalize";
 import { barcodeStockInReasons, barcodeStockOutReasons } from "@/lib/barcode/stock-reasons";
-import { barcodeStockStaffScanEvent } from "./barcode-stock-scan-capture";
 
 type BarcodeStockFormProps = {
   barcode: string;
@@ -31,21 +30,81 @@ export function BarcodeStockForm({ barcode, productId, currentQuantity }: Barcod
   }, [barcode, productId]);
 
   useEffect(() => {
-    function handleStaffScan(event: Event) {
-      const scannedText = (event as CustomEvent<{ barcode?: string }>).detail?.barcode;
+    let bufferedText = "";
+    let lastKeyAt = 0;
+    let flushTimer: ReturnType<typeof setTimeout> | null = null;
 
-      if (!scannedText) {
+    function isEditableTarget(target: EventTarget | null) {
+      if (!(target instanceof HTMLElement)) {
+        return false;
+      }
+
+      return target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement || target.isContentEditable;
+    }
+
+    function clearFlushTimer() {
+      if (flushTimer) {
+        clearTimeout(flushTimer);
+        flushTimer = null;
+      }
+    }
+
+    function resetBuffer() {
+      bufferedText = "";
+      lastKeyAt = 0;
+      clearFlushTimer();
+    }
+
+    function flushBuffer() {
+      const scannedText = normalizeBarcodeText(bufferedText);
+      resetBuffer();
+
+      if (scannedText.length < 4) {
         return;
       }
 
-      setStaffBarcode(normalizeBarcodeText(scannedText).toUpperCase());
+      setStaffBarcode(scannedText.toUpperCase());
       staffInputRef.current?.focus();
     }
 
-    window.addEventListener(barcodeStockStaffScanEvent, handleStaffScan);
+    function scheduleFlush() {
+      clearFlushTimer();
+      flushTimer = setTimeout(flushBuffer, 220);
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.ctrlKey || event.metaKey || event.altKey || isEditableTarget(event.target)) {
+        return;
+      }
+
+      if (event.key === "Enter" || event.key === "Tab") {
+        if (bufferedText) {
+          event.preventDefault();
+          flushBuffer();
+        }
+        return;
+      }
+
+      if (event.key.length !== 1) {
+        return;
+      }
+
+      const now = Date.now();
+
+      if (lastKeyAt && now - lastKeyAt > 150) {
+        bufferedText = "";
+      }
+
+      lastKeyAt = now;
+      bufferedText += event.key;
+      scheduleFlush();
+    }
+
+    window.addEventListener("keydown", handleKeyDown, true);
 
     return () => {
-      window.removeEventListener(barcodeStockStaffScanEvent, handleStaffScan);
+      window.removeEventListener("keydown", handleKeyDown, true);
+      clearFlushTimer();
     };
   }, []);
 

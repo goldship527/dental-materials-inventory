@@ -6,7 +6,6 @@ import { searchProductsByBarcode } from "@/lib/db/barcodes";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { BarcodeSearchForm } from "../barcode-search-form";
 import { BarcodeStockForm } from "./barcode-stock-form";
-import { BarcodeStockScanCapture } from "./barcode-stock-scan-capture";
 
 type PageProps = {
   searchParams?: Promise<{
@@ -73,7 +72,6 @@ export default async function BarcodeStockPage({ searchParams }: PageProps) {
 
   return (
     <main className="min-h-screen bg-surface px-4 py-6 text-ink sm:px-6 lg:px-8">
-      <BarcodeStockScanCapture currentBarcode={barcode} hasSelectedProduct={Boolean(selectedProduct)} />
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
         <AppNav current="barcode" />
 

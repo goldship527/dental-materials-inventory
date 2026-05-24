@@ -41,6 +41,92 @@ export function BarcodeSearchForm({
     };
   }, []);
 
+  useEffect(() => {
+    if (!autoSubmitOnScan) {
+      return;
+    }
+
+    let bufferedText = "";
+    let lastKeyAt = 0;
+    let flushTimer: ReturnType<typeof setTimeout> | null = null;
+
+    function isEditableTarget(target: EventTarget | null) {
+      if (!(target instanceof HTMLElement)) {
+        return false;
+      }
+
+      return target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement || target.isContentEditable;
+    }
+
+    function clearFlushTimer() {
+      if (flushTimer) {
+        clearTimeout(flushTimer);
+        flushTimer = null;
+      }
+    }
+
+    function resetBuffer() {
+      bufferedText = "";
+      lastKeyAt = 0;
+      clearFlushTimer();
+    }
+
+    function submitBufferedScan() {
+      const scannedText = normalizeBarcodeText(bufferedText);
+      resetBuffer();
+
+      if (scannedText.length < 4 || scannedText === normalizeBarcodeText(defaultBarcode)) {
+        return;
+      }
+
+      if (inputRef.current) {
+        inputRef.current.value = scannedText;
+      }
+
+      formRef.current?.requestSubmit();
+    }
+
+    function scheduleFlush() {
+      clearFlushTimer();
+      flushTimer = setTimeout(submitBufferedScan, 220);
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.ctrlKey || event.metaKey || event.altKey || isEditableTarget(event.target)) {
+        return;
+      }
+
+      if (event.key === "Enter" || event.key === "Tab") {
+        if (bufferedText) {
+          event.preventDefault();
+          submitBufferedScan();
+        }
+        return;
+      }
+
+      if (event.key.length !== 1) {
+        return;
+      }
+
+      const now = Date.now();
+
+      if (lastKeyAt && now - lastKeyAt > 150) {
+        bufferedText = "";
+      }
+
+      lastKeyAt = now;
+      bufferedText += event.key;
+      scheduleFlush();
+    }
+
+    window.addEventListener("keydown", handleKeyDown, true);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown, true);
+      clearFlushTimer();
+    };
+  }, [autoSubmitOnScan, defaultBarcode]);
+
   function scheduleAutoSubmit(value: string) {
     if (!autoSubmitOnScan) {
       return;
