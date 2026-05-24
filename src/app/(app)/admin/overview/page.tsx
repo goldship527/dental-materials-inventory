@@ -127,10 +127,13 @@ export default async function AdminOverviewPage() {
                 {overview.rows.map((row) => (
                   <tr key={row.clinicId} className="align-top">
                     <th scope="row" className="px-5 py-4 text-left font-semibold text-ink">
-                      <span className="block">{row.clinicName}</span>
+                      <a className="block text-accent hover:underline" href={`/admin/overview/${row.clinicId}`}>
+                        {row.clinicName}
+                      </a>
                       {row.clinicAddress ? (
                         <span className="mt-1 block text-xs font-normal text-muted">{row.clinicAddress}</span>
                       ) : null}
+                      <span className="mt-2 block text-xs font-semibold text-muted">詳細を見る</span>
                     </th>
                     <td className="whitespace-nowrap px-4 py-4 text-right">{numberText(row.stockItemCount)}</td>
                     <td className="whitespace-nowrap px-4 py-4 text-right">
