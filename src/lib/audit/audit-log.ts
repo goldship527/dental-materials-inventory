@@ -14,6 +14,7 @@ export const auditActions = {
   productImport: "PRODUCT_IMPORT",
   supplierCreate: "SUPPLIER_CREATE",
   supplierUpdate: "SUPPLIER_UPDATE",
+  supplierImport: "SUPPLIER_IMPORT",
   stockMovementRevert: "STOCK_MOVEMENT_REVERT",
   stocktakeSessionDiscard: "STOCKTAKE_SESSION_DISCARD",
   stocktakeSessionCommit: "STOCKTAKE_SESSION_COMMIT",

@@ -62,12 +62,20 @@ export default async function SuppliersPage({ searchParams }: PageProps) {
           </div>
           <div className="grid w-full grid-cols-1 gap-3 sm:flex sm:w-auto sm:shrink-0 sm:flex-wrap">
             {canManageSuppliers ? (
-              <a
-                className="inline-flex min-h-11 items-center justify-center rounded bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-800"
-                href="/suppliers/new"
-              >
-                発注先を新規作成
-              </a>
+              <>
+                <a
+                  className="inline-flex min-h-11 items-center justify-center rounded bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-800"
+                  href="/suppliers/new"
+                >
+                  発注先を新規作成
+                </a>
+                <a
+                  className="inline-flex min-h-11 items-center justify-center rounded border border-line bg-white px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+                  href="/suppliers/import"
+                >
+                  発注先を一括取り込み
+                </a>
+              </>
             ) : null}
             <a className="inline-flex min-h-11 items-center justify-center rounded border border-line px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent" href="/home">
               ホームへ戻る
