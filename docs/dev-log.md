@@ -4070,3 +4070,29 @@
 - `corepack pnpm exec tsx tests/staff-operators.test.ts`
 - `corepack pnpm build`
 - `git diff --check`
+
+## 2026-05-24 担当者バーコード印刷
+
+### 作業内容
+- Code 128形式のバーコード生成ロジック `src/lib/barcode/code128.ts` を追加した。
+- Code 128をSVG表示する `Code128Barcode` コンポーネントを追加した。
+- `/admin/staff-operators/labels` を追加し、有効なスタッフ担当者のバーコードをA4印刷できるようにした。
+- スタッフ担当者管理画面に「バーコード印刷」リンクを追加した。
+- `tests/code128.test.ts` を追加し、`STAFF-0001` のような担当者コードをCode 128化できることを確認するようにした。
+- README、仕様書、スタッフマニュアルを更新した。
+
+### 判断
+- 担当者バーコードは画像としてDB保存せず、登録済み文字列から画面上でSVG生成する。
+- 英字、数字、ハイフン、アンダーバーを扱えるため、担当者バーコードにはCode 128を使う。
+- PDFファイル生成ではなく、まずはブラウザ印刷に限定する。
+
+### セキュリティメモ
+- 担当者バーコードには氏名、個人情報、患者情報を入れない運用を維持する。
+- 印刷ページはADMINだけが閲覧できる。
+- DBスキーマと秘密値は変更していない。
+
+### 検証
+- `corepack pnpm typecheck`
+- `corepack pnpm exec tsx tests/code128.test.ts`
+- `corepack pnpm build`
+- `git diff --check`

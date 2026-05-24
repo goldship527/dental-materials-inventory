@@ -109,7 +109,15 @@ export function StaffOperatorManagement({ operators, clinics }: StaffOperatorMan
             <h2 className="text-lg font-semibold">担当者一覧</h2>
             <p className="mt-1 text-sm text-muted">無効化した担当者は新しいバーコード出入庫では使えません。</p>
           </div>
-          <p className="text-sm font-semibold text-muted">合計 {operators.length} 件</p>
+          <div className="flex flex-wrap items-center gap-3">
+            <p className="text-sm font-semibold text-muted">合計 {operators.length} 件</p>
+            <a
+              className="rounded border border-line bg-white px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+              href="/admin/staff-operators/labels"
+            >
+              バーコード印刷
+            </a>
+          </div>
         </div>
 
         <div className="mt-4 max-w-full overflow-x-auto">
