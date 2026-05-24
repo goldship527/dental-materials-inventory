@@ -24,6 +24,9 @@ const createStaffOperatorSchema = z.object({
     .transform((value) => normalizeStaffOperatorBarcode(value)),
   clinicIds: z.array(z.string().trim().min(1)).min(1, "利用できるクリニックを1つ以上選んでください。"),
 });
+const updateStaffOperatorSchema = createStaffOperatorSchema.extend({
+  staffOperatorId: z.string().trim().min(1),
+});
 const staffOperatorIdSchema = z.object({
   staffOperatorId: z.string().trim().min(1),
 });
@@ -199,6 +202,93 @@ export async function deactivateStaffOperatorForContext(options: {
   });
 }
 
+export async function updateStaffOperatorForContext(options: {
+  adminUserId: string;
+  organizationId: string;
+  staffOperatorId: string;
+  displayName: string;
+  barcode: string;
+  clinicIds: string[];
+}) {
+  const input = updateStaffOperatorSchema.parse(options);
+  const clinicIds = await assertClinicIdsBelongToOrganization(options.organizationId, input.clinicIds);
+  const staffOperator = await prisma.staffOperator.findFirst({
+    where: {
+      id: input.staffOperatorId,
+      organizationId: options.organizationId,
+    },
+    select: {
+      id: true,
+      barcode: true,
+    },
+  });
+
+  if (!staffOperator) {
+    throw new Error("対象のスタッフ担当者が見つかりません。");
+  }
+
+  const existingOperator = await prisma.staffOperator.findUnique({
+    where: {
+      organizationId_barcode: {
+        organizationId: options.organizationId,
+        barcode: input.barcode,
+      },
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  if (existingOperator && existingOperator.id !== staffOperator.id) {
+    throw new Error("同じ担当者バーコードがすでに登録されています。");
+  }
+
+  try {
+    await prisma.$transaction(async (tx) => {
+      await tx.staffOperator.update({
+        where: {
+          id: staffOperator.id,
+        },
+        data: {
+          displayName: input.displayName,
+          barcode: input.barcode,
+        },
+      });
+
+      await tx.staffOperatorClinicAssignment.deleteMany({
+        where: {
+          staffOperatorId: staffOperator.id,
+        },
+      });
+
+      await tx.staffOperatorClinicAssignment.createMany({
+        data: clinicIds.map((clinicId) => ({
+          staffOperatorId: staffOperator.id,
+          clinicId,
+        })),
+      });
+    });
+
+    await writeAuditLog({
+      organizationId: options.organizationId,
+      actorUserId: options.adminUserId,
+      action: auditActions.staffOperatorUpdate,
+      targetType: "StaffOperator",
+      targetId: staffOperator.id,
+      details: {
+        barcodeChanged: staffOperator.barcode !== input.barcode,
+        clinicCount: clinicIds.length,
+      },
+    });
+  } catch (error) {
+    if (isBarcodeUniqueConflict(error)) {
+      throw new Error("同じ担当者バーコードがすでに登録されています。");
+    }
+
+    throw error;
+  }
+}
+
 export async function createStaffOperatorAction(
   _previousState: StaffOperatorActionState,
   formData: FormData,
@@ -218,6 +308,32 @@ export async function createStaffOperatorAction(
     return {
       status: "success",
       message: "スタッフ担当者を追加しました。",
+    };
+  } catch (error) {
+    return toActionError(error);
+  }
+}
+
+export async function updateStaffOperatorAction(
+  _previousState: StaffOperatorActionState,
+  formData: FormData,
+): Promise<StaffOperatorActionState> {
+  try {
+    const context = await requireAdminContext();
+
+    await updateStaffOperatorForContext({
+      adminUserId: context.userId,
+      organizationId: context.organizationId,
+      staffOperatorId: String(formData.get("staffOperatorId") ?? ""),
+      displayName: String(formData.get("displayName") ?? ""),
+      barcode: String(formData.get("barcode") ?? ""),
+      clinicIds: formData.getAll("clinicIds").map(String),
+    });
+    revalidatePath("/admin/staff-operators");
+
+    return {
+      status: "success",
+      message: "スタッフ担当者を更新しました。",
     };
   } catch (error) {
     return toActionError(error);

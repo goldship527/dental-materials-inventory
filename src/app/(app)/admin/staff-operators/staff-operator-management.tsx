@@ -5,6 +5,7 @@ import {
   createStaffOperatorAction,
   deactivateStaffOperatorAction,
   type StaffOperatorActionState,
+  updateStaffOperatorAction,
 } from "@/lib/actions/staff-operators";
 import type { StaffOperatorClinicOption, StaffOperatorRow } from "@/lib/db/staff-operators";
 
@@ -42,6 +43,7 @@ function StatusMessage({ state }: { state: StaffOperatorActionState }) {
 
 export function StaffOperatorManagement({ operators, clinics }: StaffOperatorManagementProps) {
   const [createState, createAction, isCreating] = useActionState(createStaffOperatorAction, initialState);
+  const [updateState, updateAction, isUpdating] = useActionState(updateStaffOperatorAction, initialState);
   const [deactivateState, deactivateAction, isDeactivating] = useActionState(deactivateStaffOperatorAction, initialState);
 
   return (
@@ -111,7 +113,7 @@ export function StaffOperatorManagement({ operators, clinics }: StaffOperatorMan
         </div>
 
         <div className="mt-4 max-w-full overflow-x-auto">
-          <table className="min-w-[900px] border-separate border-spacing-0 text-left text-sm">
+          <table className="min-w-[1100px] border-separate border-spacing-0 text-left text-sm">
             <thead>
               <tr className="text-muted">
                 <th className="border-b border-line px-3 py-2 font-semibold">担当者</th>
@@ -123,12 +125,52 @@ export function StaffOperatorManagement({ operators, clinics }: StaffOperatorMan
               </tr>
             </thead>
             <tbody>
-              {operators.map((operator) => (
-                <tr key={operator.id}>
-                  <td className="border-b border-line px-3 py-3 align-top font-semibold">{operator.displayName}</td>
-                  <td className="border-b border-line px-3 py-3 align-top font-mono text-muted">{operator.barcode}</td>
+              {operators.map((operator) => {
+                const updateFormId = `staff-operator-update-${operator.id}`;
+                const assignedClinicIds = new Set(operator.assignedClinics.map((clinic) => clinic.id));
+
+                return (
+                  <tr key={operator.id}>
+                    <td className="border-b border-line px-3 py-3 align-top">
+                      <form action={updateAction} id={updateFormId} />
+                      <input form={updateFormId} name="staffOperatorId" type="hidden" value={operator.id} />
+                      <input
+                        className="h-10 w-full min-w-36 rounded border border-line px-3 text-sm font-semibold text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                        form={updateFormId}
+                        maxLength={100}
+                        name="displayName"
+                        required
+                        type="text"
+                        defaultValue={operator.displayName}
+                      />
+                    </td>
+                    <td className="border-b border-line px-3 py-3 align-top">
+                      <input
+                        className="h-10 w-full min-w-36 rounded border border-line px-3 font-mono text-sm text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                        form={updateFormId}
+                        maxLength={64}
+                        name="barcode"
+                        required
+                        type="text"
+                        defaultValue={operator.barcode}
+                      />
+                    </td>
                   <td className="border-b border-line px-3 py-3 align-top text-muted">
-                    {operator.assignedClinics.length > 0 ? operator.assignedClinics.map((clinic) => clinic.name).join(" / ") : "-"}
+                    <div className="grid min-w-48 gap-2">
+                      {clinics.map((clinic) => (
+                        <label key={clinic.id} className="flex items-center gap-2 text-sm font-semibold text-ink">
+                          <input
+                            className="h-4 w-4 rounded border-line text-accent focus:ring-accent/20"
+                            defaultChecked={assignedClinicIds.has(clinic.id)}
+                            form={updateFormId}
+                            name="clinicIds"
+                            type="checkbox"
+                            value={clinic.id}
+                          />
+                          {clinic.name}
+                        </label>
+                      ))}
+                    </div>
                   </td>
                   <td className="border-b border-line px-3 py-3 align-top">
                     <span
@@ -145,6 +187,15 @@ export function StaffOperatorManagement({ operators, clinics }: StaffOperatorMan
                     {dateTimeFormatter.format(operator.updatedAt)}
                   </td>
                   <td className="border-b border-line px-3 py-3 align-top">
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        className="h-11 rounded bg-accent px-3 text-sm font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-50"
+                        disabled={isUpdating}
+                        form={updateFormId}
+                        type="submit"
+                      >
+                        保存
+                      </button>
                     {operator.isActive ? (
                       <form
                         action={deactivateAction}
@@ -166,11 +217,16 @@ export function StaffOperatorManagement({ operators, clinics }: StaffOperatorMan
                     ) : (
                       <span className="text-xs text-muted">-</span>
                     )}
+                    </div>
                   </td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
+        </div>
+        <div className="mt-4">
+          <StatusMessage state={updateState} />
         </div>
         <div className="mt-4">
           <StatusMessage state={deactivateState} />

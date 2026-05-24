@@ -2,6 +2,7 @@
 
 import { type FormEvent, useState, useTransition } from "react";
 import { signIn } from "next-auth/react";
+import { PasswordInput } from "@/components/ui/password-input";
 
 export function LoginForm() {
   const [error, setError] = useState<string | null>(null);
@@ -53,10 +54,9 @@ export function LoginForm() {
         <label htmlFor="password" className="text-sm font-semibold text-ink">
           パスワード
         </label>
-        <input
+        <PasswordInput
           id="password"
           name="password"
-          type="password"
           autoComplete="current-password"
           defaultValue="password"
           required

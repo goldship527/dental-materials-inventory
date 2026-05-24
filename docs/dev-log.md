@@ -4044,3 +4044,29 @@
 - `corepack pnpm exec tsx tests/barcode-stock-lots.test.ts`
 - `corepack pnpm build`
 - `git diff --check`
+
+## 2026-05-24 スタッフ担当者編集とパスワード表示切替
+
+### 作業内容
+- `/admin/staff-operators` の担当者一覧で、担当者名、担当者バーコード、利用できるクリニックをその場で編集できるようにした。
+- スタッフ担当者更新用のServer Actionを追加し、バーコード重複、クリニック未選択、組織外クリニック指定をサーバー側で検証するようにした。
+- スタッフ担当者更新を監査ログ `STAFF_OPERATOR_UPDATE` として記録するようにした。
+- ログイン画面とパスワード変更画面に、入力中パスワードの表示/非表示ボタンを追加した。
+- パスワード表示切替の共通部品 `PasswordInput` を追加した。
+- README、仕様書、スタッフマニュアルを更新した。
+
+### 判断
+- スタッフ担当者の編集は別ページではなく、一覧内で保存する形にした。
+- 担当者バーコードを変更しても、過去の入出庫履歴は `performedByStaffId` で担当者IDに紐づくため維持される。
+- パスワード表示は現在の画面上だけの一時表示であり、平文パスワードをDB、ログ、ドキュメントに保存しない。
+
+### セキュリティメモ
+- 担当者バーコードには氏名、個人情報、患者情報を入れない運用を維持する。
+- スタッフ担当者編集はADMINに限定し、Server Action側でも組織スコープを確認する。
+- パスワード表示ボタン利用時は、共用端末や周囲からの覗き見に注意する。
+
+### 検証
+- `corepack pnpm typecheck`
+- `corepack pnpm exec tsx tests/staff-operators.test.ts`
+- `corepack pnpm build`
+- `git diff --check`

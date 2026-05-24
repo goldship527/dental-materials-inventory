@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { PasswordInput } from "@/components/ui/password-input";
 import { changePasswordAction, type AccountActionState } from "@/lib/actions/account";
 
 const initialState: AccountActionState = {};
@@ -14,10 +15,9 @@ export function PasswordForm() {
         <label className="text-sm font-semibold text-muted" htmlFor="currentPassword">
           現在のパスワード
         </label>
-        <input
+        <PasswordInput
           id="currentPassword"
           name="currentPassword"
-          type="password"
           autoComplete="current-password"
           required
           className="h-12 rounded border border-line px-4 text-base outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
@@ -28,10 +28,9 @@ export function PasswordForm() {
         <label className="text-sm font-semibold text-muted" htmlFor="newPassword">
           新しいパスワード
         </label>
-        <input
+        <PasswordInput
           id="newPassword"
           name="newPassword"
-          type="password"
           autoComplete="new-password"
           required
           minLength={8}
@@ -45,10 +44,9 @@ export function PasswordForm() {
         <label className="text-sm font-semibold text-muted" htmlFor="confirmPassword">
           新しいパスワード（確認）
         </label>
-        <input
+        <PasswordInput
           id="confirmPassword"
           name="confirmPassword"
-          type="password"
           autoComplete="new-password"
           required
           minLength={8}

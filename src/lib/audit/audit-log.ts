@@ -7,6 +7,7 @@ export const auditActions = {
   adminUserDeactivate: "ADMIN_USER_DEACTIVATE",
   adminUserPasswordReset: "ADMIN_USER_PASSWORD_RESET",
   staffOperatorCreate: "STAFF_OPERATOR_CREATE",
+  staffOperatorUpdate: "STAFF_OPERATOR_UPDATE",
   staffOperatorDeactivate: "STAFF_OPERATOR_DEACTIVATE",
   productCreate: "PRODUCT_CREATE",
   productUpdate: "PRODUCT_UPDATE",
