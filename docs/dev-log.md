@@ -3443,6 +3443,8 @@
 ### 検証
 - `corepack pnpm typecheck`
 - `corepack pnpm build`
+- `Invoke-WebRequest -UseBasicParsing -Uri 'http://localhost:3000/admin/overview'`
+- `corepack pnpm exec -- tsx -e "... getAdminOverview ..."`
 - `git diff --check`
 
 - `corepack pnpm dev` 起動後、`/login` が HTTP 200 で応答することを確認
@@ -4174,3 +4176,25 @@
 - `corepack pnpm exec tsx tests/barcode-normalize.test.ts`
 - `corepack pnpm build`
 - `Invoke-WebRequest -UseBasicParsing -Uri 'http://localhost:3000/barcode/stock'`
+
+## 2026-05-24 本部ダッシュボードMVP
+
+### 作業内容
+- `/admin/overview` に本部ダッシュボードを追加した。
+- ADMINが同一組織内の有効クリニックについて、クリニック別の在庫数、不足数、在庫0件数、発注候補数、期限ロット要確認数、最終入出庫日時を確認できるようにした。
+- 管理モードのナビゲーションに「本部ダッシュボード」を追加し、通常業務画面から管理モードへ入る導線も `/admin/overview` に変更した。
+- 仕様書に、本部ダッシュボードMVPの目的、画面、今回作らないもの、安全ルールを追記した。
+
+### 判断
+- 5クリニック1法人のような導入を見据え、まずは全画面のクリニック切替ではなく、読み取り専用の横断確認画面だけを追加した。
+- 横断画面から在庫編集や発注操作は行わず、別クリニックの在庫を誤操作するリスクを避ける。
+- 既存の業務画面は、引き続きログイン中ユーザーに紐づくクリニックを対象にする。
+
+### セキュリティメモ
+- 本部ダッシュボードは `requireAdminUser` でADMINに限定する。
+- 集計対象はログイン中ユーザーの `organizationId` に属する有効クリニックだけに限定する。
+- 秘密値、DB接続文字列、Supabaseキー、患者情報、個人情報、実在医院名は扱っていない。
+
+### 検証
+- `corepack pnpm typecheck`
+- `corepack pnpm build`

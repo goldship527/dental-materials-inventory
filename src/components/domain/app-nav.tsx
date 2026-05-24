@@ -3,6 +3,7 @@ import { isAdminRole } from "@/lib/auth/roles";
 
 type NavItemId =
   | "home"
+  | "overview"
   | "setup"
   | "inventory"
   | "products"
@@ -85,6 +86,11 @@ const workNavItems = [
 ] as const satisfies readonly NavItem[];
 
 const adminNavItems = [
+  {
+    id: "overview",
+    label: "本部ダッシュボード",
+    href: "/admin/overview",
+  },
   {
     id: "setup",
     label: "初期設定",
@@ -171,7 +177,8 @@ export async function AppNav({ current }: AppNavProps) {
   const canUseAdminMode = isAdminRole(session?.user?.role);
   const isAdminMode =
     canUseAdminMode &&
-    (current === "setup" ||
+    (current === "overview" ||
+      current === "setup" ||
       current === "imports" ||
       current === "admin" ||
       current === "staffOperators" ||
@@ -202,7 +209,7 @@ export async function AppNav({ current }: AppNavProps) {
               </a>
             ) : canUseAdminMode ? (
               <a
-                href="/admin/users"
+                href="/admin/overview"
                 className="inline-flex h-11 shrink-0 items-center whitespace-nowrap rounded border border-line bg-white/80 px-3 text-sm font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent sm:h-9"
               >
                 管理
