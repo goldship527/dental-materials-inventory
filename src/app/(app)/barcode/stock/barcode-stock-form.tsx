@@ -35,6 +35,23 @@ export function BarcodeStockForm({ barcode, productId, currentQuantity }: Barcod
       <input type="hidden" name="productId" value={productId} />
       <input type="hidden" name="movementType" value={movementType} />
 
+      <section className="mb-5 rounded border border-blue-100 bg-blue-50 p-4">
+        <label className="grid gap-2 text-sm font-semibold text-blue-900">
+          担当者バーコード
+          <input
+            autoComplete="off"
+            className="h-12 rounded border border-blue-200 bg-white px-3 font-mono text-base text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+            maxLength={64}
+            name="staffBarcode"
+            placeholder="STAFF-0001 / HELP-0001"
+            required
+          />
+        </label>
+        <p className="mt-2 text-xs leading-5 text-blue-800">
+          ログインユーザーとは別に、実際に作業した担当者を履歴へ残します。ヘルプ担当者のバーコードも利用できます。
+        </p>
+      </section>
+
       <div className="grid gap-5 lg:grid-cols-[1fr_1fr]">
         <section>
           <p className="text-sm font-semibold text-muted">入出庫区分</p>

@@ -3960,3 +3960,35 @@
 - `corepack pnpm build`
 - `git diff --check`
 - 文字化け疑いパターン検索でヒットなし
+
+## 2026-05-24 スタッフバーコードによる実作業者記録MVP
+
+### 作業内容
+- `StaffOperator` と `StaffOperatorClinicAssignment` を追加し、ログインユーザーとは別に現場の実作業者を管理できるようにした。
+- `StockMovement.performedByStaffId` を追加し、入出庫履歴に実作業者を任意で紐づけられるようにした。
+- 管理者向けに `/admin/staff-operators` を追加し、通常スタッフとヘルプ担当者の追加、クリニック紐づけ、無効化ができるようにした。
+- `/barcode/stock` の確定フォームに担当者バーコード欄を追加し、ログイン中クリニックで有効な担当者だけをバーコード出入庫に使えるようにした。
+- 入出庫履歴画面とCSV出力に「実作業者」を追加した。
+- seedに開発確認用の `STAFF-0001` と `HELP-0001` を追加した。
+- 仕様書とREADMEに、スタッフ担当者バーコードとヘルプ担当者の扱いを追記した。
+
+### 判断
+- ログインユーザーはアプリ利用権限、スタッフバーコードは実作業者として分けて扱う。
+- クリニック間の応援や一時的な作業に備え、`ヘルプ` はスタッフ担当者の一種として登録する。
+- 今回はバーコード出入庫だけを対象にし、クイック出庫、在庫一覧の直接編集、棚卸への担当者バーコード適用は後続検討にした。
+- 既存の入出庫履歴は `performedByStaffId = null` のまま保持し、表示上は `-` とする。
+
+### セキュリティメモ
+- 担当者バーコードは `STAFF-0001` や `HELP-0001` のような内部コードにし、氏名や個人情報を直接入れない。
+- 担当者バーコードはログイン中クリニックに紐づく有効なスタッフ担当者だけを許可する。
+- スタッフ担当者管理はADMINに限定する。
+- 患者情報、個人情報、秘密情報は理由メモや補足メモに書かない運用を維持する。
+
+### 検証
+- `corepack pnpm prisma format`
+- `corepack pnpm prisma:generate`
+- `corepack pnpm db:push`
+- `corepack pnpm typecheck`
+- `corepack pnpm exec tsx tests/staff-operators.test.ts`
+- `corepack pnpm exec tsx tests/barcode-stock-lots.test.ts`
+- `corepack pnpm exec tsx tests/stock-movements-csv.test.ts`

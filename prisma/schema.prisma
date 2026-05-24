@@ -15,6 +15,7 @@ model Organization {
 
   clinics                Clinic[]
   users                  User[]
+  staffOperators         StaffOperator[]
   products               Product[]
   productSuppliers       ProductSupplier[]
   suppliers              Supplier[]
@@ -33,16 +34,17 @@ model Clinic {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  organization          Organization           @relation(fields: [organizationId], references: [id])
-  stockItems            StockItem[]
-  stockLots             StockLot[]
-  stockMovements        StockMovement[]
-  barcodeScanLogs       BarcodeScanLog[]
-  favoriteCards         FavoriteProductCard[]
-  orderRecords          OrderRecord[]
-  orderRequests         OrderRequest[]
-  stocktakeSessions     StocktakeSession[]
-  userClinicAssignments UserClinicAssignment[]
+  organization             Organization                    @relation(fields: [organizationId], references: [id])
+  stockItems               StockItem[]
+  stockLots                StockLot[]
+  stockMovements           StockMovement[]
+  barcodeScanLogs          BarcodeScanLog[]
+  favoriteCards            FavoriteProductCard[]
+  orderRecords             OrderRecord[]
+  orderRequests            OrderRequest[]
+  stocktakeSessions        StocktakeSession[]
+  staffOperatorAssignments StaffOperatorClinicAssignment[]
+  userClinicAssignments    UserClinicAssignment[]
 
   @@index([organizationId])
 }
@@ -84,6 +86,37 @@ model UserClinicAssignment {
   clinic Clinic @relation(fields: [clinicId], references: [id])
 
   @@unique([userId, clinicId])
+  @@index([clinicId])
+}
+
+model StaffOperator {
+  id             String   @id @default(cuid())
+  organizationId String
+  displayName    String
+  barcode        String
+  operatorType   String   @default("REGULAR")
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization      Organization                    @relation(fields: [organizationId], references: [id])
+  clinicAssignments StaffOperatorClinicAssignment[]
+  stockMovements    StockMovement[]
+
+  @@unique([organizationId, barcode])
+  @@index([organizationId, isActive])
+  @@index([barcode])
+}
+
+model StaffOperatorClinicAssignment {
+  id              String @id @default(cuid())
+  staffOperatorId String
+  clinicId        String
+
+  staffOperator StaffOperator @relation(fields: [staffOperatorId], references: [id])
+  clinic        Clinic        @relation(fields: [clinicId], references: [id])
+
+  @@unique([staffOperatorId, clinicId])
   @@index([clinicId])
 }
 
@@ -292,33 +325,36 @@ model StockLot {
 }
 
 model StockMovement {
-  id             String    @id @default(cuid())
-  clinicId       String
-  productId      String
-  movementType   String
-  quantity       Int
-  beforeQuantity Int
-  afterQuantity  Int
-  reason         String?
-  sourceType     String?
-  sourceId       String?
-  revertOfId     String?
-  revertedAt     DateTime?
-  revertedById   String?
-  lotNumber      String?
-  expiryDateText String?
-  expiryDate     DateTime?
-  userId         String
-  memo           String?
-  createdAt      DateTime  @default(now())
+  id                 String    @id @default(cuid())
+  clinicId           String
+  productId          String
+  movementType       String
+  quantity           Int
+  beforeQuantity     Int
+  afterQuantity      Int
+  reason             String?
+  sourceType         String?
+  sourceId           String?
+  revertOfId         String?
+  revertedAt         DateTime?
+  revertedById       String?
+  lotNumber          String?
+  expiryDateText     String?
+  expiryDate         DateTime?
+  userId             String
+  performedByStaffId String?
+  memo               String?
+  createdAt          DateTime  @default(now())
 
-  clinic  Clinic  @relation(fields: [clinicId], references: [id])
-  product Product @relation(fields: [productId], references: [id])
-  user    User    @relation(fields: [userId], references: [id])
+  clinic           Clinic         @relation(fields: [clinicId], references: [id])
+  product          Product        @relation(fields: [productId], references: [id])
+  user             User           @relation(fields: [userId], references: [id])
+  performedByStaff StaffOperator? @relation(fields: [performedByStaffId], references: [id])
 
   @@index([clinicId, createdAt])
   @@index([productId])
   @@index([userId])
+  @@index([performedByStaffId])
   @@index([revertOfId])
 }
 

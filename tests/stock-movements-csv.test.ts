@@ -21,6 +21,7 @@ const row: StockMovementRow = {
   expiryDateText: null,
   expiryDate: new Date("2026-05-23T00:00:00+09:00"),
   userName: "Test User",
+  performedByStaffName: "Help Staff",
   createdAt: new Date("2026-05-23T09:30:00+09:00"),
 };
 

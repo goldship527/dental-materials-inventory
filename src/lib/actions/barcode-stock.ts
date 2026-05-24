@@ -8,6 +8,7 @@ import { isAllowedBarcodeStockReason } from "@/lib/barcode/stock-reasons";
 import { searchProductsByBarcode } from "@/lib/db/barcodes";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { prisma } from "@/lib/db/prisma";
+import { findActiveStaffOperatorForClinic } from "@/lib/db/staff-operators";
 
 const movementTypeSchema = z.enum(["IN", "OUT"]);
 const quantitySchema = z.coerce
@@ -16,6 +17,7 @@ const quantitySchema = z.coerce
   .min(1, "数量は1以上で入力してください。")
   .max(9999, "数量は9999以下で入力してください。");
 const barcodeSchema = z.string().trim().min(1, "バーコードを読み取ってください。").max(300, "バーコードが長すぎます。");
+const staffBarcodeSchema = z.string().trim().min(1, "担当者バーコードを読み取ってください。").max(64, "担当者バーコードが長すぎます。");
 const productIdSchema = z.string().min(1, "商品を選択してください。");
 const reasonSchema = z.string().trim().min(1, "理由を選択してください。").max(40, "理由が長すぎます。");
 const reasonNoteSchema = z.string().trim().max(160, "補足メモは160文字以内で入力してください。");
@@ -28,10 +30,12 @@ export type BarcodeStockActionState = {
 
 type BarcodeStockMoveContext = {
   userId: string;
+  organizationId: string;
   clinicId: string;
 };
 
 type BarcodeStockMoveInput = {
+  staffBarcode: string;
   barcode: string;
   productId: string;
   movementType: "IN" | "OUT";
@@ -177,7 +181,7 @@ export async function barcodeStockMoveForContext(options: {
   afterQuantity: number;
 }> {
   const { context, input } = options;
-  const { barcode, productId, movementType, quantity, reason, reasonNote } = input;
+  const { staffBarcode, barcode, productId, movementType, quantity, reason, reasonNote } = input;
 
   if (!isAllowedBarcodeStockReason(movementType, reason)) {
     throw new Error("選択した入出庫区分に対応した理由を選んでください。");
@@ -193,6 +197,16 @@ export async function barcodeStockMoveForContext(options: {
 
   if (match.productId !== productId) {
     throw new Error("読み取り結果の商品と操作対象の商品が一致しません。もう一度読み取ってください。");
+  }
+
+  const staffOperator = await findActiveStaffOperatorForClinic({
+    organizationId: context.organizationId,
+    clinicId: context.clinicId,
+    barcode: staffBarcode,
+  });
+
+  if (!staffOperator) {
+    throw new Error("有効な担当者バーコードが見つかりません。このクリニックで使える担当者を確認してください。");
   }
 
   const reasonText = buildReason(reason, reasonNote);
@@ -293,6 +307,7 @@ export async function barcodeStockMoveForContext(options: {
         expiryDateText: lotData?.expiryDateText || null,
         expiryDate: lotData?.expiryDate ?? null,
         userId: context.userId,
+        performedByStaffId: staffOperator.id,
         memo,
       },
     });
@@ -316,6 +331,7 @@ export async function barcodeStockMoveAction(
 ): Promise<BarcodeStockActionState> {
   try {
     const context = await requireActiveClinic();
+    const staffBarcode = staffBarcodeSchema.parse(formData.get("staffBarcode"));
     const barcode = barcodeSchema.parse(formData.get("barcode"));
     const productId = productIdSchema.parse(formData.get("productId"));
     const movementType = movementTypeSchema.parse(formData.get("movementType"));
@@ -326,6 +342,7 @@ export async function barcodeStockMoveAction(
     const result = await barcodeStockMoveForContext({
       context,
       input: {
+        staffBarcode,
         barcode,
         productId,
         movementType,

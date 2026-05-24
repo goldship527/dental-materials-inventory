@@ -111,6 +111,8 @@ async function main() {
   await prisma.stocktakeSession.deleteMany();
   await prisma.stockItem.deleteMany();
   await prisma.productSupplier.deleteMany();
+  await prisma.staffOperatorClinicAssignment.deleteMany();
+  await prisma.staffOperator.deleteMany();
   await prisma.userClinicAssignment.deleteMany();
   await prisma.loginAttempt.deleteMany();
   await prisma.product.deleteMany();
@@ -150,6 +152,34 @@ async function main() {
     data: {
       userId: user.id,
       clinicId: clinic.id,
+    },
+  });
+
+  await prisma.staffOperator.create({
+    data: {
+      organizationId: organization.id,
+      displayName: "テストスタッフ",
+      barcode: "STAFF-0001",
+      operatorType: "REGULAR",
+      clinicAssignments: {
+        create: {
+          clinicId: clinic.id,
+        },
+      },
+    },
+  });
+
+  await prisma.staffOperator.create({
+    data: {
+      organizationId: organization.id,
+      displayName: "ヘルプ",
+      barcode: "HELP-0001",
+      operatorType: "HELP",
+      clinicAssignments: {
+        create: {
+          clinicId: clinic.id,
+        },
+      },
     },
   });
 

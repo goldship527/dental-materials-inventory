@@ -33,6 +33,20 @@ async function seedTestData(prisma: PrismaClient) {
     },
   });
 
+  const staffOperator = await prisma.staffOperator.create({
+    data: {
+      organizationId: organization.id,
+      displayName: "Test Staff",
+      barcode: "STAFF-LOT-001",
+      operatorType: "REGULAR",
+      clinicAssignments: {
+        create: {
+          clinicId: clinic.id,
+        },
+      },
+    },
+  });
+
   const product = await prisma.product.create({
     data: {
       organizationId: organization.id,
@@ -65,6 +79,7 @@ async function seedTestData(prisma: PrismaClient) {
     clinic,
     product,
     context,
+    staffOperator,
   };
 }
 
@@ -106,6 +121,7 @@ async function main() {
   try {
     const data = await seedTestData(prisma);
     const baseInput = {
+      staffBarcode: data.staffOperator.barcode,
       barcode: gs1Input,
       productId: data.product.id,
       reason: "納品",
@@ -139,6 +155,7 @@ async function main() {
     assert.equal(firstMovement.lotNumber, "LOT123");
     assert.equal(firstMovement.expiryDateText, "270531");
     assert.ok(firstMovement.expiryDate instanceof Date);
+    assert.equal(firstMovement.performedByStaffId, data.staffOperator.id);
 
     await barcodeStockMoveForContext({
       context: data.context,

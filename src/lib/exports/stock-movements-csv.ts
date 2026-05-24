@@ -58,6 +58,7 @@ export function buildStockMovementsCsv(rows: StockMovementRow[]) {
     "操作元",
     "理由メモ",
     "操作者",
+    "実作業者",
     "ロット番号",
     "有効期限",
   ];
@@ -76,6 +77,7 @@ export function buildStockMovementsCsv(rows: StockMovementRow[]) {
         getStockMovementSourceLabel(row.sourceType),
         row.reason,
         row.userName,
+        row.performedByStaffName,
         row.lotNumber,
         formatDate(row.expiryDate, row.expiryDateText),
       ]

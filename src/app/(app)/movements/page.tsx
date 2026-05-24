@@ -167,7 +167,7 @@ export default async function MovementsPage({ searchParams }: PageProps) {
 
         <section className="overflow-hidden rounded border border-line bg-white shadow-panel">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[1200px] border-collapse text-left text-sm">
+            <table className="w-full min-w-[1320px] border-collapse text-left text-sm">
               <thead className="bg-gray-50 text-xs text-muted">
                 <tr>
                   <th className="border-b border-line px-4 py-3">日時</th>
@@ -179,6 +179,7 @@ export default async function MovementsPage({ searchParams }: PageProps) {
                   <th className="border-b border-line px-4 py-3">理由メモ</th>
                   <th className="border-b border-line px-4 py-3">操作元</th>
                   <th className="border-b border-line px-4 py-3">操作者</th>
+                  <th className="border-b border-line px-4 py-3">実作業者</th>
                   <th className="border-b border-line px-4 py-3">取り消し</th>
                 </tr>
               </thead>
@@ -233,6 +234,7 @@ export default async function MovementsPage({ searchParams }: PageProps) {
                           {movement.revertOfId ? <p className="mt-1 text-xs text-muted">取り消し操作</p> : null}
                         </td>
                         <td className="border-b border-line px-4 py-3 text-muted">{movement.userName}</td>
+                        <td className="border-b border-line px-4 py-3 text-muted">{movement.performedByStaffName ?? "-"}</td>
                         <td className="border-b border-line px-4 py-3">
                           {canRevert ? (
                             <RevertMovementButton
@@ -250,7 +252,7 @@ export default async function MovementsPage({ searchParams }: PageProps) {
                   })
                 ) : (
                   <tr>
-                    <td className="px-4 py-12 text-center text-muted" colSpan={10}>
+                    <td className="px-4 py-12 text-center text-muted" colSpan={11}>
                       {emptyMessage}
                     </td>
                   </tr>

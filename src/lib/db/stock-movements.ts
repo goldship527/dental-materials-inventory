@@ -20,6 +20,7 @@ export type StockMovementRow = {
   expiryDateText: string | null;
   expiryDate: Date | null;
   userName: string;
+  performedByStaffName: string | null;
   createdAt: Date;
 };
 
@@ -144,6 +145,7 @@ function buildQueryWhere(query: string): Prisma.StockMovementWhereInput | undefi
     { product: { productCode: { contains: query, mode: "insensitive" } } },
     { product: { category: { contains: query, mode: "insensitive" } } },
     { user: { name: { contains: query, mode: "insensitive" } } },
+    { performedByStaff: { displayName: { contains: query, mode: "insensitive" } } },
   ];
 
   if (matchingMovementTypes.length > 0) {
@@ -219,6 +221,11 @@ export async function getStockMovementRows(
           name: true,
         },
       },
+      performedByStaff: {
+        select: {
+          displayName: true,
+        },
+      },
     },
     orderBy: {
       createdAt: "desc",
@@ -249,6 +256,7 @@ export async function getStockMovementRows(
       expiryDateText: movement.expiryDateText,
       expiryDate: movement.expiryDate,
       userName: movement.user.name,
+      performedByStaffName: movement.performedByStaff?.displayName ?? null,
       createdAt: movement.createdAt,
     };
   });
