@@ -174,6 +174,30 @@ export default async function AdminOverviewClinicDetailPage({ params, searchPara
           ))}
         </section>
 
+        <section className="grid gap-3 md:grid-cols-3">
+          <a
+            className="rounded border border-line bg-white p-4 shadow-panel transition hover:border-accent"
+            href={`/admin/overview/${clinicId}/shortage`}
+          >
+            <p className="text-sm font-semibold text-accent">不足在庫を見る</p>
+            <p className="mt-2 text-sm leading-6 text-muted">不足商品だけを、発注先や不足数と一緒に確認します。</p>
+          </a>
+          <a
+            className="rounded border border-line bg-white p-4 shadow-panel transition hover:border-accent"
+            href={`/admin/overview/${clinicId}/orders`}
+          >
+            <p className="text-sm font-semibold text-accent">発注候補を見る</p>
+            <p className="mt-2 text-sm leading-6 text-muted">未確認、確認済み、発注済みの候補を読み取り専用で確認します。</p>
+          </a>
+          <a
+            className="rounded border border-line bg-white p-4 shadow-panel transition hover:border-accent"
+            href={`/admin/overview/${clinicId}/movements`}
+          >
+            <p className="text-sm font-semibold text-accent">入出庫履歴を見る</p>
+            <p className="mt-2 text-sm leading-6 text-muted">最近の入庫、出庫、調整履歴を最新100件まで確認します。</p>
+          </a>
+        </section>
+
         <section className="rounded border border-line bg-white p-4 shadow-panel">
           <form className="grid gap-3 lg:grid-cols-[1fr_220px_auto_auto]" action={`/admin/overview/${clinicId}`}>
             <label className="grid gap-2 text-sm font-semibold text-muted">

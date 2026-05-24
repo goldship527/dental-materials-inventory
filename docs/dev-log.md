@@ -4275,3 +4275,31 @@
 - `corepack pnpm typecheck`
 - `corepack pnpm build`
 - `git diff --check`
+
+## 2026-05-24 本部用クリニック別読み取り専用確認画面
+
+### 作業内容
+- `/admin/overview/[clinicId]` に、不足在庫、発注候補、入出庫履歴へ進む導線を追加した。
+- `/admin/overview/[clinicId]/shortage` を追加し、指定クリニックの不足在庫だけを読み取り専用で確認できるようにした。
+- `/admin/overview/[clinicId]/orders` を追加し、指定クリニックの発注候補を状態別・検索付きで確認できるようにした。
+- `/admin/overview/[clinicId]/movements` を追加し、指定クリニックの入出庫履歴を最新100件まで確認できるようにした。
+- 各画面で、クリニック別詳細へ戻る導線を追加した。
+- README、仕様書、スタッフマニュアル、開発・管理用使用書を更新した。
+
+### 判断
+- 通常業務画面のクリニック文脈は切り替えず、本部用の読み取り専用画面として追加した。
+- 横断確認中の誤操作を避けるため、在庫編集、発注候補編集、履歴取り消し、発注書印刷、CSV出力は入れなかった。
+- 入出庫履歴はまず最新100件までの画面確認に留め、重い横断CSV出力は扱わない。
+
+### セキュリティメモ
+- 各画面は `requireAdminUser` でADMINに限定する。
+- URL上の `clinicId` は、ログイン中ユーザーの `organizationId` に属する有効クリニックか確認する。
+- 組織外または無効なクリニックは表示しない。
+- 在庫数、発注候補、履歴は変更しない。
+- 実在医院名、患者情報、個人情報、秘密情報は追加していない。
+
+### 検証
+- `corepack pnpm exec tsx tests/admin-overview-detail.test.ts`
+- `corepack pnpm typecheck`
+- `corepack pnpm build`
+- `git diff --check`
