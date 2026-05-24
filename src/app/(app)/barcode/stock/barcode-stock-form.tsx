@@ -117,6 +117,10 @@ export function BarcodeStockForm({ barcode, productId, currentQuantity }: Barcod
     setQuantity(Math.max(1, Math.min(9999, Math.trunc(Number.isFinite(nextQuantity) ? nextQuantity : 1))));
   }
 
+  function updateStaffBarcode(value: string) {
+    setStaffBarcode(normalizeBarcodeText(value).toUpperCase());
+  }
+
   return (
     <form action={formAction} className="rounded border border-line bg-white p-5 shadow-panel">
       <input type="hidden" name="barcode" value={barcode} />
@@ -134,7 +138,15 @@ export function BarcodeStockForm({ barcode, productId, currentQuantity }: Barcod
             maxLength={64}
             name="staffBarcode"
             value={staffBarcode}
-            onChange={(event) => setStaffBarcode(normalizeBarcodeText(event.target.value).toUpperCase())}
+            onInput={(event) => updateStaffBarcode(event.currentTarget.value)}
+            onChange={(event) => updateStaffBarcode(event.target.value)}
+            onCompositionEnd={(event) => updateStaffBarcode(event.currentTarget.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                event.preventDefault();
+                updateStaffBarcode(event.currentTarget.value);
+              }
+            }}
             placeholder="STAFF-0001"
             required
           />

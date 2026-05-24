@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { normalizeBarcodeText } from "@/lib/barcode/normalize";
 
 type BarcodeSearchFormProps = {
@@ -23,6 +23,7 @@ export function BarcodeSearchForm({
   const formRef = useRef<HTMLFormElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const submitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [lastScannedBarcode, setLastScannedBarcode] = useState("");
 
   useEffect(() => {
     if (!autoFocusInput) {
@@ -79,6 +80,8 @@ export function BarcodeSearchForm({
         return;
       }
 
+      setLastScannedBarcode(scannedText);
+
       if (inputRef.current) {
         inputRef.current.value = scannedText;
       }
@@ -127,6 +130,22 @@ export function BarcodeSearchForm({
     };
   }, [autoSubmitOnScan, defaultBarcode]);
 
+  function submitBarcodeValue(value: string) {
+    const normalizedValue = normalizeBarcodeText(value);
+
+    if (!normalizedValue || normalizedValue === normalizeBarcodeText(defaultBarcode)) {
+      return;
+    }
+
+    setLastScannedBarcode(normalizedValue);
+
+    if (inputRef.current) {
+      inputRef.current.value = normalizedValue;
+    }
+
+    formRef.current?.requestSubmit();
+  }
+
   function scheduleAutoSubmit(value: string) {
     if (!autoSubmitOnScan) {
       return;
@@ -142,9 +161,19 @@ export function BarcodeSearchForm({
       return;
     }
 
+    setLastScannedBarcode(normalizedValue);
+
     submitTimerRef.current = setTimeout(() => {
-      formRef.current?.requestSubmit();
+      submitBarcodeValue(normalizedValue);
     }, autoSubmitDelayMs);
+  }
+
+  function submitImmediately(value: string) {
+    if (submitTimerRef.current) {
+      clearTimeout(submitTimerRef.current);
+    }
+
+    submitBarcodeValue(value);
   }
 
   return (
@@ -167,7 +196,15 @@ export function BarcodeSearchForm({
             autoComplete="off"
             spellCheck={false}
             onFocus={(event) => event.currentTarget.select()}
+            onInput={(event) => scheduleAutoSubmit(event.currentTarget.value)}
             onChange={(event) => scheduleAutoSubmit(event.target.value)}
+            onCompositionEnd={(event) => submitImmediately(event.currentTarget.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === "Tab") {
+                event.preventDefault();
+                submitImmediately(event.currentTarget.value);
+              }
+            }}
             className="h-12 rounded border border-line px-4 font-mono text-base text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
           />
           <button
@@ -184,6 +221,11 @@ export function BarcodeSearchForm({
           </a>
         </div>
       </label>
+      {lastScannedBarcode ? (
+        <p className="mt-3 rounded border border-blue-100 bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-900">
+          読み取り値: <span className="font-mono">{lastScannedBarcode}</span>
+        </p>
+      ) : null}
     </form>
   );
 }
