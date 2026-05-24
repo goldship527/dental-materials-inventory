@@ -58,6 +58,15 @@ export default async function AdminOverviewPage() {
           </p>
         </header>
 
+        <section className="flex flex-wrap gap-3">
+          <a
+            className="inline-flex h-11 items-center justify-center rounded border border-line bg-white px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+            href="/admin/overview/usage-export"
+          >
+            使用個数CSV出力
+          </a>
+        </section>
+
         <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {summaryItems.map((item) => (
             <div key={item.label} className="rounded border border-line bg-white p-5 shadow-panel">

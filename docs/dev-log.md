@@ -4276,6 +4276,34 @@
 - `corepack pnpm build`
 - `git diff --check`
 
+## 2026-05-24 本部向け使用個数CSV出力
+
+### 作業内容
+- `/admin/overview/usage-export` に、ADMIN向けの使用個数CSV出力画面を追加した。
+- `/admin/overview/usage-export/download` から、指定期間の使用個数CSVをダウンロードできるようにした。
+- `StockMovement.movementType = OUT` を使用個数として扱い、法人合計とクリニック別の商品別集計を同じCSVに出力するようにした。
+- CSVには、集計区分、対象期間、クリニック名、商品名、商品コード、JAN、カテゴリ、メーカー、出庫数合計、出庫回数、最終出庫日時を含めた。
+- 出力期間は最大366日までに制限した。
+- 本部ダッシュボードから使用個数CSV出力画面へ進む導線を追加した。
+- README、仕様書、スタッフマニュアル、開発・管理用使用書を更新した。
+
+### 判断
+- 発注量や最低在庫の見直しに使いやすいよう、まずは「法人合計」と「クリニック別」の商品別集計に絞った。
+- 理由別、ロット別、発注先別、グラフ、Excel複数シートはMVPから外した。
+- CSV出力ではスプレッドシート数式として解釈されやすい文字列を保護する。
+
+### セキュリティメモ
+- CSV出力はADMINに限定する。
+- 集計対象はログイン中ユーザーの `organizationId` に属する有効クリニックだけに限定する。
+- 患者情報、個人情報、秘密情報、パスワード、APIキーはCSVに含めない。
+- 在庫数や入出庫履歴は変更しない。
+
+### 検証
+- `corepack pnpm exec tsx tests/admin-usage-export.test.ts`
+- `corepack pnpm typecheck`
+- `corepack pnpm build`
+- `git diff --check`
+
 ## 2026-05-24 本部用クリニック別読み取り専用確認画面
 
 ### 作業内容
