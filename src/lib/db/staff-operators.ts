@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db/prisma";
+import { normalizeBarcodeText } from "@/lib/barcode/normalize";
 
 export const staffOperatorTypes = {
   regular: "REGULAR",
@@ -23,7 +24,7 @@ export type StaffOperatorClinicOption = {
 };
 
 export function normalizeStaffOperatorBarcode(value: string) {
-  return value.trim().toUpperCase();
+  return normalizeBarcodeText(value).toUpperCase();
 }
 
 export async function getStaffOperatorRows(organizationId: string): Promise<StaffOperatorRow[]> {

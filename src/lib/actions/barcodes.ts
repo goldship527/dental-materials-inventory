@@ -4,6 +4,7 @@ import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { markMatchingBarcodeScanLogsLinkedForContext } from "@/lib/actions/barcode-scan-logs";
+import { normalizeBarcodeText } from "@/lib/barcode/normalize";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { prisma } from "@/lib/db/prisma";
 
@@ -22,9 +23,13 @@ const barcodeBaseSchema = z.object({
   productId: z.string().min(1),
   barcode: z
     .string()
-    .trim()
-    .min(1, "バーコードを入力してください。")
-    .max(100, "バーコードは100文字以内で入力してください。"),
+    .transform((value) => normalizeBarcodeText(value))
+    .pipe(
+      z
+        .string()
+        .min(1, "バーコードを入力してください。")
+        .max(100, "バーコードは100文字以内で入力してください。"),
+    ),
   barcodeType: z.string().trim().min(1, "種別を入力してください。").max(40, "種別は40文字以内で入力してください。"),
   unitLabel: nullableTextSchema,
   isPrimary: z.boolean(),

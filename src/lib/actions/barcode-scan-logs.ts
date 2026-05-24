@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createOrFindTestProductFromSampleForContext } from "@/lib/actions/imports";
 import { analyzeBarcodeInput } from "@/lib/barcode/gs1";
+import { normalizeBarcodeText } from "@/lib/barcode/normalize";
 import { searchProductsByBarcode } from "@/lib/db/barcodes";
 import { type ActiveClinicContext, requireActiveClinic } from "@/lib/db/clinic";
 import { prisma } from "@/lib/db/prisma";
@@ -16,7 +17,10 @@ import {
 } from "@/lib/imports/medical-device-samples";
 
 const createBarcodeScanLogSchema = z.object({
-  rawInput: z.string().trim().min(1, "読み取り値がありません。").max(300, "読み取り値は300文字以内で保存してください。"),
+  rawInput: z
+    .string()
+    .transform((value) => normalizeBarcodeText(value))
+    .pipe(z.string().min(1, "読み取り値がありません。").max(300, "読み取り値は300文字以内で保存してください。")),
 });
 const resolveBarcodeScanLogSchema = z.object({
   logId: z.string().trim().min(1),
@@ -245,7 +249,7 @@ export async function markMatchingBarcodeScanLogsLinkedForContext(options: {
   barcode: string;
   db?: Prisma.TransactionClient;
 }) {
-  const inputBarcode = options.barcode.trim();
+  const inputBarcode = normalizeBarcodeText(options.barcode);
 
   if (!inputBarcode) {
     return {

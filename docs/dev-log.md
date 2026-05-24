@@ -4122,3 +4122,29 @@
 - `corepack pnpm exec tsx tests/barcode-scan-logs.test.ts`
 - `corepack pnpm build`
 - `git diff --check`
+
+## 2026-05-24 バーコード入力の全角半角正規化
+
+### 作業内容
+- バーコード入力の共通正規化処理 `src/lib/barcode/normalize.ts` を追加した。
+- 商品バーコード検索、商品バーコード登録、未対応バーコード整理、バーコード出入庫、担当者バーコード照合で、全角英数字や全角ハイフンを半角相当に直して扱うようにした。
+- `４９００００００００００９` のような全角JANでも、`4900000000009` として検索できるテストを追加した。
+- README、仕様書、スタッフマニュアルに、全角入力時もアプリ側で正規化することを追記した。
+
+### 判断
+- スキャナー側の設定で半角入力にできるのが望ましいが、現場端末や入力方式の揺れに備えてアプリ側でも吸収する。
+- 読み取り値は保存・照合前に正規化し、同じバーコードが全角と半角で別物として登録されないようにする。
+- 日付・時刻付き読み取りの再対応は行わず、前回決めた通り保存時刻・確定時刻を正とする。
+
+### セキュリティメモ
+- DBスキーマ、秘密値、Supabase設定は変更していない。
+- バーコードは商品識別子または内部担当者コードとして扱い、患者情報や個人情報を入れない運用を維持する。
+
+### 検証
+- `corepack pnpm typecheck`
+- `corepack pnpm exec tsx tests/barcode-normalize.test.ts`
+- `corepack pnpm exec tsx tests/barcode-gs1.test.ts`
+- `corepack pnpm exec tsx tests/ean13.test.ts`
+- `corepack pnpm exec tsx tests/staff-operators.test.ts`
+- `corepack pnpm exec tsx tests/barcode-stock-lots.test.ts`
+- `corepack pnpm exec tsx tests/barcode-scan-logs.test.ts`

@@ -1,4 +1,5 @@
 import { isValidEan13, isValidGtin14 } from "@/lib/barcode/ean13";
+import { normalizeBarcodeText } from "@/lib/barcode/normalize";
 
 const GS1_SEPARATOR = "\u001d";
 
@@ -204,7 +205,7 @@ function extractJan13Candidate(value: string) {
 }
 
 export function analyzeBarcodeInput(input: string): BarcodeInputAnalysis {
-  const rawInput = input.trim();
+  const rawInput = normalizeBarcodeText(input);
   const normalizedInput = normalizeVisibleInput(rawInput);
   const extractedGtin = extractGtinFromGs1(rawInput);
   const digitsOnly = normalizedInput.replace(/\D/g, "");

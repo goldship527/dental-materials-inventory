@@ -4,6 +4,7 @@ import type { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { analyzeBarcodeInput } from "@/lib/barcode/gs1";
+import { normalizeBarcodeText } from "@/lib/barcode/normalize";
 import { isAllowedBarcodeStockReason } from "@/lib/barcode/stock-reasons";
 import { searchProductsByBarcode } from "@/lib/db/barcodes";
 import { requireActiveClinic } from "@/lib/db/clinic";
@@ -16,8 +17,14 @@ const quantitySchema = z.coerce
   .int("数量は整数で入力してください。")
   .min(1, "数量は1以上で入力してください。")
   .max(9999, "数量は9999以下で入力してください。");
-const barcodeSchema = z.string().trim().min(1, "バーコードを読み取ってください。").max(300, "バーコードが長すぎます。");
-const staffBarcodeSchema = z.string().trim().min(1, "担当者バーコードを読み取ってください。").max(64, "担当者バーコードが長すぎます。");
+const barcodeSchema = z
+  .string()
+  .transform((value) => normalizeBarcodeText(value))
+  .pipe(z.string().min(1, "バーコードを読み取ってください。").max(300, "バーコードが長すぎます。"));
+const staffBarcodeSchema = z
+  .string()
+  .transform((value) => normalizeBarcodeText(value))
+  .pipe(z.string().min(1, "担当者バーコードを読み取ってください。").max(64, "担当者バーコードが長すぎます。"));
 const productIdSchema = z.string().min(1, "商品を選択してください。");
 const reasonSchema = z.string().trim().min(1, "理由を選択してください。").max(40, "理由が長すぎます。");
 const reasonNoteSchema = z.string().trim().max(160, "補足メモは160文字以内で入力してください。");
