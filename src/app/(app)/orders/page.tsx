@@ -272,9 +272,9 @@ export default async function OrdersPage({ searchParams }: PageProps) {
               return (
                 <section
                   key={supplierKey}
-                  className="overflow-hidden rounded border border-line/90 bg-panel/95 shadow-panel print:break-inside-avoid print:rounded-none print:border-black print:shadow-none"
+                  className="overflow-hidden rounded border border-line/90 bg-white shadow-panel print:break-inside-avoid print:rounded-none print:border-black print:shadow-none"
                 >
-                <div className="flex flex-col gap-2 border-b border-line px-4 py-2 text-sm lg:flex-row lg:items-start lg:justify-between print:border-black print:px-2 print:py-2 print:text-xs">
+                <div className="flex flex-col gap-2 border-b border-line border-l-4 border-l-accent bg-teal-50/70 px-4 py-2 text-sm lg:flex-row lg:items-start lg:justify-between print:border-black print:border-l-black print:bg-white print:px-2 print:py-2 print:text-xs">
                   <div>
                     <h2 className="font-semibold">{supplierName}</h2>
                     {hasUnassignedSupplier ? (

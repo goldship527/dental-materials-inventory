@@ -124,11 +124,9 @@ export default async function MovementsPage({ searchParams }: PageProps) {
     startDate: params.startDate,
     endDate: params.endDate,
   });
-  const [movements, movementCount, categories] = await Promise.all([
-    getStockMovementRows(context.clinicId, filters),
-    getStockMovementCount(context.clinicId, filters),
-    getProductCategories(context.organizationId),
-  ]);
+  const movements = await getStockMovementRows(context.clinicId, filters);
+  const movementCount = await getStockMovementCount(context.clinicId, filters);
+  const categories = await getProductCategories(context.organizationId).catch(() => []);
   const exportHref = buildMovementExportHref(filters);
   const filterLabel = [
     filters.query ? `検索: ${filters.query}` : "",
