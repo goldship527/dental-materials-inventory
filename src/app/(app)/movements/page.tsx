@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { AppNav } from "@/components/domain/app-nav";
 import { requireActiveClinic } from "@/lib/db/clinic";
+import { getProductCategories } from "@/lib/db/products";
 import {
   getStockMovementCount,
   getStockMovementRows,
@@ -18,6 +19,7 @@ type PageProps = {
     type?: string;
     source?: string;
     sourceId?: string;
+    category?: string;
     startDate?: string;
     endDate?: string;
   }>;
@@ -65,6 +67,7 @@ function buildMovementExportHref(filters: {
   movementType: string;
   sourceType: string;
   sourceId: string;
+  category: string;
   startDate: string;
   endDate: string;
 }) {
@@ -84,6 +87,10 @@ function buildMovementExportHref(filters: {
 
   if (filters.sourceId) {
     params.set("sourceId", filters.sourceId);
+  }
+
+  if (filters.category) {
+    params.set("category", filters.category);
   }
 
   if (filters.startDate) {
@@ -113,16 +120,21 @@ export default async function MovementsPage({ searchParams }: PageProps) {
     movementType: params.type,
     sourceType: params.source,
     sourceId: params.sourceId,
+    category: params.category,
     startDate: params.startDate,
     endDate: params.endDate,
   });
-  const movements = await getStockMovementRows(context.clinicId, filters);
-  const movementCount = await getStockMovementCount(context.clinicId, filters);
+  const [movements, movementCount, categories] = await Promise.all([
+    getStockMovementRows(context.clinicId, filters),
+    getStockMovementCount(context.clinicId, filters),
+    getProductCategories(context.organizationId),
+  ]);
   const exportHref = buildMovementExportHref(filters);
   const filterLabel = [
     filters.query ? `検索: ${filters.query}` : "",
     filters.movementType ? `区分: ${getStockMovementTypeLabel(filters.movementType)}` : "",
     filters.sourceType ? `操作元: ${getStockMovementSourceLabel(filters.sourceType)}` : "",
+    filters.category ? `カテゴリ: ${filters.category}` : "",
     filters.startDate ? `開始日: ${filters.startDate}` : "",
     filters.endDate ? `終了日: ${filters.endDate}` : "",
     filters.sourceId ? "棚卸セッション指定あり" : "",
@@ -154,8 +166,10 @@ export default async function MovementsPage({ searchParams }: PageProps) {
           defaultQuery={filters.query}
           defaultType={filters.movementType}
           defaultSource={filters.sourceType}
+          defaultCategory={filters.category}
           defaultStartDate={filters.startDate}
           defaultEndDate={filters.endDate}
+          categories={categories}
           exportHref={exportHref}
         />
 

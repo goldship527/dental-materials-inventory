@@ -29,6 +29,7 @@ export type StockMovementFilters = {
   movementType?: string;
   sourceType?: string;
   sourceId?: string;
+  category?: string;
   startDate?: string;
   endDate?: string;
 };
@@ -101,6 +102,7 @@ export function normalizeStockMovementFilters(filters: StockMovementFilters = {}
     movementType,
     sourceType,
     sourceId: filters.sourceId?.trim() ?? "",
+    category: filters.category?.trim() ?? "",
     startDate: filters.startDate?.trim() ?? "",
     endDate: filters.endDate?.trim() ?? "",
   };
@@ -177,6 +179,14 @@ function buildStockMovementWhere(clinicId: string, rawFilters: StockMovementFilt
 
   if (sourceTypeWhere) {
     and.push(sourceTypeWhere);
+  }
+
+  if (filters.category) {
+    and.push({
+      product: {
+        category: filters.category,
+      },
+    });
   }
 
   if (filters.sourceId) {

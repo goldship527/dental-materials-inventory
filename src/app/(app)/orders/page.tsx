@@ -274,7 +274,7 @@ export default async function OrdersPage({ searchParams }: PageProps) {
                   key={supplierKey}
                   className="overflow-hidden rounded border border-line/90 bg-panel/95 shadow-panel print:break-inside-avoid print:rounded-none print:border-black print:shadow-none"
                 >
-                <div className="flex items-center justify-between border-b border-line px-4 py-2 text-sm print:border-black print:px-2 print:py-2 print:text-xs">
+                <div className="flex flex-col gap-2 border-b border-line px-4 py-2 text-sm lg:flex-row lg:items-start lg:justify-between print:border-black print:px-2 print:py-2 print:text-xs">
                   <div>
                     <h2 className="font-semibold">{supplierName}</h2>
                     {hasUnassignedSupplier ? (
@@ -283,7 +283,7 @@ export default async function OrdersPage({ searchParams }: PageProps) {
                       </p>
                     ) : null}
                   </div>
-                  <div className="flex flex-wrap items-center justify-end gap-3">
+                  <div className="flex flex-wrap items-start justify-end gap-2">
                     <span className="text-muted print:text-black">{supplierRows.length} 件</span>
                     {printableRows.length > 0 ? (
                       <a
@@ -294,21 +294,21 @@ export default async function OrdersPage({ searchParams }: PageProps) {
                       </a>
                     ) : null}
                     {printableRows.length > 0 ? (
-                      <form action={markOrderRequestsOrderedAction} className="grid gap-1.5 rounded border border-line bg-subtle/70 px-3 py-2 print:hidden">
+                      <form action={markOrderRequestsOrderedAction} className="flex flex-wrap items-end gap-2 rounded border border-line bg-subtle/70 px-2 py-2 print:hidden">
                         {printableRows.map((row) => (
                           <input key={row.id} type="hidden" name="orderRequestId" value={row.id} />
                         ))}
-                        <label className="flex items-center gap-2 text-xs font-semibold text-muted">
+                        <label className="flex h-9 items-center gap-2 whitespace-nowrap text-xs font-semibold text-muted">
                           <input type="checkbox" name="confirmOrdered" required className="h-4 w-4 accent-teal-700" />
                           送付済み確認
                         </label>
-                        <label className="grid gap-1 text-xs font-semibold text-muted">
-                          送付方法
+                        <label className="grid w-44 gap-1 text-xs font-semibold text-muted">
+                          <span className="sr-only">送付方法</span>
                           <select
                             name="orderedMethod"
                             required
                             defaultValue=""
-                            className="h-9 rounded border border-line bg-white px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                            className="h-9 rounded border border-line bg-white px-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
                           >
                             <option value="" disabled>
                               選択してください
@@ -324,17 +324,17 @@ export default async function OrdersPage({ searchParams }: PageProps) {
                           name="orderedMemo"
                           placeholder="送付メモ（任意）"
                           maxLength={300}
-                          className="min-h-12 rounded border border-line bg-white px-3 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                          className="h-9 min-h-9 w-40 rounded border border-line bg-white px-2 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
                         />
                         <textarea
                           name="supplierResponseMemo"
                           placeholder="先方対応メモ（任意）"
                           maxLength={300}
-                          className="min-h-12 rounded border border-line bg-white px-3 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                          className="h-9 min-h-9 w-40 rounded border border-line bg-white px-2 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
                         />
                         <button
                           type="submit"
-                          className="min-h-9 rounded bg-ink px-3 py-2 text-xs font-semibold text-white transition hover:bg-slate-700"
+                          className="h-9 rounded bg-ink px-3 text-xs font-semibold text-white transition hover:bg-slate-700"
                         >
                           この発注先を発注済みにする
                         </button>
