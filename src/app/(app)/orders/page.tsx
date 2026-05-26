@@ -3,7 +3,7 @@ import { auth } from "@/auth";
 import { AppNav } from "@/components/domain/app-nav";
 import { markOrderRequestsOrderedAction } from "@/lib/actions/orders";
 import { requireActiveClinic } from "@/lib/db/clinic";
-import { getOrderRequestRows } from "@/lib/db/orders";
+import { getOrderRequestRows, type OrderRequestRow } from "@/lib/db/orders";
 import { orderPrintUnassignedSupplierId } from "@/lib/orders/print";
 import { orderSendMethodLabels, orderSendMethodValues } from "@/lib/orders/send-method";
 import {
@@ -69,6 +69,50 @@ function getSupplierStatusChipClass(status: OrderRequestStatusValue) {
   }
 
   return "border-line bg-white/80 text-muted";
+}
+
+function OrderRequestRowsTable({ rows }: { rows: OrderRequestRow[] }) {
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full min-w-[1180px] border-collapse text-left text-sm print:min-w-0 print:text-[10.5px]">
+        <thead className="bg-subtle text-xs text-muted print:bg-white print:text-[10px] print:text-black">
+          <tr>
+            <th className="border-b border-line px-4 py-3 print:border print:border-black print:px-2 print:py-1.5">
+              商品
+            </th>
+            <th className="border-b border-line px-4 py-3 text-right print:border print:border-black print:px-2 print:py-1.5">
+              現在庫
+            </th>
+            <th className="border-b border-line px-4 py-3 text-right print:border print:border-black print:px-2 print:py-1.5">
+              最低在庫
+            </th>
+            <th className="border-b border-line px-4 py-3 text-right print:border print:border-black print:px-2 print:py-1.5">
+              不足数
+            </th>
+            <th className="border-b border-line px-4 py-3 print:border print:border-black print:px-2 print:py-1.5">
+              発注先
+            </th>
+            <th className="border-b border-line px-4 py-3 text-right print:border print:border-black print:px-2 print:py-1.5">
+              発注数量
+            </th>
+            <th className="border-b border-line px-4 py-3 print:hidden">数量変更</th>
+            <th className="border-b border-line px-4 py-3 print:hidden">状態・メモ</th>
+            <th className="hidden border border-black px-2 py-1.5 print:table-cell">状態</th>
+            <th className="hidden border border-black px-2 py-1.5 print:table-cell">備考</th>
+            <th className="hidden border border-black px-2 py-1.5 print:table-cell">確認</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => (
+            <OrderRequestTableRow
+              key={`${row.id}-${row.status}-${row.requestedQuantity}-${row.memo ?? ""}-${row.orderedMethod ?? ""}-${row.orderedMemo ?? ""}-${row.supplierResponseMemo ?? ""}`}
+              row={row}
+            />
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
 }
 
 export default async function OrdersPage({ searchParams }: PageProps) {
@@ -282,7 +326,35 @@ export default async function OrdersPage({ searchParams }: PageProps) {
             groupedRows.map(([supplierKey, group]) => {
               const supplierName = group.supplierName;
               const supplierRows = group.rows;
-              const printableRows = supplierRows.filter((row) => printableOrderRequestStatuses.includes(row.status));
+              const activeRows = supplierRows.filter((row) => printableOrderRequestStatuses.includes(row.status));
+              const orderedRows = supplierRows.filter((row) => row.status === "ORDERED");
+              const skippedRows = supplierRows.filter((row) => row.status === "SKIPPED");
+              const rowBlocks = [
+                {
+                  key: "active",
+                  title: "発注候補",
+                  description: "これから発注する対象",
+                  rows: activeRows,
+                  className: "border-accent/30",
+                  headerClassName: "bg-white",
+                },
+                {
+                  key: "ordered",
+                  title: "発注済み",
+                  description: "送付済み・納品確認待ち",
+                  rows: orderedRows,
+                  className: "border-green-100",
+                  headerClassName: "bg-green-50/70",
+                },
+                {
+                  key: "skipped",
+                  title: "取り消し",
+                  description: "今回の下書きから外したもの",
+                  rows: skippedRows,
+                  className: "border-red-100",
+                  headerClassName: "bg-red-50/70",
+                },
+              ].filter((block) => block.rows.length > 0);
               const hasUnassignedSupplier = supplierRows.some((row) => !row.supplierId);
               const supplierStatusCounts = orderRequestStatuses
                 .map((status) => ({
@@ -322,101 +394,88 @@ export default async function OrdersPage({ searchParams }: PageProps) {
                         </span>
                       ))}
                     </div>
-                    {printableRows.length > 0 ? (
-                      <a
-                        className="inline-flex min-h-9 items-center justify-center rounded border border-line bg-white/75 px-3 py-1.5 text-xs font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent print:hidden"
-                        href={buildOrdersPrintHref(supplierRows[0]?.supplierId)}
-                      >
-                        この発注先の下書き
-                      </a>
-                    ) : null}
-                    {printableRows.length > 0 ? (
-                      <form action={markOrderRequestsOrderedAction} className="flex flex-wrap items-end gap-2 rounded border border-line bg-subtle/70 px-2 py-2 print:hidden">
-                        {printableRows.map((row) => (
-                          <input key={row.id} type="hidden" name="orderRequestId" value={row.id} />
-                        ))}
-                        <label className="flex h-9 items-center gap-2 whitespace-nowrap text-xs font-semibold text-muted">
-                          <input type="checkbox" name="confirmOrdered" required className="h-4 w-4 accent-teal-700" />
-                          送付済み確認
-                        </label>
-                        <label className="grid w-44 gap-1 text-xs font-semibold text-muted">
-                          <span className="sr-only">送付方法</span>
-                          <select
-                            name="orderedMethod"
-                            required
-                            defaultValue=""
-                            className="h-9 rounded border border-line bg-white px-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
-                          >
-                            <option value="" disabled>
-                              選択してください
-                            </option>
-                            {orderSendMethodValues.map((method) => (
-                              <option key={method} value={method}>
-                                {orderSendMethodLabels[method]}
-                              </option>
-                            ))}
-                          </select>
-                        </label>
-                        <textarea
-                          name="orderedMemo"
-                          placeholder="送付メモ（任意）"
-                          maxLength={300}
-                          className="h-9 min-h-9 w-40 rounded border border-line bg-white px-2 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
-                        />
-                        <textarea
-                          name="supplierResponseMemo"
-                          placeholder="先方対応メモ（任意）"
-                          maxLength={300}
-                          className="h-9 min-h-9 w-40 rounded border border-line bg-white px-2 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
-                        />
-                        <button
-                          type="submit"
-                          className="h-9 rounded bg-ink px-3 text-xs font-semibold text-white transition hover:bg-slate-700"
-                        >
-                          この発注先を発注済みにする
-                        </button>
-                      </form>
-                    ) : null}
                   </div>
                 </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full min-w-[1180px] border-collapse text-left text-sm print:min-w-0 print:text-[10.5px]">
-                    <thead className="bg-subtle text-xs text-muted print:bg-white print:text-[10px] print:text-black">
-                      <tr>
-                        <th className="border-b border-line px-4 py-3 print:border print:border-black print:px-2 print:py-1.5">
-                          商品
-                        </th>
-                        <th className="border-b border-line px-4 py-3 text-right print:border print:border-black print:px-2 print:py-1.5">
-                          現在庫
-                        </th>
-                        <th className="border-b border-line px-4 py-3 text-right print:border print:border-black print:px-2 print:py-1.5">
-                          最低在庫
-                        </th>
-                        <th className="border-b border-line px-4 py-3 text-right print:border print:border-black print:px-2 print:py-1.5">
-                          不足数
-                        </th>
-                        <th className="border-b border-line px-4 py-3 print:border print:border-black print:px-2 print:py-1.5">
-                          発注先
-                        </th>
-                        <th className="border-b border-line px-4 py-3 text-right print:border print:border-black print:px-2 print:py-1.5">
-                          発注数量
-                        </th>
-                        <th className="border-b border-line px-4 py-3 print:hidden">数量変更</th>
-                        <th className="border-b border-line px-4 py-3 print:hidden">状態・メモ</th>
-                        <th className="hidden border border-black px-2 py-1.5 print:table-cell">状態</th>
-                        <th className="hidden border border-black px-2 py-1.5 print:table-cell">備考</th>
-                        <th className="hidden border border-black px-2 py-1.5 print:table-cell">確認</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {supplierRows.map((row) => (
-                        <OrderRequestTableRow
-                          key={`${row.id}-${row.status}-${row.requestedQuantity}-${row.memo ?? ""}-${row.orderedMethod ?? ""}-${row.orderedMemo ?? ""}-${row.supplierResponseMemo ?? ""}`}
-                          row={row}
-                        />
-                      ))}
-                    </tbody>
-                  </table>
+                <div className="grid gap-3 bg-subtle/30 p-3 print:bg-white print:p-0">
+                  {rowBlocks.map((block) => (
+                    <section
+                      key={block.key}
+                      className={`overflow-hidden rounded border bg-white print:break-inside-avoid print:rounded-none print:border-black ${block.className}`}
+                    >
+                      <div
+                        className={`flex flex-col gap-2 border-b border-line px-3 py-2 text-sm lg:flex-row lg:items-start lg:justify-between print:border-black print:bg-white print:px-2 print:py-1.5 print:text-xs ${block.headerClassName}`}
+                      >
+                        <div>
+                          <h3 className="font-semibold">{block.title}</h3>
+                          <p className="mt-0.5 text-xs text-muted print:text-black">{block.description}</p>
+                        </div>
+                        <div className="flex flex-wrap items-start justify-end gap-2">
+                          <span className="rounded border border-line bg-white/80 px-2 py-1 text-xs font-semibold text-muted print:border-black print:text-black">
+                            {block.rows.length} 件
+                          </span>
+                          {block.key === "active" && activeRows.length > 0 ? (
+                            <a
+                              className="inline-flex min-h-9 items-center justify-center rounded border border-line bg-white/75 px-3 py-1.5 text-xs font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent print:hidden"
+                              href={buildOrdersPrintHref(activeRows[0]?.supplierId)}
+                            >
+                              この発注先の下書き
+                            </a>
+                          ) : null}
+                          {block.key === "active" && activeRows.length > 0 ? (
+                            <form
+                              action={markOrderRequestsOrderedAction}
+                              className="flex flex-wrap items-end gap-2 rounded border border-line bg-white/80 px-2 py-2 print:hidden"
+                            >
+                              {activeRows.map((row) => (
+                                <input key={row.id} type="hidden" name="orderRequestId" value={row.id} />
+                              ))}
+                              <label className="flex h-9 items-center gap-2 whitespace-nowrap text-xs font-semibold text-muted">
+                                <input type="checkbox" name="confirmOrdered" required className="h-4 w-4 accent-teal-700" />
+                                送付済み確認
+                              </label>
+                              <label className="grid w-44 gap-1 text-xs font-semibold text-muted">
+                                <span className="sr-only">送付方法</span>
+                                <select
+                                  name="orderedMethod"
+                                  required
+                                  defaultValue=""
+                                  className="h-9 rounded border border-line bg-white px-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                                >
+                                  <option value="" disabled>
+                                    選択してください
+                                  </option>
+                                  {orderSendMethodValues.map((method) => (
+                                    <option key={method} value={method}>
+                                      {orderSendMethodLabels[method]}
+                                    </option>
+                                  ))}
+                                </select>
+                              </label>
+                              <textarea
+                                name="orderedMemo"
+                                placeholder="送付メモ（任意）"
+                                maxLength={300}
+                                className="h-9 min-h-9 w-40 rounded border border-line bg-white px-2 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                              />
+                              <textarea
+                                name="supplierResponseMemo"
+                                placeholder="先方対応メモ（任意）"
+                                maxLength={300}
+                                className="h-9 min-h-9 w-40 rounded border border-line bg-white px-2 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                              />
+                              <button
+                                type="submit"
+                                className="h-9 rounded bg-ink px-3 text-xs font-semibold text-white transition hover:bg-slate-700"
+                              >
+                                この発注先を発注済みにする
+                              </button>
+                            </form>
+                          ) : null}
+                        </div>
+                      </div>
+                      <OrderRequestRowsTable rows={block.rows} />
+                    </section>
+                  ))}
                 </div>
                 </section>
               );
