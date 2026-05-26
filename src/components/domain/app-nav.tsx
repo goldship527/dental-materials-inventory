@@ -39,14 +39,14 @@ const workNavItems = [
     href: "/home",
   },
   {
-    id: "inventory",
-    label: "在庫",
-    href: "/inventory",
-  },
-  {
     id: "quick",
     label: "出庫",
     href: "/quick",
+  },
+  {
+    id: "inventory",
+    label: "在庫",
+    href: "/inventory",
   },
   {
     id: "barcode",

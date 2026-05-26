@@ -59,7 +59,7 @@ export function QuickCard({ categoryLabel, row }: QuickCardProps) {
           <button
             type="submit"
             disabled={row.quantity <= 0 || isPending}
-            className="h-12 w-full rounded border border-line bg-white text-2xl font-semibold transition hover:border-danger hover:bg-red-50 hover:text-danger disabled:cursor-not-allowed disabled:opacity-40"
+            className="h-12 w-full rounded bg-danger text-2xl font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-40"
           >
             {isPending ? "..." : "-1"}
           </button>
@@ -70,7 +70,7 @@ export function QuickCard({ categoryLabel, row }: QuickCardProps) {
           <button
             type="submit"
             disabled={isPending}
-            className="h-12 w-full rounded bg-accent text-2xl font-semibold text-white transition hover:bg-accentDeep disabled:cursor-not-allowed disabled:opacity-50"
+            className="h-12 w-full rounded border border-line bg-white text-2xl font-semibold text-accent transition hover:border-accent hover:bg-teal-50 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isPending ? "..." : "+1"}
           </button>
