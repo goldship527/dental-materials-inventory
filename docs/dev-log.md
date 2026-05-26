@@ -4929,3 +4929,21 @@
 - `corepack pnpm typecheck`
 - `corepack pnpm build`
 - `git diff --check`
+
+## 2026-05-26 Supabase反映手順と公開環境確認手順の使用書補強
+
+### 作業内容
+- 開発・管理用使用書に、Supabase DBスキーマ反映後の確認画面と、`The database is already in sync with the Prisma schema.` の意味を追記した。
+- 購入履歴インポート関連で必要になる `ProductImportHistory.clinicId`、`ProductImportHistory.dealerNames`、`Product.importSource` を、公開環境で画面が開けない場合の確認観点として明記した。
+- READMEに、Supabase反映後の画面確認、Vercel最新コミット確認、購入履歴由来商品のバックフィルdry-run手順を追記した。
+
+### 判断
+- 公開環境の画面エラーは、アプリの最新デプロイとDBスキーマ反映のずれで起きることがあるため、使用書側に実務手順として残す。
+- 購入履歴インポートの操作説明は既存のスタッフマニュアルに任せ、今回は開発・管理者向けのDB反映手順を中心に補強した。
+
+### セキュリティメモ
+- `.env.supabase.local` の存在と必要な変数名だけを記載し、実際の接続文字列や秘密値は書かない。
+- 公開デモや本番候補DBでは `db:seed` を不用意に実行しない注意を維持した。
+
+### 検証
+- ドキュメントのみの変更。

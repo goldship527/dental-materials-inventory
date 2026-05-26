@@ -337,6 +337,8 @@ SUPABASE_STORAGE_BUCKET
 /products
 /products/new
 /products/import
+/products/import/purchase-history
+/products/import/purchase-history/setup
 /suppliers
 /suppliers/new
 /suppliers/import
@@ -356,6 +358,12 @@ SUPABASE_STORAGE_BUCKET
 
 `.env.local` はローカル開発用のまま維持し、Supabase用の接続文字列は `.env.supabase.local` に保存する。
 
+`.env.supabase.local` には、スキーマ反映用の `DATABASE_URL` だけを置けばよい。
+
+```text
+DATABASE_URL="Supabase PostgreSQLの接続文字列"
+```
+
 ```powershell
 cd C:\Dev\dental-materials-inventory
 .\scripts\push-supabase-schema.ps1
@@ -363,12 +371,37 @@ cd C:\Dev\dental-materials-inventory
 
 このスクリプトは `.env.supabase.local` の `DATABASE_URL` を一時的に現在のPowerShellプロセスへ読み込み、`corepack pnpm db:push` だけを実行する。実行後はPowerShellプロセスの `DATABASE_URL` を元に戻す。
 
+実行結果に次の表示が出た場合は、Supabase DBの形は現在のPrisma schemaと一致している。
+
+```text
+The database is already in sync with the Prisma schema.
+```
+
+ローカルでは表示できるのに公開環境で `/products/import` などが `This page couldn’t load` になる場合、Supabase DBに新しいカラムが未反映のことがある。今回の購入履歴インポート関連では、特に `ProductImportHistory.clinicId`、`ProductImportHistory.dealerNames`、`Product.importSource` が必要になる。
+
+スキーマ反映後に確認する画面:
+
+```text
+/products/import
+/products/import/purchase-history
+/products/import/purchase-history/setup
+```
+
+過去の暫定実装で、商品備考に旧マーカー `[purchase-history-import]` だけが残っている公開DBの場合は、スキーマ反映後にバックフィル対象を確認する。
+
+```powershell
+corepack pnpm exec tsx scripts/backfill-purchase-history-import-source.ts --dry-run
+```
+
+`Dry run: 0 product(s) would be marked as PURCHASE_HISTORY.` と出た場合、バックフィル本実行は不要。対象件数が出た場合だけ、接続先DBが正しいことを確認してから本実行する。
+
 注意:
 
 - `.env.supabase.local` は秘密値を含むためGitに入れない
 - `db:push` はテーブルやカラムなどDBの形を反映する
 - `db:seed` は初期データ投入・リセット用なので、公開デモや本番候補DBには不用意に実行しない
 - Vercelの環境変数を変更した場合はRedeployが必要
+- GitHubへpushした後、Vercelが最新コミットでデプロイ済みか確認する
 - 写真アップロード用の `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` / `SUPABASE_STORAGE_BUCKET` はアプリ実行時の設定。Vercel上のアップロード確認だけでよい場合、ローカルの `.env.local` に入れる必要はない
 
 ## 14. 本番導入を考える場合
