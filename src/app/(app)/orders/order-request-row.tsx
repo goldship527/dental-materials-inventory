@@ -250,48 +250,32 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
           </div>
         ) : null}
         {row.status === "ORDERED" && !row.receivedAt ? (
-          <div className="mt-2 rounded border border-teal-100 bg-teal-50 p-2.5">
+          <div className="mt-2 rounded border border-teal-100 bg-teal-50 p-2">
             <p className="text-xs font-semibold text-accent">納品確認</p>
             <form action={receiptAction} className="mt-2 grid gap-1.5">
               <input type="hidden" name="orderRequestId" value={row.id} />
-              <label className="grid gap-1 text-xs font-semibold text-muted">
-                納品数量
-                <input
-                  type="number"
-                  name="receivedQuantity"
-                  min={1}
-                  max={row.requestedQuantity}
-                  defaultValue={row.requestedQuantity}
-                  className="h-9 rounded border border-line bg-white px-3 text-right text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
-                />
-              </label>
-              <label className="flex items-center gap-2 text-xs font-semibold text-muted">
-                <input type="checkbox" name="applyToStock" defaultChecked className="h-4 w-4 accent-teal-700" />
-                在庫へ入庫反映する
-              </label>
-              <label className="grid gap-1 text-xs font-semibold text-muted">
-                ロット番号
-                <input
-                  type="text"
-                  name="receivedLotNumber"
-                  maxLength={120}
-                  placeholder="任意"
-                  className="h-9 rounded border border-line bg-white px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
-                />
-              </label>
-              <label className="grid gap-1 text-xs font-semibold text-muted">
-                有効期限
-                <input
-                  type="date"
-                  name="receivedExpiryDate"
-                  className="h-9 rounded border border-line bg-white px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
-                />
-              </label>
+              <div className="grid gap-1.5 sm:grid-cols-[1fr_auto] sm:items-end">
+                <label className="grid gap-1 text-xs font-semibold text-muted">
+                  納品数量
+                  <input
+                    type="number"
+                    name="receivedQuantity"
+                    min={1}
+                    max={row.requestedQuantity}
+                    defaultValue={row.requestedQuantity}
+                    className="h-9 rounded border border-line bg-white px-3 text-right text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                  />
+                </label>
+                <label className="flex h-9 items-center gap-2 whitespace-nowrap text-xs font-semibold text-muted">
+                  <input type="checkbox" name="applyToStock" defaultChecked className="h-4 w-4 accent-teal-700" />
+                  在庫反映
+                </label>
+              </div>
               <textarea
                 name="receivedMemo"
                 placeholder="納品メモ"
                 maxLength={200}
-                className="min-h-12 rounded border border-line bg-white px-3 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                className="h-10 min-h-10 rounded border border-line bg-white px-3 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
               />
               <button
                 type="submit"
@@ -313,10 +297,10 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
             onChange={(event) => setSelectedStatus(event.target.value as OrderRequestStatusValue)}
             className={
               selectedStatus === "SKIPPED"
-                ? "h-10 rounded border border-danger bg-red-50 px-3 text-sm font-semibold text-danger outline-none focus:border-danger focus:ring-2 focus:ring-danger/20"
+                ? "h-9 rounded border border-danger bg-red-50 px-3 text-sm font-semibold text-danger outline-none focus:border-danger focus:ring-2 focus:ring-danger/20"
                 : selectedStatus === "ORDERED"
-                  ? "h-10 rounded border border-success bg-green-50 px-3 text-sm font-semibold text-success outline-none focus:border-success focus:ring-2 focus:ring-success/20"
-                  : "h-10 rounded border border-line bg-white px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                  ? "h-9 rounded border border-success bg-green-50 px-3 text-sm font-semibold text-success outline-none focus:border-success focus:ring-2 focus:ring-success/20"
+                  : "h-9 rounded border border-line bg-white px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
             }
           >
             {statusOptions.map((status) => (
@@ -326,7 +310,7 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
             ))}
           </select>
           {row.status === "ORDERED" ? (
-            <p className="rounded border border-green-100 bg-green-50 px-3 py-2 text-xs font-semibold text-success">
+            <p className="rounded border border-green-100 bg-green-50 px-3 py-1.5 text-xs font-semibold text-success">
               誤って発注済みにした場合は、未確認または確認済みに戻せます。
             </p>
           ) : null}
@@ -359,7 +343,7 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
                   name="orderedMethod"
                   required
                   defaultValue={row.orderedMethod ?? ""}
-                  className="h-10 rounded border border-line bg-white px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                  className="h-9 rounded border border-line bg-white px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
                 >
                   <option value="" disabled>
                     選択してください
@@ -371,20 +355,22 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
                   ))}
                 </select>
               </label>
-              <textarea
-                name="orderedMemo"
-                defaultValue={row.orderedMemo ?? ""}
-                placeholder="送付メモ（任意）"
-                maxLength={300}
-                className="min-h-12 rounded border border-line px-3 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
-              />
-              <textarea
-                name="supplierResponseMemo"
-                defaultValue={row.supplierResponseMemo ?? ""}
-                placeholder="先方対応メモ（任意）"
-                maxLength={300}
-                className="min-h-12 rounded border border-line px-3 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
-              />
+              <div className="grid gap-1.5 sm:grid-cols-2">
+                <textarea
+                  name="orderedMemo"
+                  defaultValue={row.orderedMemo ?? ""}
+                  placeholder="送付メモ（任意）"
+                  maxLength={300}
+                  className="h-10 min-h-10 rounded border border-line px-3 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                />
+                <textarea
+                  name="supplierResponseMemo"
+                  defaultValue={row.supplierResponseMemo ?? ""}
+                  placeholder="先方対応メモ（任意）"
+                  maxLength={300}
+                  className="h-10 min-h-10 rounded border border-line px-3 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                />
+              </div>
             </>
           ) : null}
           <textarea
@@ -394,12 +380,12 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
               selectedStatus === "SKIPPED" ? "取り消し理由・メモ" : selectedStatus === "ORDERED" ? "送付方法・メモ" : "備考メモ"
             }
             maxLength={200}
-            className="min-h-14 rounded border border-line px-3 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+            className="h-10 min-h-10 rounded border border-line px-3 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
           />
           <button
             type="submit"
             disabled={isStatusPending}
-            className="h-10 rounded border border-line bg-white/75 px-3 text-xs font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
+            className="h-9 rounded border border-line bg-white/75 px-3 text-xs font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isStatusPending ? "変更中" : "状態・メモ更新"}
           </button>
