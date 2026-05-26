@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { AppNav } from "@/components/domain/app-nav";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { getProductCategories, getProductMasterRows } from "@/lib/db/products";
+import { isPurchaseHistoryImportSource } from "@/lib/products/import-source";
 import { ProductFilterForm } from "./product-filter-form";
 
 type PageProps = {
@@ -10,6 +11,8 @@ type PageProps = {
     q?: string;
     category?: string;
     attachBarcode?: string;
+    source?: string;
+    setup?: string;
   }>;
 };
 
@@ -29,6 +32,10 @@ function formatBarcodeLabel(barcode: { barcodeType: string; unitLabel: string | 
   return pieces.join(" / ");
 }
 
+function needsInitialSetup(row: { category: string | null; hasStockItem: boolean; minStock: number; location: string | null }) {
+  return !row.hasStockItem || !row.category || row.category === "未分類" || row.minStock === 0 || !row.location;
+}
+
 export default async function ProductsPage({ searchParams }: PageProps) {
   const session = await auth();
 
@@ -41,6 +48,8 @@ export default async function ProductsPage({ searchParams }: PageProps) {
   const query = params.q?.trim() ?? "";
   const category = params.category ?? "";
   const attachBarcode = params.attachBarcode?.trim() ?? "";
+  const source = params.source ?? "";
+  const setup = params.setup ?? "";
   const [rows, categories] = await Promise.all([
     getProductMasterRows(context.organizationId, context.clinicId),
     getProductCategories(context.organizationId),
@@ -59,6 +68,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
       row.orderUnit,
       row.supplierName,
       row.supplierProductCode,
+      row.notes,
       ...row.barcodes.map((barcode) => barcode.barcode),
     ]
       .filter(Boolean)
@@ -66,10 +76,21 @@ export default async function ProductsPage({ searchParams }: PageProps) {
       .toLowerCase();
     const matchesQuery = normalizedQuery ? searchText.includes(normalizedQuery) : true;
     const matchesCategory = category ? row.category === category : true;
+    const matchesSource = source === "purchase-history" ? isPurchaseHistoryImportSource(row.importSource) : true;
+    const matchesSetup = setup === "1" ? needsInitialSetup(row) : true;
 
-    return matchesQuery && matchesCategory;
+    return matchesQuery && matchesCategory && matchesSource && matchesSetup;
   });
-  const filterLabel = [query ? `検索: ${query}` : "", category ? `カテゴリ: ${category}` : ""].filter(Boolean).join(" / ");
+  const purchaseHistoryRows = rows.filter((row) => isPurchaseHistoryImportSource(row.importSource));
+  const purchaseHistorySetupRows = purchaseHistoryRows.filter(needsInitialSetup);
+  const filterLabel = [
+    query ? `検索: ${query}` : "",
+    category ? `カテゴリ: ${category}` : "",
+    source === "purchase-history" ? "購入履歴から登録" : "",
+    setup === "1" ? "初期設定が必要" : "",
+  ]
+    .filter(Boolean)
+    .join(" / ");
 
   return (
     <main className="min-h-screen bg-surface px-4 py-6 text-ink sm:px-6 lg:px-8">
@@ -113,7 +134,36 @@ export default async function ProductsPage({ searchParams }: PageProps) {
           defaultQuery={query}
           defaultCategory={category}
           attachBarcode={attachBarcode}
+          source={source}
+          setup={setup}
         />
+
+        {!attachBarcode && purchaseHistoryRows.length > 0 ? (
+          <section className="rounded border border-line bg-white p-4 text-sm shadow-panel">
+            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+              <div>
+                <p className="font-semibold text-ink">購入履歴から登録した商品</p>
+                <p className="mt-1 text-muted">
+                  {purchaseHistoryRows.length}件中、{purchaseHistorySetupRows.length}件はカテゴリ、最低在庫、保管場所などの確認が残っています。
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <a
+                  className="inline-flex min-h-10 items-center justify-center rounded border border-line px-3 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+                  href="/products?source=purchase-history"
+                >
+                  登録商品を見る
+                </a>
+                <a
+                  className="inline-flex min-h-10 items-center justify-center rounded bg-accent px-3 py-2 text-sm font-semibold text-white transition hover:bg-teal-800"
+                  href="/products/import/purchase-history/setup"
+                >
+                  まとめて整える
+                </a>
+              </div>
+            </div>
+          </section>
+        ) : null}
 
         {attachBarcode ? (
           <section className="rounded border border-warning/30 bg-yellow-50 p-4 text-sm text-warning shadow-panel">
@@ -159,6 +209,21 @@ export default async function ProductsPage({ searchParams }: PageProps) {
                         <p className="mt-1 text-xs text-muted">
                           {row.productCode ?? "コード未設定"} / JAN {row.janCode ?? "-"}
                         </p>
+                        {isPurchaseHistoryImportSource(row.importSource) ? (
+                          <div className="mt-2 flex flex-wrap gap-2">
+                            <span className="inline-flex rounded bg-teal-50 px-2 py-1 text-xs font-semibold text-accent">
+                              購入履歴から登録
+                            </span>
+                            {needsInitialSetup(row) ? (
+                              <a
+                                className="inline-flex rounded border border-orange-200 bg-orange-50 px-2 py-1 text-xs font-semibold text-warning transition hover:border-warning"
+                                href={`/products/${row.id}/edit`}
+                              >
+                                設定を整える
+                              </a>
+                            ) : null}
+                          </div>
+                        ) : null}
                       </td>
                       <td className="border-b border-line px-4 py-3">{row.category ?? "-"}</td>
                       <td className="border-b border-line px-4 py-3">

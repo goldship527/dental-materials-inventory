@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db/prisma";
 import type { OrderSendMethodValue } from "@/lib/orders/send-method";
 import type { OrderRequestStatusValue } from "@/lib/orders/status";
+import { productImportSources } from "@/lib/products/import-source";
 
 export type ProductMasterRow = {
   id: string;
@@ -25,6 +26,8 @@ export type ProductMasterRow = {
   photoFileName: string | null;
   photoMimeType: string | null;
   photoUpdatedAt: Date | null;
+  importSource: string | null;
+  notes: string | null;
   barcodes: ProductBarcodeSummary[];
 };
 
@@ -41,8 +44,19 @@ export type ProductSupplierOption = {
   name: string;
 };
 
+export type PurchaseHistorySetupProductRow = {
+  id: string;
+  name: string;
+  productCode: string | null;
+  janCode: string | null;
+  category: string | null;
+  manufacturer: string | null;
+  specification: string | null;
+  defaultMinStock: number;
+  importSource: string | null;
+};
+
 export type ProductDetail = ProductMasterRow & {
-  notes: string | null;
   primarySupplierId: string | null;
   productSuppliers: ProductSupplierSummary[];
   stockLots: ProductStockLotSummary[];
@@ -142,6 +156,57 @@ export async function getProductCategories(organizationId: string): Promise<stri
     .filter((category): category is string => Boolean(category));
 }
 
+export async function getPurchaseHistorySetupProductRows(
+  organizationId: string,
+  take = 200,
+): Promise<PurchaseHistorySetupProductRow[]> {
+  return prisma.product.findMany({
+    where: {
+      organizationId,
+      isActive: true,
+      importSource: productImportSources.purchaseHistory,
+      AND: [
+        {
+          OR: [
+            {
+              category: null,
+            },
+            {
+              category: "",
+            },
+            {
+              category: "未分類",
+            },
+            {
+              defaultMinStock: 0,
+            },
+          ],
+        },
+      ],
+    },
+    select: {
+      id: true,
+      name: true,
+      productCode: true,
+      janCode: true,
+      category: true,
+      manufacturer: true,
+      specification: true,
+      defaultMinStock: true,
+      importSource: true,
+    },
+    orderBy: [
+      {
+        category: "asc",
+      },
+      {
+        name: "asc",
+      },
+    ],
+    take,
+  });
+}
+
 export async function getProductMasterRows(organizationId: string, clinicId: string): Promise<ProductMasterRow[]> {
   const products = await prisma.product.findMany({
     where: {
@@ -236,6 +301,8 @@ export async function getProductMasterRows(organizationId: string, clinicId: str
       photoFileName: product.photoFileName,
       photoMimeType: product.photoMimeType,
       photoUpdatedAt: product.photoUpdatedAt,
+      importSource: product.importSource,
+      notes: product.notes,
       barcodes,
     };
   });
@@ -428,6 +495,7 @@ export async function getProductDetail(
     photoFileName: product.photoFileName,
     photoMimeType: product.photoMimeType,
     photoUpdatedAt: product.photoUpdatedAt,
+    importSource: product.importSource,
     barcodes,
     notes: product.notes,
     primarySupplierId: product.primarySupplier?.id ?? null,

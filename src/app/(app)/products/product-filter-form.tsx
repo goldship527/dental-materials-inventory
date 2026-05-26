@@ -5,14 +5,39 @@ type ProductFilterFormProps = {
   defaultQuery: string;
   defaultCategory: string;
   attachBarcode?: string;
+  source?: string;
+  setup?: string;
 };
 
-export function ProductFilterForm({ categories, defaultQuery, defaultCategory, attachBarcode = "" }: ProductFilterFormProps) {
-  const clearHref = attachBarcode ? `/products?attachBarcode=${encodeURIComponent(attachBarcode)}` : "/products";
+export function ProductFilterForm({
+  categories,
+  defaultQuery,
+  defaultCategory,
+  attachBarcode = "",
+  source = "",
+  setup = "",
+}: ProductFilterFormProps) {
+  const clearParams = new URLSearchParams();
+
+  if (attachBarcode) {
+    clearParams.set("attachBarcode", attachBarcode);
+  }
+
+  if (source) {
+    clearParams.set("source", source);
+  }
+
+  if (setup) {
+    clearParams.set("setup", setup);
+  }
+
+  const clearHref = clearParams.size > 0 ? `/products?${clearParams.toString()}` : "/products";
 
   return (
     <form className="grid gap-3 rounded border border-line bg-white p-4 shadow-panel md:grid-cols-[1fr_220px_auto_auto]">
       {attachBarcode ? <input type="hidden" name="attachBarcode" value={attachBarcode} /> : null}
+      {source ? <input type="hidden" name="source" value={source} /> : null}
+      {setup ? <input type="hidden" name="setup" value={setup} /> : null}
       <input
         type="search"
         name="q"

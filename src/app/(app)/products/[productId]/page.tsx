@@ -7,6 +7,7 @@ import { getStockMovementSourceLabel, getStockMovementTypeLabel } from "@/lib/db
 import { orderSendMethodLabels } from "@/lib/orders/send-method";
 import { createEmptyOrderRequestStatusCounts, orderRequestStatusLabels } from "@/lib/orders/status";
 import { buildProductPhotoUrl } from "@/lib/product-photos/url";
+import { ProductStockItemCreateForm } from "./product-stock-item-create-form";
 
 type PageProps = {
   params: Promise<{
@@ -175,6 +176,9 @@ export default async function ProductDetailPage({ params }: PageProps) {
               </a>
             </div>
           </div>
+          {!product.hasStockItem ? (
+            <ProductStockItemCreateForm productId={product.id} defaultMinStock={product.defaultMinStock} />
+          ) : null}
         </section>
 
         <section className={`rounded border p-5 shadow-panel ${stockStatus.panelClass}`}>

@@ -1,7 +1,11 @@
 "use client";
 
 import { useActionState } from "react";
-import { updateProductMasterWithStateAction, type ProductMasterActionState } from "@/lib/actions/products";
+import {
+  updateProductMasterWithStateAction,
+  type ProductMasterActionState,
+  type ProductMasterFieldName,
+} from "@/lib/actions/products";
 import type { ProductDetail } from "@/lib/db/products";
 
 type SupplierOption = {
@@ -23,9 +27,26 @@ function valueOrEmpty(value: string | number | null) {
 export function ProductEditForm({ product, suppliers }: ProductEditFormProps) {
   const [state, formAction, isPending] = useActionState(updateProductMasterWithStateAction, initialState);
   const alternativeProductSuppliers = product.productSuppliers.filter((productSupplier) => !productSupplier.isPrimary);
+  const getFieldError = (fieldName: ProductMasterFieldName) => state.fieldErrors?.[fieldName];
+  const controlClass = (fieldName: ProductMasterFieldName, className = "") => {
+    const hasError = Boolean(getFieldError(fieldName));
+
+    return [
+      "rounded border px-3 text-ink outline-none focus:ring-2",
+      hasError ? "border-danger focus:border-danger focus:ring-danger/20" : "border-line focus:border-accent focus:ring-accent/20",
+      className,
+    ]
+      .filter(Boolean)
+      .join(" ");
+  };
+  const fieldError = (fieldName: ProductMasterFieldName) => {
+    const message = getFieldError(fieldName);
+
+    return message ? <p className="text-xs font-semibold text-danger">{message}</p> : null;
+  };
 
   return (
-    <form action={formAction} className="grid gap-6">
+    <form action={formAction} noValidate className="grid gap-6">
       <input type="hidden" name="productId" value={product.id} />
 
       <section className="rounded border border-line bg-white p-5 shadow-panel">
@@ -38,8 +59,10 @@ export function ProductEditForm({ product, suppliers }: ProductEditFormProps) {
               defaultValue={product.name}
               required
               maxLength={100}
-              className="h-11 rounded border border-line px-3 text-base font-semibold text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+              aria-invalid={Boolean(getFieldError("name"))}
+              className={controlClass("name", "h-11 text-base font-semibold")}
             />
+            {fieldError("name")}
           </label>
 
           <label className="grid gap-1 text-sm font-semibold text-muted">
@@ -48,8 +71,10 @@ export function ProductEditForm({ product, suppliers }: ProductEditFormProps) {
               name="productCode"
               defaultValue={valueOrEmpty(product.productCode)}
               maxLength={100}
-              className="h-11 rounded border border-line px-3 text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+              aria-invalid={Boolean(getFieldError("productCode"))}
+              className={controlClass("productCode", "h-11")}
             />
+            {fieldError("productCode")}
           </label>
 
           <label className="grid gap-1 text-sm font-semibold text-muted">
@@ -59,8 +84,10 @@ export function ProductEditForm({ product, suppliers }: ProductEditFormProps) {
               defaultValue={valueOrEmpty(product.janCode)}
               inputMode="numeric"
               maxLength={100}
-              className="h-11 rounded border border-line px-3 font-mono text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+              aria-invalid={Boolean(getFieldError("janCode"))}
+              className={controlClass("janCode", "h-11 font-mono")}
             />
+            {fieldError("janCode")}
           </label>
 
           <label className="grid gap-1 text-sm font-semibold text-muted">
@@ -69,8 +96,10 @@ export function ProductEditForm({ product, suppliers }: ProductEditFormProps) {
               name="category"
               defaultValue={valueOrEmpty(product.category)}
               maxLength={100}
-              className="h-11 rounded border border-line px-3 text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+              aria-invalid={Boolean(getFieldError("category"))}
+              className={controlClass("category", "h-11")}
             />
+            {fieldError("category")}
           </label>
 
           <label className="grid gap-1 text-sm font-semibold text-muted">
@@ -79,8 +108,10 @@ export function ProductEditForm({ product, suppliers }: ProductEditFormProps) {
               name="manufacturer"
               defaultValue={valueOrEmpty(product.manufacturer)}
               maxLength={100}
-              className="h-11 rounded border border-line px-3 text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+              aria-invalid={Boolean(getFieldError("manufacturer"))}
+              className={controlClass("manufacturer", "h-11")}
             />
+            {fieldError("manufacturer")}
           </label>
 
           <label className="grid gap-1 text-sm font-semibold text-muted">
@@ -89,8 +120,10 @@ export function ProductEditForm({ product, suppliers }: ProductEditFormProps) {
               name="specification"
               defaultValue={valueOrEmpty(product.specification)}
               maxLength={100}
-              className="h-11 rounded border border-line px-3 text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+              aria-invalid={Boolean(getFieldError("specification"))}
+              className={controlClass("specification", "h-11")}
             />
+            {fieldError("specification")}
           </label>
 
           <label className="grid gap-1 text-sm font-semibold text-muted">
@@ -99,8 +132,10 @@ export function ProductEditForm({ product, suppliers }: ProductEditFormProps) {
               name="orderUnit"
               defaultValue={valueOrEmpty(product.orderUnit)}
               maxLength={100}
-              className="h-11 rounded border border-line px-3 text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+              aria-invalid={Boolean(getFieldError("orderUnit"))}
+              className={controlClass("orderUnit", "h-11")}
             />
+            {fieldError("orderUnit")}
           </label>
         </div>
         <div className="mt-6 border-t border-line pt-5">
@@ -186,7 +221,8 @@ export function ProductEditForm({ product, suppliers }: ProductEditFormProps) {
             <select
               name="primarySupplierId"
               defaultValue={product.primarySupplierId ?? ""}
-              className="h-11 rounded border border-line bg-white px-3 text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+              aria-invalid={Boolean(getFieldError("primarySupplierId"))}
+              className={controlClass("primarySupplierId", "h-11 bg-white")}
             >
               <option value="">未設定</option>
               {suppliers.map((supplier) => (
@@ -195,6 +231,7 @@ export function ProductEditForm({ product, suppliers }: ProductEditFormProps) {
                 </option>
               ))}
             </select>
+            {fieldError("primarySupplierId")}
           </label>
 
           <label className="grid gap-1 text-sm font-semibold text-muted">
@@ -203,8 +240,10 @@ export function ProductEditForm({ product, suppliers }: ProductEditFormProps) {
               name="supplierProductCode"
               defaultValue={valueOrEmpty(product.supplierProductCode)}
               maxLength={100}
-              className="h-11 rounded border border-line px-3 text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+              aria-invalid={Boolean(getFieldError("supplierProductCode"))}
+              className={controlClass("supplierProductCode", "h-11")}
             />
+            {fieldError("supplierProductCode")}
           </label>
 
           <label className="grid gap-1 text-sm font-semibold text-muted">
@@ -217,8 +256,10 @@ export function ProductEditForm({ product, suppliers }: ProductEditFormProps) {
               max="9999999"
               step="1"
               inputMode="numeric"
-              className="h-11 rounded border border-line px-3 text-right text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+              aria-invalid={Boolean(getFieldError("standardPrice"))}
+              className={controlClass("standardPrice", "h-11 text-right")}
             />
+            {fieldError("standardPrice")}
           </label>
 
           <label className="grid gap-1 text-sm font-semibold text-muted">
@@ -231,8 +272,10 @@ export function ProductEditForm({ product, suppliers }: ProductEditFormProps) {
               max="9999"
               required
               inputMode="numeric"
-              className="h-11 rounded border border-line px-3 text-right text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+              aria-invalid={Boolean(getFieldError("defaultMinStock"))}
+              className={controlClass("defaultMinStock", "h-11 text-right")}
             />
+            {fieldError("defaultMinStock")}
           </label>
         </div>
       </section>
@@ -244,8 +287,10 @@ export function ProductEditForm({ product, suppliers }: ProductEditFormProps) {
             name="notes"
             defaultValue={valueOrEmpty(product.notes)}
             maxLength={500}
-            className="min-h-28 rounded border border-line px-3 py-2 text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+            aria-invalid={Boolean(getFieldError("notes"))}
+            className={controlClass("notes", "min-h-28 py-2")}
           />
+          {fieldError("notes")}
         </label>
         <p className="mt-3 text-xs text-muted">個人情報や秘密情報は入力しないでください。</p>
       </section>

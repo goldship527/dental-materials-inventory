@@ -242,7 +242,7 @@ export default async function HomePage() {
           <section className="grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
             {attentionItems.map((item) => (
               <a
-                key={item.href}
+                key={item.title}
                 className="rounded border border-line bg-white p-5 shadow-panel transition hover:border-accent hover:shadow-md"
                 href={item.href}
               >

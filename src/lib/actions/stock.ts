@@ -6,17 +6,33 @@ import { type ActiveClinicContext, requireActiveClinic } from "@/lib/db/clinic";
 import { prisma } from "@/lib/db/prisma";
 
 const stockItemIdSchema = z.string().min(1);
+const productIdSchema = z.string().min(1);
 const quantitySchema = z.coerce.number().int().min(0).max(9999);
 const expectedUpdatedAtSchema = z.coerce.number().int().nonnegative();
 const reasonSchema = z.string().trim().min(1, "理由メモを入力してください。").max(200);
 const deltaSchema = z.coerce.number().pipe(z.union([z.literal(-1), z.literal(1)]));
 const sourceTypeSchema = z.enum(["MANUAL", "STOCKTAKE"]).default("MANUAL");
+const nullableLocationSchema = z
+  .string()
+  .trim()
+  .max(100, "保管場所は100文字以内で入力してください。")
+  .transform((value) => (value.length > 0 ? value : null));
+const createStockItemSchema = z.object({
+  productId: productIdSchema,
+  quantity: quantitySchema,
+  minStock: quantitySchema,
+  location: nullableLocationSchema,
+});
 const stockConflictMessage =
   "他のスタッフが先に在庫を変更しました。最新の在庫を確認してから再度操作してください。";
+
+export type CreateStockItemInput = z.infer<typeof createStockItemSchema>;
+type CreateStockItemFieldName = keyof CreateStockItemInput;
 
 export type StockActionState = {
   status?: "success" | "error";
   message?: string;
+  fieldErrors?: Partial<Record<CreateStockItemFieldName, string>>;
 };
 
 type StockUpdateResult = {
@@ -41,6 +57,28 @@ function revalidateStockPages() {
   revalidatePath("/shortage");
   revalidatePath("/movements");
   revalidatePath("/stocktake");
+  revalidatePath("/products");
+}
+
+function revalidateStockProductPages(productId: string) {
+  revalidateStockPages();
+  revalidatePath(`/products/${productId}`);
+  revalidatePath(`/products/${productId}/edit`);
+}
+
+function toFieldErrors(error: z.ZodError): Partial<Record<CreateStockItemFieldName, string>> {
+  const flattened = error.flatten().fieldErrors as Record<string, string[] | undefined>;
+  const fieldErrors: Partial<Record<CreateStockItemFieldName, string>> = {};
+
+  for (const [fieldName, messages] of Object.entries(flattened)) {
+    const firstMessage = messages?.[0];
+
+    if (firstMessage) {
+      fieldErrors[fieldName as CreateStockItemFieldName] = firstMessage;
+    }
+  }
+
+  return fieldErrors;
 }
 
 function toActionError(error: unknown): StockActionState {
@@ -88,6 +126,65 @@ function parseAdjustStockInput(formData: FormData): AdjustStockInput {
     sourceType: sourceTypeSchema.parse(formData.get("sourceType") ?? "MANUAL"),
     expectedQuantity: parseOptionalQuantity(formData.get("expectedQuantity")),
     expectedUpdatedAt: parseOptionalUpdatedAt(formData.get("expectedUpdatedAt")),
+  };
+}
+
+function parseCreateStockItemInput(formData: FormData): CreateStockItemInput {
+  return createStockItemSchema.parse({
+    productId: formData.get("productId"),
+    quantity: formData.get("quantity") ?? "0",
+    minStock: formData.get("minStock") ?? "0",
+    location: formData.get("location") ?? "",
+  });
+}
+
+export async function createStockItemForContext(context: ActiveClinicContext, input: CreateStockItemInput) {
+  const product = await prisma.product.findFirst({
+    where: {
+      id: input.productId,
+      organizationId: context.organizationId,
+      isActive: true,
+    },
+    select: {
+      id: true,
+      name: true,
+    },
+  });
+
+  if (!product) {
+    throw new Error("対象の商品が見つかりません。");
+  }
+
+  const existingStockItem = await prisma.stockItem.findUnique({
+    where: {
+      clinicId_productId: {
+        clinicId: context.clinicId,
+        productId: input.productId,
+      },
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  if (existingStockItem) {
+    throw new Error("このクリニックの在庫行は既に作成されています。");
+  }
+
+  await prisma.stockItem.create({
+    data: {
+      clinicId: context.clinicId,
+      productId: input.productId,
+      quantity: input.quantity,
+      minStock: input.minStock,
+      location: input.location,
+      isUsed: true,
+    },
+  });
+
+  return {
+    productId: product.id,
+    productName: product.name,
   };
 }
 
@@ -315,6 +412,34 @@ export async function quickMoveWithStateAction(
       message: `${result.productName} を${label}しました。現在庫は ${result.afterQuantity} です。`,
     };
   } catch (error) {
+    return toActionError(error);
+  }
+}
+
+export async function createStockItemWithStateAction(
+  _previousState: StockActionState,
+  formData: FormData,
+): Promise<StockActionState> {
+  try {
+    const context = await requireActiveClinic();
+    const input = parseCreateStockItemInput(formData);
+    const result = await createStockItemForContext(context, input);
+
+    revalidateStockProductPages(result.productId);
+
+    return {
+      status: "success",
+      message: `${result.productName} を在庫一覧の対象に追加しました。`,
+    };
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return {
+        status: "error",
+        message: error.issues[0]?.message ?? "入力内容を確認してください。",
+        fieldErrors: toFieldErrors(error),
+      };
+    }
+
     return toActionError(error);
   }
 }

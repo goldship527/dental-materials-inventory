@@ -45,6 +45,7 @@ model Clinic {
   stocktakeSessions        StocktakeSession[]
   staffOperatorAssignments StaffOperatorClinicAssignment[]
   userClinicAssignments    UserClinicAssignment[]
+  productImportHistories   ProductImportHistory[]
 
   @@index([organizationId])
 }
@@ -194,6 +195,7 @@ model Product {
   standardPrice       Float?
   defaultMinStock     Int       @default(0)
   isActive            Boolean   @default(true)
+  importSource        String?
   notes               String?
   photoFileName       String?
   photoMimeType       String?
@@ -220,14 +222,17 @@ model Product {
   @@index([janCode])
   @@index([productCode])
   @@index([internalCode])
+  @@index([organizationId, importSource])
 }
 
 model ProductImportHistory {
   id             String   @id @default(cuid())
   organizationId String
+  clinicId       String?
   userId         String
   sourceType     String
   fileName       String?
+  dealerNames    String?
   totalRows      Int
   validRows      Int
   createdRows    Int
@@ -237,9 +242,11 @@ model ProductImportHistory {
   createdAt      DateTime @default(now())
 
   organization Organization @relation(fields: [organizationId], references: [id])
+  clinic       Clinic?      @relation(fields: [clinicId], references: [id])
   user         User         @relation(fields: [userId], references: [id])
 
   @@index([organizationId, createdAt])
+  @@index([clinicId])
   @@index([userId])
 }
 

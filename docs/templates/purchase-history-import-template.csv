@@ -1,0 +1,4 @@
+purchaseDate,dealerName,dealerProductCode,supplierProductCode,janCode,productName,manufacturer,specification,quantity,unitPrice,amount
+2026-05-01,Sample Dental Dealer,DLR-1001,SUP-1001,4900000000001,Sample Bonding Agent,Sample Maker,5ml bottle,2,1200,2400
+2026-05-08,Sample Dental Dealer,DLR-1002,SUP-1002,4900000000002,Sample Impression Material,Sample Maker,regular set,1,3600,3600
+2026-05-15,Sample Dental Dealer,DLR-1003,SUP-1003,,Sample Disposable Tips,Sample Supply,100 pieces,3,850,2550

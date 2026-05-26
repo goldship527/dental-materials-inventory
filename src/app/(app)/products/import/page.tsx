@@ -30,9 +30,14 @@ export default async function ProductImportPage() {
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
             <h1 className="mt-2 text-3xl font-semibold">商品マスタ一括取り込み</h1>
           </div>
-          <a className="text-sm font-semibold text-accent hover:underline" href="/products">
-            商品マスタ一覧へ戻る
-          </a>
+          <div className="flex flex-wrap gap-3">
+            <a className="text-sm font-semibold text-accent hover:underline" href="/products/import/purchase-history">
+              購入履歴インポート
+            </a>
+            <a className="text-sm font-semibold text-accent hover:underline" href="/products">
+              商品マスタ一覧へ戻る
+            </a>
+          </div>
         </header>
 
         <ProductImportForm />

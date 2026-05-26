@@ -12,6 +12,8 @@ export const auditActions = {
   productCreate: "PRODUCT_CREATE",
   productUpdate: "PRODUCT_UPDATE",
   productImport: "PRODUCT_IMPORT",
+  purchaseHistoryImport: "PURCHASE_HISTORY_IMPORT",
+  purchaseHistorySetup: "PURCHASE_HISTORY_SETUP",
   supplierCreate: "SUPPLIER_CREATE",
   supplierUpdate: "SUPPLIER_UPDATE",
   supplierImport: "SUPPLIER_IMPORT",

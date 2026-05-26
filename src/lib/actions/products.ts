@@ -97,12 +97,14 @@ const createProductSchema = z.object({
 });
 
 export type CreateProductInput = z.infer<typeof createProductSchema>;
+export type ProductMasterInput = z.infer<typeof productMasterSchema>;
+export type ProductMasterFieldName = keyof CreateProductInput | keyof ProductMasterInput;
 
 export type ProductMasterActionState = {
   status?: "success" | "error";
   message?: string;
   productId?: string;
-  fieldErrors?: Partial<Record<keyof CreateProductInput, string>>;
+  fieldErrors?: Partial<Record<ProductMasterFieldName, string>>;
 };
 
 type ProductSupplierInput = {
@@ -372,6 +374,24 @@ export async function updateProductMasterWithStateAction(
       message: "商品マスタを更新しました。",
     };
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return {
+        status: "error",
+        message: error.issues[0]?.message ?? "入力内容を確認してください。",
+        fieldErrors: toFieldErrors<ProductMasterFieldName & string>(error),
+      };
+    }
+
+    if (isJanUniqueConflict(error)) {
+      return {
+        status: "error",
+        message: "同じ組織で同じJANコードの商品が既にあります。",
+        fieldErrors: {
+          janCode: "同じ組織で同じJANコードの商品が既にあります。",
+        },
+      };
+    }
+
     return toActionError(error);
   }
 }
@@ -472,7 +492,7 @@ export async function createProductAction(
       return {
         status: "error",
         message: error.issues[0]?.message ?? "入力内容を確認してください。",
-        fieldErrors: toFieldErrors<keyof CreateProductInput & string>(error),
+        fieldErrors: toFieldErrors<ProductMasterFieldName & string>(error),
       };
     }
 
