@@ -254,9 +254,9 @@ export default async function ProductDetailPage({ params }: PageProps) {
             <p className="text-sm font-semibold text-muted">発注候補</p>
             <p className="mt-1 text-3xl font-semibold">{product.orderRequests.length}</p>
             <p className="mt-1 text-sm text-muted">
-              未確認 {orderRequestCounts.DRAFT} / 確認済み {orderRequestCounts.CONFIRMED} /{" "}
+              確認待ち {orderRequestCounts.DRAFT} / 発注予定 {orderRequestCounts.CONFIRMED} /{" "}
               発注済み {orderRequestCounts.ORDERED} /{" "}
-              <span className="font-semibold text-danger">取り消し {orderRequestCounts.SKIPPED}</span>
+              <span className="font-semibold text-muted">見送り {orderRequestCounts.SKIPPED}</span>
             </p>
           </div>
         </section>

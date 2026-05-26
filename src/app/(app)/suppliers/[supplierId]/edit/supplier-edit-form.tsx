@@ -162,7 +162,7 @@ export function SupplierEditForm({ supplier }: SupplierEditFormProps) {
           </p>
         </div>
         <div className="rounded border border-line bg-white p-5 shadow-panel">
-          <p className="text-sm font-semibold text-muted">未確認候補</p>
+          <p className="text-sm font-semibold text-muted">確認待ち候補</p>
           <p className="mt-2 text-3xl font-semibold">{supplier.orderRequestCounts.DRAFT}</p>
         </div>
       </section>

@@ -33,7 +33,7 @@ export default async function AdminOverviewPage() {
       isWarning: overview.summary.shortageCount > 0,
     },
     {
-      label: "未確認の発注候補",
+      label: "確認待ちの発注候補",
       value: numberText(overview.summary.draftOrderRequestCount),
       note: "発注前に確認が必要な候補",
       isWarning: overview.summary.draftOrderRequestCount > 0,
@@ -116,10 +116,10 @@ export default async function AdminOverviewPage() {
                     在庫0
                   </th>
                   <th scope="col" className="whitespace-nowrap px-4 py-3 text-right">
-                    未確認候補
+                    確認待ち候補
                   </th>
                   <th scope="col" className="whitespace-nowrap px-4 py-3 text-right">
-                    確認済み
+                    発注予定
                   </th>
                   <th scope="col" className="whitespace-nowrap px-4 py-3 text-right">
                     発注済み

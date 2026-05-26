@@ -46,7 +46,7 @@ function formatOrderRecordId(orderRecordId: string | null) {
 
 function getStatusBadgeClass(status: OrderRequestStatusValue) {
   if (status === "SKIPPED") {
-    return "border-red-100 bg-red-50 text-danger";
+    return "border-line bg-subtle text-muted";
   }
 
   if (status === "ORDERED") {
@@ -367,7 +367,7 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
             onChange={(event) => setSelectedStatus(event.target.value as OrderRequestStatusValue)}
             className={
               selectedStatus === "SKIPPED"
-                ? "h-9 rounded border border-danger bg-red-50 px-3 text-sm font-semibold text-danger outline-none focus:border-danger focus:ring-2 focus:ring-danger/20"
+                ? "h-9 rounded border border-line bg-subtle px-3 text-sm font-semibold text-muted outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
                 : selectedStatus === "ORDERED"
                   ? "h-9 rounded border border-success bg-green-50 px-3 text-sm font-semibold text-success outline-none focus:border-success focus:ring-2 focus:ring-success/20"
                   : "h-9 rounded border border-line bg-white px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
@@ -381,11 +381,11 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
           </select>
           {row.status === "ORDERED" ? (
             <p className="rounded border border-green-100 bg-green-50 px-3 py-1.5 text-xs font-semibold text-success">
-              誤って発注済みにした場合は、未確認または確認済みに戻せます。
+              誤って発注済みにした場合は、確認待ちまたは発注予定に戻せます。
             </p>
           ) : null}
           {selectedStatus === "SKIPPED" ? (
-            <p className="text-xs font-semibold text-danger">取り消しにした候補は発注書下書きに含めません。</p>
+            <p className="text-xs font-semibold text-muted">見送りにした候補は発注書下書きに含めません。</p>
           ) : null}
           {selectedStatus === "ORDERED" ? (
             <p className="text-xs font-semibold text-success">発注済みにした候補は発注書下書きに含めません。</p>
@@ -447,7 +447,7 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
             name="memo"
             defaultValue={row.memo ?? ""}
             placeholder={
-              selectedStatus === "SKIPPED" ? "取り消し理由・メモ" : selectedStatus === "ORDERED" ? "送付方法・メモ" : "備考メモ"
+              selectedStatus === "SKIPPED" ? "見送り理由・メモ" : selectedStatus === "ORDERED" ? "送付方法・メモ" : "備考メモ"
             }
             maxLength={200}
             className="h-10 min-h-10 rounded border border-line px-3 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
@@ -466,7 +466,7 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
       <td
         className={
           row.status === "SKIPPED"
-            ? "hidden border-b border-line px-4 py-3 text-danger print:table-cell print:border print:border-black print:px-2 print:py-1.5 print:font-semibold print:text-black"
+            ? "hidden border-b border-line px-4 py-3 text-muted print:table-cell print:border print:border-black print:px-2 print:py-1.5 print:font-semibold print:text-black"
             : row.status === "ORDERED"
               ? "hidden border-b border-line px-4 py-3 text-success print:table-cell print:border print:border-black print:px-2 print:py-1.5 print:font-semibold print:text-black"
             : "hidden border-b border-line px-4 py-3 print:table-cell print:border print:border-black print:px-2 print:py-1.5 print:font-semibold"

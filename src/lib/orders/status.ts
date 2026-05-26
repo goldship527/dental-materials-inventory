@@ -1,12 +1,12 @@
 export type OrderRequestStatusValue = "DRAFT" | "CONFIRMED" | "SKIPPED" | "ORDERED";
 
-export const orderRequestStatuses: OrderRequestStatusValue[] = ["DRAFT", "CONFIRMED", "SKIPPED", "ORDERED"];
+export const orderRequestStatuses: OrderRequestStatusValue[] = ["DRAFT", "CONFIRMED", "ORDERED", "SKIPPED"];
 export const printableOrderRequestStatuses: OrderRequestStatusValue[] = ["DRAFT", "CONFIRMED"];
 
 export const orderRequestStatusLabels: Record<OrderRequestStatusValue, string> = {
-  DRAFT: "未確認",
-  CONFIRMED: "確認済み",
-  SKIPPED: "取り消し",
+  DRAFT: "確認待ち",
+  CONFIRMED: "発注予定",
+  SKIPPED: "見送り",
   ORDERED: "発注済み",
 };
 
