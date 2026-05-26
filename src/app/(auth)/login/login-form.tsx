@@ -7,6 +7,8 @@ import { PasswordInput } from "@/components/ui/password-input";
 export function LoginForm() {
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const defaultEmail = process.env.NODE_ENV === "production" ? "" : "test@example.com";
+  const defaultPassword = process.env.NODE_ENV === "production" ? "" : "password";
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -44,7 +46,7 @@ export function LoginForm() {
           name="email"
           type="email"
           autoComplete="email"
-          defaultValue="test@example.com"
+          defaultValue={defaultEmail}
           required
           className="h-12 rounded border border-line bg-white px-4 text-base outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20"
         />
@@ -58,7 +60,7 @@ export function LoginForm() {
           id="password"
           name="password"
           autoComplete="current-password"
-          defaultValue="password"
+          defaultValue={defaultPassword}
           required
           className="h-12 rounded border border-line bg-white px-4 text-base outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20"
         />
