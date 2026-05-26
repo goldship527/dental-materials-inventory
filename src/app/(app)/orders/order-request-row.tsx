@@ -26,11 +26,6 @@ const dateTimeFormatter = new Intl.DateTimeFormat("ja-JP", {
   hour: "2-digit",
   minute: "2-digit",
 });
-const dateFormatter = new Intl.DateTimeFormat("ja-JP", {
-  year: "numeric",
-  month: "2-digit",
-  day: "2-digit",
-});
 const priceFormatter = new Intl.NumberFormat("ja-JP", {
   style: "currency",
   currency: "JPY",
@@ -41,21 +36,32 @@ type OrderRequestRowProps = {
   row: OrderRequestRow;
 };
 
+type ActiveOrderPanel = "supplier" | "quantity" | "receipt" | "status" | null;
+
 const statusOptions = orderRequestStatuses;
-
-function formatReceiptExpiryDate(expiryDate: Date | null, expiryDateText: string | null) {
-  if (expiryDate) {
-    return dateFormatter.format(expiryDate);
-  }
-
-  return expiryDateText || "-";
-}
 
 function formatOrderRecordId(orderRecordId: string | null) {
   return orderRecordId ? orderRecordId.slice(-8) : "-";
 }
 
+function getStatusBadgeClass(status: OrderRequestStatusValue) {
+  if (status === "SKIPPED") {
+    return "border-red-100 bg-red-50 text-danger";
+  }
+
+  if (status === "ORDERED") {
+    return "border-green-100 bg-green-50 text-success";
+  }
+
+  if (status === "CONFIRMED") {
+    return "border-teal-100 bg-teal-50 text-accent";
+  }
+
+  return "border-line bg-white text-muted";
+}
+
 export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
+  const [activePanel, setActivePanel] = useState<ActiveOrderPanel>(null);
   const [requestedQuantity, setRequestedQuantity] = useState(row.requestedQuantity);
   const [selectedStatus, setSelectedStatus] = useState<OrderRequestStatusValue>(row.status);
   const [selectedSupplierId, setSelectedSupplierId] = useState(row.supplierId ?? "");
@@ -94,6 +100,10 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
     const normalizedQuantity = Math.max(1, Math.min(9999, Math.trunc(Number.isFinite(nextQuantity) ? nextQuantity : 1)));
 
     setRequestedQuantity(normalizedQuantity);
+  }
+
+  function togglePanel(panel: Exclude<ActiveOrderPanel, null>) {
+    setActivePanel((currentPanel) => (currentPanel === panel ? null : panel));
   }
 
   return (
@@ -153,143 +163,203 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
           </div>
         )}
         {canChangeSupplier ? (
-          <form action={supplierAction} className="mt-2 grid gap-1.5 print:hidden">
-            <input type="hidden" name="orderRequestId" value={row.id} />
-            <select
-              name="supplierId"
-              value={selectedSupplierId}
-              onChange={(event) => setSelectedSupplierId(event.target.value)}
-              className="h-10 rounded border border-line bg-white/90 px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
-            >
-              {row.supplierId ? null : (
-                <option value="" disabled>
-                  発注先を選択
-                </option>
-              )}
-              {row.supplierOptions.map((supplierOption) => (
-                <option key={supplierOption.supplierId} value={supplierOption.supplierId}>
-                  {supplierOption.supplierName}
-                  {supplierOption.isPrimary ? "（主）" : ""}
-                </option>
-              ))}
-            </select>
+          <div className="mt-2 grid gap-1.5 print:hidden">
             <button
-              type="submit"
-              disabled={isSupplierPending || !selectedSupplierId || selectedSupplierId === (row.supplierId ?? "")}
-              className="h-9 rounded border border-line bg-white/75 px-3 text-xs font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
+              type="button"
+              onClick={() => togglePanel("supplier")}
+              className="inline-flex h-8 w-fit items-center rounded border border-line bg-white/75 px-3 text-xs font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent"
             >
-              {isSupplierPending ? "変更中" : "発注先を変更"}
+              {activePanel === "supplier" ? "閉じる" : "発注先変更"}
             </button>
-          </form>
+            {activePanel === "supplier" ? (
+              <form action={supplierAction} className="grid gap-1.5 rounded border border-line bg-subtle/60 p-2">
+                <input type="hidden" name="orderRequestId" value={row.id} />
+                <select
+                  name="supplierId"
+                  value={selectedSupplierId}
+                  onChange={(event) => setSelectedSupplierId(event.target.value)}
+                  className="h-9 rounded border border-line bg-white/90 px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                >
+                  {row.supplierId ? null : (
+                    <option value="" disabled>
+                      発注先を選択
+                    </option>
+                  )}
+                  {row.supplierOptions.map((supplierOption) => (
+                    <option key={supplierOption.supplierId} value={supplierOption.supplierId}>
+                      {supplierOption.supplierName}
+                      {supplierOption.isPrimary ? "（主）" : ""}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="submit"
+                  disabled={isSupplierPending || !selectedSupplierId || selectedSupplierId === (row.supplierId ?? "")}
+                  className="h-8 rounded border border-line bg-white/75 px-3 text-xs font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {isSupplierPending ? "変更中" : "発注先を変更"}
+                </button>
+              </form>
+            ) : null}
+          </div>
         ) : null}
       </td>
       <td className="border-b border-line px-3 py-2 print:border print:border-black print:px-2 print:py-1.5 print:text-right">
         <span className="font-bold tabular-nums">{row.requestedQuantity}</span>
       </td>
       <td className="border-b border-line px-3 py-2 print:hidden">
-        <form action={quantityAction} className="grid gap-1.5">
-          <input type="hidden" name="orderRequestId" value={row.id} />
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => changeRequestedQuantity(requestedQuantity - 1)}
-              disabled={requestedQuantity <= 1 || isQuantityPending}
-              className="h-9 w-9 rounded border border-line bg-white/75 text-base font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent disabled:cursor-not-allowed disabled:opacity-40"
-              aria-label="発注数量を1減らす"
-            >
-              -
-            </button>
-            <input
-              type="text"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              name="requestedQuantity"
-              value={requestedQuantity}
-              onChange={(event) => changeRequestedQuantity(Number(event.target.value))}
-              className="h-9 w-20 rounded border border-line bg-white/90 px-3 text-right outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
-            />
-            <button
-              type="button"
-              onClick={() => changeRequestedQuantity(requestedQuantity + 1)}
-              disabled={requestedQuantity >= 9999 || isQuantityPending}
-              className="h-9 w-9 rounded border border-line bg-white/75 text-base font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent disabled:cursor-not-allowed disabled:opacity-40"
-              aria-label="発注数量を1増やす"
-            >
-              +
-            </button>
-            <button
-              type="submit"
-              disabled={isQuantityPending}
-              className="h-9 rounded bg-ink px-3 text-xs font-semibold text-white transition hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {isQuantityPending ? "更新中" : "更新"}
-            </button>
-          </div>
-        </form>
+        <div className="grid gap-1.5">
+          <button
+            type="button"
+            onClick={() => togglePanel("quantity")}
+            className="inline-flex h-8 w-fit items-center rounded border border-line bg-white/75 px-3 text-xs font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent"
+          >
+            {activePanel === "quantity" ? "閉じる" : "数量変更"}
+          </button>
+          {activePanel === "quantity" ? (
+            <form action={quantityAction} className="grid gap-1.5 rounded border border-line bg-subtle/60 p-2">
+              <input type="hidden" name="orderRequestId" value={row.id} />
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => changeRequestedQuantity(requestedQuantity - 1)}
+                  disabled={requestedQuantity <= 1 || isQuantityPending}
+                  className="h-9 w-9 rounded border border-line bg-white/75 text-base font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent disabled:cursor-not-allowed disabled:opacity-40"
+                  aria-label="発注数量を1減らす"
+                >
+                  -
+                </button>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  name="requestedQuantity"
+                  value={requestedQuantity}
+                  onChange={(event) => changeRequestedQuantity(Number(event.target.value))}
+                  className="h-9 w-20 rounded border border-line bg-white/90 px-3 text-right outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                />
+                <button
+                  type="button"
+                  onClick={() => changeRequestedQuantity(requestedQuantity + 1)}
+                  disabled={requestedQuantity >= 9999 || isQuantityPending}
+                  className="h-9 w-9 rounded border border-line bg-white/75 text-base font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent disabled:cursor-not-allowed disabled:opacity-40"
+                  aria-label="発注数量を1増やす"
+                >
+                  +
+                </button>
+                <button
+                  type="submit"
+                  disabled={isQuantityPending}
+                  className="h-9 rounded bg-ink px-3 text-xs font-semibold text-white transition hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {isQuantityPending ? "更新中" : "更新"}
+                </button>
+              </div>
+            </form>
+          ) : null}
+        </div>
         {row.status === "ORDERED" && row.receivedAt ? (
-          <div className="mt-2 rounded border border-teal-100 bg-teal-50 px-3 py-2 text-xs font-semibold text-accent">
-            納品確認済み: {dateTimeFormatter.format(row.receivedAt)}
-            <span className="block">納品数 {row.receivedQuantity ?? "-"}</span>
-            {row.receivedLotNumber || row.receivedExpiryDateText || row.receivedExpiryDate ? (
-              <span className="block">
-                ロット {row.receivedLotNumber || "-"} / 有効期限{" "}
-                {formatReceiptExpiryDate(row.receivedExpiryDate, row.receivedExpiryDateText)}
-              </span>
-            ) : null}
-            {row.receivedMemo ? <span className="block font-normal">{row.receivedMemo}</span> : null}
-            <form action={receiptRevertAction} className="mt-2">
+          <div className="mt-2 grid gap-1.5 rounded border border-teal-100 bg-teal-50 px-3 py-2 text-xs font-semibold text-accent">
+            <span>
+              納品済み {dateTimeFormatter.format(row.receivedAt)} / {row.receivedQuantity ?? "-"} 個
+            </span>
+            {row.receivedMemo ? <span className="font-normal text-muted">{row.receivedMemo}</span> : null}
+            <form action={receiptRevertAction}>
               <input type="hidden" name="orderRequestId" value={row.id} />
               <button
                 type="submit"
                 disabled={isReceiptRevertPending}
-                className="h-9 rounded border border-teal-200 bg-white px-3 text-xs font-semibold text-accent transition hover:border-danger hover:text-danger disabled:cursor-not-allowed disabled:opacity-50"
+                className="h-8 rounded border border-teal-200 bg-white px-3 text-xs font-semibold text-accent transition hover:border-danger hover:text-danger disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {isReceiptRevertPending ? "取り消し中" : "納品確認を取り消す"}
+                {isReceiptRevertPending ? "取り消し中" : "納品確認を戻す"}
               </button>
             </form>
           </div>
         ) : null}
         {row.status === "ORDERED" && !row.receivedAt ? (
-          <div className="mt-2 rounded border border-teal-100 bg-teal-50 p-2">
-            <p className="text-xs font-semibold text-accent">納品確認</p>
-            <form action={receiptAction} className="mt-2 grid gap-1.5">
-              <input type="hidden" name="orderRequestId" value={row.id} />
-              <div className="grid gap-1.5 sm:grid-cols-[1fr_auto] sm:items-end">
-                <label className="grid gap-1 text-xs font-semibold text-muted">
-                  納品数量
-                  <input
-                    type="number"
-                    name="receivedQuantity"
-                    min={1}
-                    max={row.requestedQuantity}
-                    defaultValue={row.requestedQuantity}
-                    className="h-9 rounded border border-line bg-white px-3 text-right text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
-                  />
-                </label>
-                <label className="flex h-9 items-center gap-2 whitespace-nowrap text-xs font-semibold text-muted">
-                  <input type="checkbox" name="applyToStock" defaultChecked className="h-4 w-4 accent-teal-700" />
-                  在庫反映
-                </label>
-              </div>
-              <textarea
-                name="receivedMemo"
-                placeholder="納品メモ"
-                maxLength={200}
-                className="h-10 min-h-10 rounded border border-line bg-white px-3 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
-              />
-              <button
-                type="submit"
-                disabled={isReceiptPending}
-                className="h-9 rounded bg-accent px-3 text-xs font-semibold text-white transition hover:bg-accentDeep disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {isReceiptPending ? "確認中" : "納品を確認"}
-              </button>
-            </form>
+          <div className="mt-2 grid gap-1.5">
+            <button
+              type="button"
+              onClick={() => togglePanel("receipt")}
+              className="inline-flex h-8 w-fit items-center rounded border border-teal-200 bg-teal-50 px-3 text-xs font-semibold text-accent transition hover:border-accent hover:bg-white"
+            >
+              {activePanel === "receipt" ? "閉じる" : "納品確認"}
+            </button>
+            {activePanel === "receipt" ? (
+              <form action={receiptAction} className="grid gap-1.5 rounded border border-teal-100 bg-teal-50 p-2">
+                <input type="hidden" name="orderRequestId" value={row.id} />
+                <div className="grid gap-1.5 sm:grid-cols-[1fr_auto] sm:items-end">
+                  <label className="grid gap-1 text-xs font-semibold text-muted">
+                    納品数量
+                    <input
+                      type="number"
+                      name="receivedQuantity"
+                      min={1}
+                      max={row.requestedQuantity}
+                      defaultValue={row.requestedQuantity}
+                      className="h-9 rounded border border-line bg-white px-3 text-right text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                    />
+                  </label>
+                  <label className="flex h-9 items-center gap-2 whitespace-nowrap text-xs font-semibold text-muted">
+                    <input type="checkbox" name="applyToStock" defaultChecked className="h-4 w-4 accent-teal-700" />
+                    在庫反映
+                  </label>
+                </div>
+                <textarea
+                  name="receivedMemo"
+                  placeholder="納品メモ"
+                  maxLength={200}
+                  className="h-10 min-h-10 rounded border border-line bg-white px-3 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                />
+                <button
+                  type="submit"
+                  disabled={isReceiptPending}
+                  className="h-9 rounded bg-accent px-3 text-xs font-semibold text-white transition hover:bg-accentDeep disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {isReceiptPending ? "確認中" : "納品を確認"}
+                </button>
+              </form>
+            ) : null}
           </div>
         ) : null}
       </td>
       <td className="border-b border-line px-3 py-2 print:hidden">
-        <form action={statusAction} className="grid gap-1.5">
+        <div className="grid gap-1.5">
+          <div className="flex flex-wrap items-center gap-2">
+            <span
+              className={`inline-flex min-h-7 items-center rounded border px-2.5 py-1 text-xs font-semibold ${getStatusBadgeClass(row.status)}`}
+            >
+              {orderRequestStatusLabels[row.status]}
+            </span>
+            {row.status === "ORDERED" && row.orderedAt ? (
+              <span className="text-xs text-muted">{dateTimeFormatter.format(row.orderedAt)}</span>
+            ) : null}
+            {row.status === "ORDERED" && row.receivedAt ? (
+              <span className="rounded border border-teal-100 bg-teal-50 px-2 py-1 text-xs font-semibold text-accent">
+                納品済み
+              </span>
+            ) : null}
+          </div>
+          {row.status === "ORDERED" ? (
+            <div className="grid gap-0.5 text-xs text-muted">
+              {row.orderRecordId ? <span>発注記録: {formatOrderRecordId(row.orderRecordId)}</span> : null}
+              {row.orderedMethod ? <span>送付方法: {orderSendMethodLabels[row.orderedMethod]}</span> : null}
+              {row.orderedMemo ? <span className="line-clamp-1">送付メモ: {row.orderedMemo}</span> : null}
+              {row.supplierResponseMemo ? (
+                <span className="line-clamp-1">先方対応メモ: {row.supplierResponseMemo}</span>
+              ) : null}
+            </div>
+          ) : null}
+          {row.memo ? <p className="line-clamp-2 text-xs text-muted">{row.memo}</p> : null}
+          <button
+            type="button"
+            onClick={() => togglePanel("status")}
+            className="inline-flex h-8 w-fit items-center rounded border border-line bg-white/75 px-3 text-xs font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent"
+          >
+            {activePanel === "status" ? "閉じる" : "状態・メモ"}
+          </button>
+          {activePanel === "status" ? (
+            <form action={statusAction} className="grid gap-1.5 rounded border border-line bg-subtle/60 p-2">
           <input type="hidden" name="orderRequestId" value={row.id} />
           <select
             name="status"
@@ -389,7 +459,9 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
           >
             {isStatusPending ? "変更中" : "状態・メモ更新"}
           </button>
-        </form>
+            </form>
+          ) : null}
+        </div>
       </td>
       <td
         className={

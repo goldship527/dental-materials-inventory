@@ -55,6 +55,22 @@ function buildOrdersPrintHref(supplierId: string | null | undefined) {
   return `/orders/print?supplierId=${encodeURIComponent(selectedSupplierId)}`;
 }
 
+function getSupplierStatusChipClass(status: OrderRequestStatusValue) {
+  if (status === "SKIPPED") {
+    return "border-red-100 bg-red-50 text-danger";
+  }
+
+  if (status === "ORDERED") {
+    return "border-green-100 bg-green-50 text-success";
+  }
+
+  if (status === "CONFIRMED") {
+    return "border-teal-100 bg-teal-50 text-accent";
+  }
+
+  return "border-line bg-white/80 text-muted";
+}
+
 export default async function OrdersPage({ searchParams }: PageProps) {
   const session = await auth();
 
@@ -268,6 +284,13 @@ export default async function OrdersPage({ searchParams }: PageProps) {
               const supplierRows = group.rows;
               const printableRows = supplierRows.filter((row) => printableOrderRequestStatuses.includes(row.status));
               const hasUnassignedSupplier = supplierRows.some((row) => !row.supplierId);
+              const supplierStatusCounts = orderRequestStatuses
+                .map((status) => ({
+                  status,
+                  label: orderRequestStatusLabels[status],
+                  count: supplierRows.filter((row) => row.status === status).length,
+                }))
+                .filter((item) => item.count > 0);
 
               return (
                 <section
@@ -284,7 +307,21 @@ export default async function OrdersPage({ searchParams }: PageProps) {
                     ) : null}
                   </div>
                   <div className="flex flex-wrap items-start justify-end gap-2">
-                    <span className="text-muted print:text-black">{supplierRows.length} 件</span>
+                    <div className="flex flex-wrap items-center justify-end gap-1.5">
+                      <span className="rounded border border-line bg-white/80 px-2 py-1 text-xs font-semibold text-muted print:border-black print:text-black">
+                        全 {supplierRows.length} 件
+                      </span>
+                      {supplierStatusCounts.map((item) => (
+                        <span
+                          key={item.status}
+                          className={`rounded border px-2 py-1 text-xs font-semibold print:border-black print:bg-white print:text-black ${getSupplierStatusChipClass(
+                            item.status,
+                          )}`}
+                        >
+                          {item.label} {item.count}
+                        </span>
+                      ))}
+                    </div>
                     {printableRows.length > 0 ? (
                       <a
                         className="inline-flex min-h-9 items-center justify-center rounded border border-line bg-white/75 px-3 py-1.5 text-xs font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent print:hidden"
