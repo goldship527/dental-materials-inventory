@@ -238,6 +238,7 @@ export default async function OrdersPage({ searchParams }: PageProps) {
     }, new Map<string, { supplierName: string; rows: typeof queryFilteredRows }>()),
   ).sort(([, a], [, b]) => a.supplierName.localeCompare(b.supplierName, "ja"));
   const generatedAt = new Intl.DateTimeFormat("ja-JP", {
+    timeZone: "Asia/Tokyo",
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
@@ -518,10 +519,10 @@ export default async function OrdersPage({ searchParams }: PageProps) {
                           </span>
                           {block.key === "active" && activeRows.length > 0 ? (
                             <a
-                              className="inline-flex min-h-9 items-center justify-center rounded border border-line bg-white/75 px-3 py-1.5 text-xs font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent print:hidden"
+                              className="inline-flex min-h-9 items-center justify-center rounded border border-accent/30 bg-white px-3 py-1.5 text-xs font-semibold text-accent transition hover:bg-teal-50 print:hidden"
                               href={buildOrdersPrintHref(activeRows[0]?.supplierId)}
                             >
-                              この発注先の下書き
+                              このディーラーだけ印刷
                             </a>
                           ) : null}
                           {block.key === "active" && activeRows.length > 0 ? (

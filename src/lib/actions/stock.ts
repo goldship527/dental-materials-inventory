@@ -4,11 +4,13 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { type ActiveClinicContext, requireActiveClinic } from "@/lib/db/clinic";
 import { prisma } from "@/lib/db/prisma";
+import { findActiveStaffOperatorByIdForClinic } from "@/lib/db/staff-operators";
 
 const stockItemIdSchema = z.string().min(1);
 const productIdSchema = z.string().min(1);
 const quantitySchema = z.coerce.number().int().min(0).max(9999);
 const expectedUpdatedAtSchema = z.coerce.number().int().nonnegative();
+const staffOperatorIdSchema = z.string().trim().min(1, "スタッフを選択してください。");
 const reasonSchema = z.string().trim().min(1, "理由メモを入力してください。").max(200);
 const deltaSchema = z.coerce.number().pipe(z.union([z.literal(-1), z.literal(1)]));
 const sourceTypeSchema = z.enum(["MANUAL", "STOCKTAKE"]).default("MANUAL");
@@ -277,10 +279,20 @@ async function adjustStock(formData: FormData): Promise<StockUpdateResult> {
   return result;
 }
 
-async function quickMove(stockItemId: string, delta: number): Promise<StockUpdateResult> {
+async function quickMove(stockItemId: string, delta: number, staffOperatorId: string): Promise<StockUpdateResult> {
   const context = await requireActiveClinic();
   const parsedStockItemId = stockItemIdSchema.parse(stockItemId);
   const parsedDelta = deltaSchema.parse(delta);
+  const parsedStaffOperatorId = staffOperatorIdSchema.parse(staffOperatorId);
+  const staffOperator = await findActiveStaffOperatorByIdForClinic({
+    organizationId: context.organizationId,
+    clinicId: context.clinicId,
+    staffOperatorId: parsedStaffOperatorId,
+  });
+
+  if (!staffOperator) {
+    throw new Error("このクリニックで有効なスタッフを選択してください。");
+  }
 
   const result = await prisma.$transaction(async (tx) => {
     const stockItem = await tx.stockItem.findFirst({
@@ -358,6 +370,7 @@ async function quickMove(stockItemId: string, delta: number): Promise<StockUpdat
         reason: parsedDelta > 0 ? "クイック出庫 +1" : "クイック出庫 -1",
         sourceType: "QUICK_CARD",
         userId: context.userId,
+        performedByStaffId: staffOperator.id,
       },
     });
 
@@ -393,8 +406,8 @@ export async function adjustStockWithStateAction(
   }
 }
 
-export async function quickMoveAction(stockItemId: string, delta: number) {
-  await quickMove(stockItemId, delta);
+export async function quickMoveAction(stockItemId: string, delta: number, staffOperatorId: string) {
+  await quickMove(stockItemId, delta, staffOperatorId);
 }
 
 export async function quickMoveWithStateAction(
@@ -404,7 +417,8 @@ export async function quickMoveWithStateAction(
   try {
     const stockItemId = stockItemIdSchema.parse(formData.get("stockItemId"));
     const delta = deltaSchema.parse(formData.get("delta"));
-    const result = await quickMove(stockItemId, delta);
+    const staffOperatorId = staffOperatorIdSchema.parse(formData.get("staffOperatorId"));
+    const result = await quickMove(stockItemId, delta, staffOperatorId);
     const label = delta > 0 ? "+1" : "-1";
 
     return {

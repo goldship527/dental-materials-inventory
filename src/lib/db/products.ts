@@ -30,6 +30,7 @@ export type ProductMasterRow = {
   currentQuantity: number;
   minStock: number;
   hasStockItem: boolean;
+  stockItemId: string | null;
   location: string | null;
   photoFileName: string | null;
   photoMimeType: string | null;
@@ -257,6 +258,7 @@ export async function getProductMasterRows(organizationId: string, clinicId: str
             isUsed: true,
           },
           select: {
+            id: true,
             quantity: true,
             minStock: true,
             location: true,
@@ -332,6 +334,7 @@ export async function getProductMasterRows(organizationId: string, clinicId: str
       currentQuantity,
       minStock,
       hasStockItem: Boolean(stockItem),
+      stockItemId: stockItem?.id ?? null,
       location: stockItem?.location ?? null,
       photoFileName: product.photoFileName,
       photoMimeType: product.photoMimeType,
@@ -387,6 +390,7 @@ export async function getProductDetail(
           isUsed: true,
         },
         select: {
+          id: true,
           quantity: true,
           minStock: true,
           location: true,
@@ -561,6 +565,7 @@ export async function getProductDetail(
     currentQuantity,
     minStock,
     hasStockItem: Boolean(stockItem),
+    stockItemId: stockItem?.id ?? null,
     location: stockItem?.location ?? null,
     photoFileName: product.photoFileName,
     photoMimeType: product.photoMimeType,

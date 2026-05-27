@@ -23,6 +23,11 @@ export type StaffOperatorClinicOption = {
   name: string;
 };
 
+export type StaffOperatorOption = {
+  id: string;
+  displayName: string;
+};
+
 export function normalizeStaffOperatorBarcode(value: string) {
   return normalizeBarcodeText(value).toUpperCase();
 }
@@ -85,6 +90,62 @@ export async function getStaffOperatorClinicOptions(organizationId: string): Pro
     select: {
       id: true,
       name: true,
+    },
+  });
+}
+
+export async function getActiveStaffOperatorOptionsForClinic(options: {
+  organizationId: string;
+  clinicId: string;
+}): Promise<StaffOperatorOption[]> {
+  const rows = await prisma.staffOperator.findMany({
+    where: {
+      organizationId: options.organizationId,
+      isActive: true,
+      clinicAssignments: {
+        some: {
+          clinicId: options.clinicId,
+          clinic: {
+            isActive: true,
+          },
+        },
+      },
+    },
+    orderBy: {
+      displayName: "asc",
+    },
+    select: {
+      id: true,
+      displayName: true,
+    },
+  });
+
+  return rows;
+}
+
+export async function findActiveStaffOperatorByIdForClinic(options: {
+  organizationId: string;
+  clinicId: string;
+  staffOperatorId: string;
+}) {
+  return prisma.staffOperator.findFirst({
+    where: {
+      id: options.staffOperatorId,
+      organizationId: options.organizationId,
+      isActive: true,
+      clinicAssignments: {
+        some: {
+          clinicId: options.clinicId,
+          clinic: {
+            isActive: true,
+          },
+        },
+      },
+    },
+    select: {
+      id: true,
+      displayName: true,
+      operatorType: true,
     },
   });
 }

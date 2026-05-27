@@ -5,6 +5,7 @@ import {
 } from "@/lib/db/stock-movements";
 
 const csvDateTimeFormatter = new Intl.DateTimeFormat("ja-JP", {
+  timeZone: "Asia/Tokyo",
   year: "numeric",
   month: "2-digit",
   day: "2-digit",
@@ -13,6 +14,7 @@ const csvDateTimeFormatter = new Intl.DateTimeFormat("ja-JP", {
 });
 
 const csvDateFormatter = new Intl.DateTimeFormat("ja-JP", {
+  timeZone: "Asia/Tokyo",
   year: "numeric",
   month: "2-digit",
   day: "2-digit",

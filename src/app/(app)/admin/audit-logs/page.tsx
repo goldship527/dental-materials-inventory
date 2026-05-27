@@ -3,6 +3,7 @@ import { requireAdminUser } from "@/lib/auth/admin";
 import { getRecentAuditLogs } from "@/lib/db/audit-logs";
 
 const dateFormatter = new Intl.DateTimeFormat("ja-JP", {
+  timeZone: "Asia/Tokyo",
   dateStyle: "medium",
   timeStyle: "short",
 });

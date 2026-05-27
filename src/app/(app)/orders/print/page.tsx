@@ -13,6 +13,7 @@ type PageProps = {
 
 function formatDateTime(date: Date) {
   return new Intl.DateTimeFormat("ja-JP", {
+    timeZone: "Asia/Tokyo",
     year: "numeric",
     month: "2-digit",
     day: "2-digit",

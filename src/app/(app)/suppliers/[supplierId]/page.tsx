@@ -14,6 +14,7 @@ type PageProps = {
 };
 
 const dateTimeFormatter = new Intl.DateTimeFormat("ja-JP", {
+  timeZone: "Asia/Tokyo",
   year: "numeric",
   month: "2-digit",
   day: "2-digit",
@@ -21,6 +22,7 @@ const dateTimeFormatter = new Intl.DateTimeFormat("ja-JP", {
   minute: "2-digit",
 });
 const dateFormatter = new Intl.DateTimeFormat("ja-JP", {
+  timeZone: "Asia/Tokyo",
   year: "numeric",
   month: "2-digit",
   day: "2-digit",

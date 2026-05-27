@@ -54,6 +54,7 @@ export default async function ShortagePage({ searchParams }: PageProps) {
     return normalizedQuery ? searchText.includes(normalizedQuery) : true;
   });
   const generatedAt = new Intl.DateTimeFormat("ja-JP", {
+    timeZone: "Asia/Tokyo",
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
@@ -61,6 +62,7 @@ export default async function ShortagePage({ searchParams }: PageProps) {
     minute: "2-digit",
   }).format(new Date());
   const dateFormatter = new Intl.DateTimeFormat("ja-JP", {
+    timeZone: "Asia/Tokyo",
     year: "numeric",
     month: "2-digit",
     day: "2-digit",

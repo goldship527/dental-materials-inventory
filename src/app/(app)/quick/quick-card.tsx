@@ -10,10 +10,12 @@ const initialState: StockActionState = {};
 type QuickCardProps = {
   categoryLabel: string;
   row: StockRow;
+  selectedStaffOperatorId: string;
 };
 
-export function QuickCard({ categoryLabel, row }: QuickCardProps) {
+export function QuickCard({ categoryLabel, row, selectedStaffOperatorId }: QuickCardProps) {
   const [state, formAction, isPending] = useActionState(quickMoveWithStateAction, initialState);
+  const isStaffSelected = selectedStaffOperatorId.length > 0;
   const photoUrl = buildProductPhotoUrl({
     id: row.productId,
     photoUpdatedAt: row.photoUpdatedAt,
@@ -63,9 +65,10 @@ export function QuickCard({ categoryLabel, row }: QuickCardProps) {
         <form action={formAction}>
           <input type="hidden" name="stockItemId" value={row.stockItemId} />
           <input type="hidden" name="delta" value="-1" />
+          <input type="hidden" name="staffOperatorId" value={selectedStaffOperatorId} />
           <button
             type="submit"
-            disabled={row.quantity <= 0 || isPending}
+            disabled={row.quantity <= 0 || !isStaffSelected || isPending}
             className="h-11 w-full rounded border border-red-200 bg-red-50 text-2xl font-semibold text-danger transition hover:border-red-300 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-40"
           >
             {isPending ? "..." : "-1"}
@@ -74,9 +77,10 @@ export function QuickCard({ categoryLabel, row }: QuickCardProps) {
         <form action={formAction}>
           <input type="hidden" name="stockItemId" value={row.stockItemId} />
           <input type="hidden" name="delta" value="1" />
+          <input type="hidden" name="staffOperatorId" value={selectedStaffOperatorId} />
           <button
             type="submit"
-            disabled={isPending}
+            disabled={!isStaffSelected || isPending}
             className="h-11 w-full rounded border border-line bg-white text-xl font-semibold text-accent transition hover:border-accent hover:bg-teal-50 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isPending ? "..." : "+1"}

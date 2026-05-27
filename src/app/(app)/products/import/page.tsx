@@ -6,6 +6,7 @@ import { getRecentProductImportHistories } from "@/lib/db/product-import-history
 import { ProductImportForm } from "./product-import-form";
 
 const dateFormatter = new Intl.DateTimeFormat("ja-JP", {
+  timeZone: "Asia/Tokyo",
   dateStyle: "medium",
   timeStyle: "short",
 });

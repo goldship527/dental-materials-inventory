@@ -3,8 +3,9 @@ import { auth } from "@/auth";
 import { AppNav } from "@/components/domain/app-nav";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { prisma } from "@/lib/db/prisma";
+import { getActiveStaffOperatorOptionsForClinic } from "@/lib/db/staff-operators";
 import { toStockRow } from "@/lib/db/stock";
-import { QuickCard } from "./quick-card";
+import { QuickCardGrid } from "./quick-card-grid";
 
 type PageProps = {
   searchParams?: Promise<{
@@ -22,7 +23,8 @@ export default async function QuickPage({ searchParams }: PageProps) {
   const context = await requireActiveClinic();
   const params = (await searchParams) ?? {};
   const selectedTab = params.tab?.trim() ?? "";
-  const favoriteCards = await prisma.favoriteProductCard.findMany({
+  const [favoriteCards, staffOperators] = await Promise.all([
+    prisma.favoriteProductCard.findMany({
     where: {
       clinicId: context.clinicId,
       product: {
@@ -50,7 +52,12 @@ export default async function QuickPage({ searchParams }: PageProps) {
         displayOrder: "asc",
       },
     ],
-  });
+    }),
+    getActiveStaffOperatorOptionsForClinic({
+      organizationId: context.organizationId,
+      clinicId: context.clinicId,
+    }),
+  ]);
 
   const cards = favoriteCards.flatMap((card) => {
     const stockItem = card.product.stockItems[0];
@@ -91,6 +98,11 @@ export default async function QuickPage({ searchParams }: PageProps) {
     },
     include: {
       product: true,
+      performedByStaff: {
+        select: {
+          displayName: true,
+        },
+      },
     },
     orderBy: {
       createdAt: "desc",
@@ -157,11 +169,7 @@ export default async function QuickPage({ searchParams }: PageProps) {
           </div>
         </section>
 
-        <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {visibleCards.map(({ id, categoryTab, row }) => (
-            <QuickCard key={id} categoryLabel={categoryTab ?? row.category ?? "未分類"} row={row} />
-          ))}
-        </section>
+        <QuickCardGrid cards={visibleCards} staffOperators={staffOperators} />
 
         <section className="rounded border border-line/90 bg-panel/95 p-4 shadow-panel">
           <h2 className="text-base font-semibold">直近のクイック出庫操作</h2>
@@ -174,7 +182,8 @@ export default async function QuickPage({ searchParams }: PageProps) {
                   </a>
                   <span className="text-muted">
                     {movement.quantity > 0 ? "+" : ""}
-                    {movement.quantity} / {movement.beforeQuantity} → {movement.afterQuantity}
+                    {movement.quantity} / {movement.beforeQuantity} → {movement.afterQuantity} /{" "}
+                    {movement.performedByStaff?.displayName ?? "-"}
                   </span>
                 </div>
               ))

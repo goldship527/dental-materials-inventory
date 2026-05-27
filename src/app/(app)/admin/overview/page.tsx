@@ -3,6 +3,7 @@ import { requireAdminUser } from "@/lib/auth/admin";
 import { getAdminOverview } from "@/lib/db/admin-overview";
 
 const dateTimeFormatter = new Intl.DateTimeFormat("ja-JP", {
+  timeZone: "Asia/Tokyo",
   month: "2-digit",
   day: "2-digit",
   hour: "2-digit",

@@ -5,8 +5,9 @@ import { requireActiveClinic } from "@/lib/db/clinic";
 import { getProductDetail } from "@/lib/db/products";
 import { getStockMovementSourceLabel, getStockMovementTypeLabel } from "@/lib/db/stock-movements";
 import { orderSendMethodLabels } from "@/lib/orders/send-method";
-import { createEmptyOrderRequestStatusCounts, orderRequestStatusLabels } from "@/lib/orders/status";
+import { createEmptyOrderRequestStatusCounts, orderRequestStatusLabels, printableOrderRequestStatuses } from "@/lib/orders/status";
 import { buildProductPhotoUrl } from "@/lib/product-photos/url";
+import { ProductOrderRequestButton } from "./product-order-request-button";
 import { ProductStockItemCreateForm } from "./product-stock-item-create-form";
 
 type PageProps = {
@@ -21,6 +22,7 @@ const yenFormatter = new Intl.NumberFormat("ja-JP", {
   maximumFractionDigits: 0,
 });
 const dateTimeFormatter = new Intl.DateTimeFormat("ja-JP", {
+  timeZone: "Asia/Tokyo",
   year: "numeric",
   month: "2-digit",
   day: "2-digit",
@@ -28,6 +30,7 @@ const dateTimeFormatter = new Intl.DateTimeFormat("ja-JP", {
   minute: "2-digit",
 });
 const dateFormatter = new Intl.DateTimeFormat("ja-JP", {
+  timeZone: "Asia/Tokyo",
   year: "numeric",
   month: "2-digit",
   day: "2-digit",
@@ -151,6 +154,8 @@ export default async function ProductDetailPage({ params }: PageProps) {
   const plannedOrderRequestCount = orderRequestCounts.DRAFT + orderRequestCounts.CONFIRMED;
   const awaitingReceiptCount = product.orderRequests.filter((request) => request.status === "ORDERED" && !request.receivedAt).length;
   const receivedOrderRequestCount = product.orderRequests.filter((request) => request.status === "ORDERED" && request.receivedAt).length;
+  const hasActiveOrderRequest = product.orderRequests.some((request) => printableOrderRequestStatuses.includes(request.status));
+  const hasPendingOrder = product.pendingOrders.totalQuantity > 0;
   const productQuery = encodeURIComponent(product.name);
   const inventoryHref = `/inventory?q=${productQuery}`;
   const movementsHref = `/movements?q=${productQuery}`;
@@ -247,6 +252,13 @@ export default async function ProductDetailPage({ params }: PageProps) {
                 >
                   不足一覧へ
                 </a>
+              ) : null}
+              {product.stockItemId ? (
+                <ProductOrderRequestButton
+                  stockItemId={product.stockItemId}
+                  isAlreadyAdded={hasActiveOrderRequest}
+                  hasPendingOrder={hasPendingOrder}
+                />
               ) : null}
               {product.orderRequests.length > 0 ? (
                 <a

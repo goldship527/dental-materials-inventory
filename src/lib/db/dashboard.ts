@@ -47,6 +47,7 @@ export type DashboardSummary = {
 
 function createRepeatedShortageTrend(shortageCount: number): DashboardTrendPoint[] {
   const formatter = new Intl.DateTimeFormat("ja-JP", {
+    timeZone: "Asia/Tokyo",
     month: "2-digit",
     day: "2-digit",
   });
