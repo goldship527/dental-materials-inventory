@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useRef } from "react";
 import {
   updateProductMasterWithStateAction,
   type ProductMasterActionState,
@@ -26,6 +26,7 @@ function valueOrEmpty(value: string | number | null) {
 
 export function ProductEditForm({ product, suppliers }: ProductEditFormProps) {
   const [state, formAction, isPending] = useActionState(updateProductMasterWithStateAction, initialState);
+  const defaultMinStockInputRef = useRef<HTMLInputElement | null>(null);
   const alternativeProductSuppliers = product.productSuppliers.filter((productSupplier) => !productSupplier.isPrimary);
   const getFieldError = (fieldName: ProductMasterFieldName) => state.fieldErrors?.[fieldName];
   const controlClass = (fieldName: ProductMasterFieldName, className = "") => {
@@ -265,6 +266,7 @@ export function ProductEditForm({ product, suppliers }: ProductEditFormProps) {
           <label className="grid gap-1 text-sm font-semibold text-muted">
             標準の最低在庫
             <input
+              ref={defaultMinStockInputRef}
               type="number"
               name="defaultMinStock"
               defaultValue={product.defaultMinStock}
@@ -276,6 +278,21 @@ export function ProductEditForm({ product, suppliers }: ProductEditFormProps) {
               className={controlClass("defaultMinStock", "h-11 text-right")}
             />
             {fieldError("defaultMinStock")}
+            {product.recommendedMinStock.recommended !== null ? (
+              <button
+                type="button"
+                onClick={() => {
+                  if (defaultMinStockInputRef.current) {
+                    defaultMinStockInputRef.current.value = String(product.recommendedMinStock.recommended);
+                  }
+                }}
+                className="mt-2 justify-self-start rounded border border-accent px-3 py-2 text-xs font-semibold text-accent transition hover:bg-teal-50"
+              >
+                推奨 {product.recommendedMinStock.recommended} を入力
+              </button>
+            ) : (
+              <p className="mt-2 text-xs text-muted">推奨: データ不足</p>
+            )}
           </label>
         </div>
       </section>

@@ -20,7 +20,7 @@ export default async function HomePage() {
   }
 
   const context = await requireActiveClinic();
-  const summary = await getDashboardSummary(context.clinicId);
+  const summary = await getDashboardSummary(context.clinicId, context.organizationId);
   const latestMovementAt = summary.latestMovement ? movementDateFormatter.format(summary.latestMovement.createdAt) : null;
   const plannedOrderRequestCount = summary.orderRequestStatusCounts.DRAFT + summary.orderRequestStatusCounts.CONFIRMED;
   const summaryItems = [
@@ -104,6 +104,20 @@ export default async function HomePage() {
       note: "期限切れまたは30日以内のロット別在庫",
       isWarning: summary.attentionStockLotCount > 0,
     },
+    {
+      title: "死蔵在庫",
+      href: "/inventory/dormant",
+      value: `${summary.dormantStockCount} 件`,
+      note: "過去90日以内に出庫がない在庫",
+      isWarning: summary.dormantStockCount > 0,
+    },
+    {
+      title: "異常出庫検知",
+      href: "/movements/anomalies",
+      value: `${summary.stockAnomalyCount} 件`,
+      note: "通常より出庫数が多い商品",
+      isWarning: summary.stockAnomalyCount > 0,
+    },
   ];
   const menuItems = [
     {
@@ -137,11 +151,25 @@ export default async function HomePage() {
       badge: "直近100件",
     },
     {
+      title: "異常出庫検知",
+      description: "通常より出庫数が多い商品を確認",
+      href: "/movements/anomalies",
+      badge: `${summary.stockAnomalyCount} 件`,
+      isWarning: summary.stockAnomalyCount > 0,
+    },
+    {
       title: "期限ロット一覧",
       description: "ロット番号と有効期限",
       href: "/stock-lots",
       badge: `${summary.attentionStockLotCount} 件`,
       isWarning: summary.attentionStockLotCount > 0,
+    },
+    {
+      title: "死蔵在庫レポート",
+      description: "90日以上動いていない在庫を確認",
+      href: "/inventory/dormant",
+      badge: `${summary.dormantStockCount} 件`,
+      isWarning: summary.dormantStockCount > 0,
     },
     {
       title: "棚卸",

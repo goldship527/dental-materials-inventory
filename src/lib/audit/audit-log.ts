@@ -20,6 +20,8 @@ export const auditActions = {
   stockMovementRevert: "STOCK_MOVEMENT_REVERT",
   stocktakeSessionDiscard: "STOCKTAKE_SESSION_DISCARD",
   stocktakeSessionCommit: "STOCKTAKE_SESSION_COMMIT",
+  anomalyThresholdUpdate: "ANOMALY_THRESHOLD_UPDATE",
+  notificationPreferenceUpdate: "NOTIFICATION_PREFERENCE_UPDATE",
 } as const;
 
 export async function writeAuditLog(options: {

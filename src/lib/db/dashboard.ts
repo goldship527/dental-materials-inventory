@@ -1,6 +1,8 @@
 import { getOrderRequestStatusCounts } from "@/lib/db/orders";
 import { prisma } from "@/lib/db/prisma";
 import { getStockRows } from "@/lib/db/stock";
+import { countStockAnomalies } from "@/lib/db/stock-anomalies";
+import { countDormantStockRows } from "@/lib/db/dormant-stock";
 import { countAttentionStockLots } from "@/lib/db/stock-lots";
 
 export type DashboardTrendPoint = {
@@ -26,6 +28,8 @@ export type DashboardSummary = {
   unresolvedBarcodeScanCount: number;
   expiringBarcodeScanCount: number;
   attentionStockLotCount: number;
+  dormantStockCount: number;
+  stockAnomalyCount: number;
   latestStocktakeSession: {
     id: string;
     committedAt: Date | null;
@@ -67,7 +71,7 @@ async function fallbackOnError<T>(promise: Promise<T>, fallbackValue: T): Promis
   }
 }
 
-export async function getDashboardSummary(clinicId: string): Promise<DashboardSummary> {
+export async function getDashboardSummary(clinicId: string, organizationId?: string): Promise<DashboardSummary> {
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
   const thirtyDaysLater = new Date(todayStart);
@@ -81,6 +85,8 @@ export async function getDashboardSummary(clinicId: string): Promise<DashboardSu
     unresolvedBarcodeScanCount,
     expiringBarcodeScanCount,
     attentionStockLotCount,
+    dormantStockCount,
+    stockAnomalyCount,
     latestStocktakeSession,
   ] = await Promise.all([
     fallbackOnError(getStockRows(clinicId), []),
@@ -147,6 +153,8 @@ export async function getDashboardSummary(clinicId: string): Promise<DashboardSu
       0,
     ),
     fallbackOnError(countAttentionStockLots(clinicId, todayStart), 0),
+    organizationId ? fallbackOnError(countDormantStockRows(organizationId, clinicId), 0) : Promise.resolve(0),
+    organizationId ? fallbackOnError(countStockAnomalies(organizationId, clinicId), 0) : Promise.resolve(0),
     fallbackOnError(
       prisma.stocktakeSession.findFirst({
         where: {
@@ -188,6 +196,8 @@ export async function getDashboardSummary(clinicId: string): Promise<DashboardSu
     unresolvedBarcodeScanCount,
     expiringBarcodeScanCount,
     attentionStockLotCount,
+    dormantStockCount,
+    stockAnomalyCount,
     latestStocktakeSession: latestStocktakeSession
       ? {
           id: latestStocktakeSession.id,

@@ -19,7 +19,7 @@ export default async function PurchaseHistorySetupPage() {
 
   const context = await requireActiveClinic();
   const [products, categories] = await Promise.all([
-    getPurchaseHistorySetupProductRows(context.organizationId),
+    getPurchaseHistorySetupProductRows(context.organizationId, { clinicId: context.clinicId }),
     getProductCategories(context.organizationId),
   ]);
 

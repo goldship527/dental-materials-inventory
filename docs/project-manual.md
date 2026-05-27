@@ -404,6 +404,24 @@ corepack pnpm exec tsx scripts/backfill-purchase-history-import-source.ts --dry-
 - GitHubへpushした後、Vercelが最新コミットでデプロイ済みか確認する
 - 写真アップロード用の `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` / `SUPABASE_STORAGE_BUCKET` はアプリ実行時の設定。Vercel上のアップロード確認だけでよい場合、ローカルの `.env.local` に入れる必要はない
 
+### 朝のダイジェスト通知
+
+朝のダイジェスト通知を有効にする場合は、Vercelの環境変数に次を設定する。
+
+```text
+NOTIFICATIONS_ENABLED=true
+RESEND_API_KEY=ResendのAPIキー
+NOTIFICATION_EMAIL_FROM=送信元メールアドレス
+CRON_SECRET=Cronエンドポイント保護用のランダム文字列
+APP_BASE_URL=https://公開URL
+```
+
+ローカル開発では `NOTIFICATIONS_ENABLED=false` のままにし、実メール送信を抑止する。
+
+Vercel Cron は `vercel.json` で `/api/notifications/daily-digest` を30分ごとに呼び出す。アプリ側では、ユーザーの通知設定にあるJSTの配信時刻と曜日が一致した場合だけ送信する。
+
+通知本文には、不足在庫、期限ロット、納品待ち、死蔵在庫、異常出庫検知の件数とリンクだけを含める。金額、患者情報、個人情報、APIキーは含めない。
+
 ## 14. 本番導入を考える場合
 
 本番導入では、公開デモと同じVercel + Supabase構成を土台にできる。ただし公開デモは評価・説明用であり、本番ではバックアップ、監視、権限、運用手順、障害対応を追加で設計する。

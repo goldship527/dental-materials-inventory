@@ -1,7 +1,15 @@
 import { prisma } from "@/lib/db/prisma";
+import { getPendingOrderDetailsByProduct, getPendingOrdersByProduct, type PendingOrderSupplierSummary } from "@/lib/db/pending-orders";
+import { getProductAbcRanks, type ProductAbcRankSummary } from "@/lib/db/product-abc-ranks";
+import { getSupplierLeadTimes, type SupplierLeadTimeStats } from "@/lib/db/supplier-lead-times";
 import type { OrderSendMethodValue } from "@/lib/orders/send-method";
 import type { OrderRequestStatusValue } from "@/lib/orders/status";
 import { productImportSources } from "@/lib/products/import-source";
+import {
+  getRecommendedMinStocks,
+  type RecommendedMinStocksByProduct,
+  type RecommendedMinStockSummary,
+} from "@/lib/stock/recommended-min-stock";
 
 export type ProductMasterRow = {
   id: string;
@@ -29,6 +37,9 @@ export type ProductMasterRow = {
   importSource: string | null;
   notes: string | null;
   barcodes: ProductBarcodeSummary[];
+  pendingOrders: ProductPendingOrderSummary;
+  abcRank: ProductAbcRankSummary;
+  recommendedMinStock: RecommendedMinStockSummary;
 };
 
 export type ProductBarcodeSummary = {
@@ -54,14 +65,22 @@ export type PurchaseHistorySetupProductRow = {
   specification: string | null;
   defaultMinStock: number;
   importSource: string | null;
+  recommendedMinStock: RecommendedMinStockSummary | null;
 };
 
 export type ProductDetail = ProductMasterRow & {
   primarySupplierId: string | null;
   productSuppliers: ProductSupplierSummary[];
+  pendingOrderSuppliers: PendingOrderSupplierSummary[];
   stockLots: ProductStockLotSummary[];
   recentMovements: ProductDetailMovement[];
   orderRequests: ProductDetailOrderRequest[];
+};
+
+export type ProductPendingOrderSummary = {
+  count: number;
+  totalQuantity: number;
+  latestOrderedAt: Date | null;
 };
 
 export type ProductSupplierSummary = {
@@ -74,6 +93,7 @@ export type ProductSupplierSummary = {
   isPrimary: boolean;
   isActive: boolean;
   notes: string | null;
+  leadTime: SupplierLeadTimeStats | null;
 };
 
 export type ProductDetailMovement = {
@@ -158,9 +178,12 @@ export async function getProductCategories(organizationId: string): Promise<stri
 
 export async function getPurchaseHistorySetupProductRows(
   organizationId: string,
-  take = 200,
+  options: { clinicId?: string; take?: number } | number = 200,
 ): Promise<PurchaseHistorySetupProductRow[]> {
-  return prisma.product.findMany({
+  const take = typeof options === "number" ? options : (options.take ?? 200);
+  const clinicId = typeof options === "number" ? undefined : options.clinicId;
+  const [products, recommendedMinStocksByProduct] = await Promise.all([
+    prisma.product.findMany({
     where: {
       organizationId,
       isActive: true,
@@ -204,60 +227,72 @@ export async function getPurchaseHistorySetupProductRows(
       },
     ],
     take,
-  });
+    }),
+    clinicId ? getRecommendedMinStocks(organizationId, clinicId) : Promise.resolve({} as RecommendedMinStocksByProduct),
+  ]);
+
+  return products.map((product) => ({
+    ...product,
+    recommendedMinStock: recommendedMinStocksByProduct[product.id] ?? null,
+  }));
 }
 
 export async function getProductMasterRows(organizationId: string, clinicId: string): Promise<ProductMasterRow[]> {
-  const products = await prisma.product.findMany({
-    where: {
-      organizationId,
-      isActive: true,
-    },
-    include: {
-      primarySupplier: {
-        select: {
-          id: true,
-          name: true,
-        },
+  const [products, pendingOrdersByProduct, abcRanksByProduct, recommendedMinStocksByProduct] = await Promise.all([
+    prisma.product.findMany({
+      where: {
+        organizationId,
+        isActive: true,
       },
-      stockItems: {
-        where: {
-          clinicId,
-          isUsed: true,
-        },
-        select: {
-          quantity: true,
-          minStock: true,
-          location: true,
-        },
-      },
-      barcodes: {
-        select: {
-          id: true,
-          barcode: true,
-          barcodeType: true,
-          unitLabel: true,
-          isPrimary: true,
-        },
-        orderBy: [
-          {
-            isPrimary: "desc",
+      include: {
+        primarySupplier: {
+          select: {
+            id: true,
+            name: true,
           },
-          {
-            barcode: "asc",
+        },
+        stockItems: {
+          where: {
+            clinicId,
+            isUsed: true,
           },
-        ],
+          select: {
+            quantity: true,
+            minStock: true,
+            location: true,
+          },
+        },
+        barcodes: {
+          select: {
+            id: true,
+            barcode: true,
+            barcodeType: true,
+            unitLabel: true,
+            isPrimary: true,
+          },
+          orderBy: [
+            {
+              isPrimary: "desc",
+            },
+            {
+              barcode: "asc",
+            },
+          ],
+        },
       },
-    },
-    orderBy: [
-      {
-        category: "asc",
-      },
-      {
-        name: "asc",
-      },
-    ],
-  });
+      orderBy: [
+        {
+          category: "asc",
+        },
+        {
+          name: "asc",
+        },
+      ],
+    }),
+    getPendingOrdersByProduct(organizationId, clinicId),
+    getProductAbcRanks(organizationId, clinicId),
+    getRecommendedMinStocks(organizationId, clinicId),
+  ]);
 
   return products.map((product) => {
     const stockItem = product.stockItems[0];
@@ -304,6 +339,26 @@ export async function getProductMasterRows(organizationId: string, clinicId: str
       importSource: product.importSource,
       notes: product.notes,
       barcodes,
+      pendingOrders: pendingOrdersByProduct[product.id] ?? {
+        count: 0,
+        totalQuantity: 0,
+        latestOrderedAt: null,
+      },
+      abcRank: abcRanksByProduct[product.id] ?? {
+        rank: "UNUSED",
+        totalQuantity: 0,
+        share: 0,
+      },
+      recommendedMinStock: recommendedMinStocksByProduct[product.id] ?? {
+        recommended: null,
+        totalOut90d: 0,
+        monthlyUsage: 0,
+        leadDays: 7,
+        safetyFactor: 1.5,
+        sampleSufficient: false,
+        usesFallbackLeadTime: true,
+        leadTimeSampleCount: null,
+      },
     };
   });
 }
@@ -429,6 +484,19 @@ export async function getProductDetail(
     return null;
   }
 
+  const [pendingOrdersByProduct, supplierLeadTimes, abcRanksByProduct, recommendedMinStocksByProduct] = await Promise.all([
+    getPendingOrderDetailsByProduct(organizationId, clinicId),
+    getSupplierLeadTimes(organizationId),
+    getProductAbcRanks(organizationId, clinicId),
+    getRecommendedMinStocks(organizationId, clinicId),
+  ]);
+  const pendingOrderDetails = pendingOrdersByProduct[product.id] ?? {
+    count: 0,
+    totalQuantity: 0,
+    latestOrderedAt: null,
+    suppliers: [],
+  };
+
   const stockItem = product.stockItems[0];
   const currentQuantity = stockItem?.quantity ?? 0;
   const minStock = stockItem?.minStock ?? product.defaultMinStock;
@@ -456,6 +524,7 @@ export async function getProductDetail(
     isPrimary: productSupplier.isPrimary,
     isActive: productSupplier.isActive,
     notes: productSupplier.notes,
+    leadTime: supplierLeadTimes[productSupplier.supplier.id] ?? null,
   }));
 
   if (product.primarySupplier && !productSuppliers.some((productSupplier) => productSupplier.supplierId === product.primarySupplier?.id)) {
@@ -469,6 +538,7 @@ export async function getProductDetail(
       isPrimary: true,
       isActive: true,
       notes: null,
+      leadTime: supplierLeadTimes[product.primarySupplier.id] ?? null,
     });
   }
 
@@ -498,8 +568,29 @@ export async function getProductDetail(
     importSource: product.importSource,
     barcodes,
     notes: product.notes,
+    pendingOrders: {
+      count: pendingOrderDetails.count,
+      totalQuantity: pendingOrderDetails.totalQuantity,
+      latestOrderedAt: pendingOrderDetails.latestOrderedAt,
+    },
+    abcRank: abcRanksByProduct[product.id] ?? {
+      rank: "UNUSED",
+      totalQuantity: 0,
+      share: 0,
+    },
+    recommendedMinStock: recommendedMinStocksByProduct[product.id] ?? {
+      recommended: null,
+      totalOut90d: 0,
+      monthlyUsage: 0,
+      leadDays: 7,
+      safetyFactor: 1.5,
+      sampleSufficient: false,
+      usesFallbackLeadTime: true,
+      leadTimeSampleCount: null,
+    },
     primarySupplierId: product.primarySupplier?.id ?? null,
     productSuppliers,
+    pendingOrderSuppliers: pendingOrderDetails.suppliers,
     stockLots: product.stockLots.map((lot) => ({
       id: lot.id,
       lotNumber: lot.lotNumber,

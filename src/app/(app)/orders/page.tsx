@@ -4,6 +4,7 @@ import { AppNav } from "@/components/domain/app-nav";
 import { markOrderRequestsOrderedAction } from "@/lib/actions/orders";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { getOrderRequestRows, type OrderRequestRow } from "@/lib/db/orders";
+import { getSupplierLeadTimes, type SupplierLeadTimeStats } from "@/lib/db/supplier-lead-times";
 import { orderPrintUnassignedSupplierId } from "@/lib/orders/print";
 import { orderSendMethodLabels, orderSendMethodValues } from "@/lib/orders/send-method";
 import {
@@ -85,6 +86,18 @@ function getSupplierStatusChipClass(status: Exclude<OrderListFilterValue, "">) {
   }
 
   return "border-line bg-white/80 text-muted";
+}
+
+function formatSupplierLeadTime(leadTime: SupplierLeadTimeStats | undefined) {
+  if (!leadTime) {
+    return "平均納品日数: データ不足";
+  }
+
+  if (!leadTime.isSampleSufficient) {
+    return `平均納品日数: データ不足（直近180日、${leadTime.sampleCount}件）`;
+  }
+
+  return `平均納品日数: ${leadTime.avgDays.toFixed(1)}日（中央値 ${leadTime.medianDays.toFixed(1)}日、直近180日、${leadTime.sampleCount}件）`;
 }
 
 function matchesOrderListFilter(row: OrderRequestRow, filter: OrderListFilterValue) {
@@ -170,7 +183,10 @@ export default async function OrdersPage({ searchParams }: PageProps) {
     ? (params.status as OrderListFilterValue)
     : "";
   const selectedStatusLabel = statusFilters.find((filter) => filter.value === selectedStatus)?.label ?? "";
-  const rows = await getOrderRequestRows(context.clinicId);
+  const [rows, supplierLeadTimes] = await Promise.all([
+    getOrderRequestRows(context.clinicId),
+    getSupplierLeadTimes(context.organizationId),
+  ]);
   const queryFilteredRows = rows.filter((row) => {
     const searchText = [row.name, row.productCode, row.category, row.supplierName, row.memo]
       .filter(Boolean)
@@ -383,6 +399,8 @@ export default async function OrdersPage({ searchParams }: PageProps) {
             groupedRows.map(([supplierKey, group]) => {
               const supplierName = group.supplierName;
               const supplierRows = group.rows;
+              const supplierLeadTime =
+                supplierKey === orderPrintUnassignedSupplierId ? undefined : supplierLeadTimes[supplierKey];
               const activeRows = sortRowsByStatusFlow(supplierRows.filter((row) => printableOrderRequestStatuses.includes(row.status)));
               const awaitingReceiptRows = sortRowsByStatusFlow(supplierRows.filter((row) => row.status === "ORDERED" && !row.receivedAt));
               const receivedRows = sortRowsByStatusFlow(supplierRows.filter((row) => row.status === "ORDERED" && row.receivedAt));
@@ -454,6 +472,9 @@ export default async function OrdersPage({ searchParams }: PageProps) {
                 <div className="flex flex-col gap-2 border-b border-line border-l-4 border-l-accent bg-teal-50/70 px-4 py-2 text-sm lg:flex-row lg:items-start lg:justify-between print:border-black print:border-l-black print:bg-white print:px-2 print:py-2 print:text-xs">
                   <div>
                     <h2 className="font-semibold">{supplierName}</h2>
+                    <p className="mt-1 text-xs font-semibold text-muted print:text-black">
+                      {formatSupplierLeadTime(supplierLeadTime)}
+                    </p>
                     {hasUnassignedSupplier ? (
                       <p className="mt-1 text-xs font-semibold text-danger print:hidden">
                         発注先未設定の商品があります。商品マスタで主発注先を設定してください。

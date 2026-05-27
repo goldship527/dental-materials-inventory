@@ -6,6 +6,7 @@ type NavItemId =
   | "overview"
   | "setup"
   | "inventory"
+  | "dormant"
   | "products"
   | "suppliers"
   | "barcode"
@@ -20,7 +21,9 @@ type NavItemId =
   | "staffOperators"
   | "auditLogs"
   | "storage"
-  | "account";
+  | "settings"
+  | "account"
+  | "notifications";
 
 type AppNavProps = {
   current: NavItemId;
@@ -47,6 +50,11 @@ const workNavItems = [
     id: "inventory",
     label: "在庫",
     href: "/inventory",
+  },
+  {
+    id: "dormant",
+    label: "死蔵",
+    href: "/inventory/dormant",
   },
   {
     id: "barcode",
@@ -121,6 +129,11 @@ const adminNavItems = [
     label: "ストレージ診断",
     href: "/admin/storage",
   },
+  {
+    id: "settings",
+    label: "組織設定",
+    href: "/admin/settings",
+  },
 ] as const satisfies readonly NavItem[];
 
 const helpNavItems = [
@@ -183,7 +196,8 @@ export async function AppNav({ current }: AppNavProps) {
       current === "admin" ||
       current === "staffOperators" ||
       current === "auditLogs" ||
-      current === "storage");
+      current === "storage" ||
+      current === "settings");
   const modeItems = isAdminMode ? adminNavItems : workNavItems;
 
   return (

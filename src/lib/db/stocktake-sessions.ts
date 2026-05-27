@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db/prisma";
+import { getProductAbcRanks, type ProductAbcRankSummary } from "@/lib/db/product-abc-ranks";
 
 export type StocktakeSessionStatus = "IN_PROGRESS" | "COMMITTED" | "DISCARDED";
 export type StocktakeSessionItemStatus = "PENDING" | "COUNTED" | "SKIPPED";
@@ -37,6 +38,7 @@ export type StocktakeSessionItemRow = {
   countedByUserName: string | null;
   movementId: string | null;
   barcodeValues: string[];
+  abcRank: ProductAbcRankSummary;
 };
 
 export type StocktakeSessionDetail = {
@@ -249,6 +251,11 @@ export async function getStocktakeSessionDetail(
           name: true,
         },
       },
+      clinic: {
+        select: {
+          organizationId: true,
+        },
+      },
       items: {
         include: {
           countedByUser: {
@@ -284,17 +291,20 @@ export async function getStocktakeSessionDetail(
     return null;
   }
 
-  const movements = await prisma.stockMovement.findMany({
-    where: {
-      clinicId,
-      sourceType: "STOCKTAKE_SESSION",
-      sourceId: sessionId,
-    },
-    select: {
-      id: true,
-      productId: true,
-    },
-  });
+  const [movements, abcRanksByProduct] = await Promise.all([
+    prisma.stockMovement.findMany({
+      where: {
+        clinicId,
+        sourceType: "STOCKTAKE_SESSION",
+        sourceId: sessionId,
+      },
+      select: {
+        id: true,
+        productId: true,
+      },
+    }),
+    getProductAbcRanks(session.clinic.organizationId, clinicId),
+  ]);
   const movementIdByProductId = new Map(movements.map((movement) => [movement.productId, movement.id]));
 
   const rows = session.items
@@ -321,6 +331,11 @@ export async function getStocktakeSessionDetail(
         countedByUserName: item.countedByUser?.name ?? null,
         movementId: movementIdByProductId.get(item.productId) ?? null,
         barcodeValues,
+        abcRank: abcRanksByProduct[item.productId] ?? {
+          rank: "UNUSED",
+          totalQuantity: 0,
+          share: 0,
+        },
       };
     })
     .sort((a, b) => {

@@ -22,6 +22,19 @@ model Organization {
   productBarcodes        ProductBarcode[]
   productImportHistories ProductImportHistory[]
   auditLogs              AuditLog[]
+  setting                OrganizationSetting?
+  notificationPreferences NotificationPreference[]
+  notificationDeliveries  NotificationDelivery[]
+}
+
+model OrganizationSetting {
+  id                  String   @id @default(cuid())
+  organizationId      String   @unique
+  anomalyOutThreshold Float    @default(3.0)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id])
 }
 
 model Clinic {
@@ -74,8 +87,51 @@ model User {
   stocktakeItemsCounted      StocktakeSessionItem[] @relation("StocktakeSessionItemCountedBy")
   productImportHistories     ProductImportHistory[]
   auditLogs                  AuditLog[]
+  notificationPreferences    NotificationPreference[]
+  notificationDeliveries     NotificationDelivery[]
 
   @@index([organizationId])
+}
+
+model NotificationPreference {
+  id                  String   @id @default(cuid())
+  organizationId      String
+  userId              String
+  channel             String   @default("EMAIL")
+  isEnabled           Boolean  @default(true)
+  dailyDigestTime     String   @default("07:00")
+  dailyDigestWeekdays String   @default("MON,TUE,WED,THU,FRI")
+  itemsJson           Json
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  user         User         @relation(fields: [userId], references: [id])
+
+  @@unique([userId, channel])
+  @@index([organizationId])
+}
+
+model NotificationDelivery {
+  id             String    @id @default(cuid())
+  organizationId String
+  userId         String
+  channel        String
+  status         String
+  subject        String
+  bodyDigestJson Json
+  attemptCount   Int       @default(0)
+  lastError      String?
+  scheduledFor   DateTime
+  sentAt         DateTime?
+  createdAt      DateTime  @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  user         User         @relation(fields: [userId], references: [id])
+
+  @@index([organizationId, scheduledFor])
+  @@index([userId])
+  @@index([status])
 }
 
 model UserClinicAssignment {

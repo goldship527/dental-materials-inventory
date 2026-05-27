@@ -4,6 +4,14 @@
 ハンドオフ元: Claude（第三者レビュー担当）
 受け取り側: Codex（次フェーズ実装担当）
 
+プロジェクトルート: `C:\Dev\dental-materials-inventory`
+正式表示名: 一般歯科材料在庫管理システム
+パッケージマネージャ: pnpm（`corepack pnpm` 経由）
+このドキュメントの絶対パス: `C:\Dev\dental-materials-inventory\docs\codex-handoff-waste-reduction.md`
+
+このハンドオフ内のファイル参照は、断りがない限りプロジェクトルートからの相対パスです。
+（例: `docs/spec.md` は `C:\Dev\dental-materials-inventory\docs\spec.md` を指します）
+
 ---
 
 ## 0. このドキュメントの目的

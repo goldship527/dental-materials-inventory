@@ -36,6 +36,30 @@ function needsInitialSetup(row: { category: string | null; hasStockItem: boolean
   return !row.hasStockItem || !row.category || row.category === "未分類" || row.minStock === 0 || !row.location;
 }
 
+function getAbcRankLabel(rank: string) {
+  if (rank === "UNUSED") {
+    return "未使用";
+  }
+
+  return rank;
+}
+
+function getAbcRankBadgeClass(rank: string) {
+  if (rank === "A") {
+    return "border-emerald-200 bg-emerald-50 text-accent";
+  }
+
+  if (rank === "B") {
+    return "border-sky-200 bg-sky-50 text-sky-700";
+  }
+
+  if (rank === "C") {
+    return "border-gray-200 bg-gray-50 text-muted";
+  }
+
+  return "border-line bg-white text-muted";
+}
+
 export default async function ProductsPage({ searchParams }: PageProps) {
   const session = await auth();
 
@@ -181,7 +205,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
             {filterLabel ? `（${filterLabel}）` : ""}
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[1280px] border-collapse text-left text-sm">
+            <table className="w-full min-w-[1440px] border-collapse text-left text-sm">
               <thead className="bg-gray-50 text-xs text-muted">
                 <tr>
                   <th className="border-b border-line px-4 py-3">商品</th>
@@ -193,6 +217,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
                   <th className="border-b border-line px-4 py-3">主発注先</th>
                   <th className="border-b border-line px-4 py-3 text-right">標準価格</th>
                   <th className="border-b border-line px-4 py-3 text-right">現在庫</th>
+                  <th className="border-b border-line px-4 py-3 text-right">納品待ち</th>
                   <th className="border-b border-line px-4 py-3 text-right">最低在庫</th>
                   <th className="border-b border-line px-4 py-3">保管場所</th>
                   {attachBarcode ? <th className="border-b border-line px-4 py-3">紐づけ</th> : null}
@@ -203,6 +228,14 @@ export default async function ProductsPage({ searchParams }: PageProps) {
                   filteredRows.map((row) => (
                     <tr key={row.id} className="align-top">
                       <td className="border-b border-line px-4 py-3">
+                        <div className="mb-2 flex flex-wrap items-center gap-2">
+                          <span className={`inline-flex rounded border px-2 py-1 text-xs font-semibold ${getAbcRankBadgeClass(row.abcRank.rank)}`}>
+                            ABC {getAbcRankLabel(row.abcRank.rank)}
+                          </span>
+                          {row.abcRank.rank !== "UNUSED" ? (
+                            <span className="text-xs text-muted">90日出庫 {row.abcRank.totalQuantity}</span>
+                          ) : null}
+                        </div>
                         <a className="font-semibold text-accent hover:underline" href={`/products/${row.id}`}>
                           {row.name}
                         </a>
@@ -262,7 +295,21 @@ export default async function ProductsPage({ searchParams }: PageProps) {
                       <td className="border-b border-line px-4 py-3 text-right font-semibold">
                         {row.currentQuantity}
                       </td>
-                      <td className="border-b border-line px-4 py-3 text-right">{row.minStock}</td>
+                      <td className="border-b border-line px-4 py-3 text-right">
+                        {row.pendingOrders.totalQuantity > 0 ? (
+                          <span className="font-semibold text-accent">{row.pendingOrders.totalQuantity}個</span>
+                        ) : (
+                          "-"
+                        )}
+                      </td>
+                      <td className="border-b border-line px-4 py-3 text-right">
+                        <p className="font-semibold">{row.minStock}</p>
+                        {row.recommendedMinStock.recommended !== null ? (
+                          <p className="mt-1 text-xs font-semibold text-accent">推奨 {row.recommendedMinStock.recommended}</p>
+                        ) : (
+                          <p className="mt-1 text-xs text-muted">推奨: データ不足</p>
+                        )}
+                      </td>
                       <td className="border-b border-line px-4 py-3">{row.location ?? "-"}</td>
                       {attachBarcode ? (
                         <td className="border-b border-line px-4 py-3">
@@ -278,7 +325,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
                   ))
                 ) : (
                   <tr>
-                    <td className="px-4 py-12 text-center text-muted" colSpan={attachBarcode ? 12 : 11}>
+                    <td className="px-4 py-12 text-center text-muted" colSpan={attachBarcode ? 13 : 12}>
                       条件に一致する商品はありません。
                     </td>
                   </tr>

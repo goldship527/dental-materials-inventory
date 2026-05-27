@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { AppNav } from "@/components/domain/app-nav";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { getActiveOrderRequestProductIds } from "@/lib/db/orders";
+import { getPendingOrderDetailsByProduct } from "@/lib/db/pending-orders";
 import { getStockRows } from "@/lib/db/stock";
 import { PrintButton } from "./print-button";
 import { ShortageOrderButton } from "./shortage-order-button";
@@ -24,9 +25,10 @@ export default async function ShortagePage({ searchParams }: PageProps) {
   const params = (await searchParams) ?? {};
   const query = params.q?.trim() ?? "";
   const normalizedQuery = query.toLowerCase();
-  const [rows, activeOrderProductIds] = await Promise.all([
+  const [rows, activeOrderProductIds, pendingOrdersByProduct] = await Promise.all([
     getStockRows(context.clinicId),
     getActiveOrderRequestProductIds(context.clinicId),
+    getPendingOrderDetailsByProduct(context.organizationId, context.clinicId),
   ]);
   const shortageRows = rows
     .filter((row) => row.isShortage)
@@ -58,6 +60,11 @@ export default async function ShortagePage({ searchParams }: PageProps) {
     hour: "2-digit",
     minute: "2-digit",
   }).format(new Date());
+  const dateFormatter = new Intl.DateTimeFormat("ja-JP", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
   const emptyMessage =
     shortageRows.length === 0
       ? "不足在庫はありません。"
@@ -144,14 +151,21 @@ export default async function ShortagePage({ searchParams }: PageProps) {
                 <th className="border-b border-line px-4 py-3 print:border print:border-black print:px-2 print:py-1.5">
                   発注先
                 </th>
+                <th className="border-b border-line px-4 py-3 text-right print:border print:border-black print:px-2 print:py-1.5">
+                  納品待ち
+                </th>
                 <th className="border-b border-line px-4 py-3 print:hidden">発注候補</th>
                 <th className="hidden border border-black px-2 py-1.5 print:table-cell">確認</th>
               </tr>
             </thead>
             <tbody>
               {filteredShortageRows.length > 0 ? (
-                filteredShortageRows.map((row) => (
-                  <tr key={row.stockItemId} className="print:break-inside-avoid">
+                filteredShortageRows.map((row) => {
+                  const pendingOrders = pendingOrdersByProduct[row.productId];
+                  const hasPendingOrders = Boolean(pendingOrders && pendingOrders.totalQuantity > 0);
+
+                  return (
+                    <tr key={row.stockItemId} className="print:break-inside-avoid">
                     <td className="border-b border-line px-4 py-3 print:border print:border-black print:px-2 print:py-1.5">
                       <a
                         className="font-semibold text-accent hover:underline print:text-black print:no-underline"
@@ -184,20 +198,34 @@ export default async function ShortagePage({ searchParams }: PageProps) {
                         "-"
                       )}
                     </td>
+                    <td className="border-b border-line px-4 py-3 text-right print:border print:border-black print:px-2 print:py-1.5">
+                      {hasPendingOrders && pendingOrders ? (
+                        <div>
+                          <p className="font-semibold text-accent print:text-black">{pendingOrders.totalQuantity}個</p>
+                          <p className="mt-1 text-xs text-muted print:text-[9px] print:text-black">
+                            最終 {pendingOrders.latestOrderedAt ? dateFormatter.format(pendingOrders.latestOrderedAt) : "-"}
+                          </p>
+                        </div>
+                      ) : (
+                        "-"
+                      )}
+                    </td>
                     <td className="border-b border-line px-4 py-3 print:hidden">
                       <ShortageOrderButton
                         stockItemId={row.stockItemId}
-                        isAlreadyAdded={activeOrderProductIds.has(row.productId)}
+                        isAlreadyAdded={activeOrderProductIds.has(row.productId) || hasPendingOrders}
+                        pendingQuantity={pendingOrders?.totalQuantity ?? 0}
                       />
                     </td>
                     <td className="hidden border border-black px-2 py-1.5 print:table-cell" />
                   </tr>
-                ))
+                  );
+                })
               ) : (
                 <tr>
                   <td
                     className="px-4 py-12 text-center text-muted print:border print:border-black print:px-2 print:py-6 print:text-black"
-                    colSpan={7}
+                    colSpan={8}
                   >
                     {emptyMessage}
                   </td>

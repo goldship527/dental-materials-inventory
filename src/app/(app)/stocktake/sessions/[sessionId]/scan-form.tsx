@@ -121,6 +121,30 @@ function getStatusBadgeClass(status: string) {
   return "bg-white text-muted";
 }
 
+function getAbcRankLabel(rank: string) {
+  if (rank === "UNUSED") {
+    return "未使用";
+  }
+
+  return rank;
+}
+
+function getAbcRankBadgeClass(rank: string) {
+  if (rank === "A") {
+    return "border-emerald-200 bg-emerald-50 text-accent";
+  }
+
+  if (rank === "B") {
+    return "border-sky-200 bg-sky-50 text-sky-700";
+  }
+
+  if (rank === "C") {
+    return "border-gray-200 bg-gray-50 text-muted";
+  }
+
+  return "border-line bg-white text-muted";
+}
+
 type StocktakeItemRowProps = {
   sessionId: string;
   row: StocktakeSessionItemRow;
@@ -213,6 +237,14 @@ function StocktakeItemRow({ sessionId, row, editable, highlighted, registerInput
   return (
     <tr id={`stocktake-item-${row.id}`} className={`${getRowClass(row, highlighted)} transition-colors`}>
       <td className={`border-b border-line px-4 py-3 ${getRowAccentClass(row, highlighted)}`}>
+        <div className="mb-2 flex flex-wrap items-center gap-2">
+          <span className={`inline-flex rounded border px-2 py-1 text-xs font-semibold ${getAbcRankBadgeClass(row.abcRank.rank)}`}>
+            ABC {getAbcRankLabel(row.abcRank.rank)}
+          </span>
+          {row.abcRank.rank !== "UNUSED" ? (
+            <span className="text-xs text-muted">90日出庫 {row.abcRank.totalQuantity}</span>
+          ) : null}
+        </div>
         <a className="font-semibold text-accent hover:underline" href={`/products/${row.productId}`}>
           {row.name}
         </a>

@@ -67,6 +67,18 @@ function formatBarcodeLabel(barcode: { barcodeType: string; unitLabel: string | 
   return pieces.join(" / ");
 }
 
+function formatLeadTime(leadTime: { avgDays: number; medianDays: number; sampleCount: number; isSampleSufficient: boolean } | null) {
+  if (!leadTime) {
+    return "平均納品日数: データ不足";
+  }
+
+  if (!leadTime.isSampleSufficient) {
+    return `平均納品日数: データ不足（直近180日、${leadTime.sampleCount}件）`;
+  }
+
+  return `平均納品日数: ${leadTime.avgDays.toFixed(1)}日（中央値 ${leadTime.medianDays.toFixed(1)}日、直近180日、${leadTime.sampleCount}件）`;
+}
+
 function getStockStatus(currentQuantity: number, minStock: number, hasStockItem: boolean) {
   if (!hasStockItem) {
     return {
@@ -204,6 +216,11 @@ export default async function ProductDetailPage({ params }: PageProps) {
                     発注候補 {product.orderRequests.length} 件
                   </span>
                 ) : null}
+                {product.pendingOrders.totalQuantity > 0 ? (
+                  <span className="rounded bg-yellow-50 px-3 py-1 text-xs font-semibold text-warning">
+                    納品待ち {product.pendingOrders.totalQuantity}個
+                  </span>
+                ) : null}
               </div>
               <p className="mt-2 text-sm text-muted">
                 {stockStatus.description}。現在庫 {product.currentQuantity} / 最低在庫 {product.minStock}
@@ -253,6 +270,11 @@ export default async function ProductDetailPage({ params }: PageProps) {
             <p className="text-sm font-semibold text-muted">最低在庫</p>
             <p className="mt-1 text-3xl font-semibold">{product.minStock}</p>
             <p className="mt-1 text-sm text-muted">標準最低 {product.defaultMinStock}</p>
+            {product.recommendedMinStock.recommended !== null ? (
+              <p className="mt-2 text-sm font-semibold text-accent">推奨 {product.recommendedMinStock.recommended}</p>
+            ) : (
+              <p className="mt-2 text-sm text-muted">推奨: データ不足</p>
+            )}
           </div>
           <div className="rounded border border-line bg-white p-4 shadow-panel">
             <p className="text-sm font-semibold text-muted">不足数</p>
@@ -270,6 +292,87 @@ export default async function ProductDetailPage({ params }: PageProps) {
             </p>
           </div>
         </section>
+
+        <section className="rounded border border-line bg-white p-4 shadow-panel">
+          <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+            <div>
+              <h2 className="text-lg font-semibold">推奨最低在庫</h2>
+              <p className="mt-1 text-sm text-muted">
+                過去90日の出庫実績、発注先リードタイム、安全在庫係数から計算した参考値です。自動では更新されません。
+              </p>
+            </div>
+            <a
+              className="inline-flex min-h-10 items-center justify-center rounded border border-line bg-white px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+              href={`/products/${product.id}/edit`}
+            >
+              商品編集で確認
+            </a>
+          </div>
+          {product.recommendedMinStock.recommended !== null ? (
+            <dl className="mt-4 grid gap-3 text-sm md:grid-cols-5">
+              <div className="rounded bg-gray-50 p-3">
+                <dt className="text-muted">推奨値</dt>
+                <dd className="mt-1 text-xl font-semibold text-accent">{product.recommendedMinStock.recommended}</dd>
+              </div>
+              <div className="rounded bg-gray-50 p-3">
+                <dt className="text-muted">90日出庫</dt>
+                <dd className="mt-1 font-semibold">{product.recommendedMinStock.totalOut90d}</dd>
+              </div>
+              <div className="rounded bg-gray-50 p-3">
+                <dt className="text-muted">月間平均</dt>
+                <dd className="mt-1 font-semibold">{product.recommendedMinStock.monthlyUsage}</dd>
+              </div>
+              <div className="rounded bg-gray-50 p-3">
+                <dt className="text-muted">リードタイム</dt>
+                <dd className="mt-1 font-semibold">
+                  {product.recommendedMinStock.leadDays}日
+                  {product.recommendedMinStock.usesFallbackLeadTime ? "（仮）" : ""}
+                </dd>
+              </div>
+              <div className="rounded bg-gray-50 p-3">
+                <dt className="text-muted">安全係数</dt>
+                <dd className="mt-1 font-semibold">{product.recommendedMinStock.safetyFactor}</dd>
+              </div>
+            </dl>
+          ) : (
+            <p className="mt-4 rounded bg-gray-50 px-3 py-2 text-sm text-muted">
+              過去90日の出庫実績がないため、推奨最低在庫は表示しません。
+            </p>
+          )}
+        </section>
+
+        {product.pendingOrders.totalQuantity > 0 ? (
+          <section className="rounded border border-warning/30 bg-yellow-50 p-4 shadow-panel">
+            <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+              <div>
+                <h2 className="text-lg font-semibold text-warning">未納の発注があります</h2>
+                <p className="mt-1 text-sm text-muted">
+                  発注済 {product.pendingOrders.count}件 / 合計 {product.pendingOrders.totalQuantity}個
+                  {product.pendingOrders.latestOrderedAt
+                    ? ` / 最終発注 ${dateFormatter.format(product.pendingOrders.latestOrderedAt)}`
+                    : ""}
+                </p>
+              </div>
+              <a
+                className="inline-flex min-h-10 items-center justify-center rounded border border-warning/40 bg-white px-4 py-2 text-sm font-semibold text-warning transition hover:border-warning"
+                href={ordersHref}
+              >
+                発注候補で確認
+              </a>
+            </div>
+            <div className="mt-3 grid gap-2 md:grid-cols-2">
+              {product.pendingOrderSuppliers.map((supplier) => (
+                <div key={supplier.supplierId ?? "none"} className="rounded border border-warning/20 bg-white px-3 py-2 text-sm">
+                  <p className="font-semibold">{supplier.supplierName ?? "発注先未設定"}</p>
+                  <p className="mt-1 text-muted">
+                    {supplier.count}件 / {supplier.totalQuantity}個
+                    {supplier.latestOrderedAt ? ` / 最終 ${dateFormatter.format(supplier.latestOrderedAt)}` : ""}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </section>
+        ) : null}
 
         <section className="rounded border border-line bg-white p-4 shadow-panel">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
@@ -402,6 +505,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
                         品番 {productSupplier.supplierProductCode ?? "-"} / 単位 {productSupplier.orderUnit ?? "-"} / 価格{" "}
                         {formatPrice(productSupplier.standardPrice)}
                       </p>
+                      <p className="mt-1 text-xs font-semibold text-muted">{formatLeadTime(productSupplier.leadTime)}</p>
                       {productSupplier.notes ? <p className="mt-1 text-xs text-muted">{productSupplier.notes}</p> : null}
                     </div>
                   ))

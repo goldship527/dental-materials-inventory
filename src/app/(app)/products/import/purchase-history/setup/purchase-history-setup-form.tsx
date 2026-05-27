@@ -109,6 +109,17 @@ export function PurchaseHistorySetupForm({ products, categories }: PurchaseHisto
                         onChange={(event) => updateRow(product.id, { defaultMinStock: Number(event.target.value) })}
                         className="h-11 w-28 rounded border border-line px-3 text-right text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
                       />
+                      {product.recommendedMinStock?.recommended !== null && product.recommendedMinStock?.recommended !== undefined ? (
+                        <button
+                          type="button"
+                          onClick={() => updateRow(product.id, { defaultMinStock: product.recommendedMinStock?.recommended ?? 0 })}
+                          className="mt-2 rounded border border-accent px-3 py-2 text-xs font-semibold text-accent transition hover:bg-teal-50"
+                        >
+                          推奨 {product.recommendedMinStock.recommended}
+                        </button>
+                      ) : (
+                        <p className="mt-2 text-xs text-muted">推奨: データ不足</p>
+                      )}
                     </td>
                     <td className="border-b border-line px-3 py-3">
                       <a className="font-semibold text-accent hover:underline" href={`/products/${product.id}/edit`}>

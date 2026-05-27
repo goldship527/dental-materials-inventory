@@ -3442,9 +3442,141 @@
 
 ### 検証
 - `corepack pnpm typecheck`
+
+## 2026-05-27 フェーズ4-A 発注済可視化と重複発注防止
+
+### 作業内容
+- 未納の発注済候補を商品IDごとに集計する `src/lib/db/pending-orders.ts` を追加した。
+- 不足在庫一覧に、納品待ち数量と最終発注日を表示するようにした。
+- 不足在庫一覧で、未納の発注がある商品は発注候補追加ボタンを無効にし、「発注済 N個があります」と警告するようにした。
+- 商品一覧に、商品ごとの納品待ち数量を表示するようにした。
+- 商品詳細に、未納の発注件数、合計数量、最終発注日、発注先別内訳を表示するようにした。
+- 仕様書にフェーズ4-Aの仕様を追記し、スタッフマニュアルにも納品待ち表示の確認箇所を追記した。
+
+### 判断
+- 「未納の発注」は `OrderRequest.status = "ORDERED"` かつ `receivedAt = null` とした。
+- `OrderRequest` は `organizationId` を直接持たないため、集計時は `clinic.organizationId` と `product.organizationId` の両方を確認する。
+- 表示と警告だけを追加し、在庫数、発注候補ステータス、納品確認状態は変更しない。
+
+### セキュリティメモ
+- 集計対象はログイン中ユーザーの所属組織・所属クリニックに限定する。
+- 金額、単価、購入履歴明細は表示しない。
+- 他組織・他クリニックの発注が混入しないことをテストで確認した。
+
+### 検証
+- `corepack pnpm exec tsx tests/pending-orders.test.ts`
+- `corepack pnpm typecheck`
+- `corepack pnpm build`
+
+## 2026-05-27 フェーズ4-B 死蔵在庫レポート
+
+### 作業内容
+- 過去90日以内に出庫がなく、現在庫が1以上の商品を集計する `src/lib/db/dormant-stock.ts` を追加した。
+- `/inventory/dormant` に死蔵在庫レポート画面を追加した。
+- レポートでは、商品名、現在庫、最低在庫、保管場所、最終出庫日、滞留日数、滞留金額を表示するようにした。
+- 検索と、90日・180日・365日の期間切り替えを追加した。
+- ホームの要対応セクションと通常メニュー、共通ナビに死蔵在庫への導線を追加した。
+- 仕様書とスタッフマニュアルに、死蔵在庫レポートの仕様と使い方を追記した。
+
+### 判断
+- 既定の死蔵判定期間は90日とした。
+- ちょうど90日前の出庫は「過去90日以内の出庫」として扱い、対象外にする。
+- 出庫履歴が一度もない在庫は、現在庫が1以上であれば対象に含める。
+- 滞留金額は `Product.standardPrice × StockItem.quantity` の概算とし、標準価格がない商品は `-` 表示にする。
+
+### セキュリティメモ
+- 集計対象はログイン中ユーザーの所属組織・所属クリニックに限定する。
+- 滞留金額は組織内確認用の表示に限定し、外部送信や通知には使わない。
+- 表示専用であり、在庫数、発注候補、入出庫履歴は変更しない。
+
+### 検証
+- `corepack pnpm exec tsx tests/dormant-stock.test.ts`
+- `corepack pnpm exec tsx tests/stock-status.test.ts`
+- `corepack pnpm typecheck`
+- `corepack pnpm build`
 - `corepack pnpm build`
 - `git diff --check`
 - ローカル `/orders` は未ログイン状態のため `/login` へリダイレクトすることまで確認した。ログイン後の画面操作確認は未実施。
+
+## 2026-05-27 フェーズ4-C 発注先リードタイム学習
+
+### 作業内容
+- 発注先ごとに、直近180日の発注日と納品確認日の差から平均納品日数、中央値、サンプル件数を集計する `src/lib/db/supplier-lead-times.ts` を追加した。
+- 商品詳細の取扱発注先一覧に、発注先ごとの平均納品日数を表示するようにした。
+- 発注候補一覧の発注先グループ見出しに、同じ平均納品日数を表示するようにした。
+- 仕様書にフェーズ4-Cの仕様を追記し、スタッフマニュアルにも表示箇所を追記した。
+
+### 判断
+- サンプル件数が3件未満の発注先は、計算値を持っていても画面上は「データ不足」として扱う。
+- 集計期間はユーザー確認どおり直近180日とした。
+- 今回は表示専用に留め、発注先、発注数量、在庫数、納品状態は自動変更しない。
+
+### セキュリティメモ
+- 集計対象は `clinic.organizationId` と `supplier.organizationId` でログインユーザーの組織に限定する。
+- 金額、患者情報、個人情報は扱わない。
+- DBスキーマ、監査ログ対象、在庫更新処理は変更しない。
+
+### 検証
+- `corepack pnpm tsx tests/supplier-lead-times.test.ts`
+- `corepack pnpm tsx tests/pending-orders.test.ts`
+- `corepack pnpm tsx tests/dormant-stock.test.ts`
+- `corepack pnpm typecheck`
+- `corepack pnpm build`
+- `git diff --check`
+- ローカル開発サーバーで `/orders`、`/products`、`/inventory/dormant` がログイン画面へ正常にリダイレクトされることを確認
+
+## 2026-05-27 フェーズ4-D 使用頻度ABC分析
+
+### 作業内容
+- 過去90日の出庫数量から商品ごとのABC/未使用ランクを計算する `src/lib/db/product-abc-ranks.ts` を追加した。
+- 商品一覧の各商品にABCランクバッジと90日出庫数量を表示するようにした。
+- 棚卸セッションの各商品行にもABCランクバッジと90日出庫数量を表示するようにした。
+- 仕様書とスタッフマニュアルに、ABC分析の判定ロジックと見方を追記した。
+
+### 判断
+- ユーザー確認どおり、集計期間は90日、ABC閾値は70% / 90%、表示はバッジ方式とした。
+- ランクの境界では、累計比率をまたぐ商品をその直前のランクに含める。
+- 出庫が無い商品、または全商品で出庫が無い場合は「未使用」として扱う。
+
+### セキュリティメモ
+- 集計対象はログイン中ユーザーの所属組織と所属クリニックに限定する。
+- 使用頻度は院内の業務情報として扱い、外部送信や通知には使わない。
+- 表示専用であり、在庫数、発注候補、棚卸結果、入出庫履歴は変更しない。
+
+### 検証
+- `corepack pnpm tsx tests/product-abc-ranks.test.ts`
+- `corepack pnpm tsx tests/stocktake-sessions.test.ts`
+- `corepack pnpm typecheck`
+- `corepack pnpm build`
+- `git diff --check`
+- ローカル開発サーバーで `/products` と `/stocktake/sessions` がログイン画面へ正常にリダイレクトされることを確認
+
+## 2026-05-27 フェーズ4-E 推奨最低在庫レコメンド
+
+### 作業内容
+- 過去90日の出庫数量、発注先リードタイム、安全在庫係数から推奨最低在庫を計算する `src/lib/stock/recommended-min-stock.ts` を追加した。
+- 商品一覧の最低在庫欄に、現在値と推奨値またはデータ不足表示を追加した。
+- 商品詳細に、推奨値、90日出庫、月間平均、リードタイム、安全在庫係数の計算根拠を表示するようにした。
+- 商品編集画面と購入履歴登録商品の一括整備画面に、推奨値を最低在庫入力欄へ入れる補助ボタンを追加した。
+- 仕様書とスタッフマニュアルに、計算式、仮値、採用方法、安全ルールを追記した。
+
+### 判断
+- ユーザー確認どおり、安全在庫係数は1.5、リードタイム未取得時は7日、出庫0件は「データ不足」とした。
+- リードタイムは主発注先の平均納品日数を使い、サンプル件数が3件未満の場合は7日の仮値を使う。
+- 補助ボタンは入力欄に値を入れるだけとし、保存は既存の保存操作に任せる。
+
+### セキュリティメモ
+- 集計対象はログイン中ユーザーの所属組織と所属クリニックに限定する。
+- 推奨値は院内判断用の参考情報として扱い、外部送信や通知には使わない。
+- 表示や補助ボタンだけでは、在庫数、最低在庫、発注候補、入出庫履歴は変更しない。
+
+### 検証
+- `corepack pnpm tsx tests/recommended-min-stock.test.ts`
+- `corepack pnpm tsx tests/purchase-history-setup.test.ts`
+- `corepack pnpm typecheck`
+- `corepack pnpm build`
+- `git diff --check`
+- ローカル開発サーバーで `/products` と `/products/import/purchase-history/setup` がログイン画面へ正常にリダイレクトされることを確認
 
 ## 2026-05-24 商品詳細からの在庫行追加フロー
 
@@ -3538,6 +3670,64 @@
 ### 検証
 - `corepack pnpm typecheck`
 - `corepack pnpm build`
+- `git diff --check`
+
+## 2026-05-27 フェーズ4-F 異常出庫検知
+
+### 作業内容
+- `OrganizationSetting` を追加し、組織別に異常出庫検知の閾値を保存できるようにした。
+- 過去30日の日次平均と直近24時間の出庫数を比較する異常検知集計を追加した。
+- ホーム画面の要対応セクションに異常出庫件数を追加し、`/movements/anomalies` で商品別の検知結果を確認できるようにした。
+- `/admin/settings` を追加し、ADMIN が閾値を 1.5〜10.0 の範囲で更新できるようにした。
+- 閾値変更時に `ANOMALY_THRESHOLD_UPDATE` の監査ログを記録するようにした。
+- `docs/spec.md` と `docs/user-manual.md` に異常出庫検知の仕様と利用上の注意を追記した。
+
+### 判断
+- 検知は表示専用とし、在庫数、入出庫履歴、発注候補は自動変更しない。
+- 出庫実績が少なすぎる商品の誤検知を避けるため、`baselineDaily < 0.1` は対象外にした。
+- 閾値の既定値は 3.0、入力範囲は 1.5〜10.0 とした。
+
+### セキュリティメモ
+- 集計は `organizationId` と `clinicId` の両方で絞り、別組織・別クリニックの履歴を混ぜない。
+- 設定変更は ADMIN のみ許可し、監査ログへ変更前後の閾値を残す。
+- 金額、患者情報、個人情報、外部通知は扱わない。
+
+### 検証
+- `corepack pnpm prisma generate`
+- `corepack pnpm tsx tests/stock-anomalies.test.ts`
+- `corepack pnpm typecheck`
+- `corepack pnpm build`
+- `git diff --check`
+
+## 2026-05-27 フェーズ4-G 朝のダイジェスト通知
+
+### 作業内容
+- `NotificationPreference` と `NotificationDelivery` を追加し、ユーザー別の通知設定と送信履歴を保存できるようにした。
+- `/account/notifications` を追加し、ログインユーザーが朝のダイジェスト通知の有効/無効、配信時刻、曜日、対象項目を設定できるようにした。
+- 不足在庫、期限ロット、納品待ち、死蔵在庫、異常出庫検知の件数とリンクを組み立てるダイジェスト生成処理を追加した。
+- Resend API向けのメール送信モジュールを追加し、`NOTIFICATIONS_ENABLED=true` かつ必要な環境変数が揃う場合だけ実送信するようにした。
+- `/api/notifications/daily-digest` を追加し、Cronから起動できるようにした。
+- `vercel.json` を追加し、Vercel Cronで30分ごとにダイジェスト処理を呼ぶ設定を追加した。
+- `.env.example` と `docs/project-manual.md` に通知関連の環境変数と運用注意を追記した。
+- `docs/spec.md` と `docs/user-manual.md` に朝のダイジェスト通知の仕様と利用上の注意を追記した。
+
+### 判断
+- 送信先は自由入力にせず、既存ユーザーの登録メールアドレスだけを使う。
+- ローカル開発やAPIキー未設定時は送信を安全にスキップし、失敗履歴を量産しない。
+- 同じユーザー、同じチャンネル、同じ予定時刻で `QUEUED` または `SENT` の履歴がある場合は重複送信しない。
+- 配信時刻はJSTの30分単位で判定し、Vercel Cronは30分ごとに起動する。
+
+### セキュリティメモ
+- メール本文には金額、患者情報、個人情報、APIキーを含めない。
+- Cronエンドポイントは `CRON_SECRET` が設定されている場合、Bearer認証を必須にする。
+- 通知は確認導線だけで、在庫数、発注候補、入出庫履歴は自動変更しない。
+
+### 検証
+- `corepack pnpm prisma generate`
+- `corepack pnpm tsx tests/notifications-daily-digest.test.ts`
+- `corepack pnpm typecheck`
+- `corepack pnpm build`
+- ローカル起動で `/account/notifications` の未ログイン時リダイレクトと `/api/notifications/daily-digest` の安全スキップ応答を確認
 - `git diff --check`
 
 ## 2026-05-22 管理画面診断の後片付け
