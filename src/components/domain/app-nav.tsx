@@ -52,18 +52,13 @@ const workNavItems = [
     href: "/inventory",
   },
   {
-    id: "barcode",
-    label: "バーコード",
-    href: "/barcode",
-  },
-  {
     id: "shortage",
     label: "不足",
     href: "/shortage",
   },
   {
     id: "orders",
-    label: "発注候補",
+    label: "発注",
     href: "/orders",
   },
   {
@@ -72,24 +67,9 @@ const workNavItems = [
     href: "/movements",
   },
   {
-    id: "dormant",
-    label: "長期在庫",
-    href: "/inventory/dormant",
-  },
-  {
     id: "stocktake",
     label: "棚卸",
     href: "/stocktake/sessions",
-  },
-  {
-    id: "products",
-    label: "商品",
-    href: "/products",
-  },
-  {
-    id: "suppliers",
-    label: "発注先",
-    href: "/suppliers",
   },
 ] as const satisfies readonly NavItem[];
 
