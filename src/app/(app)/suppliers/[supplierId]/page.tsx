@@ -38,6 +38,14 @@ function formatOrderRecordId(orderRecordId: string | null) {
   return orderRecordId ? orderRecordId.slice(-8) : "-";
 }
 
+function getSupplierOrderRequestStatusLabel(request: { status: string; receivedAt: Date | null }) {
+  if (request.status === "ORDERED") {
+    return request.receivedAt ? "納品済み" : "納品待ち";
+  }
+
+  return orderRequestStatusLabels[request.status as keyof typeof orderRequestStatusLabels];
+}
+
 export default async function SupplierDetailPage({ params }: PageProps) {
   const session = await auth();
 
@@ -59,6 +67,7 @@ export default async function SupplierDetailPage({ params }: PageProps) {
     supplier.orderRequestCounts.CONFIRMED +
     supplier.orderRequestCounts.ORDERED +
     supplier.orderRequestCounts.SKIPPED;
+  const plannedOrderRequestCount = supplier.orderRequestCounts.DRAFT + supplier.orderRequestCounts.CONFIRMED;
   const shortageProducts = supplier.products.filter((product) => product.shortageCount > 0);
   const supplierQuery = encodeURIComponent(supplier.name);
   const productsHref = `/products?q=${supplierQuery}`;
@@ -133,7 +142,7 @@ export default async function SupplierDetailPage({ params }: PageProps) {
           </div>
           <div className="rounded border border-line bg-white p-5 shadow-panel">
             <p className="text-sm font-semibold text-muted">発注予定</p>
-            <p className="mt-2 text-3xl font-semibold">{supplier.orderRequestCounts.CONFIRMED}</p>
+            <p className="mt-2 text-3xl font-semibold">{plannedOrderRequestCount}</p>
             <p className="mt-2 text-sm text-muted">これから発注する候補</p>
           </div>
         </section>
@@ -274,10 +283,10 @@ export default async function SupplierDetailPage({ params }: PageProps) {
                               : "text-muted"
                         }
                       >
-                        {orderRequestStatusLabels[request.status]} / {dateTimeFormatter.format(request.updatedAt)}
+                        {getSupplierOrderRequestStatusLabel(request)} / {dateTimeFormatter.format(request.updatedAt)}
                       </p>
                       {request.status === "ORDERED" && request.orderedAt ? (
-                        <p className="text-muted">発注済み日時: {dateTimeFormatter.format(request.orderedAt)}</p>
+                        <p className="text-muted">発注記録日時: {dateTimeFormatter.format(request.orderedAt)}</p>
                       ) : null}
                       {request.status === "ORDERED" && request.orderRecordId ? (
                         <p className="text-muted">発注記録: {formatOrderRecordId(request.orderRecordId)}</p>

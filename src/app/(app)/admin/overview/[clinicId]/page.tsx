@@ -105,6 +105,7 @@ export default async function AdminOverviewClinicDetailPage({ params, searchPara
 
     return matchesQuery && matchesCategory && matchesShortage;
   });
+  const plannedOrderRequestCount = detail.orderStatusCounts.DRAFT + detail.orderStatusCounts.CONFIRMED;
   const summaryItems = [
     {
       label: "在庫行",
@@ -119,9 +120,9 @@ export default async function AdminOverviewClinicDetailPage({ params, searchPara
     },
     {
       label: "発注候補",
-      value: numberText(detail.orderStatusCounts.CONFIRMED),
-      note: `発注済み ${numberText(detail.orderStatusCounts.ORDERED)} / 確認待ち ${numberText(detail.orderStatusCounts.DRAFT)}`,
-      isWarning: detail.orderStatusCounts.CONFIRMED > 0 || detail.orderStatusCounts.DRAFT > 0,
+      value: numberText(plannedOrderRequestCount),
+      note: `発注記録あり ${numberText(detail.orderStatusCounts.ORDERED)} / 見送り ${numberText(detail.orderStatusCounts.SKIPPED)}`,
+      isWarning: plannedOrderRequestCount > 0,
     },
     {
       label: "期限ロット",
@@ -187,7 +188,7 @@ export default async function AdminOverviewClinicDetailPage({ params, searchPara
             href={`/admin/overview/${clinicId}/orders`}
           >
             <p className="text-sm font-semibold text-accent">発注候補を見る</p>
-            <p className="mt-2 text-sm leading-6 text-muted">発注予定、発注済み、確認待ちの候補を読み取り専用で確認します。</p>
+            <p className="mt-2 text-sm leading-6 text-muted">発注予定、納品待ち、納品済み、見送りの候補を読み取り専用で確認します。</p>
           </a>
           <a
             className="rounded border border-line bg-white p-4 shadow-panel transition hover:border-accent"

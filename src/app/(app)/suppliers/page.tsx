@@ -103,6 +103,7 @@ export default async function SuppliersPage({ searchParams }: PageProps) {
                 row.orderRequestCounts.CONFIRMED +
                 row.orderRequestCounts.ORDERED +
                 row.orderRequestCounts.SKIPPED;
+              const plannedOrderRequestCount = row.orderRequestCounts.DRAFT + row.orderRequestCounts.CONFIRMED;
 
               return (
                 <article key={row.id} className="rounded border border-line bg-white p-5 shadow-panel">
@@ -120,22 +121,18 @@ export default async function SuppliersPage({ searchParams }: PageProps) {
                     </div>
                   </div>
 
-                  <div className="mt-5 grid gap-3 sm:grid-cols-4">
+                  <div className="mt-5 grid gap-3 sm:grid-cols-3">
                     <div className="rounded border border-line px-3 py-2">
                       <p className="text-xs font-semibold text-muted">発注予定</p>
-                      <p className="mt-1 text-2xl font-semibold">{row.orderRequestCounts.CONFIRMED}</p>
+                      <p className="mt-1 text-2xl font-semibold">{plannedOrderRequestCount}</p>
                     </div>
                     <div className="rounded border border-line px-3 py-2">
-                      <p className="text-xs font-semibold text-accent">発注済み</p>
+                      <p className="text-xs font-semibold text-accent">発注記録あり</p>
                       <p className="mt-1 text-2xl font-semibold text-accent">{row.orderRequestCounts.ORDERED}</p>
                     </div>
                     <div className="rounded border border-line px-3 py-2">
                       <p className="text-xs font-semibold text-muted">見送り</p>
                       <p className="mt-1 text-2xl font-semibold text-muted">{row.orderRequestCounts.SKIPPED}</p>
-                    </div>
-                    <div className="rounded border border-line px-3 py-2">
-                      <p className="text-xs font-semibold text-muted">確認待ち</p>
-                      <p className="mt-1 text-2xl font-semibold">{row.orderRequestCounts.DRAFT}</p>
                     </div>
                   </div>
 

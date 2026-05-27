@@ -22,6 +22,7 @@ export default async function HomePage() {
   const context = await requireActiveClinic();
   const summary = await getDashboardSummary(context.clinicId);
   const latestMovementAt = summary.latestMovement ? movementDateFormatter.format(summary.latestMovement.createdAt) : null;
+  const plannedOrderRequestCount = summary.orderRequestStatusCounts.DRAFT + summary.orderRequestStatusCounts.CONFIRMED;
   const summaryItems = [
     {
       label: "在庫登録",
@@ -40,8 +41,8 @@ export default async function HomePage() {
     },
     {
       label: "発注候補",
-      value: `発注予定 ${summary.orderRequestStatusCounts.CONFIRMED} 件`,
-      note: `発注済み ${summary.orderRequestStatusCounts.ORDERED} / 確認待ち ${summary.draftOrderRequestCount}`,
+      value: `発注予定 ${plannedOrderRequestCount} 件`,
+      note: `発注記録あり ${summary.orderRequestStatusCounts.ORDERED} / 見送り ${summary.orderRequestStatusCounts.SKIPPED}`,
     },
   ];
   const primaryActionItems = [
@@ -63,8 +64,8 @@ export default async function HomePage() {
       title: "発注候補を見る",
       description: "発注予定の候補を発注先ごとに確認します",
       href: "/orders",
-      badge: `発注予定 ${summary.orderRequestStatusCounts.CONFIRMED} 件`,
-      tone: summary.orderRequestStatusCounts.CONFIRMED > 0 || summary.draftOrderRequestCount > 0 ? "warning" : "normal",
+      badge: `発注予定 ${plannedOrderRequestCount} 件`,
+      tone: plannedOrderRequestCount > 0 ? "warning" : "normal",
     },
     {
       title: "バーコード出入庫",
@@ -92,9 +93,9 @@ export default async function HomePage() {
     {
       title: "発注候補 発注予定",
       href: "/orders",
-      value: `${summary.orderRequestStatusCounts.CONFIRMED} 件`,
-      note: `これから発注する候補 / 確認待ち ${summary.draftOrderRequestCount}`,
-      isWarning: summary.orderRequestStatusCounts.CONFIRMED > 0,
+      value: `${plannedOrderRequestCount} 件`,
+      note: "これから発注する候補",
+      isWarning: plannedOrderRequestCount > 0,
     },
     {
       title: "期限ロット",

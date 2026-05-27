@@ -16,6 +16,7 @@ const initialState: SupplierMasterActionState = {};
 
 export function SupplierEditForm({ supplier }: SupplierEditFormProps) {
   const [state, formAction, isPending] = useActionState(updateSupplierMasterWithStateAction, initialState);
+  const plannedOrderRequestCount = supplier.orderRequestCounts.DRAFT + supplier.orderRequestCounts.CONFIRMED;
   const getFieldError = (fieldName: SupplierMasterFieldName) => state.fieldErrors?.[fieldName];
   const controlClass = (fieldName: SupplierMasterFieldName, className = "") => {
     const hasError = Boolean(getFieldError(fieldName));
@@ -163,7 +164,7 @@ export function SupplierEditForm({ supplier }: SupplierEditFormProps) {
         </div>
         <div className="rounded border border-line bg-white p-5 shadow-panel">
           <p className="text-sm font-semibold text-muted">発注予定候補</p>
-          <p className="mt-2 text-3xl font-semibold">{supplier.orderRequestCounts.CONFIRMED}</p>
+          <p className="mt-2 text-3xl font-semibold">{plannedOrderRequestCount}</p>
         </div>
       </section>
 

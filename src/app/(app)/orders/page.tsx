@@ -7,25 +7,37 @@ import { getOrderRequestRows, type OrderRequestRow } from "@/lib/db/orders";
 import { orderPrintUnassignedSupplierId } from "@/lib/orders/print";
 import { orderSendMethodLabels, orderSendMethodValues } from "@/lib/orders/send-method";
 import {
-  orderRequestStatusLabels,
-  orderRequestStatuses,
   printableOrderRequestStatuses,
   type OrderRequestStatusValue,
 } from "@/lib/orders/status";
 import { OrderRequestTableRow } from "./order-request-row";
 import { OrdersPrintButton } from "./print-button";
 
-const statusFilters = [
+type OrderListFilterValue = "" | "PLANNED" | "AWAITING_RECEIPT" | "RECEIVED" | "SKIPPED";
+
+const statusFilters: { label: string; value: OrderListFilterValue }[] = [
   {
     label: "すべて",
     value: "",
   },
-  ...orderRequestStatuses.map((status) => ({
-    label: orderRequestStatusLabels[status],
-    value: status,
-  })),
+  {
+    label: "発注予定",
+    value: "PLANNED",
+  },
+  {
+    label: "納品待ち",
+    value: "AWAITING_RECEIPT",
+  },
+  {
+    label: "納品済み",
+    value: "RECEIVED",
+  },
+  {
+    label: "見送り",
+    value: "SKIPPED",
+  },
 ];
-const orderRequestStatusRank = Object.fromEntries(orderRequestStatuses.map((status, index) => [status, index])) as Record<
+const orderRequestStatusRank = Object.fromEntries(["CONFIRMED", "DRAFT", "ORDERED", "SKIPPED"].map((status, index) => [status, index])) as Record<
   OrderRequestStatusValue,
   number
 >;
@@ -37,7 +49,7 @@ type PageProps = {
   }>;
 };
 
-function buildOrdersHref(status: OrderRequestStatusValue | "", query: string) {
+function buildOrdersHref(status: OrderListFilterValue, query: string) {
   const params = new URLSearchParams();
 
   if (query) {
@@ -59,20 +71,40 @@ function buildOrdersPrintHref(supplierId: string | null | undefined) {
   return `/orders/print?supplierId=${encodeURIComponent(selectedSupplierId)}`;
 }
 
-function getSupplierStatusChipClass(status: OrderRequestStatusValue) {
+function getSupplierStatusChipClass(status: Exclude<OrderListFilterValue, "">) {
   if (status === "SKIPPED") {
     return "border-line bg-subtle text-muted";
   }
 
-  if (status === "ORDERED") {
+  if (status === "AWAITING_RECEIPT" || status === "RECEIVED") {
     return "border-green-100 bg-green-50 text-success";
   }
 
-  if (status === "CONFIRMED") {
+  if (status === "PLANNED") {
     return "border-teal-100 bg-teal-50 text-accent";
   }
 
   return "border-line bg-white/80 text-muted";
+}
+
+function matchesOrderListFilter(row: OrderRequestRow, filter: OrderListFilterValue) {
+  if (!filter) {
+    return true;
+  }
+
+  if (filter === "PLANNED") {
+    return printableOrderRequestStatuses.includes(row.status);
+  }
+
+  if (filter === "AWAITING_RECEIPT") {
+    return row.status === "ORDERED" && !row.receivedAt;
+  }
+
+  if (filter === "RECEIVED") {
+    return row.status === "ORDERED" && Boolean(row.receivedAt);
+  }
+
+  return row.status === "SKIPPED";
 }
 
 function sortRowsByStatusFlow(rows: OrderRequestRow[]) {
@@ -134,10 +166,10 @@ export default async function OrdersPage({ searchParams }: PageProps) {
   const params = (await searchParams) ?? {};
   const query = params.q?.trim() ?? "";
   const normalizedQuery = query.toLowerCase();
-  const selectedStatus = orderRequestStatuses.includes(params.status as OrderRequestStatusValue)
-    ? (params.status as OrderRequestStatusValue)
+  const selectedStatus = statusFilters.some((filter) => filter.value === params.status)
+    ? (params.status as OrderListFilterValue)
     : "";
-  const selectedStatusLabel = selectedStatus ? orderRequestStatusLabels[selectedStatus] : "";
+  const selectedStatusLabel = statusFilters.find((filter) => filter.value === selectedStatus)?.label ?? "";
   const rows = await getOrderRequestRows(context.clinicId);
   const queryFilteredRows = rows.filter((row) => {
     const searchText = [row.name, row.productCode, row.category, row.supplierName, row.memo]
@@ -147,14 +179,31 @@ export default async function OrdersPage({ searchParams }: PageProps) {
 
     return normalizedQuery ? searchText.includes(normalizedQuery) : true;
   });
-  const filteredRows = selectedStatus ? queryFilteredRows.filter((row) => row.status === selectedStatus) : queryFilteredRows;
-  const counts = orderRequestStatuses.map((status) => ({
-    status,
-    label: orderRequestStatusLabels[status],
-    count: queryFilteredRows.filter((row) => row.status === status).length,
-  }));
+  const filteredRows = queryFilteredRows.filter((row) => matchesOrderListFilter(row, selectedStatus));
+  const counts = [
+    {
+      status: "PLANNED" as const,
+      label: "発注予定",
+      count: queryFilteredRows.filter((row) => printableOrderRequestStatuses.includes(row.status)).length,
+    },
+    {
+      status: "AWAITING_RECEIPT" as const,
+      label: "納品待ち",
+      count: queryFilteredRows.filter((row) => row.status === "ORDERED" && !row.receivedAt).length,
+    },
+    {
+      status: "RECEIVED" as const,
+      label: "納品済み",
+      count: queryFilteredRows.filter((row) => row.status === "ORDERED" && row.receivedAt).length,
+    },
+    {
+      status: "SKIPPED" as const,
+      label: "見送り",
+      count: queryFilteredRows.filter((row) => row.status === "SKIPPED").length,
+    },
+  ];
   const countByStatus = Object.fromEntries(counts.map((item) => [item.status, item.count])) as Record<
-    OrderRequestStatusValue,
+    Exclude<OrderListFilterValue, "">,
     number
   >;
   const groupedRows = Array.from(
@@ -229,11 +278,11 @@ export default async function OrdersPage({ searchParams }: PageProps) {
         <section className="hidden grid-cols-4 gap-2 text-xs print:grid">
           <div className="border border-black px-2 py-1.5">印刷対象: {filteredRows.length} 件</div>
           <div className="border border-black px-2 py-1.5">検索後: {queryFilteredRows.length} 件</div>
-          <div className="border border-black px-2 py-1.5">発注予定: {countByStatus.CONFIRMED} 件</div>
-          <div className="border border-black px-2 py-1.5">確認待ち: {countByStatus.DRAFT} 件</div>
+          <div className="border border-black px-2 py-1.5">発注予定: {countByStatus.PLANNED} 件</div>
+          <div className="border border-black px-2 py-1.5">納品待ち: {countByStatus.AWAITING_RECEIPT} 件</div>
         </section>
         <section className="hidden border border-black px-2 py-1.5 text-xs print:block">
-          出力条件: {filterLabel || "すべて"} / 全発注候補: {rows.length} 件 / 発注済み: {countByStatus.ORDERED} 件 / 見送り:{" "}
+          出力条件: {filterLabel || "すべて"} / 全発注候補: {rows.length} 件 / 納品済み: {countByStatus.RECEIVED} 件 / 見送り:{" "}
           {countByStatus.SKIPPED} 件
         </section>
 
@@ -244,7 +293,7 @@ export default async function OrdersPage({ searchParams }: PageProps) {
                 className={
                   item.status === "SKIPPED"
                     ? "text-sm font-semibold text-muted"
-                    : item.status === "ORDERED"
+                    : item.status === "AWAITING_RECEIPT" || item.status === "RECEIVED"
                       ? "text-sm font-semibold text-success"
                       : "text-sm font-semibold text-muted"
                 }
@@ -255,7 +304,7 @@ export default async function OrdersPage({ searchParams }: PageProps) {
                 className={
                   item.status === "SKIPPED"
                     ? "mt-2 text-3xl font-bold tabular-nums text-muted"
-                    : item.status === "ORDERED"
+                    : item.status === "AWAITING_RECEIPT" || item.status === "RECEIVED"
                       ? "mt-2 text-3xl font-bold tabular-nums text-success"
                       : "mt-2 text-3xl font-bold tabular-nums"
                 }
@@ -296,14 +345,14 @@ export default async function OrdersPage({ searchParams }: PageProps) {
             return (
               <a
                 key={filter.value || "all"}
-                href={buildOrdersHref(filter.value as OrderRequestStatusValue | "", query)}
+                href={buildOrdersHref(filter.value, query)}
                 aria-current={isCurrent ? "page" : undefined}
                 className={
                   filter.value === "SKIPPED"
                     ? isCurrent
                       ? "inline-flex min-h-10 items-center rounded border border-line bg-subtle px-3 py-2 text-sm font-semibold text-muted"
                       : "inline-flex min-h-10 items-center rounded border border-line bg-white/75 px-3 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:bg-subtle"
-                    : filter.value === "ORDERED"
+                    : filter.value === "AWAITING_RECEIPT" || filter.value === "RECEIVED"
                       ? isCurrent
                         ? "inline-flex min-h-10 items-center rounded border border-success bg-green-50 px-3 py-2 text-sm font-semibold text-success"
                         : "inline-flex min-h-10 items-center rounded border border-green-100 bg-white/75 px-3 py-2 text-sm font-semibold text-success transition hover:border-success hover:bg-green-50"
@@ -335,7 +384,8 @@ export default async function OrdersPage({ searchParams }: PageProps) {
               const supplierName = group.supplierName;
               const supplierRows = group.rows;
               const activeRows = sortRowsByStatusFlow(supplierRows.filter((row) => printableOrderRequestStatuses.includes(row.status)));
-              const orderedRows = sortRowsByStatusFlow(supplierRows.filter((row) => row.status === "ORDERED"));
+              const awaitingReceiptRows = sortRowsByStatusFlow(supplierRows.filter((row) => row.status === "ORDERED" && !row.receivedAt));
+              const receivedRows = sortRowsByStatusFlow(supplierRows.filter((row) => row.status === "ORDERED" && row.receivedAt));
               const skippedRows = sortRowsByStatusFlow(supplierRows.filter((row) => row.status === "SKIPPED"));
               const rowBlocks = [
                 {
@@ -347,12 +397,20 @@ export default async function OrdersPage({ searchParams }: PageProps) {
                   headerClassName: "bg-white",
                 },
                 {
-                  key: "ordered",
-                  title: "発注済み",
-                  description: "送付済み・納品確認待ち",
-                  rows: orderedRows,
+                  key: "awaiting-receipt",
+                  title: "納品待ち",
+                  description: "発注記録済み・商品到着待ち",
+                  rows: awaitingReceiptRows,
                   className: "border-green-100",
                   headerClassName: "bg-green-50/70",
+                },
+                {
+                  key: "received",
+                  title: "納品済み",
+                  description: "納品確認済み",
+                  rows: receivedRows,
+                  className: "border-teal-100",
+                  headerClassName: "bg-teal-50/70",
                 },
                 {
                   key: "skipped",
@@ -364,12 +422,28 @@ export default async function OrdersPage({ searchParams }: PageProps) {
                 },
               ].filter((block) => block.rows.length > 0);
               const hasUnassignedSupplier = supplierRows.some((row) => !row.supplierId);
-              const supplierStatusCounts = orderRequestStatuses
-                .map((status) => ({
-                  status,
-                  label: orderRequestStatusLabels[status],
-                  count: supplierRows.filter((row) => row.status === status).length,
-                }))
+              const supplierStatusCounts = [
+                {
+                  status: "PLANNED" as const,
+                  label: "発注予定",
+                  count: supplierRows.filter((row) => printableOrderRequestStatuses.includes(row.status)).length,
+                },
+                {
+                  status: "AWAITING_RECEIPT" as const,
+                  label: "納品待ち",
+                  count: supplierRows.filter((row) => row.status === "ORDERED" && !row.receivedAt).length,
+                },
+                {
+                  status: "RECEIVED" as const,
+                  label: "納品済み",
+                  count: supplierRows.filter((row) => row.status === "ORDERED" && row.receivedAt).length,
+                },
+                {
+                  status: "SKIPPED" as const,
+                  label: "見送り",
+                  count: supplierRows.filter((row) => row.status === "SKIPPED").length,
+                },
+              ]
                 .filter((item) => item.count > 0);
 
               return (
@@ -475,7 +549,7 @@ export default async function OrdersPage({ searchParams }: PageProps) {
                                 type="submit"
                                 className="h-9 rounded bg-ink px-3 text-xs font-semibold text-white transition hover:bg-slate-700"
                               >
-                                この発注先を発注済みにする
+                                この発注先の発注を記録
                               </button>
                             </form>
                           ) : null}

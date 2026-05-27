@@ -358,7 +358,8 @@ export async function updateOrderRequestStatusWithStateAction(
   try {
     const context = await requireActiveClinic();
     const orderRequestId = orderRequestIdSchema.parse(formData.get("orderRequestId"));
-    const status = orderRequestStatusSchema.parse(formData.get("status"));
+    const parsedStatus = orderRequestStatusSchema.parse(formData.get("status"));
+    const status = parsedStatus === "DRAFT" ? "CONFIRMED" : parsedStatus;
     const memoValue = memoSchema.parse(formData.get("memo") ?? "");
     const orderedMethodValue = formData.get("orderedMethod");
     const orderedMemoValue = orderedMemoSchema.parse(formData.get("orderedMemo") ?? "");
@@ -444,11 +445,11 @@ export async function updateOrderRequestStatusForContext(
   }
 
   if (target.receivedAt && input.status !== "ORDERED") {
-    throw new Error("納品確認済みの発注候補は、発注済み以外の状態へ戻せません。");
+    throw new Error("納品確認済みの発注候補は、納品確認を取り消すまで状態を戻せません。");
   }
 
   if (input.status === "ORDERED" && target.status !== "ORDERED" && !input.orderedMethod) {
-    throw new Error("発注済みにする場合は、送付方法を選択してください。");
+    throw new Error("発注を記録する場合は、送付方法を選択してください。");
   }
 
   const request = await prisma.$transaction(async (tx) => {
@@ -469,7 +470,7 @@ export async function updateOrderRequestStatusForContext(
         : null;
 
     if (input.status === "ORDERED" && !orderedMethod) {
-      throw new Error("発注済みにする場合は、送付方法を選択してください。");
+      throw new Error("発注を記録する場合は、送付方法を選択してください。");
     }
 
     let orderRecordId: string | null = null;
@@ -604,7 +605,7 @@ export async function updateOrderRequestSupplierForContext(
   }
 
   if (!printableOrderRequestStatuses.includes(target.status)) {
-    throw new Error("発注先を変更できるのは、未確認または確認済みの発注候補だけです。");
+    throw new Error("発注先を変更できるのは、発注予定の候補だけです。");
   }
 
   if (target.product.organizationId !== context.organizationId) {
@@ -728,7 +729,7 @@ export async function receiveOrderRequestForContext(
     }
 
     if (target.status !== "ORDERED") {
-      throw new Error("納品確認できるのは、発注済みの候補だけです。");
+      throw new Error("納品確認できるのは、納品待ちの候補だけです。");
     }
 
     if (target.receivedAt) {
@@ -886,7 +887,7 @@ export async function revertOrderReceiptForContext(
     }
 
     if (target.status !== "ORDERED") {
-      throw new Error("納品確認を取り消せるのは、発注済みの候補だけです。");
+      throw new Error("納品確認を取り消せるのは、納品済みの候補だけです。");
     }
 
     if (!target.receivedAt || target.receivedQuantity == null) {
@@ -1070,7 +1071,7 @@ export async function markOrderRequestsOrderedForContext(
     });
 
     if (targets.length === 0) {
-      throw new Error("発注済みにできる発注候補が見つかりません。");
+      throw new Error("発注を記録できる発注予定の候補が見つかりません。");
     }
 
     const supplierIds = new Set(targets.map((target) => target.supplierId ?? ""));

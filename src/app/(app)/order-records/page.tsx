@@ -71,7 +71,7 @@ export default async function OrderRecordsPage({ searchParams }: PageProps) {
   const totalReceivedRequests = filteredRows.reduce((sum, row) => sum + row.receivedRequestCount, 0);
   const emptyMessage =
     rows.length === 0
-      ? "発注記録はまだありません。発注候補を発注済みにすると、ここに記録されます。"
+      ? "発注記録はまだありません。発注候補の発注を記録すると、ここに記録されます。"
       : "条件に一致する発注記録はありません。検索語を見直してください。";
 
   return (
@@ -84,7 +84,7 @@ export default async function OrderRecordsPage({ searchParams }: PageProps) {
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
             <h1 className="mt-2 text-3xl font-semibold">発注記録</h1>
             <p className="mt-2 text-sm text-muted">
-              発注済みにしたまとまりを、発注先・送付方法・納品状況とあわせて確認します。
+              発注を記録したまとまりを、発注先・送付方法・納品状況とあわせて確認します。
             </p>
           </div>
           <div className="flex flex-wrap gap-3">

@@ -20,6 +20,8 @@ function numberText(value: number, unit = "件") {
 export default async function AdminOverviewPage() {
   const context = await requireAdminUser();
   const overview = await getAdminOverview(context.organizationId);
+  const plannedOrderRequestCount =
+    overview.summary.draftOrderRequestCount + overview.summary.confirmedOrderRequestCount;
   const summaryItems = [
     {
       label: "対象クリニック",
@@ -34,9 +36,9 @@ export default async function AdminOverviewPage() {
     },
     {
       label: "発注予定の候補",
-      value: numberText(overview.summary.confirmedOrderRequestCount),
-      note: `確認待ち ${numberText(overview.summary.draftOrderRequestCount)}`,
-      isWarning: overview.summary.confirmedOrderRequestCount > 0 || overview.summary.draftOrderRequestCount > 0,
+      value: numberText(plannedOrderRequestCount),
+      note: "これから発注する候補",
+      isWarning: plannedOrderRequestCount > 0,
     },
     {
       label: "期限ロット要確認",
@@ -119,10 +121,7 @@ export default async function AdminOverviewPage() {
                     発注予定
                   </th>
                   <th scope="col" className="whitespace-nowrap px-4 py-3 text-right">
-                    発注済み
-                  </th>
-                  <th scope="col" className="whitespace-nowrap px-4 py-3 text-right">
-                    確認待ち
+                    発注記録あり
                   </th>
                   <th scope="col" className="whitespace-nowrap px-4 py-3 text-right">
                     期限ロット
@@ -133,7 +132,10 @@ export default async function AdminOverviewPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-line bg-white">
-                {overview.rows.map((row) => (
+                {overview.rows.map((row) => {
+                  const rowPlannedOrderRequestCount = row.draftOrderRequestCount + row.confirmedOrderRequestCount;
+
+                  return (
                   <tr key={row.clinicId} className="align-top">
                     <th scope="row" className="px-5 py-4 text-left font-semibold text-ink">
                       <a className="block text-accent hover:underline" href={`/admin/overview/${row.clinicId}`}>
@@ -168,18 +170,15 @@ export default async function AdminOverviewPage() {
                     </td>
                     <td
                       className={
-                        row.confirmedOrderRequestCount > 0
+                        rowPlannedOrderRequestCount > 0
                           ? "whitespace-nowrap px-4 py-4 text-right font-semibold text-warning"
                           : "whitespace-nowrap px-4 py-4 text-right"
                       }
                     >
-                      {numberText(row.confirmedOrderRequestCount)}
+                      {numberText(rowPlannedOrderRequestCount)}
                     </td>
                     <td className="whitespace-nowrap px-4 py-4 text-right">
                       {numberText(row.orderedRequestCount)}
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-4 text-right">
-                      {numberText(row.draftOrderRequestCount)}
                     </td>
                     <td
                       className={
@@ -192,10 +191,11 @@ export default async function AdminOverviewPage() {
                     </td>
                     <td className="whitespace-nowrap px-5 py-4 text-muted">{formatDateTime(row.latestMovementAt)}</td>
                   </tr>
-                ))}
+                  );
+                })}
                 {overview.rows.length === 0 ? (
                   <tr>
-                    <td colSpan={10} className="px-5 py-8 text-center text-muted">
+                    <td colSpan={9} className="px-5 py-8 text-center text-muted">
                       表示できるクリニックがありません。
                     </td>
                   </tr>

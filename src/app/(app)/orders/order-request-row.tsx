@@ -39,6 +39,12 @@ type OrderRequestRowProps = {
 type ActiveOrderPanel = "supplier" | "quantity" | "receipt" | "status" | null;
 
 const statusOptions = orderRequestStatuses;
+const statusOptionLabels: Record<OrderRequestStatusValue, string> = {
+  DRAFT: "発注予定",
+  CONFIRMED: "発注予定",
+  ORDERED: "納品待ち",
+  SKIPPED: "見送り",
+};
 
 function formatOrderRecordId(orderRecordId: string | null) {
   return orderRecordId ? orderRecordId.slice(-8) : "-";
@@ -60,10 +66,18 @@ function getStatusBadgeClass(status: OrderRequestStatusValue) {
   return "border-line bg-white text-muted";
 }
 
+function getOrderRowStatusLabel(row: OrderRequestRow) {
+  if (row.status === "ORDERED") {
+    return row.receivedAt ? "納品済み" : "納品待ち";
+  }
+
+  return orderRequestStatusLabels[row.status];
+}
+
 export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
   const [activePanel, setActivePanel] = useState<ActiveOrderPanel>(null);
   const [requestedQuantity, setRequestedQuantity] = useState(row.requestedQuantity);
-  const [selectedStatus, setSelectedStatus] = useState<OrderRequestStatusValue>(row.status);
+  const [selectedStatus, setSelectedStatus] = useState<OrderRequestStatusValue>(row.status === "DRAFT" ? "CONFIRMED" : row.status);
   const [selectedSupplierId, setSelectedSupplierId] = useState(row.supplierId ?? "");
   const [quantityState, quantityAction, isQuantityPending] = useActionState(
     updateOrderRequestQuantityWithStateAction,
@@ -269,9 +283,9 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
               <button
                 type="submit"
                 disabled={isReceiptRevertPending}
-                className="h-8 rounded border border-teal-200 bg-white px-3 text-xs font-semibold text-accent transition hover:border-danger hover:text-danger disabled:cursor-not-allowed disabled:opacity-50"
+                className="h-8 rounded border border-line bg-white/75 px-3 text-xs font-semibold text-muted transition hover:border-danger hover:text-danger disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {isReceiptRevertPending ? "取り消し中" : "納品確認を戻す"}
+                {isReceiptRevertPending ? "取り消し中" : "納品確認を取り消す"}
               </button>
             </form>
           </div>
@@ -329,7 +343,7 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
             <span
               className={`inline-flex min-h-7 items-center rounded border px-2.5 py-1 text-xs font-semibold ${getStatusBadgeClass(row.status)}`}
             >
-              {orderRequestStatusLabels[row.status]}
+              {getOrderRowStatusLabel(row)}
             </span>
             {row.status === "ORDERED" && row.orderedAt ? (
               <span className="text-xs text-muted">{dateTimeFormatter.format(row.orderedAt)}</span>
@@ -356,7 +370,7 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
             onClick={() => togglePanel("status")}
             className="inline-flex h-8 w-fit items-center rounded border border-line bg-white/75 px-3 text-xs font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent"
           >
-            {activePanel === "status" ? "閉じる" : "状態・メモ"}
+            {activePanel === "status" ? "閉じる" : "発注記録・メモ"}
           </button>
           {activePanel === "status" ? (
             <form action={statusAction} className="grid gap-1.5 rounded border border-line bg-subtle/60 p-2">
@@ -375,23 +389,23 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
           >
             {statusOptions.map((status) => (
               <option key={status} value={status}>
-                {orderRequestStatusLabels[status]}
+                {statusOptionLabels[status]}
               </option>
             ))}
           </select>
           {row.status === "ORDERED" ? (
             <p className="rounded border border-green-100 bg-green-50 px-3 py-1.5 text-xs font-semibold text-success">
-              誤って発注済みにした場合は、確認待ちまたは発注予定に戻せます。
+              誤って発注を記録した場合は、発注予定に戻せます。
             </p>
           ) : null}
           {selectedStatus === "SKIPPED" ? (
             <p className="text-xs font-semibold text-muted">見送りにした候補は発注書下書きに含めません。</p>
           ) : null}
           {selectedStatus === "ORDERED" ? (
-            <p className="text-xs font-semibold text-success">発注済みにした候補は発注書下書きに含めません。</p>
+            <p className="text-xs font-semibold text-success">発注を記録した候補は納品待ちになり、発注書下書きには含めません。</p>
           ) : null}
           {row.status === "ORDERED" && row.orderedAt ? (
-            <p className="text-xs text-muted">発注済み日時: {dateTimeFormatter.format(row.orderedAt)}</p>
+            <p className="text-xs text-muted">発注記録日時: {dateTimeFormatter.format(row.orderedAt)}</p>
           ) : null}
           {row.status === "ORDERED" && row.orderRecordId ? (
             <p className="text-xs text-muted">発注記録: {formatOrderRecordId(row.orderRecordId)}</p>
@@ -447,7 +461,7 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
             name="memo"
             defaultValue={row.memo ?? ""}
             placeholder={
-              selectedStatus === "SKIPPED" ? "見送り理由・メモ" : selectedStatus === "ORDERED" ? "送付方法・メモ" : "備考メモ"
+              selectedStatus === "SKIPPED" ? "見送り理由・メモ" : selectedStatus === "ORDERED" ? "送付メモ" : "備考メモ"
             }
             maxLength={200}
             className="h-10 min-h-10 rounded border border-line px-3 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
@@ -457,7 +471,7 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
             disabled={isStatusPending}
             className="h-9 rounded border border-line bg-white/75 px-3 text-xs font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {isStatusPending ? "変更中" : "状態・メモ更新"}
+            {isStatusPending ? "変更中" : "発注記録・メモ更新"}
           </button>
             </form>
           ) : null}
@@ -472,7 +486,7 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
             : "hidden border-b border-line px-4 py-3 print:table-cell print:border print:border-black print:px-2 print:py-1.5 print:font-semibold"
         }
       >
-        {orderRequestStatusLabels[row.status]}
+        {getOrderRowStatusLabel(row)}
       </td>
       <td className="hidden border-b border-line px-4 py-3 print:table-cell print:border print:border-black print:px-2 print:py-1.5">
         {row.memo ?? "-"}

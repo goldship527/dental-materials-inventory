@@ -2,8 +2,8 @@ import { notFound } from "next/navigation";
 import { AppNav } from "@/components/domain/app-nav";
 import { requireAdminUser } from "@/lib/auth/admin";
 import { getAdminOverviewClinicDetail } from "@/lib/db/admin-overview";
-import { getOrderRequestRows } from "@/lib/db/orders";
-import { orderRequestStatusLabels, orderRequestStatuses, type OrderRequestStatusValue } from "@/lib/orders/status";
+import { getOrderRequestRows, type OrderRequestRow } from "@/lib/db/orders";
+import { printableOrderRequestStatuses } from "@/lib/orders/status";
 
 type PageProps = {
   params: Promise<{
@@ -15,11 +15,21 @@ type PageProps = {
   }>;
 };
 
+type AdminOrderFilterValue = "" | "PLANNED" | "AWAITING_RECEIPT" | "RECEIVED" | "SKIPPED";
+
+const statusFilters: { label: string; value: AdminOrderFilterValue }[] = [
+  { label: "すべて", value: "" },
+  { label: "発注予定", value: "PLANNED" },
+  { label: "納品待ち", value: "AWAITING_RECEIPT" },
+  { label: "納品済み", value: "RECEIVED" },
+  { label: "見送り", value: "SKIPPED" },
+];
+
 function numberText(value: number, unit = "件") {
   return `${value.toLocaleString("ja-JP")} ${unit}`;
 }
 
-function buildOrdersHref(clinicId: string, status: OrderRequestStatusValue | "", query: string) {
+function buildOrdersHref(clinicId: string, status: AdminOrderFilterValue, query: string) {
   const params = new URLSearchParams();
 
   if (query) {
@@ -35,14 +45,42 @@ function buildOrdersHref(clinicId: string, status: OrderRequestStatusValue | "",
   return queryString ? `/admin/overview/${clinicId}/orders?${queryString}` : `/admin/overview/${clinicId}/orders`;
 }
 
+function matchesOrderFilter(row: OrderRequestRow, filter: AdminOrderFilterValue) {
+  if (!filter) {
+    return true;
+  }
+
+  if (filter === "PLANNED") {
+    return printableOrderRequestStatuses.includes(row.status);
+  }
+
+  if (filter === "AWAITING_RECEIPT") {
+    return row.status === "ORDERED" && !row.receivedAt;
+  }
+
+  if (filter === "RECEIVED") {
+    return row.status === "ORDERED" && Boolean(row.receivedAt);
+  }
+
+  return row.status === "SKIPPED";
+}
+
+function getAdminOrderStatusLabel(row: OrderRequestRow) {
+  if (row.status === "ORDERED") {
+    return row.receivedAt ? "納品済み" : "納品待ち";
+  }
+
+  return row.status === "SKIPPED" ? "見送り" : "発注予定";
+}
+
 export default async function AdminOverviewClinicOrdersPage({ params, searchParams }: PageProps) {
   const context = await requireAdminUser();
   const { clinicId } = await params;
   const selectedParams = (await searchParams) ?? {};
   const query = selectedParams.q?.trim() ?? "";
   const normalizedQuery = query.toLowerCase();
-  const selectedStatus = orderRequestStatuses.includes(selectedParams.status as OrderRequestStatusValue)
-    ? (selectedParams.status as OrderRequestStatusValue)
+  const selectedStatus = statusFilters.some((filter) => filter.value === selectedParams.status)
+    ? (selectedParams.status as AdminOrderFilterValue)
     : "";
   const detail = await getAdminOverviewClinicDetail(context.organizationId, clinicId);
 
@@ -59,14 +97,13 @@ export default async function AdminOverviewClinicOrdersPage({ params, searchPara
 
     return normalizedQuery ? searchText.includes(normalizedQuery) : true;
   });
-  const filteredRows = selectedStatus
-    ? queryFilteredRows.filter((row) => row.status === selectedStatus)
-    : queryFilteredRows;
-  const counts = orderRequestStatuses.map((status) => ({
-    status,
-    label: orderRequestStatusLabels[status],
-    count: queryFilteredRows.filter((row) => row.status === status).length,
-  }));
+  const filteredRows = queryFilteredRows.filter((row) => matchesOrderFilter(row, selectedStatus));
+  const counts = statusFilters
+    .filter((filter) => filter.value)
+    .map((filter) => ({
+      ...filter,
+      count: queryFilteredRows.filter((row) => matchesOrderFilter(row, filter.value)).length,
+    }));
 
   return (
     <>
@@ -91,9 +128,9 @@ export default async function AdminOverviewClinicOrdersPage({ params, searchPara
         <section className="grid gap-3 md:grid-cols-4">
           {counts.map((item) => (
             <a
-              key={item.status}
+              key={item.value}
               className="rounded border border-line bg-white p-4 shadow-panel transition hover:border-accent"
-              href={buildOrdersHref(clinicId, item.status, query)}
+              href={buildOrdersHref(clinicId, item.value, query)}
             >
               <p className="text-sm font-semibold text-muted">{item.label}</p>
               <p className="mt-2 text-3xl font-semibold text-ink">{numberText(item.count)}</p>
@@ -119,9 +156,9 @@ export default async function AdminOverviewClinicOrdersPage({ params, searchPara
               name="status"
             >
               <option value="">すべて</option>
-              {orderRequestStatuses.map((status) => (
-                <option key={status} value={status}>
-                  {orderRequestStatusLabels[status]}
+              {statusFilters.map((filter) => (
+                <option key={filter.value || "all"} value={filter.value}>
+                  {filter.label}
                 </option>
               ))}
             </select>
@@ -184,7 +221,7 @@ export default async function AdminOverviewClinicOrdersPage({ params, searchPara
                     </td>
                     <td className="border-b border-line px-4 py-3">
                       <span className="rounded bg-gray-100 px-2 py-1 text-xs font-semibold text-muted">
-                        {orderRequestStatusLabels[row.status]}
+                        {getAdminOrderStatusLabel(row)}
                       </span>
                     </td>
                     <td className="border-b border-line px-4 py-3 text-muted">{row.memo ?? "-"}</td>

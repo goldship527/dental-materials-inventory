@@ -53,6 +53,14 @@ function formatOrderRecordId(orderRecordId: string | null) {
   return orderRecordId ? orderRecordId.slice(-8) : "-";
 }
 
+function getProductOrderRequestStatusLabel(request: { status: string; receivedAt: Date | null }) {
+  if (request.status === "ORDERED") {
+    return request.receivedAt ? "納品済み" : "納品待ち";
+  }
+
+  return orderRequestStatusLabels[request.status as keyof typeof orderRequestStatusLabels];
+}
+
 function formatBarcodeLabel(barcode: { barcodeType: string; unitLabel: string | null; isPrimary: boolean }) {
   const pieces = [barcode.barcodeType, barcode.unitLabel, barcode.isPrimary ? "代表" : ""].filter(Boolean);
 
@@ -128,6 +136,9 @@ export default async function ProductDetailPage({ params }: PageProps) {
     },
     createEmptyOrderRequestStatusCounts(),
   );
+  const plannedOrderRequestCount = orderRequestCounts.DRAFT + orderRequestCounts.CONFIRMED;
+  const awaitingReceiptCount = product.orderRequests.filter((request) => request.status === "ORDERED" && !request.receivedAt).length;
+  const receivedOrderRequestCount = product.orderRequests.filter((request) => request.status === "ORDERED" && request.receivedAt).length;
   const productQuery = encodeURIComponent(product.name);
   const inventoryHref = `/inventory?q=${productQuery}`;
   const movementsHref = `/movements?q=${productQuery}`;
@@ -254,9 +265,8 @@ export default async function ProductDetailPage({ params }: PageProps) {
             <p className="text-sm font-semibold text-muted">発注候補</p>
             <p className="mt-1 text-3xl font-semibold">{product.orderRequests.length}</p>
             <p className="mt-1 text-sm text-muted">
-              発注予定 {orderRequestCounts.CONFIRMED} / 発注済み {orderRequestCounts.ORDERED} /{" "}
-              見送り {orderRequestCounts.SKIPPED} /{" "}
-              <span className="font-semibold text-muted">確認待ち {orderRequestCounts.DRAFT}</span>
+              発注予定 {plannedOrderRequestCount} / 納品待ち {awaitingReceiptCount} / 納品済み {receivedOrderRequestCount} / 見送り{" "}
+              {orderRequestCounts.SKIPPED}
             </p>
           </div>
         </section>
@@ -469,7 +479,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
                               : "font-semibold"
                         }
                       >
-                        {orderRequestStatusLabels[request.status]}
+                        {getProductOrderRequestStatusLabel(request)}
                       </span>
                       <span className="text-muted">発注数量 {request.requestedQuantity}</span>
                     </div>
@@ -484,7 +494,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
                       / {dateTimeFormatter.format(request.updatedAt)}
                     </p>
                     {request.status === "ORDERED" && request.orderedAt ? (
-                      <p className="text-muted">発注済み日時: {dateTimeFormatter.format(request.orderedAt)}</p>
+                      <p className="text-muted">発注記録日時: {dateTimeFormatter.format(request.orderedAt)}</p>
                     ) : null}
                     {request.status === "ORDERED" && request.orderRecordId ? (
                       <p className="text-muted">発注記録: {formatOrderRecordId(request.orderRecordId)}</p>

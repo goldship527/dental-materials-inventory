@@ -160,7 +160,7 @@ export default async function OrdersPrintPage({ searchParams }: PageProps) {
               </div>
               <div className="grid grid-cols-[7rem_1fr] gap-2">
                 <dt className="text-muted print:text-black">対象状態</dt>
-                <dd>発注予定・確認待ち</dd>
+                <dd>発注予定</dd>
               </div>
               <div className="grid grid-cols-[7rem_1fr] gap-2">
                 <dt className="text-muted print:text-black">出力範囲</dt>
@@ -327,7 +327,7 @@ export default async function OrdersPrintPage({ searchParams }: PageProps) {
           </section>
         ) : (
           <section className="rounded border border-line bg-white px-4 py-12 text-center text-sm text-muted shadow-panel print:rounded-none print:border-black print:text-black print:shadow-none">
-            印刷対象の発注候補はありません。発注予定または確認待ちの発注候補を追加してください。
+            印刷対象の発注候補はありません。発注予定の発注候補を追加してください。
           </section>
         )}
       </div>
