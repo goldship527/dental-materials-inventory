@@ -37,3 +37,5 @@ data/local/uploads/
 Thumbs.db
 .vscode
 .idea
+
+.vercel

@@ -418,7 +418,7 @@ APP_BASE_URL=https://公開URL
 
 ローカル開発では `NOTIFICATIONS_ENABLED=false` のままにし、実メール送信を抑止する。
 
-Vercel Cron は `vercel.json` で `/api/notifications/daily-digest` を30分ごとに呼び出す。アプリ側では、ユーザーの通知設定にあるJSTの配信時刻と曜日が一致した場合だけ送信する。
+公開デモのVercel Hobby環境では、Vercel Cron は `vercel.json` で `/api/notifications/daily-digest` をUTC 22:00、日本時間7:00に1日1回呼び出す。Vercel Pro以上へ移行した場合は、30分ごとに呼び出し、ユーザーの通知設定にあるJSTの配信時刻と曜日が一致した場合だけ送信する構成に戻せる。
 
 通知本文には、不足在庫、期限ロット、納品待ち、死蔵在庫、異常出庫検知の件数とリンクだけを含める。金額、患者情報、個人情報、APIキーは含めない。
 
