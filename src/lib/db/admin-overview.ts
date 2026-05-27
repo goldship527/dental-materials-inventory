@@ -27,6 +27,7 @@ export type AdminOverviewSummary = {
   shortageCount: number;
   zeroStockCount: number;
   draftOrderRequestCount: number;
+  confirmedOrderRequestCount: number;
   attentionStockLotCount: number;
   latestMovementAt: Date | null;
 };
@@ -136,6 +137,7 @@ export async function getAdminOverview(organizationId: string): Promise<AdminOve
       shortageCount: rows.reduce((total, row) => total + row.shortageCount, 0),
       zeroStockCount: rows.reduce((total, row) => total + row.zeroStockCount, 0),
       draftOrderRequestCount: rows.reduce((total, row) => total + row.draftOrderRequestCount, 0),
+      confirmedOrderRequestCount: rows.reduce((total, row) => total + row.confirmedOrderRequestCount, 0),
       attentionStockLotCount: rows.reduce((total, row) => total + row.attentionStockLotCount, 0),
       latestMovementAt,
     },

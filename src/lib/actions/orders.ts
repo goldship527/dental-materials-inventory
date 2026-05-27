@@ -275,7 +275,7 @@ export async function createOrderRequestWithStateAction(
             id: skippedRequest.id,
           },
           data: {
-            status: "DRAFT",
+            status: "CONFIRMED",
             requestedQuantity,
             supplierId: stockItem.product.primarySupplierId,
             memo: null,
@@ -288,6 +288,7 @@ export async function createOrderRequestWithStateAction(
             clinicId: context.clinicId,
             productId: stockItem.product.id,
             supplierId: stockItem.product.primarySupplierId,
+            status: "CONFIRMED",
             requestedQuantity,
             createdByUserId: context.userId,
           },
@@ -306,7 +307,7 @@ export async function createOrderRequestWithStateAction(
       status: "success",
       message: result.alreadyExists
         ? `${result.productName} はすでに発注候補に入っています。`
-        : `${result.productName} を発注候補へ追加しました。`,
+        : `${result.productName} を発注予定へ追加しました。`,
     };
   } catch (error) {
     return toActionError(error);

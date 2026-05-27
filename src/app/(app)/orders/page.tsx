@@ -229,8 +229,8 @@ export default async function OrdersPage({ searchParams }: PageProps) {
         <section className="hidden grid-cols-4 gap-2 text-xs print:grid">
           <div className="border border-black px-2 py-1.5">印刷対象: {filteredRows.length} 件</div>
           <div className="border border-black px-2 py-1.5">検索後: {queryFilteredRows.length} 件</div>
-          <div className="border border-black px-2 py-1.5">確認待ち: {countByStatus.DRAFT} 件</div>
           <div className="border border-black px-2 py-1.5">発注予定: {countByStatus.CONFIRMED} 件</div>
+          <div className="border border-black px-2 py-1.5">確認待ち: {countByStatus.DRAFT} 件</div>
         </section>
         <section className="hidden border border-black px-2 py-1.5 text-xs print:block">
           出力条件: {filterLabel || "すべて"} / 全発注候補: {rows.length} 件 / 発注済み: {countByStatus.ORDERED} 件 / 見送り:{" "}
@@ -340,7 +340,7 @@ export default async function OrdersPage({ searchParams }: PageProps) {
               const rowBlocks = [
                 {
                   key: "active",
-                  title: "発注候補",
+                  title: "発注予定",
                   description: "これから発注する対象",
                   rows: activeRows,
                   className: "border-accent/30",

@@ -1,6 +1,6 @@
 export type OrderRequestStatusValue = "DRAFT" | "CONFIRMED" | "SKIPPED" | "ORDERED";
 
-export const orderRequestStatuses: OrderRequestStatusValue[] = ["DRAFT", "CONFIRMED", "ORDERED", "SKIPPED"];
+export const orderRequestStatuses: OrderRequestStatusValue[] = ["CONFIRMED", "ORDERED", "SKIPPED", "DRAFT"];
 export const printableOrderRequestStatuses: OrderRequestStatusValue[] = ["DRAFT", "CONFIRMED"];
 
 export const orderRequestStatusLabels: Record<OrderRequestStatusValue, string> = {

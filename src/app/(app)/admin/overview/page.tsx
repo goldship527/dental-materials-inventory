@@ -33,10 +33,10 @@ export default async function AdminOverviewPage() {
       isWarning: overview.summary.shortageCount > 0,
     },
     {
-      label: "確認待ちの発注候補",
-      value: numberText(overview.summary.draftOrderRequestCount),
-      note: "発注前に確認が必要な候補",
-      isWarning: overview.summary.draftOrderRequestCount > 0,
+      label: "発注予定の候補",
+      value: numberText(overview.summary.confirmedOrderRequestCount),
+      note: `確認待ち ${numberText(overview.summary.draftOrderRequestCount)}`,
+      isWarning: overview.summary.confirmedOrderRequestCount > 0 || overview.summary.draftOrderRequestCount > 0,
     },
     {
       label: "期限ロット要確認",
@@ -116,13 +116,13 @@ export default async function AdminOverviewPage() {
                     在庫0
                   </th>
                   <th scope="col" className="whitespace-nowrap px-4 py-3 text-right">
-                    確認待ち候補
-                  </th>
-                  <th scope="col" className="whitespace-nowrap px-4 py-3 text-right">
                     発注予定
                   </th>
                   <th scope="col" className="whitespace-nowrap px-4 py-3 text-right">
                     発注済み
+                  </th>
+                  <th scope="col" className="whitespace-nowrap px-4 py-3 text-right">
+                    確認待ち
                   </th>
                   <th scope="col" className="whitespace-nowrap px-4 py-3 text-right">
                     期限ロット
@@ -168,18 +168,18 @@ export default async function AdminOverviewPage() {
                     </td>
                     <td
                       className={
-                        row.draftOrderRequestCount > 0
+                        row.confirmedOrderRequestCount > 0
                           ? "whitespace-nowrap px-4 py-4 text-right font-semibold text-warning"
                           : "whitespace-nowrap px-4 py-4 text-right"
                       }
                     >
-                      {numberText(row.draftOrderRequestCount)}
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-4 text-right">
                       {numberText(row.confirmedOrderRequestCount)}
                     </td>
                     <td className="whitespace-nowrap px-4 py-4 text-right">
                       {numberText(row.orderedRequestCount)}
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-4 text-right">
+                      {numberText(row.draftOrderRequestCount)}
                     </td>
                     <td
                       className={

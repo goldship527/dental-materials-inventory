@@ -40,8 +40,8 @@ export default async function HomePage() {
     },
     {
       label: "発注候補",
-      value: `確認待ち ${summary.draftOrderRequestCount} 件`,
-      note: `発注予定 ${summary.orderRequestStatusCounts.CONFIRMED} / 発注済み ${summary.orderRequestStatusCounts.ORDERED}`,
+      value: `発注予定 ${summary.orderRequestStatusCounts.CONFIRMED} 件`,
+      note: `発注済み ${summary.orderRequestStatusCounts.ORDERED} / 確認待ち ${summary.draftOrderRequestCount}`,
     },
   ];
   const primaryActionItems = [
@@ -61,10 +61,10 @@ export default async function HomePage() {
     },
     {
       title: "発注候補を見る",
-      description: "確認待ちの発注候補を発注先ごとに確認します",
+      description: "発注予定の候補を発注先ごとに確認します",
       href: "/orders",
-      badge: `確認待ち ${summary.draftOrderRequestCount} 件`,
-      tone: summary.draftOrderRequestCount > 0 ? "warning" : "normal",
+      badge: `発注予定 ${summary.orderRequestStatusCounts.CONFIRMED} 件`,
+      tone: summary.orderRequestStatusCounts.CONFIRMED > 0 || summary.draftOrderRequestCount > 0 ? "warning" : "normal",
     },
     {
       title: "バーコード出入庫",
@@ -90,11 +90,11 @@ export default async function HomePage() {
       isWarning: summary.shortageCount > 0,
     },
     {
-      title: "発注候補 確認待ち",
+      title: "発注候補 発注予定",
       href: "/orders",
-      value: `${summary.draftOrderRequestCount} 件`,
-      note: "不足在庫から作成された候補",
-      isWarning: summary.draftOrderRequestCount > 0,
+      value: `${summary.orderRequestStatusCounts.CONFIRMED} 件`,
+      note: `これから発注する候補 / 確認待ち ${summary.draftOrderRequestCount}`,
+      isWarning: summary.orderRequestStatusCounts.CONFIRMED > 0,
     },
     {
       title: "期限ロット",

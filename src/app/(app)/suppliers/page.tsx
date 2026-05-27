@@ -122,10 +122,6 @@ export default async function SuppliersPage({ searchParams }: PageProps) {
 
                   <div className="mt-5 grid gap-3 sm:grid-cols-4">
                     <div className="rounded border border-line px-3 py-2">
-                      <p className="text-xs font-semibold text-muted">確認待ち</p>
-                      <p className="mt-1 text-2xl font-semibold">{row.orderRequestCounts.DRAFT}</p>
-                    </div>
-                    <div className="rounded border border-line px-3 py-2">
                       <p className="text-xs font-semibold text-muted">発注予定</p>
                       <p className="mt-1 text-2xl font-semibold">{row.orderRequestCounts.CONFIRMED}</p>
                     </div>
@@ -136,6 +132,10 @@ export default async function SuppliersPage({ searchParams }: PageProps) {
                     <div className="rounded border border-line px-3 py-2">
                       <p className="text-xs font-semibold text-muted">見送り</p>
                       <p className="mt-1 text-2xl font-semibold text-muted">{row.orderRequestCounts.SKIPPED}</p>
+                    </div>
+                    <div className="rounded border border-line px-3 py-2">
+                      <p className="text-xs font-semibold text-muted">確認待ち</p>
+                      <p className="mt-1 text-2xl font-semibold">{row.orderRequestCounts.DRAFT}</p>
                     </div>
                   </div>
 

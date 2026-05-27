@@ -132,9 +132,9 @@ export default async function SupplierDetailPage({ params }: PageProps) {
             <p className="mt-2 text-sm text-muted">この発注先の候補</p>
           </div>
           <div className="rounded border border-line bg-white p-5 shadow-panel">
-            <p className="text-sm font-semibold text-muted">確認待ち</p>
-            <p className="mt-2 text-3xl font-semibold">{supplier.orderRequestCounts.DRAFT}</p>
-            <p className="mt-2 text-sm text-muted">確認待ち</p>
+            <p className="text-sm font-semibold text-muted">発注予定</p>
+            <p className="mt-2 text-3xl font-semibold">{supplier.orderRequestCounts.CONFIRMED}</p>
+            <p className="mt-2 text-sm text-muted">これから発注する候補</p>
           </div>
         </section>
 
