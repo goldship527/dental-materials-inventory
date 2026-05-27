@@ -47,6 +47,11 @@ const workNavItems = [
     href: "/quick",
   },
   {
+    id: "barcode",
+    label: "バーコード",
+    href: "/barcode",
+  },
+  {
     id: "inventory",
     label: "在庫",
     href: "/inventory",

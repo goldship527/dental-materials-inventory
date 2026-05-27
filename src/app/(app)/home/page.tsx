@@ -320,7 +320,7 @@ export default async function HomePage() {
         </section>
 
         <section className="grid gap-3 print:hidden">
-          <h2 className="text-lg font-semibold">管理・確認メニュー</h2>
+          <h2 className="text-lg font-semibold">その他の確認・設定</h2>
           <div className="grid gap-4 sm:grid-cols-2">
             {menuItems.map((item) => (
               <a
