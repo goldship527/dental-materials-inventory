@@ -87,7 +87,7 @@ export default async function DormantStockPage({ searchParams }: PageProps) {
         <header className="flex flex-col gap-4 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-            <h1 className="mt-2 text-3xl font-semibold">死蔵在庫レポート</h1>
+            <h1 className="mt-2 text-3xl font-semibold">長期在庫レポート</h1>
             <p className="mt-2 text-sm text-muted">
               過去{selectedDays}日以内に出庫がなく、現在庫が1以上ある商品を表示します。
             </p>
@@ -114,7 +114,7 @@ export default async function DormantStockPage({ searchParams }: PageProps) {
             <p className={filteredRows.length > 0 ? "mt-2 text-3xl font-semibold text-warning" : "mt-2 text-3xl font-semibold"}>
               {filteredRows.length}
             </p>
-            <p className="mt-2 text-sm text-muted">表示中の死蔵在庫候補</p>
+            <p className="mt-2 text-sm text-muted">表示中の長期在庫候補</p>
           </div>
           <div className="rounded border border-line bg-white p-5 shadow-panel">
             <p className="text-sm font-semibold text-muted">対象数量</p>
@@ -216,7 +216,7 @@ export default async function DormantStockPage({ searchParams }: PageProps) {
             </div>
           ) : (
             <p className="px-4 py-8 text-sm text-muted">
-              条件に一致する死蔵在庫候補はありません。
+              条件に一致する長期在庫候補はありません。
             </p>
           )}
         </section>

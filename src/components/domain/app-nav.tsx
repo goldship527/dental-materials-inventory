@@ -52,11 +52,6 @@ const workNavItems = [
     href: "/inventory",
   },
   {
-    id: "dormant",
-    label: "死蔵",
-    href: "/inventory/dormant",
-  },
-  {
     id: "barcode",
     label: "バーコード",
     href: "/barcode",
@@ -75,6 +70,11 @@ const workNavItems = [
     id: "movements",
     label: "履歴",
     href: "/movements",
+  },
+  {
+    id: "dormant",
+    label: "長期在庫",
+    href: "/inventory/dormant",
   },
   {
     id: "stocktake",

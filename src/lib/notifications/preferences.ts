@@ -43,7 +43,7 @@ export const dailyDigestItemLabels: Record<DailyDigestItemKey, string> = {
   shortage: "不足在庫",
   stockLots: "期限ロット",
   pendingOrders: "納品待ち",
-  dormantStock: "死蔵在庫",
+  dormantStock: "長期在庫",
   stockAnomalies: "異常出庫検知",
 };
 

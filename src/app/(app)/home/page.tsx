@@ -105,7 +105,7 @@ export default async function HomePage() {
       isWarning: summary.attentionStockLotCount > 0,
     },
     {
-      title: "死蔵在庫",
+      title: "長期在庫",
       href: "/inventory/dormant",
       value: `${summary.dormantStockCount} 件`,
       note: "過去90日以内に出庫がない在庫",
@@ -165,7 +165,7 @@ export default async function HomePage() {
       isWarning: summary.attentionStockLotCount > 0,
     },
     {
-      title: "死蔵在庫レポート",
+      title: "長期在庫レポート",
       description: "90日以上動いていない在庫を確認",
       href: "/inventory/dormant",
       badge: `${summary.dormantStockCount} 件`,
