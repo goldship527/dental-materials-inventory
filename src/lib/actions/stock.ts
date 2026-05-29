@@ -50,6 +50,7 @@ export type AdjustStockInput = {
   sourceType: "MANUAL" | "STOCKTAKE";
   expectedQuantity: number | null;
   expectedUpdatedAt: number | null;
+  staffOperatorId?: string | null;
 };
 
 function revalidateStockPages() {
@@ -121,13 +122,19 @@ function parseOptionalUpdatedAt(value: FormDataEntryValue | null) {
 }
 
 function parseAdjustStockInput(formData: FormData): AdjustStockInput {
+  const sourceType = sourceTypeSchema.parse(formData.get("sourceType") ?? "MANUAL");
+
   return {
     stockItemId: stockItemIdSchema.parse(formData.get("stockItemId")),
     quantity: quantitySchema.parse(formData.get("quantity")),
     reason: reasonSchema.parse(formData.get("reason")),
-    sourceType: sourceTypeSchema.parse(formData.get("sourceType") ?? "MANUAL"),
+    sourceType,
     expectedQuantity: parseOptionalQuantity(formData.get("expectedQuantity")),
     expectedUpdatedAt: parseOptionalUpdatedAt(formData.get("expectedUpdatedAt")),
+    staffOperatorId:
+      sourceType === "MANUAL"
+        ? staffOperatorIdSchema.parse(formData.get("staffOperatorId"))
+        : null,
   };
 }
 
@@ -194,6 +201,19 @@ export async function adjustStockForContext(
   context: ActiveClinicContext,
   input: AdjustStockInput,
 ): Promise<StockUpdateResult> {
+  const staffOperator =
+    input.sourceType === "MANUAL"
+      ? await findActiveStaffOperatorByIdForClinic({
+          organizationId: context.organizationId,
+          clinicId: context.clinicId,
+          staffOperatorId: staffOperatorIdSchema.parse(input.staffOperatorId),
+        })
+      : null;
+
+  if (input.sourceType === "MANUAL" && !staffOperator) {
+    throw new Error("このクリニックで有効な作業スタッフを選択してください。");
+  }
+
   const result = await prisma.$transaction(async (tx) => {
     const stockItem = await tx.stockItem.findFirst({
       where: {
@@ -257,6 +277,7 @@ export async function adjustStockForContext(
         reason: input.reason,
         sourceType: input.sourceType,
         userId: context.userId,
+        performedByStaffId: staffOperator?.id ?? null,
       },
     });
 

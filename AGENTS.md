@@ -76,39 +76,41 @@ Do not start coding until the plan is approved.
   - Remaining risks
   - Next actions
 
-## 秘密値が必要な検証の扱い
+## Voice input clarification rule
 
-- 秘密値はチャットに貼ってもらわない
-- 秘密値はGit、README、docs、dev-logに記載しない
-- 秘密値がないと実行できない検証は、ローカルフォールバックやモック可能な範囲までCodexが確認する
-- 実サービス接続が必要な最終確認は、利用者がローカル環境変数や管理画面で秘密値を設定して実施する手順として残す
+The user often uses voice input. If an instruction appears abrupt, contextually strange, potentially destructive, unsafe, or likely to be a speech recognition error, do not execute it immediately. Ask a brief clarification question first.
 
-今後、Supabase以外の秘密値(SMTP, S3, OAuth client secret等)を扱う場面でも、同じルールを適用する。
+## Secret-dependent verification
+
+- Do not ask the user to paste secret values into chat.
+- Do not write secret values to Git, README, docs, or docs/dev-log.md.
+- If verification cannot be completed without secrets, Codex should verify as much as possible with local fallbacks or mocks.
+- If a final check requires connection to a real service, leave the required environment variables and safe execution steps for the user.
 
 ## Shared Context Engine
 
-このプロジェクトで作業を始める前に、必要に応じて以下の共有文脈入口を確認する。
+Before starting work in this project, check the following shared context entry point when needed:
 
 C:\Users\topro\Dropbox\Ts context vault\04_Projects\AI_Dev\context-index.md
 
-このファイルは、Codex と Claude Code が同じ前提から作業を始めるための共通入口である。
+This file is the shared entry point used by Codex and Claude Code before starting work with the same assumptions.
 
-作業時のルール:
+Rules:
 
-- vault全体を読まない。
-- まず context-index.md を読み、そこに書かれた必要最小限のファイルだけを参照する。
-- 実装仕様の正本は、このプロジェクト内の docs/spec.md とする。
-- 作業履歴の正本は、このプロジェクト内の docs/dev-log.md とする。
-- Obsidian側の仕様メモは、概要、検討メモ、参照リンクとして扱う。
-- 古いログや検討メモを、現在の仕様として扱わない。
-- 作業後に共有文脈へ影響がある場合は、update-policy.md に従って必要な文脈ファイルを更新する。
+- Do not read the entire vault.
+- First read context-index.md, then refer only to the necessary minimum files listed there.
+- The authoritative implementation specification is this project's docs/spec.md.
+- The authoritative work history is this project's docs/dev-log.md.
+- Treat Obsidian-side specification notes as summaries, investigation notes, or reference links.
+- Do not treat old logs or investigation notes as the current specification.
+- If work affects shared context, update only the necessary files according to update-policy.md.
 
-読む優先順位:
+Reading priority:
 
-1. このプロジェクトの AGENTS.md
-2. 共有文脈入口 context-index.md
-3. このプロジェクトの README.md
-4. このプロジェクトの docs/spec.md
-5. このプロジェクトの docs/dev-log.md
+1. This project's AGENTS.md
+2. Shared context entry point context-index.md
+3. This project's README.md
+4. This project's docs/spec.md
+5. This project's docs/dev-log.md
 
-ただし、ユーザーのこのチャットでの明示指示が最優先である。
+The user's explicit instruction in the current chat has the highest priority.

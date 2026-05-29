@@ -114,7 +114,8 @@ export default async function BarcodeStockPage({ searchParams }: PageProps) {
 
         {!barcode ? (
           <section className="rounded border border-line bg-white p-5 text-sm text-muted shadow-panel">
-            バーコードを読み取ってください。
+            <p className="font-semibold text-ink">1. 商品バーコードを読み取ってください。</p>
+            <p className="mt-2">商品が1件に特定できたら、次の画面で担当者バーコードを読み取って入出庫を確定します。</p>
           </section>
         ) : null}
 

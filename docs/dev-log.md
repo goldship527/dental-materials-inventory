@@ -5482,3 +5482,46 @@
 
 ### 検証
 - `corepack pnpm typecheck`
+
+## 2026-05-29 AGENTS.mdの文字化け修正
+
+### 作業内容
+- `AGENTS.md` の文字化けしていたルール文を、読みやすいUTF-8のMarkdownとして整理した。
+- 既存の作業ルール、秘密値の扱い、Shared Context Engineの参照方針、音声入力時の確認ルールを残した。
+
+### 判断
+- アプリ本体の仕様や実装には触れず、作業前に読むルール文書だけを修正した。
+- 秘密情報を扱わないため、具体的なAPIキー、パスワード、DB接続文字列は追加していない。
+
+### セキュリティメモ
+- 秘密値、患者情報、実在クリニック名、実在会社名は追加していない。
+
+### 検証
+- `Get-Content -LiteralPath 'C:\Dev\dental-materials-inventory\AGENTS.md'`
+
+## 2026-05-29 在庫直接編集の作業スタッフ記録
+
+### 作業内容
+- 在庫一覧 `/inventory` の数量直接編集フォームに、作業スタッフ選択を追加した。
+- 在庫直接編集の保存時に、選択されたスタッフが同じ組織・同じクリニックの有効なスタッフであることをサーバー側で検証するようにした。
+- 在庫直接編集で作成する `StockMovement` に `performedByStaffId` を保存するようにした。
+- バーコード出入庫 `/barcode/stock` は、既存の「商品バーコード → 担当者バーコード → 入出庫確定」の流れを維持し、案内文だけを少し明確にした。
+- 仕様書に、在庫変更時の作業スタッフ記録方針を追記した。
+
+### 判断
+- バーコード出入庫はスタッフ選択式に変えず、現場でバーコードを続けて読む運用を優先した。
+- 在庫一覧の直接編集はバーコード読み取り画面ではないため、クイック出庫と同じスタッフ選択方式にした。
+- 棚卸の旧フォームは、今回のスタッフ選択必須化の対象外とした。
+
+### セキュリティメモ
+- 送信されたスタッフIDは信用せず、組織・クリニック・有効状態を確認してから履歴へ保存する。
+- 患者情報、秘密情報、実在クリニック名、APIキーは追加していない。
+
+### 検証
+- `corepack pnpm typecheck`
+- `corepack pnpm exec tsx tests/barcode-stock-reasons.test.ts`
+- `corepack pnpm build`
+- `git diff --check`
+
+### 未実行・注意
+- `corepack pnpm exec tsx tests/stock-optimistic-lock.test.ts` は、Docker Desktopが起動しておらずローカルDB初期化用の `prisma db push --force-reset` が通らなかったため未完了。

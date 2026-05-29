@@ -47,6 +47,19 @@ async function main() {
         isUsed: true,
       },
     });
+    const staffOperator = await prisma.staffOperator.create({
+      data: {
+        organizationId: organization.id,
+        displayName: "Stock Lock Staff",
+        barcode: "STAFF-STOCK-LOCK",
+        operatorType: "REGULAR",
+        clinicAssignments: {
+          create: {
+            clinicId: clinic.id,
+          },
+        },
+      },
+    });
     const firstView = await prisma.stockItem.findUniqueOrThrow({
       where: {
         id: stockItem.id,
@@ -71,6 +84,7 @@ async function main() {
       sourceType: "MANUAL",
       expectedQuantity: firstView.quantity,
       expectedUpdatedAt: firstView.updatedAt.getTime(),
+      staffOperatorId: staffOperator.id,
     });
     const afterSuccess = await prisma.stockItem.findUniqueOrThrow({
       where: {
@@ -94,6 +108,7 @@ async function main() {
           sourceType: "MANUAL",
           expectedQuantity: firstView.quantity,
           expectedUpdatedAt: firstView.updatedAt.getTime(),
+          staffOperatorId: staffOperator.id,
         }),
       /他のスタッフが先に在庫を変更しました/,
     );
@@ -112,9 +127,16 @@ async function main() {
         productId: product.id,
       },
     });
+    const movement = await prisma.stockMovement.findFirstOrThrow({
+      where: {
+        clinicId: clinic.id,
+        productId: product.id,
+      },
+    });
 
     assert.equal(finalStockItem.quantity, 8);
     assert.equal(movementCount, 1);
+    assert.equal(movement.performedByStaffId, staffOperator.id);
   } finally {
     await prisma.$disconnect();
   }

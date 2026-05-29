@@ -1,15 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import type { StaffOperatorOption } from "@/lib/db/staff-operators";
 import { InventoryAdjustForm } from "./inventory-adjust-form";
 
 type InventoryAdjustCellProps = {
   stockItemId: string;
   quantity: number;
   stockUpdatedAt: number;
+  staffOperators: StaffOperatorOption[];
 };
 
-export function InventoryAdjustCell({ stockItemId, quantity, stockUpdatedAt }: InventoryAdjustCellProps) {
+export function InventoryAdjustCell({ stockItemId, quantity, stockUpdatedAt, staffOperators }: InventoryAdjustCellProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   if (!isOpen) {
@@ -26,7 +28,12 @@ export function InventoryAdjustCell({ stockItemId, quantity, stockUpdatedAt }: I
 
   return (
     <div className="grid gap-2">
-      <InventoryAdjustForm stockItemId={stockItemId} quantity={quantity} stockUpdatedAt={stockUpdatedAt} />
+      <InventoryAdjustForm
+        stockItemId={stockItemId}
+        quantity={quantity}
+        stockUpdatedAt={stockUpdatedAt}
+        staffOperators={staffOperators}
+      />
       <button
         type="button"
         onClick={() => setIsOpen(false)}

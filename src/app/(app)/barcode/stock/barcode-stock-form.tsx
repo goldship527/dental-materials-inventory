@@ -127,6 +127,14 @@ export function BarcodeStockForm({ barcode, productId, currentQuantity }: Barcod
       <input type="hidden" name="productId" value={productId} />
       <input type="hidden" name="movementType" value={movementType} />
 
+      <div className="mb-4">
+        <p className="text-xs font-semibold text-accent">2. 担当者確認</p>
+        <h2 className="mt-1 text-xl font-semibold">担当者バーコードを読んでから入出庫を確定</h2>
+        <p className="mt-2 text-sm text-muted">
+          商品バーコードは読み取り済みです。次に実際に作業する担当者バーコードを読み取り、数量と理由を確認してください。
+        </p>
+      </div>
+
       <section className="mb-5 rounded border border-blue-100 bg-blue-50 p-4">
         <label className="grid gap-2 text-sm font-semibold text-blue-900">
           担当者バーコード

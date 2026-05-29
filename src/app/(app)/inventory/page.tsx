@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { AppNav } from "@/components/domain/app-nav";
 import { requireActiveClinic } from "@/lib/db/clinic";
+import { getActiveStaffOperatorOptionsForClinic } from "@/lib/db/staff-operators";
 import { getCategories, getStockRows } from "@/lib/db/stock";
 import { InventoryAdjustCell } from "./inventory-adjust-cell";
 import { InventoryFilterForm } from "./inventory-filter-form";
@@ -26,9 +27,13 @@ export default async function InventoryPage({ searchParams }: PageProps) {
   const query = params.q?.trim() ?? "";
   const category = params.category ?? "";
   const shortageOnly = params.shortage === "1";
-  const [rows, categories] = await Promise.all([
+  const [rows, categories, staffOperators] = await Promise.all([
     getStockRows(context.clinicId),
     getCategories(context.clinicId),
+    getActiveStaffOperatorOptionsForClinic({
+      organizationId: context.organizationId,
+      clinicId: context.clinicId,
+    }),
   ]);
 
   const filteredRows = rows.filter((row) => {
@@ -110,6 +115,7 @@ export default async function InventoryPage({ searchParams }: PageProps) {
                         stockItemId={row.stockItemId}
                         quantity={row.quantity}
                         stockUpdatedAt={row.stockUpdatedAt}
+                        staffOperators={staffOperators}
                       />
                     </td>
                   </tr>
