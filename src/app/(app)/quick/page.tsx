@@ -126,6 +126,31 @@ export default async function QuickPage({ searchParams }: PageProps) {
           </a>
         </header>
 
+        <section className="rounded border border-accent/25 bg-white p-4 shadow-panel">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-sm font-semibold text-accent">バーコード出入庫</p>
+              <h2 className="mt-1 text-xl font-semibold">担当者バーコードから開始</h2>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-muted">
+                担当者バーコードを読み取ってから商品バーコードを読み取り、入庫・出庫を確定します。
+              </p>
+            </div>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <a
+                className="inline-flex h-11 items-center justify-center rounded bg-accent px-4 text-sm font-semibold text-white transition hover:bg-teal-800"
+                href="/barcode/stock"
+              >
+                バーコード出入庫を開始
+              </a>
+              <a
+                className="inline-flex h-11 items-center justify-center rounded border border-line bg-white px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+                href="/barcode"
+              >
+                バーコード管理
+              </a>
+            </div>
+          </div>
+        </section>
 
         <section className="rounded border border-line/90 bg-panel/95 p-3 shadow-panel">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">

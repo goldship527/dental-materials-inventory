@@ -48,7 +48,7 @@ const workNavItems = [
   },
   {
     id: "barcode",
-    label: "バーコード",
+    label: "バーコード管理",
     href: "/barcode",
   },
   {
