@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { AppNav } from "@/components/domain/app-nav";
-import { Sparkline } from "@/components/domain/sparkline";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { getDashboardSummary } from "@/lib/db/dashboard";
 
@@ -24,28 +23,6 @@ export default async function HomePage() {
   const summary = await getDashboardSummary(context.clinicId, context.organizationId);
   const latestMovementAt = summary.latestMovement ? movementDateFormatter.format(summary.latestMovement.createdAt) : null;
   const plannedOrderRequestCount = summary.orderRequestStatusCounts.DRAFT + summary.orderRequestStatusCounts.CONFIRMED;
-  const summaryItems = [
-    {
-      label: "在庫登録",
-      value: `${summary.stockItemCount} 件`,
-      note: `総在庫数 ${summary.totalQuantity}`,
-    },
-    {
-      label: "不足",
-      value: `${summary.shortageCount} 件`,
-      note: `在庫0 ${summary.zeroStockCount} 件 / ぎりぎり ${summary.atMinStockCount} 件`,
-    },
-    {
-      label: "クイック出庫",
-      value: `${summary.favoriteCardCount} 件`,
-      note: "ワンタップで出庫・戻し",
-    },
-    {
-      label: "発注候補",
-      value: `発注予定 ${plannedOrderRequestCount} 件`,
-      note: `発注記録あり ${summary.orderRequestStatusCounts.ORDERED} / 見送り ${summary.orderRequestStatusCounts.SKIPPED}`,
-    },
-  ];
   const primaryActionItems = [
     {
       title: "クイック出庫",
@@ -55,14 +32,14 @@ export default async function HomePage() {
       tone: "primary",
     },
     {
-      title: "不足在庫を見る",
+      title: "不足在庫",
       description: "最低在庫を下回った材料を確認します",
       href: "/shortage",
       badge: `${summary.shortageCount} 件`,
       tone: summary.shortageCount > 0 ? "warning" : "normal",
     },
     {
-      title: "発注候補を見る",
+      title: "発注候補",
       description: "発注予定の候補を発注先ごとに確認します",
       href: "/orders",
       badge: `発注予定 ${plannedOrderRequestCount} 件`,
@@ -95,7 +72,7 @@ export default async function HomePage() {
       title: "期限ロット",
       href: "/stock-lots",
       value: `${summary.attentionStockLotCount} 件`,
-      note: "期限切れまたは30日以内のロット別在庫",
+      note: "期限切れまたは30日以内",
       isWarning: summary.attentionStockLotCount > 0,
     },
     {
@@ -127,55 +104,29 @@ export default async function HomePage() {
       badge: `${summary.stockItemCount} 件`,
     },
     {
-      title: "バーコード検索",
-      description: "JAN、GTIN、登録済みバーコード",
+      title: "バーコード管理",
+      description: "検索、未登録整理、読取履歴",
       href: "/barcode",
-      badge: "読み取り",
     },
     {
       title: "発注先マスタ",
       description: "取扱商品と発注候補",
       href: "/suppliers",
-      badge: "一覧",
     },
     {
       title: "入出庫履歴",
       description: "在庫変更の記録",
       href: "/movements",
-      badge: "直近100件",
-    },
-    {
-      title: "異常出庫検知",
-      description: "通常より出庫数が多い商品を確認",
-      href: "/movements/anomalies",
-      badge: `${summary.stockAnomalyCount} 件`,
-      isWarning: summary.stockAnomalyCount > 0,
-    },
-    {
-      title: "期限ロット一覧",
-      description: "ロット番号と有効期限",
-      href: "/stock-lots",
-      badge: `${summary.attentionStockLotCount} 件`,
-      isWarning: summary.attentionStockLotCount > 0,
-    },
-    {
-      title: "長期在庫レポート",
-      description: "90日以上動いていない在庫を確認",
-      href: "/inventory/dormant",
-      badge: `${summary.dormantStockCount} 件`,
-      isWarning: summary.dormantStockCount > 0,
     },
     {
       title: "棚卸",
       description: "実在庫の入力と確定",
       href: "/stocktake/sessions",
-      badge: "入力",
     },
     {
-      title: "初期設定チェック",
+      title: "初期設定",
       description: "商品、発注先、バーコード、最低在庫",
       href: "/setup",
-      badge: "導入",
     },
     {
       title: "未対応バーコード",
@@ -206,21 +157,16 @@ export default async function HomePage() {
             <a
               key={item.href}
               href={item.href}
-              className={
-                item.tone === "primary"
-                  ? "min-h-36 rounded border border-accent/30 bg-teal-50 p-5 shadow-panel transition hover:border-accent hover:bg-white hover:shadow-md"
-                  : item.tone === "warning"
-                    ? "min-h-36 rounded border border-warning/30 bg-yellow-50 p-5 shadow-panel transition hover:border-warning hover:bg-white hover:shadow-md"
-                    : "min-h-36 rounded border border-line bg-white p-5 shadow-panel transition hover:border-accent hover:shadow-md"
-              }
+              className="relative min-h-36 overflow-hidden rounded border border-line bg-white p-5 shadow-panel transition hover:border-accent hover:shadow-md"
             >
+              {item.tone === "warning" ? <span className="absolute inset-y-0 left-0 w-1 bg-warning" /> : null}
               <div className="flex items-start justify-between gap-3">
                 <p className="text-xl font-semibold">{item.title}</p>
                 <span
                   className={
                     item.tone === "warning"
-                      ? "shrink-0 rounded bg-white/80 px-3 py-1 text-xs font-semibold text-warning"
-                      : "shrink-0 rounded bg-white/80 px-3 py-1 text-xs font-semibold text-accent"
+                      ? "shrink-0 rounded bg-yellow-50 px-3 py-1 text-xs font-semibold text-warning"
+                      : "shrink-0 rounded bg-gray-50 px-3 py-1 text-xs font-semibold text-muted"
                   }
                 >
                   {item.badge}
@@ -232,62 +178,28 @@ export default async function HomePage() {
         </section>
 
         <section className="grid gap-3">
-          <h2 className="text-lg font-semibold">今日の状況</h2>
-          <div className="grid gap-4 md:grid-cols-4">
-            {summaryItems.map((item) => (
-              <div key={item.label} className="rounded border border-line bg-white p-5 shadow-panel">
-                <p className="text-sm font-semibold text-muted">{item.label}</p>
-                <p className="mt-2 text-3xl font-semibold">{item.value}</p>
-                <p className="mt-2 text-sm text-muted">{item.note}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="grid gap-4 lg:grid-cols-[1.2fr_1fr]">
-          <a
-            className="rounded border border-line bg-white p-5 shadow-panel transition hover:border-accent hover:shadow-md"
-            href="/shortage"
-          >
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="text-sm font-semibold text-muted">不足の傾向</p>
-                <p className="mt-2 text-3xl font-semibold">{summary.shortageCount} 件</p>
-              </div>
-              <span className="shrink-0 rounded bg-yellow-50 px-3 py-1 text-xs font-semibold text-warning">目安</span>
-            </div>
-            <Sparkline className="mt-4 text-accent" data={summary.shortageTrend} />
-            <p className="mt-3 text-sm text-muted">
-              不足在庫を確認する
-            </p>
-          </a>
-
-          <section className="grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
+          <h2 className="text-lg font-semibold">今日の注意</h2>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {attentionItems.map((item) => (
               <a
                 key={item.title}
-                className="rounded border border-line bg-white p-5 shadow-panel transition hover:border-accent hover:shadow-md"
+                className={
+                  item.isWarning
+                    ? "rounded border border-warning/30 bg-white p-4 shadow-panel transition hover:border-warning hover:shadow-md"
+                    : "rounded border border-line bg-white p-4 shadow-panel transition hover:border-accent hover:shadow-md"
+                }
                 href={item.href}
               >
-                <div className="flex items-start justify-between gap-3">
-                  <p className="text-sm font-semibold text-muted">{item.title}</p>
-                  <span
-                    className={
-                      item.isWarning
-                        ? "shrink-0 rounded bg-yellow-50 px-2 py-1 text-xs font-semibold text-warning"
-                        : "shrink-0 rounded bg-gray-50 px-2 py-1 text-xs font-semibold text-muted"
-                    }
-                  >
-                    確認
-                  </span>
-                </div>
-                <p className="mt-2 text-2xl font-semibold">{item.value}</p>
+                <p className={item.isWarning ? "text-sm font-semibold text-warning" : "text-sm font-semibold text-muted"}>
+                  {item.title}
+                </p>
+                <p className="mt-2 text-2xl font-semibold text-ink">{item.value}</p>
                 <p className="mt-2 text-sm leading-6 text-muted">
-                  {item.href === "/barcode/scans" ? "有効期限が30日以内の読み取り履歴" : item.note}
+                  {item.note}
                 </p>
               </a>
             ))}
-          </section>
+          </div>
         </section>
 
         <section className="rounded border border-line bg-white p-5 shadow-panel">
@@ -315,7 +227,7 @@ export default async function HomePage() {
 
         <section className="grid gap-3 print:hidden">
           <h2 className="text-lg font-semibold">その他の確認・設定</h2>
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {menuItems.map((item) => (
               <a
                 key={item.href}
@@ -324,15 +236,17 @@ export default async function HomePage() {
               >
                 <div className="flex items-start justify-between gap-4">
                   <p className="text-xl font-semibold">{item.title}</p>
-                  <span
-                    className={
-                      item.isWarning
-                        ? "shrink-0 rounded bg-yellow-50 px-3 py-1 text-xs font-semibold text-warning"
-                        : "shrink-0 rounded bg-gray-50 px-3 py-1 text-xs font-semibold text-muted"
-                    }
-                  >
-                    {item.badge}
-                  </span>
+                  {item.badge ? (
+                    <span
+                      className={
+                        item.isWarning
+                          ? "shrink-0 rounded bg-yellow-50 px-3 py-1 text-xs font-semibold text-warning"
+                          : "shrink-0 rounded bg-gray-50 px-3 py-1 text-xs font-semibold text-muted"
+                      }
+                    >
+                      {item.badge}
+                    </span>
+                  ) : null}
                 </div>
                 <p className="mt-3 text-sm leading-6 text-muted">{item.description}</p>
               </a>
