@@ -1,9 +1,9 @@
 "use client";
 
-import { useActionState, useMemo, useState } from "react";
+import { useActionState, useEffect, useMemo, useState } from "react";
 import { barcodeStockMoveAction, type BarcodeStockActionState } from "@/lib/actions/barcode-stock";
 import { barcodeStockInReasons, barcodeStockOutReasons } from "@/lib/barcode/stock-reasons";
-import { useBarcodeStockStaff } from "./barcode-stock-staff-flow";
+import { productBarcodeInputId, useBarcodeStockStaff } from "./barcode-stock-staff-flow";
 
 type BarcodeStockFormProps = {
   barcode: string;
@@ -21,6 +21,19 @@ export function BarcodeStockForm({ barcode, productId, currentQuantity }: Barcod
   const [quantity, setQuantity] = useState(1);
   const displayQuantity = state.afterQuantity ?? currentQuantity;
   const reasonOptions = useMemo(() => (movementType === "OUT" ? barcodeStockOutReasons : barcodeStockInReasons), [movementType]);
+
+  useEffect(() => {
+    if (state.status !== "success") {
+      return;
+    }
+
+    const productBarcodeInput = document.getElementById(productBarcodeInputId);
+
+    if (productBarcodeInput instanceof HTMLInputElement) {
+      productBarcodeInput.focus();
+      productBarcodeInput.select();
+    }
+  }, [state.status, state.afterQuantity]);
 
   function changeMovementType(nextType: "OUT" | "IN") {
     setMovementType(nextType);
@@ -42,7 +55,7 @@ export function BarcodeStockForm({ barcode, productId, currentQuantity }: Barcod
         <p className="text-xs font-semibold text-accent">3. 入出庫確認</p>
         <h2 className="mt-1 text-xl font-semibold">数量と理由を確認して確定</h2>
         <p className="mt-2 text-sm text-muted">
-          確定後も同じ担当者のまま、次の商品バーコードを続けて読み取れます。
+          確定後は商品バーコード欄へ戻ります。同じ担当者のまま次の商品を続けて読み取れます。
         </p>
       </div>
 

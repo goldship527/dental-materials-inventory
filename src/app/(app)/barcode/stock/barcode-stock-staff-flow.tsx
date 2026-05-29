@@ -5,7 +5,7 @@ import { normalizeBarcodeText } from "@/lib/barcode/normalize";
 import { BarcodeSearchForm } from "../barcode-search-form";
 
 const staffBarcodeStorageKey = "dentalInventory.barcodeStock.staffBarcode";
-const productBarcodeInputId = "barcode-stock-product-barcode";
+export const productBarcodeInputId = "barcode-stock-product-barcode";
 
 type BarcodeStockStaffContextValue = {
   staffBarcode: string;

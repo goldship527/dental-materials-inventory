@@ -361,7 +361,7 @@ export async function barcodeStockMoveAction(
 
     return {
       status: "success",
-      message: `${result.productName} を${movementType === "OUT" ? "出庫" : "入庫"}しました。現在庫は ${result.afterQuantity} です。`,
+      message: `${result.productName} を${movementType === "OUT" ? "出庫" : "入庫"}しました。現在庫は ${result.afterQuantity} です。次の商品バーコードを読み取れます。`,
       afterQuantity: result.afterQuantity,
     };
   } catch (error) {
