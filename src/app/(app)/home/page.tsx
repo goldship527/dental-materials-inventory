@@ -30,6 +30,7 @@ export default async function HomePage() {
       href: "/quick",
       badge: `${summary.favoriteCardCount} 件`,
       tone: "primary",
+      imageSrc: "/images/home-actions/quick-stock.png",
     },
     {
       title: "不足在庫",
@@ -37,6 +38,7 @@ export default async function HomePage() {
       href: "/shortage",
       badge: `${summary.shortageCount} 件`,
       tone: summary.shortageCount > 0 ? "warning" : "normal",
+      imageSrc: "/images/home-actions/shortage-check.png",
     },
     {
       title: "発注候補",
@@ -44,6 +46,7 @@ export default async function HomePage() {
       href: "/orders",
       badge: `発注予定 ${plannedOrderRequestCount} 件`,
       tone: plannedOrderRequestCount > 0 ? "warning" : "normal",
+      imageSrc: "/images/home-actions/order-candidates.png",
     },
   ];
   const attentionItems = [
@@ -159,7 +162,14 @@ export default async function HomePage() {
               href={item.href}
               className="relative min-h-36 overflow-hidden rounded border border-line bg-white p-5 shadow-panel transition hover:border-accent hover:shadow-md"
             >
-              <div className="flex items-start justify-between gap-3">
+              <img
+                src={item.imageSrc}
+                alt=""
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-y-0 right-0 h-full w-2/3 object-cover object-right opacity-20"
+              />
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-white via-white/90 to-white/60" />
+              <div className="relative z-10 flex items-start justify-between gap-3">
                 <p className="text-xl font-semibold">{item.title}</p>
                 <span
                   className={
@@ -171,7 +181,7 @@ export default async function HomePage() {
                   {item.badge}
                 </span>
               </div>
-              <p className="mt-3 text-sm leading-6 text-muted">{item.description}</p>
+              <p className="relative z-10 mt-3 text-sm leading-6 text-muted">{item.description}</p>
             </a>
           ))}
         </section>
