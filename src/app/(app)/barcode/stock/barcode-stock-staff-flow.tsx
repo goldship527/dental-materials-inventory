@@ -151,6 +151,7 @@ export function BarcodeStockStaffFlow({ barcode, children }: BarcodeStockStaffFl
             <p className="mt-1 text-sm font-semibold text-blue-900">
               担当者バーコード: <span className="font-mono">{staffBarcode}</span>
             </p>
+            <p className="mt-1 text-xs font-semibold text-blue-800">次に読むもの: 商品バーコード</p>
           </div>
           <button
             type="button"

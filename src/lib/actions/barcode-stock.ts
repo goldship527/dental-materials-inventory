@@ -33,6 +33,9 @@ export type BarcodeStockActionState = {
   status?: "success" | "error";
   message?: string;
   afterQuantity?: number;
+  lastProductName?: string;
+  lastMovementLabel?: string;
+  lastQuantity?: number;
 };
 
 type BarcodeStockMoveContext = {
@@ -363,6 +366,9 @@ export async function barcodeStockMoveAction(
       status: "success",
       message: `${result.productName} を${movementType === "OUT" ? "出庫" : "入庫"}しました。現在庫は ${result.afterQuantity} です。次の商品バーコードを読み取れます。`,
       afterQuantity: result.afterQuantity,
+      lastProductName: result.productName,
+      lastMovementLabel: movementType === "OUT" ? "出庫" : "入庫",
+      lastQuantity: quantity,
     };
   } catch (error) {
     return toActionError(error);

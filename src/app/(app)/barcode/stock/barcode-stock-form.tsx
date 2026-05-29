@@ -59,6 +59,17 @@ export function BarcodeStockForm({ barcode, productId, currentQuantity }: Barcod
         </p>
       </div>
 
+      <div className="mb-5 grid gap-3 sm:grid-cols-2">
+        <div className="rounded border border-line bg-gray-50 px-4 py-3">
+          <p className="text-xs font-semibold text-muted">現在の商品バーコード</p>
+          <p className="mt-1 break-all font-mono text-sm font-semibold text-ink">{barcode}</p>
+        </div>
+        <div className="rounded border border-line bg-gray-50 px-4 py-3">
+          <p className="text-xs font-semibold text-muted">次に読むもの</p>
+          <p className="mt-1 text-sm font-semibold text-ink">確定後は商品バーコード</p>
+        </div>
+      </div>
+
       <section className="mb-5 rounded border border-blue-100 bg-blue-50 p-4">
         <div className="flex flex-col gap-2 text-xs font-semibold text-blue-900 sm:flex-row sm:items-center sm:justify-between">
           <p>
@@ -184,15 +195,33 @@ export function BarcodeStockForm({ barcode, productId, currentQuantity }: Barcod
       </p>
 
       {state.message ? (
-        <p
+        <div
           className={
             state.status === "success"
               ? "mt-4 rounded border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-accent"
               : "mt-4 rounded border border-danger/30 bg-red-50 px-4 py-3 text-sm font-semibold text-danger"
           }
         >
-          {state.message}
-        </p>
+          <p>{state.message}</p>
+          {state.status === "success" && state.lastProductName ? (
+            <dl className="mt-3 grid gap-2 text-xs sm:grid-cols-3">
+              <div>
+                <dt className="text-muted">最後に処理した商品</dt>
+                <dd className="mt-1 text-ink">{state.lastProductName}</dd>
+              </div>
+              <div>
+                <dt className="text-muted">処理内容</dt>
+                <dd className="mt-1 text-ink">
+                  {state.lastMovementLabel} {state.lastQuantity}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-muted">処理後在庫</dt>
+                <dd className="mt-1 text-ink">{state.afterQuantity}</dd>
+              </div>
+            </dl>
+          ) : null}
+        </div>
       ) : null}
 
       <button
