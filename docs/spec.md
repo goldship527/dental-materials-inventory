@@ -2503,6 +2503,7 @@ Server Action `createProductAction` で作成する。
 - GitHub: Vercelへのデプロイ元
 
 ローカル開発ではDocker上のPostgreSQLを使うが、公開デモではDockerを使わない。公開デモでは `DATABASE_URL` にSupabaseのPostgreSQL接続文字列を設定する。
+Vercelのサーバーレス実行では同時に複数のPrisma Clientが起動しうるため、productionではDB接続URLに `connection_limit=1` を補い、Supabase PostgreSQLの接続上限に当たりにくくする。
 
 ### 39.2 環境変数
 

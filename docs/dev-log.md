@@ -5633,3 +5633,24 @@
 - `corepack pnpm typecheck`
 - `corepack pnpm build`
 - `git diff --check`
+
+## 2026-05-29 公開環境DB接続数の抑制
+
+### 作業内容
+- Vercel公開版で `/barcode/stock`、`/barcode`、商品詳細ページが500になる原因を調査した。
+- Vercelログで、Supabase PostgreSQLの `max clients reached in session mode` によりPrismaのDB接続が失敗していることを確認した。
+- production実行時だけ、`DATABASE_URL` に `connection_limit=1` が未設定なら補うようにした。
+- 仕様書に、公開環境ではPrismaのDB接続数を抑える方針を追記した。
+
+### 判断
+- Vercel環境変数の秘密値は表示・記録せず、コード側ではURLパラメータだけを補完する。
+- 既に `connection_limit` が設定されている場合は、運用側の値を優先して上書きしない。
+
+### セキュリティメモ
+- DB接続文字列、パスワード、APIキーなどの実値はログやドキュメントに追加していない。
+- 認証、権限、在庫更新ロジックは変更していない。
+
+### 検証
+- `corepack pnpm typecheck`
+- `corepack pnpm build`
+- `git diff --check`
