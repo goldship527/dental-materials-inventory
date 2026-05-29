@@ -159,13 +159,12 @@ export default async function HomePage() {
               href={item.href}
               className="relative min-h-36 overflow-hidden rounded border border-line bg-white p-5 shadow-panel transition hover:border-accent hover:shadow-md"
             >
-              {item.tone === "warning" ? <span className="absolute inset-y-0 left-0 w-1 bg-warning" /> : null}
               <div className="flex items-start justify-between gap-3">
                 <p className="text-xl font-semibold">{item.title}</p>
                 <span
                   className={
                     item.tone === "warning"
-                      ? "shrink-0 rounded bg-yellow-50 px-3 py-1 text-xs font-semibold text-warning"
+                      ? "shrink-0 rounded bg-gray-50 px-3 py-1 text-xs font-semibold text-accent"
                       : "shrink-0 rounded bg-gray-50 px-3 py-1 text-xs font-semibold text-muted"
                   }
                 >
@@ -183,17 +182,13 @@ export default async function HomePage() {
             {attentionItems.map((item) => (
               <a
                 key={item.title}
-                className={
-                  item.isWarning
-                    ? "rounded border border-warning/30 bg-white p-4 shadow-panel transition hover:border-warning hover:shadow-md"
-                    : "rounded border border-line bg-white p-4 shadow-panel transition hover:border-accent hover:shadow-md"
-                }
+                className="rounded border border-line bg-white p-4 shadow-panel transition hover:border-accent hover:shadow-md"
                 href={item.href}
               >
-                <p className={item.isWarning ? "text-sm font-semibold text-warning" : "text-sm font-semibold text-muted"}>
-                  {item.title}
+                <p className="text-sm font-semibold text-muted">{item.title}</p>
+                <p className={item.isWarning ? "mt-2 text-2xl font-semibold text-accent" : "mt-2 text-2xl font-semibold text-ink"}>
+                  {item.value}
                 </p>
-                <p className="mt-2 text-2xl font-semibold text-ink">{item.value}</p>
                 <p className="mt-2 text-sm leading-6 text-muted">
                   {item.note}
                 </p>
