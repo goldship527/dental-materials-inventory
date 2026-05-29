@@ -49,7 +49,7 @@ export default async function HomePage() {
   const primaryActionItems = [
     {
       title: "クイック出庫",
-      description: "よく使う材料をすぐに -1 できます",
+      description: "よく使う材料の出庫を素早く記録します",
       href: "/quick",
       badge: `${summary.favoriteCardCount} 件`,
       tone: "primary",
