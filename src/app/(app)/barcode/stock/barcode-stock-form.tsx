@@ -1,9 +1,9 @@
 "use client";
 
-import { useActionState, useEffect, useMemo, useRef, useState } from "react";
+import { useActionState, useMemo, useState } from "react";
 import { barcodeStockMoveAction, type BarcodeStockActionState } from "@/lib/actions/barcode-stock";
-import { normalizeBarcodeText } from "@/lib/barcode/normalize";
 import { barcodeStockInReasons, barcodeStockOutReasons } from "@/lib/barcode/stock-reasons";
+import { useBarcodeStockStaff } from "./barcode-stock-staff-flow";
 
 type BarcodeStockFormProps = {
   barcode: string;
@@ -15,98 +15,12 @@ const initialState: BarcodeStockActionState = {};
 
 export function BarcodeStockForm({ barcode, productId, currentQuantity }: BarcodeStockFormProps) {
   const [state, formAction, isPending] = useActionState(barcodeStockMoveAction, initialState);
-  const staffInputRef = useRef<HTMLInputElement>(null);
-  const [staffBarcode, setStaffBarcode] = useState("");
+  const { staffBarcode, clearStaffBarcode } = useBarcodeStockStaff();
   const [movementType, setMovementType] = useState<"OUT" | "IN">("OUT");
   const [reason, setReason] = useState<string>("使用");
   const [quantity, setQuantity] = useState(1);
   const displayQuantity = state.afterQuantity ?? currentQuantity;
   const reasonOptions = useMemo(() => (movementType === "OUT" ? barcodeStockOutReasons : barcodeStockInReasons), [movementType]);
-
-  useEffect(() => {
-    setStaffBarcode("");
-    staffInputRef.current?.focus();
-    staffInputRef.current?.select();
-  }, [barcode, productId]);
-
-  useEffect(() => {
-    let bufferedText = "";
-    let lastKeyAt = 0;
-    let flushTimer: ReturnType<typeof setTimeout> | null = null;
-
-    function isEditableTarget(target: EventTarget | null) {
-      if (!(target instanceof HTMLElement)) {
-        return false;
-      }
-
-      return target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement || target.isContentEditable;
-    }
-
-    function clearFlushTimer() {
-      if (flushTimer) {
-        clearTimeout(flushTimer);
-        flushTimer = null;
-      }
-    }
-
-    function resetBuffer() {
-      bufferedText = "";
-      lastKeyAt = 0;
-      clearFlushTimer();
-    }
-
-    function flushBuffer() {
-      const scannedText = normalizeBarcodeText(bufferedText);
-      resetBuffer();
-
-      if (scannedText.length < 4) {
-        return;
-      }
-
-      setStaffBarcode(scannedText.toUpperCase());
-      staffInputRef.current?.focus();
-    }
-
-    function scheduleFlush() {
-      clearFlushTimer();
-      flushTimer = setTimeout(flushBuffer, 220);
-    }
-
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.ctrlKey || event.metaKey || event.altKey || isEditableTarget(event.target)) {
-        return;
-      }
-
-      if (event.key === "Enter" || event.key === "Tab") {
-        if (bufferedText) {
-          event.preventDefault();
-          flushBuffer();
-        }
-        return;
-      }
-
-      if (event.key.length !== 1) {
-        return;
-      }
-
-      const now = Date.now();
-
-      if (lastKeyAt && now - lastKeyAt > 150) {
-        bufferedText = "";
-      }
-
-      lastKeyAt = now;
-      bufferedText += event.key;
-      scheduleFlush();
-    }
-
-    window.addEventListener("keydown", handleKeyDown, true);
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown, true);
-      clearFlushTimer();
-    };
-  }, []);
 
   function changeMovementType(nextType: "OUT" | "IN") {
     setMovementType(nextType);
@@ -117,56 +31,35 @@ export function BarcodeStockForm({ barcode, productId, currentQuantity }: Barcod
     setQuantity(Math.max(1, Math.min(9999, Math.trunc(Number.isFinite(nextQuantity) ? nextQuantity : 1))));
   }
 
-  function updateStaffBarcode(value: string) {
-    setStaffBarcode(normalizeBarcodeText(value).toUpperCase());
-  }
-
   return (
     <form action={formAction} className="rounded border border-line bg-white p-5 shadow-panel">
       <input type="hidden" name="barcode" value={barcode} />
       <input type="hidden" name="productId" value={productId} />
       <input type="hidden" name="movementType" value={movementType} />
+      <input type="hidden" name="staffBarcode" value={staffBarcode} />
 
       <div className="mb-4">
-        <p className="text-xs font-semibold text-accent">2. 担当者確認</p>
-        <h2 className="mt-1 text-xl font-semibold">担当者バーコードを読んでから入出庫を確定</h2>
+        <p className="text-xs font-semibold text-accent">3. 入出庫確認</p>
+        <h2 className="mt-1 text-xl font-semibold">数量と理由を確認して確定</h2>
         <p className="mt-2 text-sm text-muted">
-          商品バーコードは読み取り済みです。次に実際に作業する担当者バーコードを読み取り、数量と理由を確認してください。
+          確定後も同じ担当者のまま、次の商品バーコードを続けて読み取れます。
         </p>
       </div>
 
       <section className="mb-5 rounded border border-blue-100 bg-blue-50 p-4">
-        <label className="grid gap-2 text-sm font-semibold text-blue-900">
-          担当者バーコード
-          <input
-            ref={staffInputRef}
-            autoFocus
-            autoComplete="off"
-            className="h-12 rounded border border-blue-200 bg-white px-3 font-mono text-base text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
-            maxLength={64}
-            name="staffBarcode"
-            value={staffBarcode}
-            onInput={(event) => updateStaffBarcode(event.currentTarget.value)}
-            onChange={(event) => updateStaffBarcode(event.target.value)}
-            onCompositionEnd={(event) => updateStaffBarcode(event.currentTarget.value)}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") {
-                event.preventDefault();
-                updateStaffBarcode(event.currentTarget.value);
-              }
-            }}
-            placeholder="STAFF-0001"
-            required
-          />
-        </label>
-        {staffBarcode ? (
-          <p className="mt-2 rounded border border-blue-200 bg-white px-3 py-2 text-xs font-semibold text-blue-900">
-            担当者バーコード読み取り済み: <span className="font-mono">{staffBarcode}</span>
+        <div className="flex flex-col gap-2 text-xs font-semibold text-blue-900 sm:flex-row sm:items-center sm:justify-between">
+          <p>
+            担当者バーコード: <span className="font-mono">{staffBarcode}</span>
           </p>
-        ) : null}
-        <p className="mt-2 text-xs leading-5 text-blue-800">
-          ログインユーザーとは別に、実際に作業した担当者を履歴へ残します。複数クリニックで作業する担当者は、管理画面で利用できるクリニックを追加します。
-        </p>
+          <button
+            type="button"
+            onClick={clearStaffBarcode}
+            className="self-start rounded border border-blue-200 bg-white px-3 py-1 text-xs font-semibold text-blue-900 transition hover:border-blue-400 sm:self-auto"
+          >
+            担当者を変更
+          </button>
+        </div>
+        <p className="mt-2 text-xs leading-5 text-blue-800">在庫確定時に、この担当者バーコードをサーバー側で再検証します。</p>
       </section>
 
       <div className="grid gap-5 lg:grid-cols-[1fr_1fr]">

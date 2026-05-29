@@ -10,6 +10,9 @@ type BarcodeSearchFormProps = {
   autoSubmitOnScan?: boolean;
   autoSubmitDelayMs?: number;
   clearHref?: string;
+  inputId?: string;
+  label?: string;
+  placeholder?: string;
 };
 
 export function BarcodeSearchForm({
@@ -19,6 +22,9 @@ export function BarcodeSearchForm({
   autoSubmitOnScan = false,
   autoSubmitDelayMs = 350,
   clearHref = "/barcode",
+  inputId,
+  label = "バーコード",
+  placeholder = "JAN / GTIN / バーコード",
 }: BarcodeSearchFormProps) {
   const formRef = useRef<HTMLFormElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -184,14 +190,15 @@ export function BarcodeSearchForm({
       className="rounded border border-line bg-white p-5 shadow-panel"
     >
       <label className="grid gap-2 text-sm font-semibold text-muted">
-        バーコード
+        {label}
         <div className="grid gap-3 md:grid-cols-[1fr_auto_auto]">
           <input
+            id={inputId}
             ref={inputRef}
             type="search"
             name="barcode"
             defaultValue={defaultBarcode}
-            placeholder="JAN / GTIN / バーコード"
+            placeholder={placeholder}
             autoFocus={autoFocusInput}
             autoComplete="off"
             spellCheck={false}

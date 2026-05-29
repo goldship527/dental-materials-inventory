@@ -4,8 +4,8 @@ import { AppNav } from "@/components/domain/app-nav";
 import { analyzeBarcodeInput } from "@/lib/barcode/gs1";
 import { searchProductsByBarcode } from "@/lib/db/barcodes";
 import { requireActiveClinic } from "@/lib/db/clinic";
-import { BarcodeSearchForm } from "../barcode-search-form";
 import { BarcodeStockForm } from "./barcode-stock-form";
+import { BarcodeStockStaffFlow } from "./barcode-stock-staff-flow";
 
 type PageProps = {
   searchParams?: Promise<{
@@ -104,116 +104,110 @@ export default async function BarcodeStockPage({ searchParams }: PageProps) {
         </header>
 
 
-        <BarcodeSearchForm
-          defaultBarcode={barcode}
-          actionPath="/barcode/stock"
-          autoFocusInput={!selectedProduct}
-          autoSubmitOnScan
-          clearHref="/barcode/stock"
-        />
+        <BarcodeStockStaffFlow barcode={barcode}>
+          {!barcode ? (
+            <section className="rounded border border-line bg-white p-5 text-sm text-muted shadow-panel">
+              <p className="font-semibold text-ink">3. 商品バーコードを読み取ってください。</p>
+              <p className="mt-2">商品が1件に特定できたら、入出庫区分、数量、理由を確認して確定します。</p>
+            </section>
+          ) : null}
 
-        {!barcode ? (
-          <section className="rounded border border-line bg-white p-5 text-sm text-muted shadow-panel">
-            <p className="font-semibold text-ink">1. 商品バーコードを読み取ってください。</p>
-            <p className="mt-2">商品が1件に特定できたら、次の画面で担当者バーコードを読み取って入出庫を確定します。</p>
-          </section>
-        ) : null}
+          {barcode && results.length === 0 ? (
+            <section className="rounded border border-warning/30 bg-yellow-50 p-5 text-sm text-warning shadow-panel">
+              <p className="font-semibold">商品が見つかりませんでした。</p>
+              <a className="mt-4 inline-flex h-11 items-center rounded border border-warning/30 bg-white px-4 font-semibold" href={`/barcode?barcode=${encodeURIComponent(barcode)}`}>
+                商品検索へ
+              </a>
+            </section>
+          ) : null}
 
-        {barcode && results.length === 0 ? (
-          <section className="rounded border border-warning/30 bg-yellow-50 p-5 text-sm text-warning shadow-panel">
-            <p className="font-semibold">商品が見つかりませんでした。</p>
-            <a className="mt-4 inline-flex h-11 items-center rounded border border-warning/30 bg-white px-4 font-semibold" href={`/barcode?barcode=${encodeURIComponent(barcode)}`}>
-              商品検索へ
-            </a>
-          </section>
-        ) : null}
-
-        {barcode && results.length > 1 ? (
-          <section className="rounded border border-warning/30 bg-yellow-50 p-5 text-sm text-warning shadow-panel">
-            <p className="font-semibold">複数の商品に一致しました。</p>
-            <div className="mt-4 grid gap-3 md:grid-cols-2">
-              {results.map((row) => (
-                <a
-                  key={row.productId}
-                  className="rounded border border-warning/30 bg-white p-4 font-semibold text-ink transition hover:border-warning"
-                  href={`/products/${row.productId}`}
-                >
-                  {row.productName}
-                  <p className="mt-1 text-xs font-normal text-muted">{row.productCode ?? "コード未設定"} / JAN {row.janCode ?? "-"}</p>
-                </a>
-              ))}
-            </div>
-          </section>
-        ) : null}
-
-        {selectedProduct && status ? (
-          <section className="grid gap-6 lg:grid-cols-[1fr_1fr]">
-            <article className="rounded border border-line bg-white p-5 shadow-panel">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                <div>
-                  <p className="text-sm font-semibold text-muted">読み取り結果</p>
-                  <h2 className="mt-2 text-2xl font-semibold">{selectedProduct.productName}</h2>
-                  <p className="mt-2 text-sm text-muted">
-                    {selectedProduct.productCode ?? "コード未設定"} / JAN {selectedProduct.janCode ?? "-"}
-                  </p>
-                </div>
-                <span className={`shrink-0 rounded px-3 py-1 text-xs font-semibold ${status.className}`}>
-                  {status.label}
-                </span>
+          {barcode && results.length > 1 ? (
+            <section className="rounded border border-warning/30 bg-yellow-50 p-5 text-sm text-warning shadow-panel">
+              <p className="font-semibold">複数の商品に一致しました。</p>
+              <div className="mt-4 grid gap-3 md:grid-cols-2">
+                {results.map((row) => (
+                  <a
+                    key={row.productId}
+                    className="rounded border border-warning/30 bg-white p-4 font-semibold text-ink transition hover:border-warning"
+                    href={`/products/${row.productId}`}
+                  >
+                    {row.productName}
+                    <p className="mt-1 text-xs font-normal text-muted">{row.productCode ?? "コード未設定"} / JAN {row.janCode ?? "-"}</p>
+                  </a>
+                ))}
               </div>
+            </section>
+          ) : null}
 
-              <dl className="mt-6 grid gap-4 sm:grid-cols-2">
-                <div className="rounded border border-line px-4 py-3">
-                  <dt className="text-xs font-semibold text-muted">現在庫</dt>
-                  <dd className="mt-1 text-3xl font-semibold">{selectedProduct.quantity}</dd>
+          {selectedProduct && status ? (
+            <section className="grid gap-6 lg:grid-cols-[1fr_1fr]">
+              <article className="rounded border border-line bg-white p-5 shadow-panel">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <p className="text-sm font-semibold text-muted">読み取り結果</p>
+                    <h2 className="mt-2 text-2xl font-semibold">{selectedProduct.productName}</h2>
+                    <p className="mt-2 text-sm text-muted">
+                      {selectedProduct.productCode ?? "コード未設定"} / JAN {selectedProduct.janCode ?? "-"}
+                    </p>
+                  </div>
+                  <span className={`shrink-0 rounded px-3 py-1 text-xs font-semibold ${status.className}`}>
+                    {status.label}
+                  </span>
                 </div>
-                <div className="rounded border border-line px-4 py-3">
-                  <dt className="text-xs font-semibold text-muted">最低在庫</dt>
-                  <dd className="mt-1 text-3xl font-semibold">{selectedProduct.minStock}</dd>
-                </div>
-                <div className="rounded border border-line px-4 py-3">
-                  <dt className="text-xs font-semibold text-muted">保管場所</dt>
-                  <dd className="mt-1 text-sm">{selectedProduct.location ?? "-"}</dd>
-                </div>
-                <div className="rounded border border-line px-4 py-3">
-                  <dt className="text-xs font-semibold text-muted">主発注先</dt>
-                  <dd className="mt-1 text-sm">{selectedProduct.supplierName ?? "-"}</dd>
-                </div>
-              </dl>
 
-              <div className="mt-5 rounded bg-gray-50 px-4 py-3 text-xs text-muted">
-                読み取ったバーコード: <span className="font-mono text-ink">{barcode}</span>
-              </div>
-              {barcodeAnalysis?.lotNumber || barcodeAnalysis?.expiryDateText || barcodeAnalysis?.expiryDate ? (
-                <div className="mt-3 rounded border border-blue-100 bg-blue-50 px-4 py-3 text-xs text-blue-900">
-                  <p className="font-semibold">ロット・有効期限情報を検出しました。</p>
-                  <p className="mt-1">
-                    ロット: <span className="font-mono">{barcodeAnalysis.lotNumber ?? "-"}</span> / 有効期限:{" "}
-                    <span className="font-mono">{formatLotExpiryDate(barcodeAnalysis.expiryDate, barcodeAnalysis.expiryDateText)}</span>
-                  </p>
-                  <p className="mt-1 text-blue-800">
-                    入庫時はロット別在庫にも反映します。出庫時は同じロットの在庫がある場合だけ確定できます。
-                  </p>
-                </div>
-              ) : null}
-              {selectedProduct.matchedBarcodes.length > 0 ? (
-                <div className="mt-3 flex flex-wrap gap-2 text-xs text-muted">
-                  {selectedProduct.matchedBarcodes.map((match) => (
-                    <span key={`${match.source}-${match.barcode}`} className="rounded bg-gray-50 px-2 py-1">
-                      {match.barcodeType} / {match.unitLabel ?? "-"}
-                    </span>
-                  ))}
-                </div>
-              ) : null}
-            </article>
+                <dl className="mt-6 grid gap-4 sm:grid-cols-2">
+                  <div className="rounded border border-line px-4 py-3">
+                    <dt className="text-xs font-semibold text-muted">現在庫</dt>
+                    <dd className="mt-1 text-3xl font-semibold">{selectedProduct.quantity}</dd>
+                  </div>
+                  <div className="rounded border border-line px-4 py-3">
+                    <dt className="text-xs font-semibold text-muted">最低在庫</dt>
+                    <dd className="mt-1 text-3xl font-semibold">{selectedProduct.minStock}</dd>
+                  </div>
+                  <div className="rounded border border-line px-4 py-3">
+                    <dt className="text-xs font-semibold text-muted">保管場所</dt>
+                    <dd className="mt-1 text-sm">{selectedProduct.location ?? "-"}</dd>
+                  </div>
+                  <div className="rounded border border-line px-4 py-3">
+                    <dt className="text-xs font-semibold text-muted">主発注先</dt>
+                    <dd className="mt-1 text-sm">{selectedProduct.supplierName ?? "-"}</dd>
+                  </div>
+                </dl>
 
-            <BarcodeStockForm
-              barcode={barcode}
-              productId={selectedProduct.productId}
-              currentQuantity={selectedProduct.quantity}
-            />
-          </section>
-        ) : null}
+                <div className="mt-5 rounded bg-gray-50 px-4 py-3 text-xs text-muted">
+                  読み取ったバーコード: <span className="font-mono text-ink">{barcode}</span>
+                </div>
+                {barcodeAnalysis?.lotNumber || barcodeAnalysis?.expiryDateText || barcodeAnalysis?.expiryDate ? (
+                  <div className="mt-3 rounded border border-blue-100 bg-blue-50 px-4 py-3 text-xs text-blue-900">
+                    <p className="font-semibold">ロット・有効期限情報を検出しました。</p>
+                    <p className="mt-1">
+                      ロット: <span className="font-mono">{barcodeAnalysis.lotNumber ?? "-"}</span> / 有効期限:{" "}
+                      <span className="font-mono">{formatLotExpiryDate(barcodeAnalysis.expiryDate, barcodeAnalysis.expiryDateText)}</span>
+                    </p>
+                    <p className="mt-1 text-blue-800">
+                      入庫時はロット別在庫にも反映します。出庫時は同じロットの在庫がある場合だけ確定できます。
+                    </p>
+                  </div>
+                ) : null}
+                {selectedProduct.matchedBarcodes.length > 0 ? (
+                  <div className="mt-3 flex flex-wrap gap-2 text-xs text-muted">
+                    {selectedProduct.matchedBarcodes.map((match) => (
+                      <span key={`${match.source}-${match.barcode}`} className="rounded bg-gray-50 px-2 py-1">
+                        {match.barcodeType} / {match.unitLabel ?? "-"}
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
+              </article>
+
+              <BarcodeStockForm
+                barcode={barcode}
+                productId={selectedProduct.productId}
+                currentQuantity={selectedProduct.quantity}
+              />
+            </section>
+          ) : null}
+        </BarcodeStockStaffFlow>
       </div>
     </main>
   );
