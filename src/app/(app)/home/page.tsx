@@ -166,9 +166,9 @@ export default async function HomePage() {
                 src={item.imageSrc}
                 alt=""
                 aria-hidden="true"
-                className="pointer-events-none absolute inset-y-0 right-0 h-full w-2/3 object-cover object-right opacity-20"
+                className="pointer-events-none absolute inset-y-0 right-0 h-full w-2/3 object-cover object-right opacity-35"
               />
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-white via-white/90 to-white/60" />
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-white via-white/85 to-white/25" />
               <div className="relative z-10 flex items-start justify-between gap-3">
                 <p className="text-xl font-semibold">{item.title}</p>
                 <span
