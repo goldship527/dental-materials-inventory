@@ -68,13 +68,6 @@ export default async function HomePage() {
       badge: `発注予定 ${plannedOrderRequestCount} 件`,
       tone: plannedOrderRequestCount > 0 ? "warning" : "normal",
     },
-    {
-      title: "バーコード出入庫",
-      description: "読み取り後に数量と理由を確認して記録します",
-      href: "/barcode/stock",
-      badge: "読取",
-      tone: "normal",
-    },
   ];
   const attentionItems = [
     {
@@ -208,7 +201,7 @@ export default async function HomePage() {
           </div>
         </header>
 
-        <section className="grid gap-3 print:hidden sm:grid-cols-2 lg:grid-cols-4">
+        <section className="grid gap-3 print:hidden sm:grid-cols-2 lg:grid-cols-3">
           {primaryActionItems.map((item) => (
             <a
               key={item.href}
