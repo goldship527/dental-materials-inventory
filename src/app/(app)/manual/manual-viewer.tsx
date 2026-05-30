@@ -111,12 +111,14 @@ function SectionPanel({
   isOpen,
   query,
   onToggle,
+  onBackToControls,
   sectionRef,
 }: {
   section: ManualSection;
   isOpen: boolean;
   query: string;
   onToggle: () => void;
+  onBackToControls: () => void;
   sectionRef: (element: HTMLDivElement | null) => void;
 }) {
   return (
@@ -138,6 +140,15 @@ function SectionPanel({
           {section.blocks.map((block, index) => (
             <ManualBlockView key={index} block={block} query={query} />
           ))}
+          <div className="mt-6 border-t border-line pt-4">
+            <button
+              type="button"
+              onClick={onBackToControls}
+              className="min-h-11 rounded border border-line bg-white px-4 text-sm font-semibold text-accent transition hover:border-accent hover:bg-teal-50"
+            >
+              目次へ戻る
+            </button>
+          </div>
         </div>
       ) : null}
     </section>
@@ -148,6 +159,7 @@ export function ManualViewer({ markdown }: { markdown: string }) {
   const doc = useMemo(() => parseManual(markdown), [markdown]);
   const [query, setQuery] = useState("");
   const [openIds, setOpenIds] = useState<Set<string>>(() => new Set());
+  const controlsRef = useRef<HTMLElement | null>(null);
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const normalizedQuery = query.trim().toLowerCase();
   const visibleSections = normalizedQuery
@@ -183,6 +195,10 @@ export function ManualViewer({ markdown }: { markdown: string }) {
     setOpenIds(new Set());
   }
 
+  function scrollToControls() {
+    controlsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
   return (
     <div className="flex flex-col gap-5">
       <section className="rounded border border-line bg-white p-5 shadow-panel">
@@ -191,7 +207,7 @@ export function ManualViewer({ markdown }: { markdown: string }) {
         ))}
       </section>
 
-      <section className="rounded border border-line bg-white p-4 shadow-panel sm:p-5">
+      <section ref={controlsRef} className="scroll-mt-4 rounded border border-line bg-white p-4 shadow-panel sm:p-5">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
           <label className="flex flex-1 flex-col gap-2 text-sm font-semibold text-ink">
             マニュアル内検索
@@ -262,6 +278,7 @@ export function ManualViewer({ markdown }: { markdown: string }) {
                 isOpen={isOpen}
                 query={normalizedQuery}
                 onToggle={() => toggleSection(section.id)}
+                onBackToControls={scrollToControls}
                 sectionRef={(element) => {
                   sectionRefs.current[section.id] = element;
                 }}
@@ -274,6 +291,14 @@ export function ManualViewer({ markdown }: { markdown: string }) {
           一致する章がありません。検索語を短くするか、別の言葉で探してください。
         </section>
       )}
+
+      <button
+        type="button"
+        onClick={scrollToControls}
+        className="fixed bottom-4 right-4 z-30 min-h-11 rounded-full border border-accent bg-white px-4 text-sm font-semibold text-accent shadow-panel transition hover:bg-teal-50 focus:outline-none focus:ring-2 focus:ring-accent/30"
+      >
+        目次へ戻る
+      </button>
     </div>
   );
 }
