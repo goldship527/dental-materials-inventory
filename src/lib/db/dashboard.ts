@@ -43,6 +43,14 @@ export type DashboardSummary = {
     afterQuantity: number;
     createdAt: Date;
   } | null;
+  latestMovements: {
+    id: string;
+    productName: string;
+    movementType: string;
+    beforeQuantity: number;
+    afterQuantity: number;
+    createdAt: Date;
+  }[];
 };
 
 function createRepeatedShortageTrend(shortageCount: number): DashboardTrendPoint[] {
@@ -82,7 +90,7 @@ export async function getDashboardSummary(clinicId: string, organizationId?: str
     rows,
     favoriteCardCount,
     orderRequestStatusCounts,
-    latestMovement,
+    latestMovements,
     unresolvedBarcodeScanCount,
     expiringBarcodeScanCount,
     attentionStockLotCount,
@@ -109,11 +117,16 @@ export async function getDashboardSummary(clinicId: string, organizationId?: str
       },
     ),
     fallbackOnError(
-      prisma.stockMovement.findFirst({
+      prisma.stockMovement.findMany({
         where: {
           clinicId,
         },
-        include: {
+        select: {
+          id: true,
+          movementType: true,
+          beforeQuantity: true,
+          afterQuantity: true,
+          createdAt: true,
           product: {
             select: {
               name: true,
@@ -123,8 +136,9 @@ export async function getDashboardSummary(clinicId: string, organizationId?: str
         orderBy: {
           createdAt: "desc",
         },
+        take: 5,
       }),
-      null,
+      [],
     ),
     fallbackOnError(
       prisma.barcodeScanLog.count({
@@ -183,6 +197,7 @@ export async function getDashboardSummary(clinicId: string, organizationId?: str
   const zeroStockCount = rows.filter((row) => row.quantity === 0).length;
   const atMinStockCount = rows.filter((row) => row.isAtMin).length;
   const totalQuantity = rows.reduce((total, row) => total + row.quantity, 0);
+  const latestMovement = latestMovements[0] ?? null;
 
   return {
     stockItemCount: rows.length,
@@ -218,5 +233,13 @@ export async function getDashboardSummary(clinicId: string, organizationId?: str
           createdAt: latestMovement.createdAt,
         }
       : null,
+    latestMovements: latestMovements.map((movement) => ({
+      id: movement.id,
+      productName: movement.product.name,
+      movementType: movement.movementType,
+      beforeQuantity: movement.beforeQuantity,
+      afterQuantity: movement.afterQuantity,
+      createdAt: movement.createdAt,
+    })),
   };
 }

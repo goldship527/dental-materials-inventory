@@ -30,7 +30,6 @@ export default async function HomePage({ searchParams }: PageProps) {
   const params = (await searchParams) ?? {};
   const canUseAdminMode = isAdminRole(session.user.role);
   const summary = await getDashboardSummary(context.clinicId, context.organizationId);
-  const latestMovementAt = summary.latestMovement ? movementDateFormatter.format(summary.latestMovement.createdAt) : null;
   const plannedOrderRequestCount = summary.orderRequestStatusCounts.DRAFT + summary.orderRequestStatusCounts.CONFIRMED;
   const primaryActionItems = [
     {
@@ -235,26 +234,31 @@ export default async function HomePage({ searchParams }: PageProps) {
         </section>
 
         <section className="rounded border border-line bg-white p-5 shadow-panel">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-sm font-semibold text-muted">直近の在庫更新</p>
-              {summary.latestMovement ? (
-                <p className="mt-2 text-base">
-                  {summary.latestMovement.productName}{" "}
-                  <span className="text-muted">
-                    {summary.latestMovement.beforeQuantity} → {summary.latestMovement.afterQuantity}
-                  </span>
-                </p>
-              ) : (
-                <p className="mt-2 text-base text-muted">まだ在庫更新はありません。</p>
-              )}
-            </div>
-            {summary.latestMovement ? (
-              <div className="rounded bg-gray-50 px-4 py-3 text-sm text-muted">
-                {summary.latestMovement.movementType} / {latestMovementAt}
-              </div>
-            ) : null}
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-sm font-semibold text-muted">直近の在庫更新</p>
+            <a className="text-sm font-semibold text-accent hover:underline" href="/movements">
+              履歴を見る
+            </a>
           </div>
+          {summary.latestMovements.length > 0 ? (
+            <div className="mt-3 divide-y divide-line">
+              {summary.latestMovements.map((movement) => (
+                <div key={movement.id} className="grid gap-2 py-2.5 text-sm sm:grid-cols-[1fr_auto] sm:items-center">
+                  <p className="font-semibold text-ink">
+                    {movement.productName}{" "}
+                    <span className="font-normal text-muted">
+                      {movement.beforeQuantity} → {movement.afterQuantity}
+                    </span>
+                  </p>
+                  <p className="text-muted">
+                    {movement.movementType} / {movementDateFormatter.format(movement.createdAt)}
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="mt-2 text-base text-muted">まだ在庫更新はありません。</p>
+          )}
         </section>
 
         <section className="grid gap-3 print:hidden">
