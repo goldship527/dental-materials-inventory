@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { AppNav } from "@/components/domain/app-nav";
+import { isAdminRole } from "@/lib/auth/roles";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { getDashboardSummary } from "@/lib/db/dashboard";
 
@@ -12,7 +13,13 @@ const movementDateFormatter = new Intl.DateTimeFormat("ja-JP", {
   minute: "2-digit",
 });
 
-export default async function HomePage() {
+type PageProps = {
+  searchParams?: Promise<{
+    adminDenied?: string;
+  }>;
+};
+
+export default async function HomePage({ searchParams }: PageProps) {
   const session = await auth();
 
   if (!session?.user) {
@@ -20,6 +27,8 @@ export default async function HomePage() {
   }
 
   const context = await requireActiveClinic();
+  const params = (await searchParams) ?? {};
+  const canUseAdminMode = isAdminRole(session.user.role);
   const summary = await getDashboardSummary(context.clinicId, context.organizationId);
   const latestMovementAt = summary.latestMovement ? movementDateFormatter.format(summary.latestMovement.createdAt) : null;
   const plannedOrderRequestCount = summary.orderRequestStatusCounts.DRAFT + summary.orderRequestStatusCounts.CONFIRMED;
@@ -107,8 +116,8 @@ export default async function HomePage() {
       badge: `${summary.stockItemCount} 件`,
     },
     {
-      title: "バーコード管理",
-      description: "検索、未登録整理、読取履歴",
+      title: "バーコード検索",
+      description: "読み取り検索と出入庫",
       href: "/barcode",
     },
     {
@@ -126,10 +135,17 @@ export default async function HomePage() {
       description: "実在庫の入力と確定",
       href: "/stocktake/sessions",
     },
+  ];
+  const adminMenuItems = [
     {
       title: "初期設定",
       description: "商品、発注先、バーコード、最低在庫",
       href: "/setup",
+    },
+    {
+      title: "取込確認",
+      description: "医療機器データとテストラベル",
+      href: "/imports/medical-devices",
     },
     {
       title: "未対応バーコード",
@@ -137,6 +153,11 @@ export default async function HomePage() {
       href: "/barcode/scans/unresolved",
       badge: `${summary.unresolvedBarcodeScanCount} 件`,
       isWarning: summary.unresolvedBarcodeScanCount > 0,
+    },
+    {
+      title: "担当者管理",
+      description: "クイック出庫用のスタッフ登録",
+      href: "/admin/staff-operators",
     },
   ];
 
@@ -154,6 +175,12 @@ export default async function HomePage() {
             <p className="mt-2 text-sm text-muted">{session.user.name} としてログイン中</p>
           </div>
         </header>
+
+        {params.adminDenied ? (
+          <section className="rounded border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm font-semibold text-warning shadow-panel">
+            管理者専用の画面です。必要な場合は管理者に依頼してください。
+          </section>
+        ) : null}
 
         <section className="grid gap-3 print:hidden sm:grid-cols-2 lg:grid-cols-3">
           {primaryActionItems.map((item) => (
@@ -231,7 +258,7 @@ export default async function HomePage() {
         </section>
 
         <section className="grid gap-3 print:hidden">
-          <h2 className="text-lg font-semibold">その他の確認・設定</h2>
+          <h2 className="text-lg font-semibold">確認メニュー</h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {menuItems.map((item) => (
               <a
@@ -244,7 +271,7 @@ export default async function HomePage() {
                   {item.badge ? (
                     <span
                       className={
-                        item.isWarning
+                        "isWarning" in item && item.isWarning
                           ? "shrink-0 rounded bg-yellow-50 px-3 py-1 text-xs font-semibold text-warning"
                           : "shrink-0 rounded bg-gray-50 px-3 py-1 text-xs font-semibold text-muted"
                       }
@@ -258,6 +285,37 @@ export default async function HomePage() {
             ))}
           </div>
         </section>
+
+        {canUseAdminMode ? (
+          <section className="grid gap-3 print:hidden">
+            <h2 className="text-lg font-semibold">管理メニュー</h2>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {adminMenuItems.map((item) => (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  className="min-h-32 rounded border border-line bg-white p-5 shadow-panel transition hover:border-accent hover:shadow-md"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <p className="text-xl font-semibold">{item.title}</p>
+                    {item.badge ? (
+                      <span
+                        className={
+                          "isWarning" in item && item.isWarning
+                            ? "shrink-0 rounded bg-yellow-50 px-3 py-1 text-xs font-semibold text-warning"
+                            : "shrink-0 rounded bg-gray-50 px-3 py-1 text-xs font-semibold text-muted"
+                        }
+                      >
+                        {item.badge}
+                      </span>
+                    ) : null}
+                  </div>
+                  <p className="mt-3 text-sm leading-6 text-muted">{item.description}</p>
+                </a>
+              ))}
+            </div>
+          </section>
+        ) : null}
       </div>
     </main>
   );

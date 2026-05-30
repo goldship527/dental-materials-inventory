@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { AppNav } from "@/components/domain/app-nav";
+import { requireAdminUser } from "@/lib/auth/admin";
 import {
   type BarcodeScanLogRow,
   getBarcodeScanMatchTypeLabel,
@@ -55,6 +56,9 @@ export default async function UnresolvedBarcodeScansPage() {
     redirect("/login");
   }
 
+  await requireAdminUser({
+    unauthorizedRedirectTo: "/barcode",
+  });
   const context = await requireActiveClinic();
   const logs = await getUnresolvedBarcodeScanLogRows(context.clinicId);
 

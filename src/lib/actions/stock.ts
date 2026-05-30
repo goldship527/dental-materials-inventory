@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { requireAdminUser } from "@/lib/auth/admin";
 import { type ActiveClinicContext, requireActiveClinic } from "@/lib/db/clinic";
 import { prisma } from "@/lib/db/prisma";
 import { findActiveStaffOperatorByIdForClinic } from "@/lib/db/staff-operators";
@@ -456,6 +457,9 @@ export async function createStockItemWithStateAction(
   formData: FormData,
 ): Promise<StockActionState> {
   try {
+    await requireAdminUser({
+      unauthorizedRedirectTo: "/products",
+    });
     const context = await requireActiveClinic();
     const input = parseCreateStockItemInput(formData);
     const result = await createStockItemForContext(context, input);

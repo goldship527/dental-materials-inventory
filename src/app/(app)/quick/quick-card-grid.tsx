@@ -42,11 +42,7 @@ export function QuickCardGrid({ cards, staffOperators }: QuickCardGridProps) {
             <p className="text-sm text-muted">スタッフを選ぶまで、各カードの +1 / -1 は押せません。</p>
           ) : (
             <p className="text-sm text-danger">
-              有効なスタッフがありません。先に
-              <a className="font-semibold underline" href="/admin/staff-operators">
-                スタッフ管理
-              </a>
-              でスタッフを登録してください。
+              有効なスタッフがありません。管理者にスタッフ登録を依頼してください。
             </p>
           )}
         </div>

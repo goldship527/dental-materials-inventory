@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { auditActions, writeAuditLog } from "@/lib/audit/audit-log";
-import { requireActiveClinic } from "@/lib/db/clinic";
+import { requireAdminUser } from "@/lib/auth/admin";
 import { prisma } from "@/lib/db/prisma";
 
 const nullableTextSchema = z
@@ -271,7 +271,9 @@ export async function updateProductMasterWithStateAction(
   formData: FormData,
 ): Promise<ProductMasterActionState> {
   try {
-    const context = await requireActiveClinic();
+    const context = await requireAdminUser({
+      unauthorizedRedirectTo: "/products",
+    });
     const input = productMasterSchema.parse({
       productId: formData.get("productId"),
       name: formData.get("name") ?? "",
@@ -401,7 +403,9 @@ export async function createProductAction(
   formData: FormData,
 ): Promise<ProductMasterActionState> {
   try {
-    const context = await requireActiveClinic();
+    const context = await requireAdminUser({
+      unauthorizedRedirectTo: "/products",
+    });
     const input = createProductSchema.parse({
       name: formData.get("name") ?? "",
       productCode: formData.get("productCode") ?? "",

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { AppNav } from "@/components/domain/app-nav";
+import { isAdminRole } from "@/lib/auth/roles";
 import {
   getBarcodeScanMatchTypeLabel,
   getBarcodeScanResolveStatusClass,
@@ -60,6 +61,7 @@ export default async function BarcodeScansPage({ searchParams }: PageProps) {
   }
 
   const context = await requireActiveClinic();
+  const canManageBarcodeMaster = isAdminRole(session.user.role);
   const params = (await searchParams) ?? {};
   const resolveStatus = params.resolve === "unresolved" ? "UNRESOLVED" : undefined;
   const logs = await getRecentBarcodeScanLogRows(context.clinicId, {
@@ -77,9 +79,11 @@ export default async function BarcodeScansPage({ searchParams }: PageProps) {
             <h1 className="mt-2 text-3xl font-semibold">バーコード読み取り履歴</h1>
           </div>
           <div className="flex flex-wrap gap-3 text-sm font-semibold">
-            <a className="text-accent hover:underline" href="/barcode/scans/unresolved">
-              未対応
-            </a>
+            {canManageBarcodeMaster ? (
+              <a className="text-accent hover:underline" href="/barcode/scans/unresolved">
+                未対応
+              </a>
+            ) : null}
             <a className="text-accent hover:underline" href="/barcode">
               バーコード検索へ
             </a>

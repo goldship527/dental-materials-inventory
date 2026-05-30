@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { AppNav } from "@/components/domain/app-nav";
+import { requireAdminUser } from "@/lib/auth/admin";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { buildOnboardingSteps, getOnboardingSummary } from "@/lib/db/onboarding";
 
@@ -35,6 +36,9 @@ export default async function SetupPage() {
     redirect("/login");
   }
 
+  await requireAdminUser({
+    unauthorizedRedirectTo: "/home",
+  });
   const context = await requireActiveClinic();
   const summary = await getOnboardingSummary(context.organizationId, context.clinicId);
   const steps = buildOnboardingSteps(summary);

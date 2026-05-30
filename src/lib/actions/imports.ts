@@ -4,6 +4,7 @@ import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { requireAdminUser } from "@/lib/auth/admin";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { prisma } from "@/lib/db/prisma";
 import {
@@ -146,6 +147,9 @@ export async function createOrFindTestProductFromSampleForContext(input: {
 }
 
 export async function createTestProductFromSampleAction(formData: FormData) {
+  await requireAdminUser({
+    unauthorizedRedirectTo: "/barcode",
+  });
   const context = await requireActiveClinic();
   const input = createTestProductSchema.parse({
     janCode: formData.get("janCode"),

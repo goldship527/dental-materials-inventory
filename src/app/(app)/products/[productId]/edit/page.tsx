@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { AppNav } from "@/components/domain/app-nav";
+import { requireAdminUser } from "@/lib/auth/admin";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { getProductDetail, getProductSupplierOptions } from "@/lib/db/products";
 import { BarcodeManagement } from "./barcode-management";
@@ -23,8 +24,11 @@ export default async function ProductEditPage({ params, searchParams }: PageProp
     redirect("/login");
   }
 
-  const context = await requireActiveClinic();
   const { productId } = await params;
+  await requireAdminUser({
+    unauthorizedRedirectTo: `/products/${productId}`,
+  });
+  const context = await requireActiveClinic();
   const search = (await searchParams) ?? {};
   const newBarcode = search.newBarcode?.trim() ?? "";
   const [product, suppliers] = await Promise.all([

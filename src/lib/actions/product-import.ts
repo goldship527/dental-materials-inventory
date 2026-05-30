@@ -2,8 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { auditActions } from "@/lib/audit/audit-log";
+import { requireAdminUser } from "@/lib/auth/admin";
 import { buildProductImportPreview, type ProductImportPreview, type ProductImportSourceType } from "@/lib/imports/product-master-import";
-import { requireActiveClinic } from "@/lib/db/clinic";
 import { prisma } from "@/lib/db/prisma";
 
 export type ProductImportActionState = {
@@ -167,7 +167,9 @@ export async function previewProductImportAction(
   const fileName = String(formData.get("fileName") ?? "").trim();
 
   try {
-    const context = await requireActiveClinic();
+    const context = await requireAdminUser({
+      unauthorizedRedirectTo: "/products",
+    });
     const preview = await previewProductImportForContext({
       organizationId: context.organizationId,
       sourceText,
@@ -204,7 +206,9 @@ export async function confirmProductImportAction(
   const fileName = String(formData.get("fileName") ?? "").trim();
 
   try {
-    const context = await requireActiveClinic();
+    const context = await requireAdminUser({
+      unauthorizedRedirectTo: "/products",
+    });
     const result = await importProductsForContext({
       organizationId: context.organizationId,
       userId: context.userId,

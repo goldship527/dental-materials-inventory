@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { Ean13Barcode } from "@/components/domain/ean13-barcode";
 import { AppNav } from "@/components/domain/app-nav";
+import { requireAdminUser } from "@/lib/auth/admin";
 import { prisma } from "@/lib/db/prisma";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import {
@@ -45,6 +46,9 @@ export default async function MedicalDeviceImportPreviewPage({ searchParams }: P
     redirect("/login");
   }
 
+  await requireAdminUser({
+    unauthorizedRedirectTo: "/home",
+  });
   const context = await requireActiveClinic();
   const cacheResult = await readMedicalDeviceSampleCache();
   const params = (await searchParams) ?? {};

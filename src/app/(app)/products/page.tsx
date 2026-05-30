@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { AppNav } from "@/components/domain/app-nav";
+import { isAdminRole } from "@/lib/auth/roles";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { getProductCategories, getProductMasterRows } from "@/lib/db/products";
 import { isPurchaseHistoryImportSource } from "@/lib/products/import-source";
@@ -13,6 +14,7 @@ type PageProps = {
     attachBarcode?: string;
     source?: string;
     setup?: string;
+    adminDenied?: string;
   }>;
 };
 
@@ -68,6 +70,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
   }
 
   const context = await requireActiveClinic();
+  const canManageProducts = isAdminRole(session.user.role);
   const params = (await searchParams) ?? {};
   const query = params.q?.trim() ?? "";
   const category = params.category ?? "";
@@ -127,7 +130,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
             <h1 className="mt-2 text-3xl font-semibold">商品マスタ</h1>
           </div>
           <div className="grid w-full grid-cols-1 gap-3 sm:flex sm:w-auto sm:shrink-0 sm:flex-wrap">
-            {!attachBarcode ? (
+            {canManageProducts && !attachBarcode ? (
               <>
                 <a
                   className="inline-flex min-h-11 items-center justify-center rounded bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-800"
@@ -151,6 +154,12 @@ export default async function ProductsPage({ searchParams }: PageProps) {
             </a>
           </div>
         </header>
+
+        {params.adminDenied ? (
+          <section className="rounded border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm font-semibold text-warning shadow-panel">
+            商品マスタの作成・編集は管理者専用です。必要な場合は管理者に依頼してください。
+          </section>
+        ) : null}
 
 
         <ProductFilterForm
@@ -178,12 +187,14 @@ export default async function ProductsPage({ searchParams }: PageProps) {
                 >
                   登録商品を見る
                 </a>
-                <a
-                  className="inline-flex min-h-10 items-center justify-center rounded bg-accent px-3 py-2 text-sm font-semibold text-white transition hover:bg-teal-800"
-                  href="/products/import/purchase-history/setup"
-                >
-                  まとめて整える
-                </a>
+                {canManageProducts ? (
+                  <a
+                    className="inline-flex min-h-10 items-center justify-center rounded bg-accent px-3 py-2 text-sm font-semibold text-white transition hover:bg-teal-800"
+                    href="/products/import/purchase-history/setup"
+                  >
+                    まとめて整える
+                  </a>
+                ) : null}
               </div>
             </div>
           </section>
@@ -220,7 +231,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
                   <th className="border-b border-line px-4 py-3 text-right">納品待ち</th>
                   <th className="border-b border-line px-4 py-3 text-right">最低在庫</th>
                   <th className="border-b border-line px-4 py-3">保管場所</th>
-                  {attachBarcode ? <th className="border-b border-line px-4 py-3">紐づけ</th> : null}
+                  {canManageProducts && attachBarcode ? <th className="border-b border-line px-4 py-3">紐づけ</th> : null}
                 </tr>
               </thead>
               <tbody>
@@ -242,7 +253,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
                         <p className="mt-1 text-xs text-muted">
                           {row.productCode ?? "コード未設定"} / JAN {row.janCode ?? "-"}
                         </p>
-                        {isPurchaseHistoryImportSource(row.importSource) ? (
+                        {canManageProducts && isPurchaseHistoryImportSource(row.importSource) ? (
                           <div className="mt-2 flex flex-wrap gap-2">
                             <span className="inline-flex rounded bg-teal-50 px-2 py-1 text-xs font-semibold text-accent">
                               購入履歴から登録
@@ -311,7 +322,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
                         )}
                       </td>
                       <td className="border-b border-line px-4 py-3">{row.location ?? "-"}</td>
-                      {attachBarcode ? (
+                      {canManageProducts && attachBarcode ? (
                         <td className="border-b border-line px-4 py-3">
                           <a
                             className="inline-flex min-h-11 items-center justify-center rounded bg-accent px-3 py-2 text-xs font-semibold text-white transition hover:bg-teal-800"
@@ -325,7 +336,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
                   ))
                 ) : (
                   <tr>
-                    <td className="px-4 py-12 text-center text-muted" colSpan={attachBarcode ? 13 : 12}>
+                    <td className="px-4 py-12 text-center text-muted" colSpan={canManageProducts && attachBarcode ? 13 : 12}>
                       条件に一致する商品はありません。
                     </td>
                   </tr>

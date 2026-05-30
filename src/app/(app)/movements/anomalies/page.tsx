@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { AppNav } from "@/components/domain/app-nav";
+import { isAdminRole } from "@/lib/auth/roles";
 import { getOrganizationSettings } from "@/lib/db/organization-settings";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { getStockAnomalies } from "@/lib/db/stock-anomalies";
@@ -37,6 +38,7 @@ export default async function StockAnomaliesPage() {
   }
 
   const context = await requireActiveClinic();
+  const canManageSettings = isAdminRole(session.user.role);
   const settings = await getOrganizationSettings(context.organizationId);
   const anomalies = await getStockAnomalies(context.organizationId, context.clinicId, {
     threshold: settings.anomalyOutThreshold,
@@ -57,12 +59,14 @@ export default async function StockAnomaliesPage() {
             </p>
           </div>
           <div className="flex flex-wrap gap-2 text-sm font-semibold">
-            <a
-              className="inline-flex h-11 items-center rounded border border-line px-4 text-muted transition hover:border-accent hover:text-accent"
-              href="/admin/settings"
-            >
-              閾値設定
-            </a>
+            {canManageSettings ? (
+              <a
+                className="inline-flex h-11 items-center rounded border border-line px-4 text-muted transition hover:border-accent hover:text-accent"
+                href="/admin/settings"
+              >
+                閾値設定
+              </a>
+            ) : null}
             <a
               className="inline-flex h-11 items-center rounded border border-line px-4 text-muted transition hover:border-accent hover:text-accent"
               href="/movements"

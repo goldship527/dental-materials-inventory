@@ -4,6 +4,7 @@ import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { markMatchingBarcodeScanLogsLinkedForContext } from "@/lib/actions/barcode-scan-logs";
+import { requireAdminUser } from "@/lib/auth/admin";
 import { normalizeBarcodeText } from "@/lib/barcode/normalize";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { prisma } from "@/lib/db/prisma";
@@ -160,6 +161,9 @@ export async function createProductBarcodeWithStateAction(
   formData: FormData,
 ): Promise<BarcodeActionState> {
   try {
+    await requireAdminUser({
+      unauthorizedRedirectTo: "/barcode",
+    });
     const context = await requireActiveClinic();
     const input = createBarcodeSchema.parse({
       productId: formData.get("productId"),
@@ -222,6 +226,9 @@ export async function updateProductBarcodeWithStateAction(
   formData: FormData,
 ): Promise<BarcodeActionState> {
   try {
+    await requireAdminUser({
+      unauthorizedRedirectTo: "/barcode",
+    });
     const context = await requireActiveClinic();
     const input = updateBarcodeSchema.parse({
       productId: formData.get("productId"),
@@ -298,6 +305,9 @@ export async function unlinkProductBarcodeWithStateAction(
   formData: FormData,
 ): Promise<BarcodeActionState> {
   try {
+    await requireAdminUser({
+      unauthorizedRedirectTo: "/barcode",
+    });
     const context = await requireActiveClinic();
     const input = unlinkBarcodeSchema.parse({
       productId: formData.get("productId"),

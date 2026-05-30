@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { requireAdminUser } from "@/lib/auth/admin";
 import { type ActiveClinicContext, requireActiveClinic } from "@/lib/db/clinic";
 import { prisma } from "@/lib/db/prisma";
 import {
@@ -151,6 +152,9 @@ export async function uploadProductPhotoAction(
   formData: FormData,
 ): Promise<ProductPhotoActionState> {
   try {
+    await requireAdminUser({
+      unauthorizedRedirectTo: "/products",
+    });
     const context = await requireActiveClinic();
     const input = productPhotoSchema.parse({
       productId: formData.get("productId"),
@@ -181,6 +185,9 @@ export async function deleteProductPhotoAction(
   formData: FormData,
 ): Promise<ProductPhotoActionState> {
   try {
+    await requireAdminUser({
+      unauthorizedRedirectTo: "/products",
+    });
     const context = await requireActiveClinic();
     const input = productPhotoSchema.parse({
       productId: formData.get("productId"),

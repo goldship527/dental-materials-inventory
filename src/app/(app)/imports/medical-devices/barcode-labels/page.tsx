@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { Ean13Barcode } from "@/components/domain/ean13-barcode";
 import { AppNav } from "@/components/domain/app-nav";
+import { requireAdminUser } from "@/lib/auth/admin";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { filterMedicalDeviceSampleRecords, readMedicalDeviceSampleCache } from "@/lib/imports/medical-device-samples";
 import { BarcodePrintButton } from "../barcode-print-button";
@@ -40,6 +41,9 @@ export default async function MedicalDeviceBarcodeLabelsPage({ searchParams }: P
     redirect("/login");
   }
 
+  await requireAdminUser({
+    unauthorizedRedirectTo: "/home",
+  });
   const context = await requireActiveClinic();
   const cacheResult = await readMedicalDeviceSampleCache();
   const params = (await searchParams) ?? {};

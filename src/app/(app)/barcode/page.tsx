@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { AppNav } from "@/components/domain/app-nav";
 import { createBarcodeScanLogAction } from "@/lib/actions/barcode-scan-logs";
 import { createTestProductFromSampleAction } from "@/lib/actions/imports";
+import { isAdminRole } from "@/lib/auth/roles";
 import { analyzeBarcodeInput } from "@/lib/barcode/gs1";
 import { searchProductsByBarcode } from "@/lib/db/barcodes";
 import { requireActiveClinic } from "@/lib/db/clinic";
@@ -64,6 +65,7 @@ export default async function BarcodePage({ searchParams }: PageProps) {
   }
 
   const context = await requireActiveClinic();
+  const canManageBarcodeMaster = isAdminRole(session.user.role);
   const params = (await searchParams) ?? {};
   const barcode = params.barcode?.trim() ?? "";
   const scanLogStatus = params.scanLog ?? "";
@@ -96,9 +98,11 @@ export default async function BarcodePage({ searchParams }: PageProps) {
             <a className="inline-flex h-11 items-center justify-center rounded bg-accent px-4 text-sm font-semibold text-white transition hover:bg-teal-800" href={`/barcode/stock${barcode ? `?barcode=${encodeURIComponent(barcode)}` : ""}`}>
               出入庫
             </a>
-            <a className="inline-flex h-11 items-center justify-center rounded border border-line px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent" href="/barcode/scans/unresolved">
-              未対応を整理
-            </a>
+            {canManageBarcodeMaster ? (
+              <a className="inline-flex h-11 items-center justify-center rounded border border-line px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent" href="/barcode/scans/unresolved">
+                未対応を整理
+              </a>
+            ) : null}
             <a className="inline-flex h-11 items-center justify-center rounded border border-line px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent" href="/barcode/scans">
               読み取り履歴
             </a>
@@ -287,29 +291,33 @@ export default async function BarcodePage({ searchParams }: PageProps) {
                         </div>
                       </div>
                       <div className="flex flex-wrap gap-2 md:justify-end">
-                        <a
-                          className="rounded border border-line bg-white px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
-                          href={`/imports/medical-devices?q=${encodeURIComponent(sample.janCode)}`}
-                        >
-                          取込確認で見る
-                        </a>
-                        <form action={createTestProductFromSampleAction}>
-                          <input type="hidden" name="janCode" value={sample.janCode} />
-                          <input type="hidden" name="sourceFile" value={sample.sourceFile} />
-                          <input type="hidden" name="sourceRow" value={sample.sourceRow} />
-                          <button
-                            type="submit"
-                            className="rounded bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-800"
-                          >
-                            テスト商品として在庫に追加
-                          </button>
-                        </form>
-                        <a
-                          className="rounded border border-line bg-white px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
-                          href={attachBarcodeHref}
-                        >
-                          既存商品へ紐づける
-                        </a>
+                        {canManageBarcodeMaster ? (
+                          <>
+                            <a
+                              className="rounded border border-line bg-white px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+                              href={`/imports/medical-devices?q=${encodeURIComponent(sample.janCode)}`}
+                            >
+                              取込確認で見る
+                            </a>
+                            <form action={createTestProductFromSampleAction}>
+                              <input type="hidden" name="janCode" value={sample.janCode} />
+                              <input type="hidden" name="sourceFile" value={sample.sourceFile} />
+                              <input type="hidden" name="sourceRow" value={sample.sourceRow} />
+                              <button
+                                type="submit"
+                                className="rounded bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-800"
+                              >
+                                テスト商品として在庫に追加
+                              </button>
+                            </form>
+                            <a
+                              className="rounded border border-line bg-white px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+                              href={attachBarcodeHref}
+                            >
+                              既存商品へ紐づける
+                            </a>
+                          </>
+                        ) : null}
                       </div>
                     </article>
                   ))}
@@ -320,6 +328,7 @@ export default async function BarcodePage({ searchParams }: PageProps) {
                 <p>
                   該当する商品は見つかりませんでした。
                 </p>
+                {canManageBarcodeMaster ? (
                 <div>
                   <a
                     className="inline-flex rounded bg-accent px-5 py-3 text-sm font-semibold text-white transition hover:bg-teal-800"
@@ -328,6 +337,7 @@ export default async function BarcodePage({ searchParams }: PageProps) {
                     商品を探して紐づける
                   </a>
                 </div>
+                ) : null}
               </div>
             )}
           </section>

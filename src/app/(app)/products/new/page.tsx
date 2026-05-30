@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { AppNav } from "@/components/domain/app-nav";
+import { requireAdminUser } from "@/lib/auth/admin";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { getProductSupplierOptions } from "@/lib/db/products";
 import { ProductCreateForm } from "./product-create-form";
@@ -12,6 +13,9 @@ export default async function ProductNewPage() {
     redirect("/login");
   }
 
+  await requireAdminUser({
+    unauthorizedRedirectTo: "/products",
+  });
   const context = await requireActiveClinic();
   const suppliers = await getProductSupplierOptions(context.organizationId);
 

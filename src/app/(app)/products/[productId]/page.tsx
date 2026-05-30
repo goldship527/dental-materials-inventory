@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { AppNav } from "@/components/domain/app-nav";
+import { isAdminRole } from "@/lib/auth/roles";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { getProductDetail } from "@/lib/db/products";
 import { getStockMovementSourceLabel, getStockMovementTypeLabel } from "@/lib/db/stock-movements";
@@ -13,6 +14,9 @@ import { ProductStockItemCreateForm } from "./product-stock-item-create-form";
 type PageProps = {
   params: Promise<{
     productId: string;
+  }>;
+  searchParams?: Promise<{
+    adminDenied?: string;
   }>;
 };
 
@@ -127,7 +131,7 @@ function getStockStatus(currentQuantity: number, minStock: number, hasStockItem:
   };
 }
 
-export default async function ProductDetailPage({ params }: PageProps) {
+export default async function ProductDetailPage({ params, searchParams }: PageProps) {
   const session = await auth();
 
   if (!session?.user) {
@@ -135,6 +139,8 @@ export default async function ProductDetailPage({ params }: PageProps) {
   }
 
   const context = await requireActiveClinic();
+  const paramsValue = (await searchParams) ?? {};
+  const canManageProducts = isAdminRole(session.user.role);
   const { productId } = await params;
   const product = await getProductDetail(productId, context.organizationId, context.clinicId);
 
@@ -174,15 +180,22 @@ export default async function ProductDetailPage({ params }: PageProps) {
             <h1 className="mt-2 text-3xl font-semibold">{product.name}</h1>
           </div>
           <div className="flex flex-wrap gap-3 text-sm font-semibold">
-            <a className="text-accent hover:underline" href={`/products/${product.id}/edit`}>
-              編集する
-            </a>
+            {canManageProducts ? (
+              <a className="text-accent hover:underline" href={`/products/${product.id}/edit`}>
+                編集する
+              </a>
+            ) : null}
             <a className="text-accent hover:underline" href="/products">
               商品マスタへ戻る
             </a>
           </div>
         </header>
 
+        {paramsValue.adminDenied ? (
+          <section className="rounded border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm font-semibold text-warning shadow-panel">
+            商品マスタの編集は管理者専用です。必要な場合は管理者に依頼してください。
+          </section>
+        ) : null}
 
         <section className="rounded border border-line bg-white p-4 shadow-panel">
           <div className="grid gap-4 md:grid-cols-[128px_1fr] md:items-center">
@@ -199,12 +212,14 @@ export default async function ProductDetailPage({ params }: PageProps) {
             )}
             <div>
               <p className="text-sm font-semibold text-muted">商品写真</p>
-              <a className="mt-2 inline-flex text-sm font-semibold text-accent hover:underline" href={`/products/${product.id}/edit`}>
-                写真を編集する
-              </a>
+              {canManageProducts ? (
+                <a className="mt-2 inline-flex text-sm font-semibold text-accent hover:underline" href={`/products/${product.id}/edit`}>
+                  写真を編集する
+                </a>
+              ) : null}
             </div>
           </div>
-          {!product.hasStockItem ? (
+          {canManageProducts && !product.hasStockItem ? (
             <ProductStockItemCreateForm productId={product.id} defaultMinStock={product.defaultMinStock} />
           ) : null}
         </section>
@@ -313,12 +328,14 @@ export default async function ProductDetailPage({ params }: PageProps) {
                 過去90日の出庫実績、発注先リードタイム、安全在庫係数から計算した参考値です。自動では更新されません。
               </p>
             </div>
-            <a
-              className="inline-flex min-h-10 items-center justify-center rounded border border-line bg-white px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
-              href={`/products/${product.id}/edit`}
-            >
-              商品編集で確認
-            </a>
+            {canManageProducts ? (
+              <a
+                className="inline-flex min-h-10 items-center justify-center rounded border border-line bg-white px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+                href={`/products/${product.id}/edit`}
+              >
+                商品編集で確認
+              </a>
+            ) : null}
           </div>
           {product.recommendedMinStock.recommended !== null ? (
             <dl className="mt-4 grid gap-3 text-sm md:grid-cols-5">
@@ -475,9 +492,11 @@ export default async function ProductDetailPage({ params }: PageProps) {
                   ) : (
                     <span className="inline-flex flex-wrap items-center gap-2">
                       <span className="font-semibold text-danger">未設定</span>
-                      <a className="font-semibold text-accent hover:underline" href={`/products/${product.id}/edit`}>
-                        主発注先を設定
-                      </a>
+                      {canManageProducts ? (
+                        <a className="font-semibold text-accent hover:underline" href={`/products/${product.id}/edit`}>
+                          主発注先を設定
+                        </a>
+                      ) : null}
                     </span>
                   )}
                 </dd>
@@ -491,9 +510,11 @@ export default async function ProductDetailPage({ params }: PageProps) {
             <div className="mt-4 border-t border-line pt-3">
               <div className="flex items-center justify-between gap-3">
                 <h3 className="text-sm font-semibold text-ink">取扱発注先</h3>
-                <a className="text-xs font-semibold text-accent hover:underline" href={`/products/${product.id}/edit`}>
-                  編集
-                </a>
+                {canManageProducts ? (
+                  <a className="text-xs font-semibold text-accent hover:underline" href={`/products/${product.id}/edit`}>
+                    編集
+                  </a>
+                ) : null}
               </div>
               <div className="mt-2 grid gap-2">
                 {product.productSuppliers.length > 0 ? (
