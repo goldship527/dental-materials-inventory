@@ -6097,3 +6097,28 @@
 - PDF本文抽出で5ページ分の概要テキストを確認した。
 - PPTX本文抽出で5スライド分の概要テキストを確認した。
 - 秘密値系キーワード検索で問題になるヒットがないことを確認した。
+
+## 提案前整理と公開デモ確認（2026-06-02）
+
+### 作業内容
+- `login-visual-image` ブランチの内容を `master` へ統合した。
+- リモート `master` 側に既存PRマージ履歴があったため、`origin/master` を取り込んでから `master` へpushした。
+- 公開デモURL `https://dental-materials-inventory.vercel.app/login` がHTTP 200で応答することを確認した。
+- 未ログイン状態で `/home`、`/inventory`、`/shortage`、`/orders`、`/admin/overview` へアクセスすると、ログイン画面へ誘導されることを確認した。
+- ログイン画面HTMLに開発用メール `test@example.com`、`value="password"`、`DATABASE_URL`、`AUTH_SECRET`、`SUPABASE_SERVICE_ROLE_KEY` が含まれていないことを確認した。
+- `docs/customer-demo-guide.md` を、初回提案で使う10〜15分のデモ台本と、できること・できないことが明確になる構成へ更新した。
+
+### 判断
+- GitHub上では `origin/HEAD` が `origin/master` を指しているため、現時点の本線は `master` として扱った。
+- 公開デモのログイン後確認は、デモログイン情報をチャットやドキュメントに書かない方針を優先し、未ログインで確認できる範囲に留めた。
+- 追加実装よりも、提案時に伝える業務フロー、できること、まだ作らないことの整理を優先した。
+
+### セキュリティメモ
+- デモログインパスワード、Supabase接続文字列、Vercel環境変数の実値は確認ログやドキュメントに記載していない。
+- 公開ログイン画面に開発用ログイン値や秘密値が埋め込まれていないことを確認した。
+
+### 検証
+- `https://dental-materials-inventory.vercel.app/login` がHTTP 200で応答した。
+- 未ログインの主要保護ルートがログイン画面へ誘導されることを確認した。
+- `corepack pnpm typecheck` に成功した。
+- `corepack pnpm build` に成功した。
