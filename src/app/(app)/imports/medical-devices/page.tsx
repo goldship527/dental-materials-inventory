@@ -58,7 +58,7 @@ export default async function MedicalDeviceImportPreviewPage({ searchParams }: P
 
   if (cacheResult.status === "missing") {
     return (
-      <main className="min-h-screen bg-surface px-6 py-8 text-ink">
+      <main className="min-h-screen bg-surface px-4 py-6 text-ink sm:px-6 lg:px-8">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
           <AppNav current="imports" />
 
@@ -143,11 +143,11 @@ export default async function MedicalDeviceImportPreviewPage({ searchParams }: P
   }
 
   return (
-    <main className="min-h-screen bg-surface px-6 py-8 text-ink">
+    <main className="min-h-screen bg-surface px-4 py-6 text-ink sm:px-6 lg:px-8">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
         <AppNav current="imports" />
 
-        <header className="flex flex-col gap-3 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
+        <header className="flex flex-col gap-4 border-b border-line pb-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
             <h1 className="mt-2 text-3xl font-semibold">医療機器データ取り込みプレビュー</h1>
@@ -155,15 +155,15 @@ export default async function MedicalDeviceImportPreviewPage({ searchParams }: P
               取込サンプルを表示しています。
             </p>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 text-sm font-semibold">
             <a
-              className="rounded border border-line bg-white px-4 py-2 text-sm font-semibold text-ink transition hover:border-accent hover:bg-teal-50 hover:text-accent"
+              className="inline-flex h-11 items-center rounded border border-line bg-white px-4 text-ink transition hover:border-accent hover:bg-teal-50 hover:text-accent"
               href="/setup"
             >
               初期設定へ戻る
             </a>
             <a
-              className="rounded border border-line bg-white px-4 py-2 text-sm font-semibold text-ink transition hover:border-accent hover:bg-teal-50 hover:text-accent"
+              className="inline-flex h-11 items-center rounded border border-line bg-white px-4 text-ink transition hover:border-accent hover:bg-teal-50 hover:text-accent"
               href="/home"
             >
               ホームへ戻る
@@ -172,7 +172,7 @@ export default async function MedicalDeviceImportPreviewPage({ searchParams }: P
         </header>
 
 
-        <section className="grid gap-3 md:grid-cols-4">
+        <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <div className="rounded border border-line bg-white p-4 shadow-panel">
             <p className="text-xs font-semibold text-muted">読み取り件数</p>
             <p className="mt-1 text-2xl font-semibold">{cache.recordCount.toLocaleString()}</p>
@@ -193,13 +193,13 @@ export default async function MedicalDeviceImportPreviewPage({ searchParams }: P
 
         <ImportPreviewForm q={q} sourceFile={sourceFile} duplicateOnly={duplicateOnly} sourceFiles={sourceFiles} />
 
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded border border-line bg-white p-4 text-sm text-muted shadow-panel">
+        <div className="flex flex-col gap-3 rounded border border-line bg-white p-4 text-sm text-muted shadow-panel md:flex-row md:items-center md:justify-between">
           <p>
             最大100件を表示中。バーコード印刷画面では、同じ条件の先頭60件をテストラベルとして表示します。
           </p>
           <a
             href={buildLabelsHref(q, sourceFile, duplicateOnly)}
-            className="rounded bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-800"
+            className="inline-flex h-11 shrink-0 items-center justify-center rounded bg-accent px-4 text-sm font-semibold text-white transition hover:bg-teal-800"
           >
             バーコードテスト印刷へ
           </a>

@@ -179,22 +179,22 @@ export default async function MovementsPage({ searchParams }: PageProps) {
           {movementCount > movements.length ? " / 画面表示は最新100件までです" : ""}
         </section>
 
-        <section className="overflow-hidden rounded border border-line bg-white shadow-panel">
+        <section className="rounded border border-line bg-white shadow-panel">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[1320px] border-collapse text-left text-sm">
+            <table className="w-full min-w-[1120px] border-collapse text-left text-sm">
               <thead className="bg-gray-50 text-xs text-muted">
                 <tr>
-                  <th className="border-b border-line px-4 py-3">日時</th>
-                  <th className="border-b border-line px-4 py-3">商品</th>
-                  <th className="w-24 border-b border-line px-4 py-3">区分</th>
-                  <th className="border-b border-line px-4 py-3 text-right">増減</th>
-                  <th className="border-b border-line px-4 py-3 text-right">変更前</th>
-                  <th className="border-b border-line px-4 py-3 text-right">変更後</th>
-                  <th className="border-b border-line px-4 py-3">理由メモ</th>
-                  <th className="border-b border-line px-4 py-3">操作元</th>
-                  <th className="border-b border-line px-4 py-3">操作者</th>
-                  <th className="border-b border-line px-4 py-3">実作業者</th>
-                  <th className="border-b border-line px-4 py-3">取り消し</th>
+                  <th className="border-b border-line px-3 py-3">日時</th>
+                  <th className="border-b border-line px-3 py-3">商品</th>
+                  <th className="w-20 border-b border-line px-3 py-3">区分</th>
+                  <th className="border-b border-line px-3 py-3 text-right">増減</th>
+                  <th className="border-b border-line px-3 py-3 text-right">変更前</th>
+                  <th className="border-b border-line px-3 py-3 text-right">変更後</th>
+                  <th className="border-b border-line px-3 py-3">理由メモ</th>
+                  <th className="border-b border-line px-3 py-3">操作元</th>
+                  <th className="border-b border-line px-3 py-3">操作者</th>
+                  <th className="border-b border-line px-3 py-3">実作業者</th>
+                  <th className="border-b border-line px-3 py-3">取り消し</th>
                 </tr>
               </thead>
               <tbody>
@@ -209,10 +209,10 @@ export default async function MovementsPage({ searchParams }: PageProps) {
 
                     return (
                       <tr key={movement.id} className="align-top">
-                        <td className="border-b border-line px-4 py-3 text-muted">
+                        <td className="whitespace-nowrap border-b border-line px-3 py-3 text-muted">
                           {dateTimeFormatter.format(movement.createdAt)}
                         </td>
-                        <td className="border-b border-line px-4 py-3">
+                        <td className="border-b border-line px-3 py-3">
                           <a className="font-semibold text-accent hover:underline" href={`/products/${movement.productId}`}>
                             {movement.productName}
                           </a>
@@ -220,17 +220,17 @@ export default async function MovementsPage({ searchParams }: PageProps) {
                             {movement.productCode ?? "コード未設定"} / {movement.category ?? "未分類"}
                           </p>
                         </td>
-                        <td className="w-24 border-b border-line px-4 py-3">
+                        <td className="w-20 border-b border-line px-3 py-3">
                           <span className={`inline-flex whitespace-nowrap rounded px-2 py-1 text-xs font-semibold ${getMovementBadgeClass(movement.movementType)}`}>
                             {getStockMovementTypeLabel(movement.movementType)}
                           </span>
                         </td>
-                        <td className="border-b border-line px-4 py-3 text-right font-semibold">
+                        <td className="border-b border-line px-3 py-3 text-right font-semibold">
                           {formatSignedQuantity(movement.quantity)}
                         </td>
-                        <td className="border-b border-line px-4 py-3 text-right">{movement.beforeQuantity}</td>
-                        <td className="border-b border-line px-4 py-3 text-right">{movement.afterQuantity}</td>
-                        <td className="border-b border-line px-4 py-3 text-muted">
+                        <td className="border-b border-line px-3 py-3 text-right">{movement.beforeQuantity}</td>
+                        <td className="border-b border-line px-3 py-3 text-right">{movement.afterQuantity}</td>
+                        <td className="border-b border-line px-3 py-3 text-muted">
                           {movement.reason ?? "-"}
                           {movement.lotNumber || movement.expiryDateText || movement.expiryDate ? (
                             <p className="mt-1 text-xs">
@@ -239,7 +239,7 @@ export default async function MovementsPage({ searchParams }: PageProps) {
                             </p>
                           ) : null}
                         </td>
-                        <td className="border-b border-line px-4 py-3 text-muted">
+                        <td className="border-b border-line px-3 py-3 text-muted">
                           {getStockMovementSourceLabel(movement.sourceType)}
                           {movement.sourceType === "STOCKTAKE_SESSION" ? (
                             <p className="mt-1 text-xs text-danger">棚卸確定の履歴は取り消せません</p>
@@ -247,9 +247,9 @@ export default async function MovementsPage({ searchParams }: PageProps) {
                           {movement.revertedAt ? <p className="mt-1 text-xs text-muted">取り消し済み</p> : null}
                           {movement.revertOfId ? <p className="mt-1 text-xs text-muted">取り消し操作</p> : null}
                         </td>
-                        <td className="border-b border-line px-4 py-3 text-muted">{movement.userName}</td>
-                        <td className="border-b border-line px-4 py-3 text-muted">{movement.performedByStaffName ?? "-"}</td>
-                        <td className="border-b border-line px-4 py-3">
+                        <td className="border-b border-line px-3 py-3 text-muted">{movement.userName}</td>
+                        <td className="border-b border-line px-3 py-3 text-muted">{movement.performedByStaffName ?? "-"}</td>
+                        <td className="border-b border-line px-3 py-3">
                           {canRevert ? (
                             <RevertMovementButton
                               movementId={movement.id}

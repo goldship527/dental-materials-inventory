@@ -24,6 +24,8 @@ function valueOrEmpty(value: string | number | null) {
   return value === null ? "" : String(value);
 }
 
+const decisionFieldClass = "grid min-h-24 content-start gap-1 rounded border border-line bg-gray-50 p-3 text-sm font-semibold text-muted";
+
 export function ProductEditForm({ product, suppliers }: ProductEditFormProps) {
   const [state, formAction, isPending] = useActionState(updateProductMasterWithStateAction, initialState);
   const defaultMinStockInputRef = useRef<HTMLInputElement | null>(null);
@@ -217,7 +219,7 @@ export function ProductEditForm({ product, suppliers }: ProductEditFormProps) {
       <section className="rounded border border-line bg-white p-5 shadow-panel">
         <h2 className="text-lg font-semibold">発注・在庫判断</h2>
         <div className="mt-4 grid gap-4 md:grid-cols-2">
-          <label className="grid gap-1 text-sm font-semibold text-muted">
+          <label className={decisionFieldClass}>
             主発注先
             <select
               name="primarySupplierId"
@@ -235,7 +237,7 @@ export function ProductEditForm({ product, suppliers }: ProductEditFormProps) {
             {fieldError("primarySupplierId")}
           </label>
 
-          <label className="grid gap-1 text-sm font-semibold text-muted">
+          <label className={decisionFieldClass}>
             発注先側の商品コード
             <input
               name="supplierProductCode"
@@ -247,7 +249,7 @@ export function ProductEditForm({ product, suppliers }: ProductEditFormProps) {
             {fieldError("supplierProductCode")}
           </label>
 
-          <label className="grid gap-1 text-sm font-semibold text-muted">
+          <label className={decisionFieldClass}>
             標準価格
             <input
               type="number"
@@ -263,7 +265,7 @@ export function ProductEditForm({ product, suppliers }: ProductEditFormProps) {
             {fieldError("standardPrice")}
           </label>
 
-          <label className="grid gap-1 text-sm font-semibold text-muted">
+          <label className={decisionFieldClass}>
             標準の最低在庫
             <input
               ref={defaultMinStockInputRef}

@@ -57,50 +57,6 @@ export default async function HomePage({ searchParams }: PageProps) {
       imageSrc: "/images/home-actions/order-candidates.png",
     },
   ];
-  const attentionItems = [
-    {
-      title: "在庫0",
-      href: "/shortage",
-      value: `${summary.zeroStockCount} 件`,
-      note: "今日の使用前に優先確認したい材料",
-      isWarning: summary.zeroStockCount > 0,
-    },
-    {
-      title: "不足在庫",
-      href: "/shortage",
-      value: `${summary.shortageCount} 件`,
-      note: "最低在庫を下回っている材料",
-      isWarning: summary.shortageCount > 0,
-    },
-    {
-      title: "発注候補 発注予定",
-      href: "/orders",
-      value: `${plannedOrderRequestCount} 件`,
-      note: "これから発注する候補",
-      isWarning: plannedOrderRequestCount > 0,
-    },
-    {
-      title: "期限ロット",
-      href: "/stock-lots",
-      value: `${summary.attentionStockLotCount} 件`,
-      note: "期限切れまたは30日以内",
-      isWarning: summary.attentionStockLotCount > 0,
-    },
-    {
-      title: "長期在庫",
-      href: "/inventory/dormant",
-      value: `${summary.dormantStockCount} 件`,
-      note: "過去90日以内に出庫がない在庫",
-      isWarning: summary.dormantStockCount > 0,
-    },
-    {
-      title: "異常出庫検知",
-      href: "/movements/anomalies",
-      value: `${summary.stockAnomalyCount} 件`,
-      note: "通常より出庫数が多い商品",
-      isWarning: summary.stockAnomalyCount > 0,
-    },
-  ];
   const menuItems = [
     {
       title: "在庫一覧",
@@ -128,6 +84,27 @@ export default async function HomePage({ searchParams }: PageProps) {
       title: "入出庫履歴",
       description: "在庫変更の記録",
       href: "/movements",
+    },
+    {
+      title: "期限ロット",
+      description: "期限切れ、期限間近の確認",
+      href: "/stock-lots",
+      badge: `${summary.attentionStockLotCount} 件`,
+      isWarning: summary.attentionStockLotCount > 0,
+    },
+    {
+      title: "長期在庫",
+      description: "一定期間使われていない在庫",
+      href: "/inventory/dormant",
+      badge: `${summary.dormantStockCount} 件`,
+      isWarning: summary.dormantStockCount > 0,
+    },
+    {
+      title: "異常出庫検知",
+      description: "通常より多い出庫の確認",
+      href: "/movements/anomalies",
+      badge: `${summary.stockAnomalyCount} 件`,
+      isWarning: summary.stockAnomalyCount > 0,
     },
     {
       title: "棚卸",
@@ -210,27 +187,6 @@ export default async function HomePage({ searchParams }: PageProps) {
               <p className="relative z-10 mt-3 text-sm leading-6 text-muted">{item.description}</p>
             </a>
           ))}
-        </section>
-
-        <section className="grid gap-3">
-          <h2 className="text-lg font-semibold">今日の注意</h2>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            {attentionItems.map((item) => (
-              <a
-                key={item.title}
-                className="rounded border border-line bg-white p-4 shadow-panel transition hover:border-accent hover:shadow-md"
-                href={item.href}
-              >
-                <p className="text-sm font-semibold text-muted">{item.title}</p>
-                <p className={item.isWarning ? "mt-2 text-2xl font-semibold text-accent" : "mt-2 text-2xl font-semibold text-ink"}>
-                  {item.value}
-                </p>
-                <p className="mt-2 text-sm leading-6 text-muted">
-                  {item.note}
-                </p>
-              </a>
-            ))}
-          </div>
         </section>
 
         <section className="rounded border border-line bg-white p-5 shadow-panel">

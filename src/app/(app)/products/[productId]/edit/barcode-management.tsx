@@ -62,7 +62,7 @@ function BarcodeRow({ productId, barcode }: BarcodeRowProps) {
           <div>
             <p className="font-mono text-sm font-semibold">{barcode.barcode}</p>
             <p className="mt-1 text-xs text-muted">
-              {barcode.barcodeType} / {barcode.unitLabel ?? "単位未設定"} / 代表JAN
+              {barcode.barcodeType} / {barcode.unitLabel ?? "単位未設定"} / 代表バーコード
             </p>
           </div>
           <span className="rounded bg-white px-3 py-1 text-xs font-semibold text-muted">商品基本情報から表示</span>
@@ -113,7 +113,7 @@ function BarcodeRow({ productId, barcode }: BarcodeRowProps) {
               defaultChecked={barcode.isPrimary}
               className="h-4 w-4 rounded border-line text-accent"
             />
-            代表
+            代表バーコード
           </label>
         </div>
         <div className="flex flex-wrap items-center gap-3">
@@ -144,7 +144,7 @@ function BarcodeRow({ productId, barcode }: BarcodeRowProps) {
   );
 }
 
-export function BarcodeManagement({ productId, janCode, barcodes, defaultNewBarcode = "" }: BarcodeManagementProps) {
+export function BarcodeManagement({ productId, barcodes, defaultNewBarcode = "" }: BarcodeManagementProps) {
   const [createState, createAction, isCreatePending] = useActionState(
     createProductBarcodeWithStateAction,
     initialState,
@@ -160,12 +160,6 @@ export function BarcodeManagement({ productId, janCode, barcodes, defaultNewBarc
           登録 {barcodes.filter((barcode) => barcode.id).length} 件
         </span>
       </div>
-
-      {janCode ? (
-        <p className="mt-4 rounded bg-gray-50 px-3 py-2 text-xs text-muted">
-          商品基本情報の代表JAN: <span className="font-mono text-ink">{janCode}</span>
-        </p>
-      ) : null}
 
       {defaultNewBarcode ? (
         <p className="mt-4 rounded border border-warning/30 bg-yellow-50 px-3 py-2 text-xs text-warning">
@@ -222,7 +216,7 @@ export function BarcodeManagement({ productId, janCode, barcodes, defaultNewBarc
           </label>
           <label className="flex h-10 items-center gap-2 text-xs font-semibold text-muted">
             <input type="checkbox" name="isPrimary" className="h-4 w-4 rounded border-line text-accent" />
-            代表
+            代表バーコード
           </label>
         </div>
         <div className="flex flex-wrap items-center gap-3">
