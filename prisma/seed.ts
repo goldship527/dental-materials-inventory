@@ -97,6 +97,18 @@ function quantityFor(index: number, minStock: number) {
   return minStock + ((index * 3) % 8);
 }
 
+function branchQuantityFor(index: number, minStock: number) {
+  if (index < 3) {
+    return 0;
+  }
+
+  if (index < 8) {
+    return Math.max(1, minStock - 1);
+  }
+
+  return minStock + 1 + ((index * 5) % 6);
+}
+
 async function main() {
   await prisma.orderRequest.deleteMany();
   await prisma.orderRecord.deleteMany();
@@ -136,6 +148,15 @@ async function main() {
     },
   });
 
+  const branchClinic = await prisma.clinic.create({
+    data: {
+      organizationId: organization.id,
+      name: "テスト分院",
+      address: "開発用の架空住所 分院",
+      phone: "000-0000-0001",
+    },
+  });
+
   const passwordHash = await bcrypt.hash(demoLoginPassword, 12);
   const user = await prisma.user.create({
     data: {
@@ -148,11 +169,17 @@ async function main() {
     },
   });
 
-  await prisma.userClinicAssignment.create({
-    data: {
-      userId: user.id,
-      clinicId: clinic.id,
-    },
+  await prisma.userClinicAssignment.createMany({
+    data: [
+      {
+        userId: user.id,
+        clinicId: clinic.id,
+      },
+      {
+        userId: user.id,
+        clinicId: branchClinic.id,
+      },
+    ],
   });
 
   await prisma.staffOperator.create({
@@ -164,6 +191,20 @@ async function main() {
       clinicAssignments: {
         create: {
           clinicId: clinic.id,
+        },
+      },
+    },
+  });
+
+  await prisma.staffOperator.create({
+    data: {
+      organizationId: organization.id,
+      displayName: "テスト分院スタッフ",
+      barcode: "STAFF-0002",
+      operatorType: "REGULAR",
+      clinicAssignments: {
+        create: {
+          clinicId: branchClinic.id,
         },
       },
     },
@@ -231,6 +272,18 @@ async function main() {
         isUsed: true,
       },
     });
+
+    const branchQuantity = branchQuantityFor(index, defaultMinStock);
+    await prisma.stockItem.create({
+      data: {
+        clinicId: branchClinic.id,
+        productId: product.id,
+        quantity: branchQuantity,
+        minStock: index % 5 === 0 ? defaultMinStock + 2 : null,
+        location: `分院棚-${(index % 6) + 1}`,
+        isUsed: true,
+      },
+    });
   }
 
   for (const [index, product] of products.slice(0, 20).entries()) {
@@ -244,11 +297,23 @@ async function main() {
     });
   }
 
+  for (const [index, product] of products.slice(0, 12).entries()) {
+    await prisma.favoriteProductCard.create({
+      data: {
+        clinicId: branchClinic.id,
+        productId: product.id,
+        displayOrder: index + 1,
+        categoryTab: product.category,
+      },
+    });
+  }
+
   console.log("Seed completed");
   console.log(`Login email: ${user.email}`);
   console.log("Login password: value from DEMO_LOGIN_PASSWORD, or local default if unset");
+  console.log("Clinics: 2");
   console.log(`Products: ${products.length}`);
-  console.log("Intentional shortages: first 10 products");
+  console.log("Intentional shortages: first 10 products in main clinic, first 8 products in branch clinic");
 }
 
 main()
