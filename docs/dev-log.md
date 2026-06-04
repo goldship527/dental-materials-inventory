@@ -6166,3 +6166,16 @@
 ### 検証
 - `corepack pnpm prisma:generate` に成功した。
 - `corepack pnpm typecheck` に成功した。
+
+## Supabase使用中管理カラム反映（2026-06-04）
+
+### 作業内容
+- 公開環境の商品マスター系ページで、新規追加カラム未反映による表示エラーが起きる可能性があったため、Supabase DBへ使用中管理用カラムを反映した。
+- `.env.supabase.local` の `DATABASE_URL` は Supabase pooler 接続で、`prisma db push` は schema engine error で失敗した。
+- そのため、既存データを消さない `ALTER TABLE ... ADD COLUMN IF NOT EXISTS` で次の3列を追加した。
+  - `Product.stockUsageMode`
+  - `StockItem.inUseQuantity`
+  - `StockItem.discardedQuantity`
+
+### 検証
+- Supabase DBの `information_schema.columns` で、上記3列が存在することを確認した。
