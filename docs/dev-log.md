@@ -6143,6 +6143,8 @@
 ### 検証
 - `corepack pnpm typecheck` に成功した。
 - `corepack pnpm build` に成功した。
+- ローカルDBと開発サーバーを起動し、開発用ログイン後のHTTP確認で `/home`、`/inventory/dormant`、`/movements`、`/products/[productId]/edit`、`/imports/medical-devices` が 200 で返ることを確認した。
+- ホームに `/inventory/dormant` 導線が残っていること、入出庫履歴の表幅調整、商品編集の発注・在庫判断欄、取込確認のレスポンシブ配置がHTMLへ反映されていることを確認した。
 
 ## 使用頻度・出庫数集計の符号補正（2026-06-04）
 
@@ -6161,8 +6163,20 @@
 - `corepack pnpm exec tsx tests/recommended-min-stock.test.ts` に成功した。
 - `corepack pnpm exec tsx tests/stock-anomalies.test.ts` に成功した。
 - `corepack pnpm typecheck` に成功した。
-- ローカルDBと開発サーバーを起動し、開発用ログイン後のHTTP確認で `/home`、`/inventory/dormant`、`/movements`、`/products/[productId]/edit`、`/imports/medical-devices` が 200 で返ることを確認した。
-- ホームに `/inventory/dormant` 導線が残っていること、入出庫履歴の表幅調整、商品編集の発注・在庫判断欄、取込確認のレスポンシブ配置がHTMLへ反映されていることを確認した。
+
+## 商品マスター一覧の列順調整（2026-06-05）
+
+### 作業内容
+- 商品マスター一覧の表で、商品名の直後に現在庫、納品待ち、最低在庫、保管場所を表示するように列順を変更した。
+- カテゴリ、主発注先、発注単位、標準価格をその後に続け、メーカー、規格、バーコードは右側へ移動した。
+
+### 判断
+- 現場で一覧確認する時は、バーコードやメーカーよりも在庫数、補充判断、保管場所の優先度が高いため、左側に寄せた。
+- 表示順だけの変更とし、検索条件、保存処理、在庫更新処理、DBスキーマは変更していない。
+
+### 検証
+- `corepack pnpm typecheck` に成功した。
+- `corepack pnpm build` に成功した。
 
 ## 使用中管理の追加（2026-06-04）
 

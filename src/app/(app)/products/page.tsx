@@ -220,17 +220,17 @@ export default async function ProductsPage({ searchParams }: PageProps) {
               <thead className="bg-gray-50 text-xs text-muted">
                 <tr>
                   <th className="border-b border-line px-4 py-3">商品</th>
-                  <th className="border-b border-line px-4 py-3">カテゴリ</th>
-                  <th className="border-b border-line px-4 py-3">バーコード</th>
-                  <th className="border-b border-line px-4 py-3">メーカー</th>
-                  <th className="border-b border-line px-4 py-3">規格</th>
-                  <th className="border-b border-line px-4 py-3">発注単位</th>
-                  <th className="border-b border-line px-4 py-3">主発注先</th>
-                  <th className="border-b border-line px-4 py-3 text-right">標準価格</th>
                   <th className="border-b border-line px-4 py-3 text-right">現在庫</th>
                   <th className="border-b border-line px-4 py-3 text-right">納品待ち</th>
                   <th className="border-b border-line px-4 py-3 text-right">最低在庫</th>
                   <th className="border-b border-line px-4 py-3">保管場所</th>
+                  <th className="border-b border-line px-4 py-3">カテゴリ</th>
+                  <th className="border-b border-line px-4 py-3">主発注先</th>
+                  <th className="border-b border-line px-4 py-3">発注単位</th>
+                  <th className="border-b border-line px-4 py-3 text-right">標準価格</th>
+                  <th className="border-b border-line px-4 py-3">メーカー</th>
+                  <th className="border-b border-line px-4 py-3">規格</th>
+                  <th className="border-b border-line px-4 py-3">バーコード</th>
                   {canManageProducts && attachBarcode ? <th className="border-b border-line px-4 py-3">紐づけ</th> : null}
                 </tr>
               </thead>
@@ -269,40 +269,6 @@ export default async function ProductsPage({ searchParams }: PageProps) {
                           </div>
                         ) : null}
                       </td>
-                      <td className="border-b border-line px-4 py-3">{row.category ?? "-"}</td>
-                      <td className="border-b border-line px-4 py-3">
-                        {row.barcodes.length > 0 ? (
-                          <div className="grid gap-1">
-                            {row.barcodes.slice(0, 2).map((barcode) => (
-                              <div key={`${row.id}-${barcode.barcode}`}>
-                                <p className="font-mono text-xs">{barcode.barcode}</p>
-                                <p className="text-xs text-muted">{formatBarcodeLabel(barcode)}</p>
-                              </div>
-                            ))}
-                            {row.barcodes.length > 2 ? (
-                              <p className="text-xs text-muted">ほか {row.barcodes.length - 2} 件</p>
-                            ) : null}
-                          </div>
-                        ) : (
-                          "-"
-                        )}
-                      </td>
-                      <td className="border-b border-line px-4 py-3">{row.manufacturer ?? "-"}</td>
-                      <td className="border-b border-line px-4 py-3">{row.specification ?? "-"}</td>
-                      <td className="border-b border-line px-4 py-3">{row.orderUnit ?? "-"}</td>
-                      <td className="border-b border-line px-4 py-3">
-                        {row.supplierId && row.supplierName ? (
-                          <a className="font-semibold text-accent hover:underline" href={`/suppliers/${row.supplierId}`}>
-                            {row.supplierName}
-                          </a>
-                        ) : (
-                          <p>-</p>
-                        )}
-                        {row.supplierProductCode ? (
-                          <p className="mt-1 text-xs text-muted">{row.supplierProductCode}</p>
-                        ) : null}
-                      </td>
-                      <td className="border-b border-line px-4 py-3 text-right">{formatPrice(row.standardPrice)}</td>
                       <td className="border-b border-line px-4 py-3 text-right font-semibold">
                         {row.currentQuantity}
                       </td>
@@ -322,6 +288,40 @@ export default async function ProductsPage({ searchParams }: PageProps) {
                         )}
                       </td>
                       <td className="border-b border-line px-4 py-3">{row.location ?? "-"}</td>
+                      <td className="border-b border-line px-4 py-3">{row.category ?? "-"}</td>
+                      <td className="border-b border-line px-4 py-3">
+                        {row.supplierId && row.supplierName ? (
+                          <a className="font-semibold text-accent hover:underline" href={`/suppliers/${row.supplierId}`}>
+                            {row.supplierName}
+                          </a>
+                        ) : (
+                          <p>-</p>
+                        )}
+                        {row.supplierProductCode ? (
+                          <p className="mt-1 text-xs text-muted">{row.supplierProductCode}</p>
+                        ) : null}
+                      </td>
+                      <td className="border-b border-line px-4 py-3">{row.orderUnit ?? "-"}</td>
+                      <td className="border-b border-line px-4 py-3 text-right">{formatPrice(row.standardPrice)}</td>
+                      <td className="border-b border-line px-4 py-3">{row.manufacturer ?? "-"}</td>
+                      <td className="border-b border-line px-4 py-3">{row.specification ?? "-"}</td>
+                      <td className="border-b border-line px-4 py-3">
+                        {row.barcodes.length > 0 ? (
+                          <div className="grid gap-1">
+                            {row.barcodes.slice(0, 2).map((barcode) => (
+                              <div key={`${row.id}-${barcode.barcode}`}>
+                                <p className="font-mono text-xs">{barcode.barcode}</p>
+                                <p className="text-xs text-muted">{formatBarcodeLabel(barcode)}</p>
+                              </div>
+                            ))}
+                            {row.barcodes.length > 2 ? (
+                              <p className="text-xs text-muted">ほか {row.barcodes.length - 2} 件</p>
+                            ) : null}
+                          </div>
+                        ) : (
+                          "-"
+                        )}
+                      </td>
                       {canManageProducts && attachBarcode ? (
                         <td className="border-b border-line px-4 py-3">
                           <a
