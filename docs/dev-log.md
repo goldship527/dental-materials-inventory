@@ -6143,6 +6143,24 @@
 ### 検証
 - `corepack pnpm typecheck` に成功した。
 - `corepack pnpm build` に成功した。
+
+## テスト分院の非破壊追加スクリプト（2026-06-05）
+
+### 作業内容
+- 既存データを初期化せずに、`テスト法人` 配下へ `テスト分院` を追加するスクリプト `scripts/add-demo-branch-clinic.ts` を追加した。
+- 既存のアクティブユーザーをテスト分院へ割り当て、`テスト分院スタッフ` と担当者バーコード `STAFF-0002` を追加または再利用するようにした。
+- 既存の商品に対して、テスト分院用の在庫行とよく使う商品カードを不足気味のサンプル値で追加するようにした。
+- スクリプトは再実行しても、既存のクリニック、在庫行、ユーザー割当、スタッフ割当、よく使うカードを重複作成しないようにした。
+- ローカルDBでスクリプトを実行し、`テストクリニック` と `テスト分院` の2院構成になったことを確認した。
+
+### 判断
+- `corepack pnpm db:seed` は既存データを削除するため使わず、追加専用スクリプトにした。
+- 実在クリニック名や実在スタッフ名は使わず、架空の開発用データに限定した。
+
+### 検証
+- `corepack pnpm typecheck` に成功した。
+- `corepack pnpm exec tsx scripts/add-demo-branch-clinic.ts` に成功した。
+- 同じスクリプトの再実行でも `createdClinic: false`、`stockItemsCreated: 0` となり、重複追加されないことを確認した。
 - ローカルDBと開発サーバーを起動し、開発用ログイン後のHTTP確認で `/home`、`/inventory/dormant`、`/movements`、`/products/[productId]/edit`、`/imports/medical-devices` が 200 で返ることを確認した。
 - ホームに `/inventory/dormant` 導線が残っていること、入出庫履歴の表幅調整、商品編集の発注・在庫判断欄、取込確認のレスポンシブ配置がHTMLへ反映されていることを確認した。
 
