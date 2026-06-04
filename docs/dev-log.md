@@ -6143,6 +6143,24 @@
 ### 検証
 - `corepack pnpm typecheck` に成功した。
 - `corepack pnpm build` に成功した。
+
+## 使用頻度・出庫数集計の符号補正（2026-06-04）
+
+### 作業内容
+- 使用頻度ABC分析、推奨最低在庫、異常出庫検知で、`StockMovement.movementType = OUT` の数量を絶対値で集計するようにした。
+- 実際の出庫操作では `quantity` が `-1` のようにマイナスで記録されるため、従来の合計では過去90日の出庫数が0扱いになる場合があった。
+- 商品詳細ページにも、商品一覧と同じ `使用頻度 A/B/C` または `過去90日出庫なし` バッジを表示するようにした。
+- マイナス数量の出庫履歴でも、ABC分析、推奨最低在庫、異常出庫検知が正しく集計されるテストに更新した。
+
+### 判断
+- 入庫や在庫調整は使用頻度には含めず、従来通り `OUT` 履歴だけを対象にした。
+- `OUT` 履歴の保存値は画面操作ではマイナスになるため、集計側では絶対値を使うのが実データに合っていると判断した。
+
+### 検証
+- `corepack pnpm exec tsx tests/product-abc-ranks.test.ts` に成功した。
+- `corepack pnpm exec tsx tests/recommended-min-stock.test.ts` に成功した。
+- `corepack pnpm exec tsx tests/stock-anomalies.test.ts` に成功した。
+- `corepack pnpm typecheck` に成功した。
 - ローカルDBと開発サーバーを起動し、開発用ログイン後のHTTP確認で `/home`、`/inventory/dormant`、`/movements`、`/products/[productId]/edit`、`/imports/medical-devices` が 200 で返ることを確認した。
 - ホームに `/inventory/dormant` 導線が残っていること、入出庫履歴の表幅調整、商品編集の発注・在庫判断欄、取込確認のレスポンシブ配置がHTMLへ反映されていることを確認した。
 

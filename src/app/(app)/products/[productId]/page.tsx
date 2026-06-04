@@ -76,6 +76,30 @@ function formatBarcodeLabel(barcode: { barcodeType: string; unitLabel: string | 
   return pieces.join(" / ");
 }
 
+function getAbcRankBadgeText(rank: string) {
+  if (rank === "UNUSED") {
+    return "過去90日出庫なし";
+  }
+
+  return `使用頻度 ${rank}`;
+}
+
+function getAbcRankBadgeClass(rank: string) {
+  if (rank === "A") {
+    return "border-emerald-200 bg-emerald-50 text-accent";
+  }
+
+  if (rank === "B") {
+    return "border-sky-200 bg-sky-50 text-sky-700";
+  }
+
+  if (rank === "C") {
+    return "border-gray-200 bg-gray-50 text-muted";
+  }
+
+  return "border-line bg-white text-muted";
+}
+
 function formatLeadTime(leadTime: { avgDays: number; medianDays: number; sampleCount: number; isSampleSufficient: boolean } | null) {
   if (!leadTime) {
     return "平均納品日数: データ不足";
@@ -247,6 +271,14 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
                 {product.pendingOrders.totalQuantity > 0 ? (
                   <span className="rounded bg-yellow-50 px-3 py-1 text-xs font-semibold text-warning">
                     納品待ち {product.pendingOrders.totalQuantity}個
+                  </span>
+                ) : null}
+                <span className={`rounded border px-3 py-1 text-xs font-semibold ${getAbcRankBadgeClass(product.abcRank.rank)}`}>
+                  {getAbcRankBadgeText(product.abcRank.rank)}
+                </span>
+                {product.abcRank.rank !== "UNUSED" ? (
+                  <span className="rounded bg-gray-100 px-3 py-1 text-xs font-semibold text-muted">
+                    90日出庫 {product.abcRank.totalQuantity}
                   </span>
                 ) : null}
               </div>

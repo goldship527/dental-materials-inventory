@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db/prisma";
+import { sumOutQuantitiesByProduct } from "@/lib/stock/out-quantity";
 
 export type ProductAbcRank = "A" | "B" | "C" | "UNUSED";
 
@@ -95,7 +96,7 @@ export async function getProductAbcRanks(
   const days = options?.days ?? 90;
   const today = options?.today ?? new Date();
   const cutoff = getProductAbcCutoffDate(days, today);
-  const [products, movementGroups] = await Promise.all([
+  const [products, outMovements] = await Promise.all([
     prisma.product.findMany({
       where: {
         organizationId,
@@ -105,8 +106,7 @@ export async function getProductAbcRanks(
         id: true,
       },
     }),
-    prisma.stockMovement.groupBy({
-      by: ["productId"],
+    prisma.stockMovement.findMany({
       where: {
         clinicId,
         movementType: "OUT",
@@ -118,14 +118,13 @@ export async function getProductAbcRanks(
           isActive: true,
         },
       },
-      _sum: {
+      select: {
+        productId: true,
         quantity: true,
       },
     }),
   ]);
-  const quantityByProduct = new Map(
-    movementGroups.map((group) => [group.productId, group._sum.quantity ?? 0]),
-  );
+  const quantityByProduct = sumOutQuantitiesByProduct(outMovements);
 
   return calculateProductAbcRanks(
     products.map((product) => ({

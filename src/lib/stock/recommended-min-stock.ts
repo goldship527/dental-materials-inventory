@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db/prisma";
 import { getSupplierLeadTimes } from "@/lib/db/supplier-lead-times";
+import { sumOutQuantitiesByProduct } from "@/lib/stock/out-quantity";
 
 export type RecommendedMinStockSummary = {
   recommended: number | null;
@@ -74,7 +75,7 @@ export async function getRecommendedMinStocks(
   const fallbackLeadDays = options?.fallbackLeadDays ?? defaultLeadDays;
   const safetyFactor = options?.safetyFactor ?? defaultSafetyFactor;
   const cutoff = getRecommendedMinStockCutoffDate(days, today);
-  const [products, movementGroups, supplierLeadTimes] = await Promise.all([
+  const [products, outMovements, supplierLeadTimes] = await Promise.all([
     prisma.product.findMany({
       where: {
         organizationId,
@@ -85,8 +86,7 @@ export async function getRecommendedMinStocks(
         primarySupplierId: true,
       },
     }),
-    prisma.stockMovement.groupBy({
-      by: ["productId"],
+    prisma.stockMovement.findMany({
       where: {
         clinicId,
         movementType: "OUT",
@@ -98,15 +98,14 @@ export async function getRecommendedMinStocks(
           isActive: true,
         },
       },
-      _sum: {
+      select: {
+        productId: true,
         quantity: true,
       },
     }),
     getSupplierLeadTimes(organizationId),
   ]);
-  const totalOutByProduct = new Map(
-    movementGroups.map((group) => [group.productId, group._sum.quantity ?? 0]),
-  );
+  const totalOutByProduct = sumOutQuantitiesByProduct(outMovements);
 
   return Object.fromEntries(
     products.map((product) => {

@@ -1,5 +1,6 @@
 import { getOrganizationSettings } from "@/lib/db/organization-settings";
 import { prisma } from "@/lib/db/prisma";
+import { sumOutQuantitiesByProduct } from "@/lib/stock/out-quantity";
 
 export type StockAnomalyDecision = {
   isAnomaly: boolean;
@@ -64,9 +65,8 @@ export async function getStockAnomalies(
   const now = options?.now ?? new Date();
   const { baselineStart, recentStart } = getAnomalyWindows(now);
   const threshold = options?.threshold ?? (await getOrganizationSettings(organizationId)).anomalyOutThreshold;
-  const [baselineGroups, recentGroups, recentMovements] = await Promise.all([
-    prisma.stockMovement.groupBy({
-      by: ["productId"],
+  const [baselineMovements, recentMovements] = await Promise.all([
+    prisma.stockMovement.findMany({
       where: {
         clinicId,
         movementType: "OUT",
@@ -79,25 +79,8 @@ export async function getStockAnomalies(
           isActive: true,
         },
       },
-      _sum: {
-        quantity: true,
-      },
-    }),
-    prisma.stockMovement.groupBy({
-      by: ["productId"],
-      where: {
-        clinicId,
-        movementType: "OUT",
-        createdAt: {
-          gte: recentStart,
-          lte: now,
-        },
-        product: {
-          organizationId,
-          isActive: true,
-        },
-      },
-      _sum: {
+      select: {
+        productId: true,
         quantity: true,
       },
     }),
@@ -116,6 +99,7 @@ export async function getStockAnomalies(
       },
       select: {
         productId: true,
+        quantity: true,
         createdAt: true,
         user: {
           select: {
@@ -141,11 +125,10 @@ export async function getStockAnomalies(
       },
     }),
   ]);
+  const baselineOutQuantityByProduct = sumOutQuantitiesByProduct(baselineMovements);
+  const recentQuantityByProduct = sumOutQuantitiesByProduct(recentMovements);
   const baselineByProduct = new Map(
-    baselineGroups.map((group) => [group.productId, (group._sum.quantity ?? 0) / 30]),
-  );
-  const recentQuantityByProduct = new Map(
-    recentGroups.map((group) => [group.productId, group._sum.quantity ?? 0]),
+    Array.from(baselineOutQuantityByProduct.entries()).map(([productId, totalQuantity]) => [productId, totalQuantity / 30]),
   );
   const recentDetailsByProduct = new Map<
     string,
