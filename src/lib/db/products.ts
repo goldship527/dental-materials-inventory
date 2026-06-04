@@ -4,6 +4,7 @@ import { getProductAbcRanks, type ProductAbcRankSummary } from "@/lib/db/product
 import { getSupplierLeadTimes, type SupplierLeadTimeStats } from "@/lib/db/supplier-lead-times";
 import type { OrderSendMethodValue } from "@/lib/orders/send-method";
 import type { OrderRequestStatusValue } from "@/lib/orders/status";
+import { normalizeDemoSpecification } from "@/lib/products/demo-specification";
 import { productImportSources } from "@/lib/products/import-source";
 import {
   getRecommendedMinStocks,
@@ -333,7 +334,7 @@ export async function getProductMasterRows(organizationId: string, clinicId: str
       nameKana: product.nameKana,
       category: product.category,
       manufacturer: product.manufacturer,
-      specification: product.specification,
+      specification: normalizeDemoSpecification(product.specification, product.name, product.orderUnit),
       orderUnit: product.orderUnit,
       supplierId: product.primarySupplier?.id ?? null,
       supplierName: product.primarySupplier?.name ?? null,
@@ -572,7 +573,7 @@ export async function getProductDetail(
     nameKana: product.nameKana,
     category: product.category,
     manufacturer: product.manufacturer,
-    specification: product.specification,
+    specification: normalizeDemoSpecification(product.specification, product.name, product.orderUnit),
     orderUnit: product.orderUnit,
     supplierId: product.primarySupplier?.id ?? null,
     supplierName: product.primarySupplier?.name ?? null,

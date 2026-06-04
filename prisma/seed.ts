@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { buildDemoSpecification } from "../src/lib/products/demo-specification";
 
 const prisma = new PrismaClient();
 
@@ -236,7 +237,7 @@ async function main() {
         nameKana: name,
         category,
         manufacturer: `架空メーカー${(index % 6) + 1}`,
-        specification: `${orderUnit}単位の開発用データ`,
+        specification: buildDemoSpecification(name, orderUnit),
         orderUnit,
         primarySupplierId: supplier.id,
         supplierProductCode: `SUP-${String(index + 1).padStart(4, "0")}`,
