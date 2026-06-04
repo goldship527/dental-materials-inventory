@@ -102,6 +102,11 @@ export default async function InventoryPage({ searchParams }: PageProps) {
                     <td className="border-b border-line px-4 py-3">{row.category ?? "-"}</td>
                     <td className="border-b border-line px-4 py-3 text-right text-lg font-semibold">
                       {row.quantity}
+                      {row.stockUsageMode === "IN_USE" ? (
+                        <span className="mt-1 block text-xs font-semibold text-muted">
+                          使用中 {row.inUseQuantity} / 総数 {row.totalQuantity} / 廃棄済み累計 {row.discardedQuantity}
+                        </span>
+                      ) : null}
                     </td>
                     <td className="border-b border-line px-4 py-3 text-right">{row.minStock}</td>
                     <td className="border-b border-line px-4 py-3">

@@ -296,6 +296,20 @@ export function ProductEditForm({ product, suppliers }: ProductEditFormProps) {
               <p className="mt-2 text-xs text-muted">推奨: データ不足</p>
             )}
           </label>
+
+          <label className={decisionFieldClass}>
+            使用中管理
+            <select
+              name="stockUsageMode"
+              defaultValue={product.stockUsageMode}
+              aria-invalid={Boolean(getFieldError("stockUsageMode"))}
+              className={controlClass("stockUsageMode", "h-11 bg-white")}
+            >
+              <option value="NONE">なし</option>
+              <option value="IN_USE">あり</option>
+            </select>
+            {fieldError("stockUsageMode")}
+          </label>
         </div>
       </section>
 

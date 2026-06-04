@@ -200,6 +200,20 @@ export function ProductCreateForm({ suppliers }: ProductCreateFormProps) {
             />
             {fieldError("defaultMinStock")}
           </label>
+
+          <label className="grid gap-1 text-sm font-semibold text-muted">
+            使用中管理
+            <select
+              name="stockUsageMode"
+              defaultValue="NONE"
+              aria-invalid={Boolean(getFieldError("stockUsageMode"))}
+              className={controlClass("stockUsageMode", "h-11 bg-white")}
+            >
+              <option value="NONE">なし</option>
+              <option value="IN_USE">あり</option>
+            </select>
+            {fieldError("stockUsageMode")}
+          </label>
         </div>
       </section>
 

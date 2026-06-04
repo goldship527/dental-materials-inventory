@@ -4,11 +4,13 @@ import { AppNav } from "@/components/domain/app-nav";
 import { isAdminRole } from "@/lib/auth/roles";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { getProductDetail } from "@/lib/db/products";
+import { getActiveStaffOperatorOptionsForClinic } from "@/lib/db/staff-operators";
 import { getStockMovementSourceLabel, getStockMovementTypeLabel } from "@/lib/db/stock-movements";
 import { orderSendMethodLabels } from "@/lib/orders/send-method";
 import { createEmptyOrderRequestStatusCounts, orderRequestStatusLabels, printableOrderRequestStatuses } from "@/lib/orders/status";
 import { buildProductPhotoUrl } from "@/lib/product-photos/url";
 import { ProductOrderRequestButton } from "./product-order-request-button";
+import { ProductStockUsagePanel } from "./product-stock-usage-panel";
 import { ProductStockItemCreateForm } from "./product-stock-item-create-form";
 
 type PageProps = {
@@ -142,7 +144,13 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
   const paramsValue = (await searchParams) ?? {};
   const canManageProducts = isAdminRole(session.user.role);
   const { productId } = await params;
-  const product = await getProductDetail(productId, context.organizationId, context.clinicId);
+  const [product, staffOperators] = await Promise.all([
+    getProductDetail(productId, context.organizationId, context.clinicId),
+    getActiveStaffOperatorOptionsForClinic({
+      organizationId: context.organizationId,
+      clinicId: context.clinicId,
+    }),
+  ]);
 
   if (!product) {
     notFound();
@@ -243,7 +251,7 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
                 ) : null}
               </div>
               <p className="mt-2 text-sm text-muted">
-                {stockStatus.description}。現在庫 {product.currentQuantity} / 最低在庫 {product.minStock}
+                {stockStatus.description}。{product.stockUsageMode === "IN_USE" ? "使用可能" : "現在庫"} {product.currentQuantity} / 最低在庫 {product.minStock}
                 {shortageCount > 0 ? ` / 不足 ${shortageCount}` : ""}
               </p>
             </div>
@@ -289,9 +297,14 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
 
         <section className="grid gap-3 md:grid-cols-4">
           <div className="rounded border border-line bg-white p-4 shadow-panel">
-            <p className="text-sm font-semibold text-muted">現在庫</p>
+            <p className="text-sm font-semibold text-muted">{product.stockUsageMode === "IN_USE" ? "使用可能" : "現在庫"}</p>
             <p className="mt-1 text-3xl font-semibold">{product.currentQuantity}</p>
             <p className="mt-1 text-sm text-muted">保管場所 {product.location ?? "-"}</p>
+            {product.stockUsageMode === "IN_USE" ? (
+              <p className="mt-2 text-sm font-semibold text-muted">
+                使用中 {product.inUseQuantity} / 総数 {product.totalQuantity} / 廃棄済み累計 {product.discardedQuantity}
+              </p>
+            ) : null}
           </div>
           <div className="rounded border border-line bg-white p-4 shadow-panel">
             <p className="text-sm font-semibold text-muted">最低在庫</p>
@@ -319,6 +332,16 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
             </p>
           </div>
         </section>
+
+        {product.stockUsageMode === "IN_USE" && product.stockItemId ? (
+          <ProductStockUsagePanel
+            stockItemId={product.stockItemId}
+            availableQuantity={product.currentQuantity}
+            inUseQuantity={product.inUseQuantity}
+            discardedQuantity={product.discardedQuantity}
+            staffOperators={staffOperators}
+          />
+        ) : null}
 
         <section className="rounded border border-line bg-white p-4 shadow-panel">
           <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
@@ -592,6 +615,7 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
                       </p>
                     ) : null}
                     {movement.reason ? <p className="text-muted">{movement.reason}</p> : null}
+                    {movement.memo ? <p className="text-muted">{movement.memo}</p> : null}
                   </div>
                 ))
               ) : (

@@ -27,7 +27,11 @@ export type ProductMasterRow = {
   supplierProductCode: string | null;
   standardPrice: number | null;
   defaultMinStock: number;
+  stockUsageMode: string;
   currentQuantity: number;
+  inUseQuantity: number;
+  discardedQuantity: number;
+  totalQuantity: number;
   minStock: number;
   hasStockItem: boolean;
   stockItemId: string | null;
@@ -104,6 +108,7 @@ export type ProductDetailMovement = {
   beforeQuantity: number;
   afterQuantity: number;
   reason: string | null;
+  memo: string | null;
   sourceType: string | null;
   lotNumber: string | null;
   expiryDateText: string | null;
@@ -260,6 +265,8 @@ export async function getProductMasterRows(organizationId: string, clinicId: str
           select: {
             id: true,
             quantity: true,
+            inUseQuantity: true,
+            discardedQuantity: true,
             minStock: true,
             location: true,
           },
@@ -299,6 +306,8 @@ export async function getProductMasterRows(organizationId: string, clinicId: str
   return products.map((product) => {
     const stockItem = product.stockItems[0];
     const currentQuantity = stockItem?.quantity ?? 0;
+    const inUseQuantity = stockItem?.inUseQuantity ?? 0;
+    const discardedQuantity = stockItem?.discardedQuantity ?? 0;
     const minStock = stockItem?.minStock ?? product.defaultMinStock;
     const barcodes =
       product.barcodes.length > 0
@@ -331,7 +340,11 @@ export async function getProductMasterRows(organizationId: string, clinicId: str
       supplierProductCode: product.supplierProductCode,
       standardPrice: product.standardPrice,
       defaultMinStock: product.defaultMinStock,
+      stockUsageMode: product.stockUsageMode,
       currentQuantity,
+      inUseQuantity,
+      discardedQuantity,
+      totalQuantity: currentQuantity + inUseQuantity,
       minStock,
       hasStockItem: Boolean(stockItem),
       stockItemId: stockItem?.id ?? null,
@@ -389,12 +402,14 @@ export async function getProductDetail(
           clinicId,
           isUsed: true,
         },
-        select: {
-          id: true,
-          quantity: true,
-          minStock: true,
-          location: true,
-        },
+          select: {
+            id: true,
+            quantity: true,
+            inUseQuantity: true,
+            discardedQuantity: true,
+            minStock: true,
+            location: true,
+          },
       },
       barcodes: {
         select: {
@@ -503,6 +518,8 @@ export async function getProductDetail(
 
   const stockItem = product.stockItems[0];
   const currentQuantity = stockItem?.quantity ?? 0;
+  const inUseQuantity = stockItem?.inUseQuantity ?? 0;
+  const discardedQuantity = stockItem?.discardedQuantity ?? 0;
   const minStock = stockItem?.minStock ?? product.defaultMinStock;
   const barcodes =
     product.barcodes.length > 0
@@ -562,7 +579,11 @@ export async function getProductDetail(
     supplierProductCode: product.supplierProductCode,
     standardPrice: product.standardPrice,
     defaultMinStock: product.defaultMinStock,
+    stockUsageMode: product.stockUsageMode,
     currentQuantity,
+    inUseQuantity,
+    discardedQuantity,
+    totalQuantity: currentQuantity + inUseQuantity,
     minStock,
     hasStockItem: Boolean(stockItem),
     stockItemId: stockItem?.id ?? null,
@@ -611,6 +632,7 @@ export async function getProductDetail(
       beforeQuantity: movement.beforeQuantity,
       afterQuantity: movement.afterQuantity,
       reason: movement.reason,
+      memo: movement.memo,
       sourceType: movement.sourceType,
       lotNumber: movement.lotNumber,
       expiryDateText: movement.expiryDateText,

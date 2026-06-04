@@ -30,6 +30,14 @@ const sourceOptions = [
   { value: "REVERT", label: "履歴取り消し" },
 ];
 
+typeOptions.push(
+  { value: "START_USE", label: "使用開始" },
+  { value: "END_USE", label: "使用終了" },
+  { value: "DISCARD", label: "廃棄" },
+);
+
+sourceOptions.push({ value: "STOCK_USAGE", label: "使用中管理" });
+
 export function MovementFilterForm({
   categories,
   defaultQuery,

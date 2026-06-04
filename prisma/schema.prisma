@@ -13,16 +13,16 @@ model Organization {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  clinics                Clinic[]
-  users                  User[]
-  staffOperators         StaffOperator[]
-  products               Product[]
-  productSuppliers       ProductSupplier[]
-  suppliers              Supplier[]
-  productBarcodes        ProductBarcode[]
-  productImportHistories ProductImportHistory[]
-  auditLogs              AuditLog[]
-  setting                OrganizationSetting?
+  clinics                 Clinic[]
+  users                   User[]
+  staffOperators          StaffOperator[]
+  products                Product[]
+  productSuppliers        ProductSupplier[]
+  suppliers               Supplier[]
+  productBarcodes         ProductBarcode[]
+  productImportHistories  ProductImportHistory[]
+  auditLogs               AuditLog[]
+  setting                 OrganizationSetting?
   notificationPreferences NotificationPreference[]
   notificationDeliveries  NotificationDelivery[]
 }
@@ -75,16 +75,16 @@ model User {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  organization               Organization           @relation(fields: [organizationId], references: [id])
+  organization               Organization             @relation(fields: [organizationId], references: [id])
   clinicAssignments          UserClinicAssignment[]
   stockMovements             StockMovement[]
-  orderRecords               OrderRecord[]          @relation("OrderRecordCreatedBy")
-  orderRequests              OrderRequest[]         @relation("OrderRequestCreatedBy")
-  receivedOrderRequests      OrderRequest[]         @relation("OrderRequestReceivedBy")
+  orderRecords               OrderRecord[]            @relation("OrderRecordCreatedBy")
+  orderRequests              OrderRequest[]           @relation("OrderRequestCreatedBy")
+  receivedOrderRequests      OrderRequest[]           @relation("OrderRequestReceivedBy")
   barcodeScanLogs            BarcodeScanLog[]
-  stocktakeSessionsStarted   StocktakeSession[]     @relation("StocktakeSessionStartedBy")
-  stocktakeSessionsCommitted StocktakeSession[]     @relation("StocktakeSessionCommittedBy")
-  stocktakeItemsCounted      StocktakeSessionItem[] @relation("StocktakeSessionItemCountedBy")
+  stocktakeSessionsStarted   StocktakeSession[]       @relation("StocktakeSessionStartedBy")
+  stocktakeSessionsCommitted StocktakeSession[]       @relation("StocktakeSessionCommittedBy")
+  stocktakeItemsCounted      StocktakeSessionItem[]   @relation("StocktakeSessionItemCountedBy")
   productImportHistories     ProductImportHistory[]
   auditLogs                  AuditLog[]
   notificationPreferences    NotificationPreference[]
@@ -250,6 +250,7 @@ model Product {
   supplierProductCode String?
   standardPrice       Float?
   defaultMinStock     Int       @default(0)
+  stockUsageMode      String    @default("NONE")
   isActive            Boolean   @default(true)
   importSource        String?
   notes               String?
@@ -352,14 +353,16 @@ model ProductBarcode {
 }
 
 model StockItem {
-  id        String   @id @default(cuid())
-  clinicId  String
-  productId String
-  quantity  Int      @default(0)
-  minStock  Int?
-  location  String?
-  isUsed    Boolean  @default(true)
-  updatedAt DateTime @updatedAt
+  id                String   @id @default(cuid())
+  clinicId          String
+  productId         String
+  quantity          Int      @default(0)
+  inUseQuantity     Int      @default(0)
+  discardedQuantity Int      @default(0)
+  minStock          Int?
+  location          String?
+  isUsed            Boolean  @default(true)
+  updatedAt         DateTime @updatedAt
 
   clinic  Clinic  @relation(fields: [clinicId], references: [id])
   product Product @relation(fields: [productId], references: [id])

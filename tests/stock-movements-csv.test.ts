@@ -12,6 +12,7 @@ const row: StockMovementRow = {
   quantity: -2,
   beforeQuantity: 10,
   afterQuantity: 8,
+  memo: null,
   reason: "使用: 午前診療分",
   sourceType: "BARCODE_STOCK",
   sourceId: null,

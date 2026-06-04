@@ -47,6 +47,10 @@ function getSignedQuantity(quantity: number) {
   return quantity > 0 ? `+${quantity}` : `${quantity}`;
 }
 
+function joinReasonAndMemo(row: StockMovementRow) {
+  return [row.reason, row.memo].filter(Boolean).join(" / ");
+}
+
 export function buildStockMovementsCsv(rows: StockMovementRow[]) {
   const headers = [
     "日時",
@@ -77,7 +81,7 @@ export function buildStockMovementsCsv(rows: StockMovementRow[]) {
         row.beforeQuantity,
         row.afterQuantity,
         getStockMovementSourceLabel(row.sourceType),
-        row.reason,
+        joinReasonAndMemo(row),
         row.userName,
         row.performedByStaffName,
         row.lotNumber,

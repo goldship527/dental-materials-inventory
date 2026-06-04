@@ -6,6 +6,7 @@ import { z } from "zod";
 import { auditActions, writeAuditLog } from "@/lib/audit/audit-log";
 import { requireAdminUser } from "@/lib/auth/admin";
 import { prisma } from "@/lib/db/prisma";
+import { normalizeStockUsageMode } from "@/lib/stock/usage-mode";
 
 const nullableTextSchema = z
   .string()
@@ -39,6 +40,7 @@ const productMasterSchema = z.object({
     .transform((value) => (value.length > 0 ? Number(value) : null))
     .pipe(z.number().nonnegative("標準価格は0以上で入力してください。").max(9999999).nullable()),
   defaultMinStock: z.coerce.number().int("最低在庫は整数で入力してください。").min(0, "最低在庫は0以上で入力してください。").max(9999),
+  stockUsageMode: z.enum(["NONE", "IN_USE"]),
   notes: nullableLongTextSchema,
 });
 
@@ -93,6 +95,7 @@ const createProductSchema = z.object({
     .int("最低在庫は整数で入力してください。")
     .min(0, "最低在庫は0以上で入力してください。")
     .max(9999, "最低在庫は9999以下で入力してください。"),
+  stockUsageMode: z.enum(["NONE", "IN_USE"]),
   notes: nullableCreateLongTextSchema,
 });
 
@@ -287,6 +290,7 @@ export async function updateProductMasterWithStateAction(
       supplierProductCode: formData.get("supplierProductCode") ?? "",
       standardPrice: formData.get("standardPrice") ?? "",
       defaultMinStock: formData.get("defaultMinStock") ?? "",
+      stockUsageMode: normalizeStockUsageMode(formData.get("stockUsageMode")),
       notes: formData.get("notes") ?? "",
     });
     const alternatives = parseAlternativeProductSuppliers(formData);
@@ -339,6 +343,7 @@ export async function updateProductMasterWithStateAction(
           supplierProductCode: input.supplierProductCode,
           standardPrice: input.standardPrice,
           defaultMinStock: input.defaultMinStock,
+          stockUsageMode: input.stockUsageMode,
           notes: input.notes,
         },
       });
@@ -419,6 +424,7 @@ export async function createProductAction(
       supplierProductCode: formData.get("supplierProductCode") ?? "",
       standardPrice: formData.get("standardPrice") ?? "",
       defaultMinStock: formData.get("defaultMinStock") ?? "0",
+      stockUsageMode: normalizeStockUsageMode(formData.get("stockUsageMode")),
       notes: formData.get("notes") ?? "",
     });
 
@@ -454,6 +460,7 @@ export async function createProductAction(
           supplierProductCode: input.supplierProductCode,
           standardPrice: input.standardPrice,
           defaultMinStock: input.defaultMinStock,
+          stockUsageMode: input.stockUsageMode,
           notes: input.notes,
         },
         select: {

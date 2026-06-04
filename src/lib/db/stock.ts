@@ -13,7 +13,11 @@ export type StockRow = {
   orderUnit: string | null;
   supplierId: string | null;
   supplierName: string | null;
+  stockUsageMode: string;
   quantity: number;
+  inUseQuantity: number;
+  discardedQuantity: number;
+  totalQuantity: number;
   stockUpdatedAt: number;
   minStock: number;
   shortageCount: number;
@@ -31,6 +35,8 @@ export function toStockRow(item: {
   id: string;
   productId: string;
   quantity: number;
+  inUseQuantity: number;
+  discardedQuantity: number;
   updatedAt: Date;
   minStock: number | null;
   location: string | null;
@@ -42,6 +48,7 @@ export function toStockRow(item: {
     manufacturer: string | null;
     orderUnit: string | null;
     defaultMinStock: number;
+    stockUsageMode: string;
     photoFileName: string | null;
     photoUpdatedAt: Date | null;
     primarySupplier: {
@@ -64,7 +71,11 @@ export function toStockRow(item: {
     orderUnit: item.product.orderUnit,
     supplierId: item.product.primarySupplier?.id ?? null,
     supplierName: item.product.primarySupplier?.name ?? null,
+    stockUsageMode: item.product.stockUsageMode,
     quantity: item.quantity,
+    inUseQuantity: item.inUseQuantity,
+    discardedQuantity: item.discardedQuantity,
+    totalQuantity: item.quantity + item.inUseQuantity,
     stockUpdatedAt: item.updatedAt.getTime(),
     minStock,
     shortageCount: status.shortageCount,

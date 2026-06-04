@@ -61,6 +61,14 @@ function getMovementBadgeClass(movementType: string) {
     return "bg-red-50 text-danger";
   }
 
+  if (movementType === "START_USE" || movementType === "END_USE") {
+    return "bg-blue-50 text-blue-700";
+  }
+
+  if (movementType === "DISCARD") {
+    return "bg-amber-50 text-amber-700";
+  }
+
   return "bg-gray-100 text-muted";
 }
 
@@ -205,7 +213,8 @@ export default async function MovementsPage({ searchParams }: PageProps) {
                       !movement.revertOfId &&
                       movement.sourceType !== "STOCKTAKE_SESSION" &&
                       movement.sourceType !== "ORDER_RECEIPT" &&
-                      movement.sourceType !== "ORDER_RECEIPT_REVERT";
+                      movement.sourceType !== "ORDER_RECEIPT_REVERT" &&
+                      movement.sourceType !== "STOCK_USAGE";
 
                     return (
                       <tr key={movement.id} className="align-top">
@@ -232,6 +241,7 @@ export default async function MovementsPage({ searchParams }: PageProps) {
                         <td className="border-b border-line px-3 py-3 text-right">{movement.afterQuantity}</td>
                         <td className="border-b border-line px-3 py-3 text-muted">
                           {movement.reason ?? "-"}
+                          {movement.memo ? <p className="mt-1 text-xs">{movement.memo}</p> : null}
                           {movement.lotNumber || movement.expiryDateText || movement.expiryDate ? (
                             <p className="mt-1 text-xs">
                               ロット {movement.lotNumber || "-"} / 有効期限{" "}

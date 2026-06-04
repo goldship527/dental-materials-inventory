@@ -12,6 +12,7 @@ export type StockMovementRow = {
   beforeQuantity: number;
   afterQuantity: number;
   reason: string | null;
+  memo: string | null;
   sourceType: string | null;
   sourceId: string | null;
   revertOfId: string | null;
@@ -34,7 +35,7 @@ export type StockMovementFilters = {
   endDate?: string;
 };
 
-export const stockMovementTypes = new Set(["IN", "OUT", "ADJUST"]);
+export const stockMovementTypes = new Set(["IN", "OUT", "ADJUST", "START_USE", "END_USE", "DISCARD"]);
 export const stockMovementSources = new Set([
   "MANUAL",
   "QUICK_CARD",
@@ -43,6 +44,7 @@ export const stockMovementSources = new Set([
   "ORDER_RECEIPT_REVERT",
   "STOCKTAKE",
   "STOCKTAKE_SESSION",
+  "STOCK_USAGE",
   "REVERT",
 ]);
 
@@ -62,6 +64,16 @@ export const stockMovementSourceLabels: Record<string, string> = {
   STOCKTAKE_SESSION: "棚卸セッション",
   REVERT: "履歴取り消し",
 };
+
+Object.assign(stockMovementTypeLabels, {
+  START_USE: "使用開始",
+  END_USE: "使用終了",
+  DISCARD: "廃棄",
+});
+
+Object.assign(stockMovementSourceLabels, {
+  STOCK_USAGE: "使用中管理",
+});
 
 export function getStockMovementTypeLabel(movementType: string) {
   return stockMovementTypeLabels[movementType] ?? movementType;
@@ -258,6 +270,7 @@ export async function getStockMovementRows(
       beforeQuantity: movement.beforeQuantity,
       afterQuantity: movement.afterQuantity,
       reason: movement.reason,
+      memo: movement.memo,
       sourceType,
       sourceId: movement.sourceId,
       revertOfId: movement.revertOfId,
