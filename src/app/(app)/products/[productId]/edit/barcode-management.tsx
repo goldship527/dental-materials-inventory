@@ -76,8 +76,8 @@ function BarcodeRow({ productId, barcode }: BarcodeRowProps) {
       <form action={updateAction} className="grid gap-3">
         <input type="hidden" name="productId" value={productId} />
         <input type="hidden" name="barcodeId" value={barcode.id} />
-        <div className="grid gap-3 md:grid-cols-[1fr_140px_160px_auto] md:items-end">
-          <label className="grid gap-1 text-xs font-semibold text-muted">
+        <div className="grid gap-3 lg:grid-cols-12 lg:items-end">
+          <label className="grid gap-1 text-xs font-semibold text-muted lg:col-span-6">
             バーコード
             <input
               name="barcode"
@@ -87,7 +87,7 @@ function BarcodeRow({ productId, barcode }: BarcodeRowProps) {
               className="h-10 rounded border border-line px-3 font-mono text-sm text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
             />
           </label>
-          <label className="grid gap-1 text-xs font-semibold text-muted">
+          <label className="grid gap-1 text-xs font-semibold text-muted sm:col-span-1 lg:col-span-2">
             種別
             <input
               name="barcodeType"
@@ -97,7 +97,7 @@ function BarcodeRow({ productId, barcode }: BarcodeRowProps) {
               className="h-10 rounded border border-line px-3 text-sm text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
             />
           </label>
-          <label className="grid gap-1 text-xs font-semibold text-muted">
+          <label className="grid gap-1 text-xs font-semibold text-muted sm:col-span-1 lg:col-span-2">
             単位ラベル
             <input
               name="unitLabel"
@@ -106,14 +106,14 @@ function BarcodeRow({ productId, barcode }: BarcodeRowProps) {
               className="h-10 rounded border border-line px-3 text-sm text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
             />
           </label>
-          <label className="flex h-10 items-center gap-2 text-xs font-semibold text-muted">
+          <label className="flex min-h-10 items-center gap-2 rounded border border-line bg-gray-50 px-3 py-2 text-xs font-semibold text-muted lg:col-span-2">
             <input
               type="checkbox"
               name="isPrimary"
               defaultChecked={barcode.isPrimary}
-              className="h-4 w-4 rounded border-line text-accent"
+              className="h-4 w-4 shrink-0 rounded border-line text-accent"
             />
-            代表バーコード
+            <span className="leading-tight">代表バーコード</span>
           </label>
         </div>
         <div className="flex flex-wrap items-center gap-3">
@@ -183,8 +183,8 @@ export function BarcodeManagement({ productId, barcodes, defaultNewBarcode = "" 
       <form action={createAction} className="mt-5 grid gap-3 rounded border border-line bg-gray-50 p-4">
         <input type="hidden" name="productId" value={productId} />
         <h3 className="text-sm font-semibold">バーコードを追加</h3>
-        <div className="grid gap-3 md:grid-cols-[1fr_140px_160px_auto] md:items-end">
-          <label className="grid gap-1 text-xs font-semibold text-muted">
+        <div className="grid gap-3 lg:grid-cols-12 lg:items-end">
+          <label className="grid gap-1 text-xs font-semibold text-muted lg:col-span-6">
             バーコード
             <input
               name="barcode"
@@ -195,7 +195,7 @@ export function BarcodeManagement({ productId, barcodes, defaultNewBarcode = "" 
               className="h-10 rounded border border-line px-3 font-mono text-sm text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
             />
           </label>
-          <label className="grid gap-1 text-xs font-semibold text-muted">
+          <label className="grid gap-1 text-xs font-semibold text-muted sm:col-span-1 lg:col-span-2">
             種別
             <input
               name="barcodeType"
@@ -205,7 +205,7 @@ export function BarcodeManagement({ productId, barcodes, defaultNewBarcode = "" 
               className="h-10 rounded border border-line px-3 text-sm text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
             />
           </label>
-          <label className="grid gap-1 text-xs font-semibold text-muted">
+          <label className="grid gap-1 text-xs font-semibold text-muted sm:col-span-1 lg:col-span-2">
             単位ラベル
             <input
               name="unitLabel"
@@ -214,9 +214,9 @@ export function BarcodeManagement({ productId, barcodes, defaultNewBarcode = "" 
               className="h-10 rounded border border-line px-3 text-sm text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
             />
           </label>
-          <label className="flex h-10 items-center gap-2 text-xs font-semibold text-muted">
-            <input type="checkbox" name="isPrimary" className="h-4 w-4 rounded border-line text-accent" />
-            代表バーコード
+          <label className="flex min-h-10 items-center gap-2 rounded border border-line bg-white px-3 py-2 text-xs font-semibold text-muted lg:col-span-2">
+            <input type="checkbox" name="isPrimary" className="h-4 w-4 shrink-0 rounded border-line text-accent" />
+            <span className="leading-tight">代表バーコード</span>
           </label>
         </div>
         <div className="flex flex-wrap items-center gap-3">
