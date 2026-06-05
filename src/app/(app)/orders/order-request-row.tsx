@@ -27,12 +27,6 @@ const dateTimeFormatter = new Intl.DateTimeFormat("ja-JP", {
   hour: "2-digit",
   minute: "2-digit",
 });
-const priceFormatter = new Intl.NumberFormat("ja-JP", {
-  style: "currency",
-  currency: "JPY",
-  maximumFractionDigits: 0,
-});
-
 type OrderRequestRowProps = {
   row: OrderRequestRow;
 };
@@ -166,7 +160,6 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
             <div className="grid gap-0.5 text-xs text-muted print:text-[9px] print:text-black">
               {row.supplierProductCode ? <span>発注先品番: {row.supplierProductCode}</span> : null}
               {row.orderUnit ? <span>単位: {row.orderUnit}</span> : null}
-              {row.standardPrice != null ? <span>標準価格: {priceFormatter.format(row.standardPrice)}</span> : null}
             </div>
           </div>
         ) : (
@@ -184,7 +177,7 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
               onClick={() => togglePanel("supplier")}
               className="inline-flex h-8 w-fit items-center rounded border border-line bg-white/75 px-3 text-xs font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent"
             >
-              {activePanel === "supplier" ? "閉じる" : "発注先変更"}
+              {activePanel === "supplier" ? "閉じる" : "発注先を変更"}
             </button>
             {activePanel === "supplier" ? (
               <form action={supplierAction} className="grid gap-1.5 rounded border border-line bg-subtle/60 p-2">
@@ -371,7 +364,7 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
             onClick={() => togglePanel("status")}
             className="inline-flex h-8 w-fit items-center rounded border border-line bg-white/75 px-3 text-xs font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent"
           >
-            {activePanel === "status" ? "閉じる" : "発注記録・メモ"}
+            {activePanel === "status" ? "閉じる" : "状態・メモを編集"}
           </button>
           {activePanel === "status" ? (
             <form action={statusAction} className="grid gap-1.5 rounded border border-line bg-subtle/60 p-2">
@@ -472,7 +465,7 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
             disabled={isStatusPending}
             className="h-9 rounded border border-line bg-white/75 px-3 text-xs font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {isStatusPending ? "変更中" : "発注記録・メモ更新"}
+            {isStatusPending ? "変更中" : "状態・メモを更新"}
           </button>
             </form>
           ) : null}

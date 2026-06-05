@@ -1,18 +1,17 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { AppNav } from "@/components/domain/app-nav";
-import { markOrderRequestsOrderedAction } from "@/lib/actions/orders";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { getOrderRequestRows, type OrderRequestRow } from "@/lib/db/orders";
 import { getSupplierLeadTimes, type SupplierLeadTimeStats } from "@/lib/db/supplier-lead-times";
 import { orderPrintUnassignedSupplierId } from "@/lib/orders/print";
-import { orderSendMethodLabels, orderSendMethodValues } from "@/lib/orders/send-method";
 import {
   printableOrderRequestStatuses,
   type OrderRequestStatusValue,
 } from "@/lib/orders/status";
 import { OrderRequestTableRow } from "./order-request-row";
 import { OrdersPrintButton } from "./print-button";
+import { SupplierOrderRecordPanel } from "./supplier-order-record-panel";
 
 type OrderListFilterValue = "" | "PLANNED" | "AWAITING_RECEIPT" | "RECEIVED" | "SKIPPED";
 
@@ -148,8 +147,8 @@ function OrderRequestRowsTable({ rows }: { rows: OrderRequestRow[] }) {
             <th className="border-b border-line px-4 py-3 text-right print:border print:border-black print:px-2 print:py-1.5">
               発注数量
             </th>
-            <th className="border-b border-line px-4 py-3 print:hidden">数量変更</th>
-            <th className="border-b border-line px-4 py-3 print:hidden">状態・メモ</th>
+            <th className="border-b border-line px-4 py-3 print:hidden">数量・納品</th>
+            <th className="border-b border-line px-4 py-3 print:hidden">状態</th>
             <th className="hidden border border-black px-2 py-1.5 print:table-cell">状態</th>
             <th className="hidden border border-black px-2 py-1.5 print:table-cell">備考</th>
             <th className="hidden border border-black px-2 py-1.5 print:table-cell">確認</th>
@@ -464,6 +463,9 @@ export default async function OrdersPage({ searchParams }: PageProps) {
                 },
               ]
                 .filter((item) => item.count > 0);
+              const primaryStatusCounts = supplierStatusCounts.filter((item) =>
+                item.status === "PLANNED" || item.status === "AWAITING_RECEIPT",
+              );
 
               return (
                 <section
@@ -487,7 +489,7 @@ export default async function OrdersPage({ searchParams }: PageProps) {
                       <span className="rounded border border-line bg-white/80 px-2 py-1 text-xs font-semibold text-muted print:border-black print:text-black">
                         全 {supplierRows.length} 件
                       </span>
-                      {supplierStatusCounts.map((item) => (
+                      {primaryStatusCounts.map((item) => (
                         <span
                           key={item.status}
                           className={`rounded border px-2 py-1 text-xs font-semibold print:border-black print:bg-white print:text-black ${getSupplierStatusChipClass(
@@ -518,62 +520,10 @@ export default async function OrdersPage({ searchParams }: PageProps) {
                             {block.rows.length} 件
                           </span>
                           {block.key === "active" && activeRows.length > 0 ? (
-                            <a
-                              className="inline-flex min-h-9 items-center justify-center rounded border border-accent/30 bg-white px-3 py-1.5 text-xs font-semibold text-accent transition hover:bg-teal-50 print:hidden"
-                              href={buildOrdersPrintHref(activeRows[0]?.supplierId)}
-                            >
-                              このディーラーだけ印刷
-                            </a>
-                          ) : null}
-                          {block.key === "active" && activeRows.length > 0 ? (
-                            <form
-                              action={markOrderRequestsOrderedAction}
-                              className="flex flex-wrap items-end gap-2 rounded border border-line bg-white/80 px-2 py-2 print:hidden"
-                            >
-                              {activeRows.map((row) => (
-                                <input key={row.id} type="hidden" name="orderRequestId" value={row.id} />
-                              ))}
-                              <label className="flex h-9 items-center gap-2 whitespace-nowrap text-xs font-semibold text-muted">
-                                <input type="checkbox" name="confirmOrdered" required className="h-4 w-4 accent-teal-700" />
-                                送付済み確認
-                              </label>
-                              <label className="grid w-44 gap-1 text-xs font-semibold text-muted">
-                                <span className="sr-only">送付方法</span>
-                                <select
-                                  name="orderedMethod"
-                                  required
-                                  defaultValue=""
-                                  className="h-9 rounded border border-line bg-white px-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
-                                >
-                                  <option value="" disabled>
-                                    選択してください
-                                  </option>
-                                  {orderSendMethodValues.map((method) => (
-                                    <option key={method} value={method}>
-                                      {orderSendMethodLabels[method]}
-                                    </option>
-                                  ))}
-                                </select>
-                              </label>
-                              <textarea
-                                name="orderedMemo"
-                                placeholder="送付メモ（任意）"
-                                maxLength={300}
-                                className="h-9 min-h-9 w-40 rounded border border-line bg-white px-2 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
-                              />
-                              <textarea
-                                name="supplierResponseMemo"
-                                placeholder="先方対応メモ（任意）"
-                                maxLength={300}
-                                className="h-9 min-h-9 w-40 rounded border border-line bg-white px-2 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
-                              />
-                              <button
-                                type="submit"
-                                className="h-9 rounded bg-ink px-3 text-xs font-semibold text-white transition hover:bg-slate-700"
-                              >
-                                この発注先の発注を記録
-                              </button>
-                            </form>
+                            <SupplierOrderRecordPanel
+                              orderRequestIds={activeRows.map((row) => row.id)}
+                              printHref={buildOrdersPrintHref(activeRows[0]?.supplierId)}
+                            />
                           ) : null}
                         </div>
                       </div>
