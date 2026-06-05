@@ -158,13 +158,18 @@ function NavGroup({
   ariaLabel,
   current,
   items,
+  wrapOnDesktop = false,
 }: {
   ariaLabel: string;
   current: NavItemId;
   items: readonly NavItem[];
+  wrapOnDesktop?: boolean;
 }) {
   return (
-    <div aria-label={ariaLabel} className="flex min-w-0 gap-2 overflow-x-auto pb-1 sm:gap-1 lg:flex-wrap lg:overflow-visible lg:pb-0">
+    <div
+      aria-label={ariaLabel}
+      className={`flex min-w-0 gap-2 overflow-x-auto pb-1 sm:gap-1 lg:overflow-visible lg:pb-0${wrapOnDesktop ? " lg:flex-wrap" : ""}`}
+    >
       {items.map((item) => (
         <NavLink key={item.id} item={item} current={current} />
       ))}
@@ -187,21 +192,29 @@ export async function AppNav({ current }: AppNavProps) {
       current === "storage" ||
       current === "settings");
   const modeItems = isAdminMode ? adminNavItems : workNavItems;
+  const navLayoutClassName = isAdminMode
+    ? "mx-auto flex w-full max-w-7xl flex-col gap-2"
+    : "mx-auto flex w-full max-w-7xl flex-col gap-2 lg:flex-row lg:items-center lg:justify-between lg:gap-4";
+  const navContentClassName = isAdminMode ? "flex flex-col gap-2" : "contents";
+  const actionGroupClassName = isAdminMode
+    ? "flex min-w-0 gap-2 overflow-x-auto pb-1 sm:gap-1 lg:flex-wrap lg:justify-end lg:overflow-visible lg:pb-0"
+    : "flex min-w-0 gap-2 overflow-x-auto pb-1 sm:gap-1 lg:shrink-0 lg:justify-end lg:overflow-visible lg:pb-0";
 
   return (
     <nav
       aria-label="アプリ内メニュー"
       className="sticky top-0 z-30 border-b border-line bg-surface/90 px-3 py-2 backdrop-blur print:hidden sm:px-4 lg:px-6"
     >
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-2">
-        <div className="flex flex-col gap-2">
+      <div className={navLayoutClassName}>
+        <div className={navContentClassName}>
           <NavGroup
             ariaLabel={isAdminMode ? "管理モードメニュー" : "通常業務メニュー"}
             current={current}
             items={modeItems}
+            wrapOnDesktop={isAdminMode}
           />
 
-          <div className="flex min-w-0 gap-2 overflow-x-auto pb-1 sm:gap-1 lg:flex-wrap lg:justify-end lg:overflow-visible lg:pb-0">
+          <div className={actionGroupClassName}>
             {clinicSelection?.canSelectClinic ? (
               <ClinicSwitcher activeClinicId={clinicSelection.activeClinicId} clinics={clinicSelection.clinics} />
             ) : null}
