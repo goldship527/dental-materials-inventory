@@ -6345,3 +6345,22 @@
 - `corepack pnpm typecheck` に成功した。
 - `corepack pnpm build` に成功した。
 - ローカルの `/admin/overview` がHTTP 200で描画され、古い `xl:flex-row xl:items-center xl:justify-between` の横一列レイアウトが出ていないことを確認した。
+
+## HTTPベース画面スモークテスト追加（2026-06-05）
+
+### 作業内容
+- `tests/ui-smoke.test.ts` を追加し、スクリーンショットではなくHTTPでHTMLを取得する画面スモークテストを用意した。
+- テスト専用DBスキーマをリセットして、ADMIN、STAFF、2クリニック、商品 `P-0009` / JAN `4900000000009` を含む架空データを作成するようにした。
+- Next.jsのローカルdev serverをテスト内で起動し、NextAuthのCSRF取得とCredentialsログインをHTTP経由で通してから、保護ページを確認する構成にした。
+- ADMINでは主要ページのHTTP 200、クリニック切替select、現在クリニック名、`dmi_active_clinic_id` cookieによる分院表示、管理メニューを確認するようにした。
+- STAFFでは管理画面へのリダイレクト、クリニック切替select非表示、所属クリニックのみ表示されることを確認するようにした。
+- 商品マスターでは列順、商品詳細では使用頻度表示、`P-0009` / JAN表示を確認するようにした。
+
+### 判断
+- ブラウザ自動操作より軽く安定した回帰確認を目的に、HTML文字列の検査に限定した。
+- 公開デモや本番データを触らないよう、既存の `tests/helpers/db.ts` と同じテストDB接続だけを使う形にした。
+
+### 検証
+- `corepack pnpm exec tsx tests/ui-smoke.test.ts` に成功した。
+- `corepack pnpm typecheck` に成功した。
+- `corepack pnpm build` に成功した。
