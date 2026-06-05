@@ -76,7 +76,11 @@ function getSupplierStatusChipClass(status: Exclude<OrderListFilterValue, "">) {
     return "border-line bg-subtle text-muted";
   }
 
-  if (status === "AWAITING_RECEIPT" || status === "RECEIVED") {
+  if (status === "AWAITING_RECEIPT") {
+    return "border-yellow-200 bg-yellow-50 text-warning";
+  }
+
+  if (status === "RECEIVED") {
     return "border-green-100 bg-green-50 text-success";
   }
 
@@ -127,6 +131,13 @@ function OrderRequestRowsTable({ rows }: { rows: OrderRequestRow[] }) {
   return (
     <div className="overflow-x-auto">
       <table className="w-full min-w-[960px] border-collapse text-left text-sm print:min-w-0 print:text-[10.5px]">
+        <colgroup className="print:hidden">
+          <col className="w-[22%]" />
+          <col className="w-[18%]" />
+          <col className="w-[24%]" />
+          <col className="w-[14%]" />
+          <col className="w-[22%]" />
+        </colgroup>
         <thead className="bg-subtle text-xs text-muted print:bg-white print:text-[10px] print:text-black">
           <tr>
             <th className="border-b border-line px-4 py-3 print:border print:border-black print:px-2 print:py-1.5">
@@ -412,16 +423,16 @@ export default async function OrdersPage({ searchParams }: PageProps) {
                   title: "納品待ち",
                   description: "発注記録済み・商品到着待ち",
                   rows: awaitingReceiptRows,
-                  className: "border-green-100",
-                  headerClassName: "bg-green-50/70",
+                  className: "border-yellow-200",
+                  headerClassName: "bg-yellow-50/80",
                 },
                 {
                   key: "received",
                   title: "納品済み",
                   description: "納品確認済み",
                   rows: receivedRows,
-                  className: "border-teal-100",
-                  headerClassName: "bg-teal-50/70",
+                  className: "border-green-100",
+                  headerClassName: "bg-green-50/80",
                 },
                 {
                   key: "skipped",

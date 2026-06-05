@@ -45,20 +45,44 @@ function formatOrderRecordId(orderRecordId: string | null) {
   return orderRecordId ? orderRecordId.slice(-8) : "-";
 }
 
-function getStatusBadgeClass(status: OrderRequestStatusValue) {
-  if (status === "SKIPPED") {
+function getStatusBadgeClass(row: OrderRequestRow) {
+  if (row.status === "SKIPPED") {
     return "border-line bg-subtle text-muted";
   }
 
-  if (status === "ORDERED") {
+  if (row.status === "ORDERED" && row.receivedAt) {
     return "border-green-100 bg-green-50 text-success";
   }
 
-  if (status === "CONFIRMED") {
+  if (row.status === "ORDERED") {
+    return "border-yellow-200 bg-yellow-50 text-warning";
+  }
+
+  if (row.status === "CONFIRMED") {
     return "border-teal-100 bg-teal-50 text-accent";
   }
 
   return "border-line bg-white text-muted";
+}
+
+function getRowToneClass(row: OrderRequestRow) {
+  if (row.status === "ORDERED" && row.receivedAt) {
+    return "border-l-4 border-l-green-400";
+  }
+
+  if (row.status === "ORDERED") {
+    return "border-l-4 border-l-yellow-400";
+  }
+
+  if (row.status === "SKIPPED") {
+    return "border-l-4 border-l-gray-300";
+  }
+
+  if (printableOrderRequestStatuses.includes(row.status)) {
+    return "border-l-4 border-l-teal-500";
+  }
+
+  return "";
 }
 
 function getOrderRowStatusLabel(row: OrderRequestRow) {
@@ -116,7 +140,7 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
   }
 
   return (
-    <tr className="align-top transition hover:bg-subtle/60 print:break-inside-avoid">
+    <tr className={`align-top transition hover:bg-subtle/60 print:break-inside-avoid ${getRowToneClass(row)}`}>
       <td className="border-b border-line px-3 py-2 print:border print:border-black print:px-2 print:py-1.5">
         <a
           className="font-semibold text-accent hover:underline print:text-black print:no-underline"
@@ -140,16 +164,16 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
         ) : null}
       </td>
       <td className="border-b border-line px-3 py-2 print:border print:border-black print:px-2 print:py-1.5">
-        <div className="grid w-fit min-w-40 grid-cols-3 gap-2 rounded border border-line bg-white px-2 py-1.5 print:min-w-0 print:border-0 print:p-0">
-          <div>
+        <div className="grid w-44 grid-cols-3 gap-2 rounded border border-line bg-white px-2 py-1.5 text-center print:w-auto print:border-0 print:p-0">
+          <div className="min-w-0">
             <p className="text-[10px] font-semibold text-muted print:text-[9px] print:text-black">現在</p>
             <p className="text-lg font-bold tabular-nums text-ink print:text-[11px]">{row.quantity}</p>
           </div>
-          <div>
+          <div className="min-w-0">
             <p className="text-[10px] font-semibold text-muted print:text-[9px] print:text-black">最低</p>
             <p className="text-lg font-bold tabular-nums text-ink print:text-[11px]">{row.minStock}</p>
           </div>
-          <div>
+          <div className="min-w-0">
             <p className="text-[10px] font-semibold text-muted print:text-[9px] print:text-black">不足</p>
             <p className="text-lg font-bold tabular-nums text-danger print:text-[11px] print:text-black">
               {row.shortageCount}
@@ -276,76 +300,12 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
             </form>
           ) : null}
         </div>
-        {row.status === "ORDERED" && row.receivedAt ? (
-          <div className="mt-2 grid gap-1.5 rounded border border-teal-100 bg-teal-50 px-3 py-2 text-xs font-semibold text-accent print:hidden">
-            <span>
-              納品済み {dateTimeFormatter.format(row.receivedAt)} / {row.receivedQuantity ?? "-"} 個
-            </span>
-            {row.receivedMemo ? <span className="font-normal text-muted">{row.receivedMemo}</span> : null}
-            <form action={receiptRevertAction}>
-              <input type="hidden" name="orderRequestId" value={row.id} />
-              <button
-                type="submit"
-                disabled={isReceiptRevertPending}
-                className="h-8 rounded border border-line bg-white/75 px-3 text-xs font-semibold text-muted transition hover:border-danger hover:text-danger disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {isReceiptRevertPending ? "取り消し中" : "納品確認を取り消す"}
-              </button>
-            </form>
-          </div>
-        ) : null}
-        {row.status === "ORDERED" && !row.receivedAt ? (
-          <div className="mt-2 grid gap-1.5 print:hidden">
-            <button
-              type="button"
-              onClick={() => togglePanel("receipt")}
-              className="inline-flex h-8 w-fit items-center rounded border border-teal-200 bg-teal-50 px-3 text-xs font-semibold text-accent transition hover:border-accent hover:bg-white"
-            >
-              {activePanel === "receipt" ? "閉じる" : "納品確認"}
-            </button>
-            {activePanel === "receipt" ? (
-              <form action={receiptAction} className="grid gap-1.5 rounded border border-teal-100 bg-teal-50 p-2">
-                <input type="hidden" name="orderRequestId" value={row.id} />
-                <div className="grid gap-1.5 sm:grid-cols-[1fr_auto] sm:items-end">
-                  <label className="grid gap-1 text-xs font-semibold text-muted">
-                    納品数量
-                    <input
-                      type="number"
-                      name="receivedQuantity"
-                      min={1}
-                      max={row.requestedQuantity}
-                      defaultValue={row.requestedQuantity}
-                      className="h-9 rounded border border-line bg-white px-3 text-right text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
-                    />
-                  </label>
-                  <label className="flex h-9 items-center gap-2 whitespace-nowrap text-xs font-semibold text-muted">
-                    <input type="checkbox" name="applyToStock" defaultChecked className="h-4 w-4 accent-teal-700" />
-                    在庫反映
-                  </label>
-                </div>
-                <textarea
-                  name="receivedMemo"
-                  placeholder="納品メモ"
-                  maxLength={200}
-                  className="h-10 min-h-10 rounded border border-line bg-white px-3 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
-                />
-                <button
-                  type="submit"
-                  disabled={isReceiptPending}
-                  className="h-9 rounded bg-accent px-3 text-xs font-semibold text-white transition hover:bg-accentDeep disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {isReceiptPending ? "確認中" : "納品を確認"}
-                </button>
-              </form>
-            ) : null}
-          </div>
-        ) : null}
       </td>
       <td className="border-b border-line px-3 py-2 print:hidden">
         <div className="grid gap-1.5">
           <div className="flex flex-wrap items-center gap-2">
             <span
-              className={`inline-flex min-h-7 items-center rounded border px-2.5 py-1 text-xs font-semibold ${getStatusBadgeClass(row.status)}`}
+              className={`inline-flex min-h-7 items-center rounded border px-2.5 py-1 text-xs font-semibold ${getStatusBadgeClass(row)}`}
             >
               {getOrderRowStatusLabel(row)}
             </span>
@@ -376,6 +336,70 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
           >
             {activePanel === "status" ? "閉じる" : "状態・メモを編集"}
           </button>
+          {row.status === "ORDERED" && row.receivedAt ? (
+            <div className="grid gap-1.5 rounded border border-green-100 bg-green-50 px-3 py-2 text-xs font-semibold text-success">
+              <span>
+                納品済み {dateTimeFormatter.format(row.receivedAt)} / {row.receivedQuantity ?? "-"} 個
+              </span>
+              {row.receivedMemo ? <span className="font-normal text-muted">{row.receivedMemo}</span> : null}
+              <form action={receiptRevertAction}>
+                <input type="hidden" name="orderRequestId" value={row.id} />
+                <button
+                  type="submit"
+                  disabled={isReceiptRevertPending}
+                  className="h-8 rounded border border-green-200 bg-white/75 px-3 text-xs font-semibold text-muted transition hover:border-danger hover:text-danger disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {isReceiptRevertPending ? "取り消し中" : "納品確認を取り消す"}
+                </button>
+              </form>
+            </div>
+          ) : null}
+          {row.status === "ORDERED" && !row.receivedAt ? (
+            <div className="grid gap-1.5">
+              <button
+                type="button"
+                onClick={() => togglePanel("receipt")}
+                className="inline-flex h-8 w-fit items-center rounded border border-yellow-200 bg-yellow-50 px-3 text-xs font-semibold text-warning transition hover:border-warning hover:bg-white"
+              >
+                {activePanel === "receipt" ? "閉じる" : "納品確認"}
+              </button>
+              {activePanel === "receipt" ? (
+                <form action={receiptAction} className="grid gap-1.5 rounded border border-yellow-200 bg-yellow-50 p-2">
+                  <input type="hidden" name="orderRequestId" value={row.id} />
+                  <div className="grid gap-1.5 sm:grid-cols-[1fr_auto] sm:items-end">
+                    <label className="grid gap-1 text-xs font-semibold text-muted">
+                      納品数量
+                      <input
+                        type="number"
+                        name="receivedQuantity"
+                        min={1}
+                        max={row.requestedQuantity}
+                        defaultValue={row.requestedQuantity}
+                        className="h-9 rounded border border-line bg-white px-3 text-right text-sm outline-none focus:border-warning focus:ring-2 focus:ring-warning/20"
+                      />
+                    </label>
+                    <label className="flex h-9 items-center gap-2 whitespace-nowrap text-xs font-semibold text-muted">
+                      <input type="checkbox" name="applyToStock" defaultChecked className="h-4 w-4 accent-amber-600" />
+                      在庫反映
+                    </label>
+                  </div>
+                  <textarea
+                    name="receivedMemo"
+                    placeholder="納品メモ"
+                    maxLength={200}
+                    className="h-10 min-h-10 rounded border border-line bg-white px-3 py-2 text-sm outline-none focus:border-warning focus:ring-2 focus:ring-warning/20"
+                  />
+                  <button
+                    type="submit"
+                    disabled={isReceiptPending}
+                    className="h-9 rounded bg-warning px-3 text-xs font-semibold text-white transition hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {isReceiptPending ? "確認中" : "納品を確認"}
+                  </button>
+                </form>
+              ) : null}
+            </div>
+          ) : null}
           {activePanel === "status" ? (
             <form action={statusAction} className="grid gap-1.5 rounded border border-line bg-subtle/60 p-2">
           <input type="hidden" name="orderRequestId" value={row.id} />
