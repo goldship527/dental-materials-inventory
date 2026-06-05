@@ -104,6 +104,17 @@ async function seedBase(prisma: typeof import("../src/lib/db/prisma").prisma) {
         clinicId: clinicA.id,
         productId: productA.id,
         movementType: "OUT",
+        quantity: 6,
+        beforeQuantity: 11,
+        afterQuantity: 5,
+        reason: "legacy positive out",
+        userId: admin.id,
+        createdAt: new Date("2026-05-11T10:00:00+09:00"),
+      },
+      {
+        clinicId: clinicA.id,
+        productId: productA.id,
+        movementType: "OUT",
         quantity: -3,
         beforeQuantity: 8,
         afterQuantity: 5,
@@ -214,10 +225,10 @@ async function main() {
       (row) => row.scope === "ORGANIZATION_TOTAL" && row.productId === data.productB.id,
     );
 
-    assert.equal(totalProductA?.totalOutQuantity, 9);
-    assert.equal(totalProductA?.movementCount, 3);
-    assert.equal(clinicAProductA?.totalOutQuantity, 5);
-    assert.equal(clinicAProductA?.movementCount, 2);
+    assert.equal(totalProductA?.totalOutQuantity, 15);
+    assert.equal(totalProductA?.movementCount, 4);
+    assert.equal(clinicAProductA?.totalOutQuantity, 11);
+    assert.equal(clinicAProductA?.movementCount, 3);
     assert.equal(totalProductB?.totalOutQuantity, 1);
     assert.equal(rows.some((row) => row.clinicName === "Inactive Clinic"), false);
     assert.equal(rows.some((row) => row.clinicName === "Other Clinic"), false);
@@ -230,7 +241,7 @@ async function main() {
     assert.ok(csv.startsWith("\uFEFF"));
     assert.ok(csv.includes('"法人合計"'));
     assert.ok(csv.includes(`"'=Risk Product"`));
-    assert.ok(csv.includes('"9"'));
+    assert.ok(csv.includes('"15"'));
     assert.throws(() =>
       parseAdminUsageExportDateRange({
         startDate: "2026-01-01",

@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { auditActions, writeAuditLog } from "@/lib/audit/audit-log";
+import { auditActions } from "@/lib/audit/audit-log";
 import { requireAdminUser } from "@/lib/auth/admin";
 import { prisma } from "@/lib/db/prisma";
 import {

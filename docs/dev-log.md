@@ -6292,3 +6292,23 @@
 ### 検証
 - `corepack pnpm typecheck` に成功した。
 - `corepack pnpm build` に成功した。
+
+## 総チェック後の軽微修正（2026-06-05）
+
+### 作業内容
+- `src/lib/actions/supplier-import.ts` の未使用importを削除した。
+- `tests/barcode-gs1.test.ts` の未使用定数を削除した。
+- 本部ダッシュボードの使用個数CSV集計で、`OUT` 履歴の数量を1件ずつ絶対値化してから合計するようにした。
+- 正負の `OUT` 履歴が混在しても使用個数が相殺されないことを、`tests/admin-usage-export.test.ts` に追加した。
+
+### 判断
+- 現行の出庫操作では `OUT` 数量はマイナス保存されるが、過去データや手動投入で正の `OUT` が混ざった場合でも、使用個数としては絶対値の合計で扱うのが安全と判断した。
+- ABC分析、推奨最低在庫、異常出庫検知と同じ集計方針に揃えた。
+
+### 検証
+- `corepack pnpm exec tsx tests/admin-usage-export.test.ts` に成功した。
+- `corepack pnpm exec tsx tests/barcode-gs1.test.ts` に成功した。
+- `corepack pnpm exec tsc --noEmit --noUnusedLocals --noUnusedParameters` に成功した。
+- `corepack pnpm typecheck` に成功した。
+- `corepack pnpm build` に成功した。
+- `tests` 配下の既存TSテスト43件を一括実行し、全件成功した。

@@ -95,8 +95,7 @@ export async function getAdminUsageExportRows(options: {
   maxGroups?: number;
 }): Promise<AdminUsageExportRow[]> {
   const maxGroups = options.maxGroups ?? maxUsageExportGroups;
-  const groupedMovements = await prisma.stockMovement.groupBy({
-    by: ["clinicId", "productId"],
+  const outMovements = await prisma.stockMovement.findMany({
     where: {
       movementType: "OUT",
       createdAt: {
@@ -108,16 +107,47 @@ export async function getAdminUsageExportRows(options: {
         isActive: true,
       },
     },
-    _sum: {
+    select: {
+      clinicId: true,
+      productId: true,
       quantity: true,
-    },
-    _count: {
-      _all: true,
-    },
-    _max: {
       createdAt: true,
     },
   });
+  const groupedMovementMap = new Map<
+    string,
+    {
+      clinicId: string;
+      productId: string;
+      totalOutQuantity: number;
+      movementCount: number;
+      lastOutAt: Date | null;
+    }
+  >();
+
+  for (const movement of outMovements) {
+    const key = `${movement.clinicId}:${movement.productId}`;
+    const row =
+      groupedMovementMap.get(key) ??
+      {
+        clinicId: movement.clinicId,
+        productId: movement.productId,
+        totalOutQuantity: 0,
+        movementCount: 0,
+        lastOutAt: null,
+      };
+
+    row.totalOutQuantity += Math.abs(movement.quantity);
+    row.movementCount += 1;
+
+    if (!row.lastOutAt || movement.createdAt > row.lastOutAt) {
+      row.lastOutAt = movement.createdAt;
+    }
+
+    groupedMovementMap.set(key, row);
+  }
+
+  const groupedMovements = Array.from(groupedMovementMap.values());
 
   if (groupedMovements.length > maxGroups) {
     throw new Error(`集計結果が多すぎます。期間を短くして${maxGroups}行以内にしてください。`);
@@ -168,9 +198,9 @@ export async function getAdminUsageExportRows(options: {
       continue;
     }
 
-    const totalOutQuantity = Math.abs(row._sum.quantity ?? 0);
-    const movementCount = row._count._all;
-    const lastOutAt = row._max.createdAt ?? null;
+    const totalOutQuantity = row.totalOutQuantity;
+    const movementCount = row.movementCount;
+    const lastOutAt = row.lastOutAt;
 
     clinicRows.push({
       scope: "CLINIC",

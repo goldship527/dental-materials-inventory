@@ -5,7 +5,6 @@ import { searchProductsByBarcode } from "../src/lib/db/barcodes";
 
 const jan13 = "4900000000009";
 const gtin14 = `0${jan13}`;
-const sampleJan13 = "4900000123456";
 
 {
   const result = analyzeBarcodeInput(`(01)${gtin14}(17)270531(10)LOT123`);
