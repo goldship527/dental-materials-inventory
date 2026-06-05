@@ -194,14 +194,14 @@ export async function AppNav({ current }: AppNavProps) {
       className="sticky top-0 z-30 border-b border-line bg-surface/90 px-3 py-2 backdrop-blur print:hidden sm:px-4 lg:px-6"
     >
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-2">
-        <div className="flex flex-col gap-2 xl:flex-row xl:items-center xl:justify-between">
+        <div className="flex flex-col gap-2">
           <NavGroup
             ariaLabel={isAdminMode ? "管理モードメニュー" : "通常業務メニュー"}
             current={current}
             items={modeItems}
           />
 
-          <div className="flex min-w-0 shrink-0 gap-2 overflow-x-auto pb-1 sm:gap-1 xl:overflow-visible xl:pb-0">
+          <div className="flex min-w-0 gap-2 overflow-x-auto pb-1 sm:gap-1 lg:flex-wrap lg:justify-end lg:overflow-visible lg:pb-0">
             {clinicSelection?.canSelectClinic ? (
               <ClinicSwitcher activeClinicId={clinicSelection.activeClinicId} clinics={clinicSelection.clinics} />
             ) : null}

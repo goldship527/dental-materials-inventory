@@ -21,7 +21,7 @@ export function ClinicSwitcher({ activeClinicId, clinics }: ClinicSwitcherProps)
   }
 
   return (
-    <form action={switchActiveClinicAction} className="flex shrink-0 items-center gap-2">
+    <form action={switchActiveClinicAction} className="flex min-w-max shrink-0 items-center gap-2">
       <input type="hidden" name="returnTo" value={returnTo} />
       <label htmlFor="active-clinic-id" className="sr-only">
         対象クリニック
@@ -30,7 +30,7 @@ export function ClinicSwitcher({ activeClinicId, clinics }: ClinicSwitcherProps)
         id="active-clinic-id"
         name="clinicId"
         defaultValue={activeClinicId}
-        className="h-11 max-w-[220px] rounded border border-line bg-white px-3 text-sm font-semibold text-ink shadow-sm sm:h-9"
+        className="h-11 w-48 max-w-[58vw] rounded border border-line bg-white px-3 text-sm font-semibold text-ink shadow-sm sm:h-9"
         onChange={(event) => event.currentTarget.form?.requestSubmit()}
       >
         {clinics.map((clinic) => (
