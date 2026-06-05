@@ -126,29 +126,22 @@ function sortRowsByStatusFlow(rows: OrderRequestRow[]) {
 function OrderRequestRowsTable({ rows }: { rows: OrderRequestRow[] }) {
   return (
     <div className="overflow-x-auto">
-      <table className="w-full min-w-[1180px] border-collapse text-left text-sm print:min-w-0 print:text-[10.5px]">
+      <table className="w-full min-w-[960px] border-collapse text-left text-sm print:min-w-0 print:text-[10.5px]">
         <thead className="bg-subtle text-xs text-muted print:bg-white print:text-[10px] print:text-black">
           <tr>
             <th className="border-b border-line px-4 py-3 print:border print:border-black print:px-2 print:py-1.5">
               商品
             </th>
-            <th className="border-b border-line px-4 py-3 text-right print:border print:border-black print:px-2 print:py-1.5">
-              現在庫
-            </th>
-            <th className="border-b border-line px-4 py-3 text-right print:border print:border-black print:px-2 print:py-1.5">
-              最低在庫
-            </th>
-            <th className="border-b border-line px-4 py-3 text-right print:border print:border-black print:px-2 print:py-1.5">
-              不足数
+            <th className="border-b border-line px-4 py-3 print:border print:border-black print:px-2 print:py-1.5">
+              在庫状況
             </th>
             <th className="border-b border-line px-4 py-3 print:border print:border-black print:px-2 print:py-1.5">
               発注先
             </th>
-            <th className="border-b border-line px-4 py-3 text-right print:border print:border-black print:px-2 print:py-1.5">
-              発注数量
+            <th className="border-b border-line px-4 py-3 print:border print:border-black print:px-2 print:py-1.5">
+              発注量
             </th>
-            <th className="border-b border-line px-4 py-3 print:hidden">数量・納品</th>
-            <th className="border-b border-line px-4 py-3 print:hidden">状態</th>
+            <th className="border-b border-line px-4 py-3 print:hidden">状態・操作</th>
             <th className="hidden border border-black px-2 py-1.5 print:table-cell">状態</th>
             <th className="hidden border border-black px-2 py-1.5 print:table-cell">備考</th>
             <th className="hidden border border-black px-2 py-1.5 print:table-cell">確認</th>

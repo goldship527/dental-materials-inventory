@@ -139,14 +139,23 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
           </p>
         ) : null}
       </td>
-      <td className="border-b border-line px-3 py-2 text-right font-semibold print:border print:border-black print:px-2 print:py-1.5">
-        <span className="font-bold tabular-nums">{row.quantity}</span>
-      </td>
-      <td className="border-b border-line px-3 py-2 text-right print:border print:border-black print:px-2 print:py-1.5">
-        <span className="tabular-nums">{row.minStock}</span>
-      </td>
-      <td className="border-b border-line px-3 py-2 text-right text-danger print:border print:border-black print:px-2 print:py-1.5 print:text-black">
-        <span className="font-bold tabular-nums">{row.shortageCount}</span>
+      <td className="border-b border-line px-3 py-2 print:border print:border-black print:px-2 print:py-1.5">
+        <div className="grid w-fit min-w-40 grid-cols-3 gap-2 rounded border border-line bg-white px-2 py-1.5 print:min-w-0 print:border-0 print:p-0">
+          <div>
+            <p className="text-[10px] font-semibold text-muted print:text-[9px] print:text-black">現在</p>
+            <p className="text-lg font-bold tabular-nums text-ink print:text-[11px]">{row.quantity}</p>
+          </div>
+          <div>
+            <p className="text-[10px] font-semibold text-muted print:text-[9px] print:text-black">最低</p>
+            <p className="text-lg font-bold tabular-nums text-ink print:text-[11px]">{row.minStock}</p>
+          </div>
+          <div>
+            <p className="text-[10px] font-semibold text-muted print:text-[9px] print:text-black">不足</p>
+            <p className="text-lg font-bold tabular-nums text-danger print:text-[11px] print:text-black">
+              {row.shortageCount}
+            </p>
+          </div>
+        </div>
       </td>
       <td className="border-b border-line px-3 py-2 print:border print:border-black print:px-2 print:py-1.5">
         {row.supplierId && row.supplierName ? (
@@ -212,15 +221,16 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
           </div>
         ) : null}
       </td>
-      <td className="border-b border-line px-3 py-2 print:border print:border-black print:px-2 print:py-1.5 print:text-right">
-        <span className="font-bold tabular-nums">{row.requestedQuantity}</span>
-      </td>
-      <td className="border-b border-line px-3 py-2 print:hidden">
-        <div className="grid gap-1.5">
+      <td className="border-b border-line px-3 py-2 print:border print:border-black print:px-2 print:py-1.5">
+        <div className="grid gap-2">
+          <div className="flex w-fit items-baseline gap-1 rounded bg-teal-50 px-2.5 py-1 text-accent print:bg-white print:px-0 print:py-0 print:text-black">
+            <span className="text-[10px] font-semibold">発注</span>
+            <span className="text-xl font-bold tabular-nums print:text-[12px]">{row.requestedQuantity}</span>
+          </div>
           <button
             type="button"
             onClick={() => togglePanel("quantity")}
-            className="inline-flex h-8 w-fit items-center rounded border border-line bg-white/75 px-3 text-xs font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent"
+            className="inline-flex h-8 w-fit items-center rounded border border-line bg-white/75 px-3 text-xs font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent print:hidden"
           >
             {activePanel === "quantity" ? "閉じる" : "数量変更"}
           </button>
@@ -267,7 +277,7 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
           ) : null}
         </div>
         {row.status === "ORDERED" && row.receivedAt ? (
-          <div className="mt-2 grid gap-1.5 rounded border border-teal-100 bg-teal-50 px-3 py-2 text-xs font-semibold text-accent">
+          <div className="mt-2 grid gap-1.5 rounded border border-teal-100 bg-teal-50 px-3 py-2 text-xs font-semibold text-accent print:hidden">
             <span>
               納品済み {dateTimeFormatter.format(row.receivedAt)} / {row.receivedQuantity ?? "-"} 個
             </span>
@@ -285,7 +295,7 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
           </div>
         ) : null}
         {row.status === "ORDERED" && !row.receivedAt ? (
-          <div className="mt-2 grid gap-1.5">
+          <div className="mt-2 grid gap-1.5 print:hidden">
             <button
               type="button"
               onClick={() => togglePanel("receipt")}
