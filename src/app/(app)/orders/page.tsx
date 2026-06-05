@@ -91,6 +91,39 @@ function getSupplierStatusChipClass(status: Exclude<OrderListFilterValue, "">) {
   return "border-line bg-white/80 text-muted";
 }
 
+function getStatusCardClass(status: Exclude<OrderListFilterValue, "">) {
+  if (status === "PLANNED") {
+    return "border-teal-100 bg-teal-50 text-accent";
+  }
+
+  if (status === "AWAITING_RECEIPT") {
+    return "border-yellow-200 bg-yellow-50 text-warning";
+  }
+
+  if (status === "RECEIVED") {
+    return "border-green-100 bg-green-50 text-success";
+  }
+
+  return "border-line bg-subtle text-muted";
+}
+
+function getStatusFilterClass(status: OrderListFilterValue, isCurrent: boolean) {
+  if (!status) {
+    return isCurrent
+      ? "inline-flex min-h-9 items-center rounded border border-ink bg-ink px-3 py-1.5 text-xs font-semibold text-white"
+      : "inline-flex min-h-9 items-center rounded border border-line bg-white/75 px-3 py-1.5 text-xs font-semibold text-muted transition hover:border-ink hover:bg-white hover:text-ink";
+  }
+
+  const toneClass = getStatusCardClass(status);
+
+  return isCurrent
+    ? `inline-flex min-h-9 items-center rounded border px-3 py-1.5 text-xs font-semibold ${toneClass}`
+    : `inline-flex min-h-9 items-center rounded border bg-white/75 px-3 py-1.5 text-xs font-semibold transition hover:bg-white ${toneClass.replace(
+        "bg-teal-50",
+        "hover:bg-teal-50",
+      ).replace("bg-yellow-50", "hover:bg-yellow-50").replace("bg-green-50", "hover:bg-green-50").replace("bg-subtle", "hover:bg-subtle")}`;
+}
+
 function formatSupplierLeadTime(leadTime: SupplierLeadTimeStats | undefined) {
   if (!leadTime) {
     return "平均納品日数: データ不足";
@@ -274,18 +307,18 @@ export default async function OrdersPage({ searchParams }: PageProps) {
               発行日時: {generatedAt}
             </p>
           </div>
-          <div className="grid w-full grid-cols-1 gap-3 print:hidden sm:flex sm:w-auto">
-            <a className="inline-flex min-h-10 items-center justify-center rounded border border-line bg-white/75 px-4 py-2 text-sm font-semibold hover:border-accent hover:bg-white" href="/shortage">
+          <div className="flex w-full gap-2 overflow-x-auto pb-1 print:hidden md:w-auto md:justify-end md:overflow-visible md:pb-0">
+            <a className="inline-flex h-9 shrink-0 items-center justify-center rounded border border-line bg-white/75 px-3 text-xs font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent" href="/shortage">
               不足一覧へ
             </a>
             <a
-              className="inline-flex min-h-10 items-center justify-center rounded border border-line bg-white/75 px-4 py-2 text-sm font-semibold hover:border-accent hover:bg-white"
+              className="inline-flex h-9 shrink-0 items-center justify-center rounded border border-line bg-white/75 px-3 text-xs font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent"
               href="/orders/print"
             >
               発注書下書き
             </a>
             <a
-              className="inline-flex min-h-10 items-center justify-center rounded border border-line bg-white/75 px-4 py-2 text-sm font-semibold hover:border-accent hover:bg-white"
+              className="inline-flex h-9 shrink-0 items-center justify-center rounded border border-line bg-white/75 px-3 text-xs font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent"
               href="/order-records"
             >
               発注記録
@@ -308,27 +341,11 @@ export default async function OrdersPage({ searchParams }: PageProps) {
 
         <section className="grid gap-3 md:grid-cols-4 print:hidden">
           {counts.map((item) => (
-            <div key={item.status} className="rounded border border-line/90 bg-panel/95 p-4 shadow-panel">
-              <p
-                className={
-                  item.status === "SKIPPED"
-                    ? "text-sm font-semibold text-muted"
-                    : item.status === "AWAITING_RECEIPT" || item.status === "RECEIVED"
-                      ? "text-sm font-semibold text-success"
-                      : "text-sm font-semibold text-muted"
-                }
-              >
+            <div key={item.status} className={`rounded border p-4 shadow-panel ${getStatusCardClass(item.status)}`}>
+              <p className="text-sm font-semibold">
                 {item.label}
               </p>
-              <p
-                className={
-                  item.status === "SKIPPED"
-                    ? "mt-2 text-3xl font-bold tabular-nums text-muted"
-                    : item.status === "AWAITING_RECEIPT" || item.status === "RECEIVED"
-                      ? "mt-2 text-3xl font-bold tabular-nums text-success"
-                      : "mt-2 text-3xl font-bold tabular-nums"
-                }
-              >
+              <p className="mt-2 text-3xl font-bold tabular-nums">
                 {item.count} 件
               </p>
             </div>
@@ -367,19 +384,7 @@ export default async function OrdersPage({ searchParams }: PageProps) {
                 key={filter.value || "all"}
                 href={buildOrdersHref(filter.value, query)}
                 aria-current={isCurrent ? "page" : undefined}
-                className={
-                  filter.value === "SKIPPED"
-                    ? isCurrent
-                      ? "inline-flex min-h-10 items-center rounded border border-line bg-subtle px-3 py-2 text-sm font-semibold text-muted"
-                      : "inline-flex min-h-10 items-center rounded border border-line bg-white/75 px-3 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:bg-subtle"
-                    : filter.value === "AWAITING_RECEIPT" || filter.value === "RECEIVED"
-                      ? isCurrent
-                        ? "inline-flex min-h-10 items-center rounded border border-success bg-green-50 px-3 py-2 text-sm font-semibold text-success"
-                        : "inline-flex min-h-10 items-center rounded border border-green-100 bg-white/75 px-3 py-2 text-sm font-semibold text-success transition hover:border-success hover:bg-green-50"
-                    : isCurrent
-                      ? "inline-flex min-h-10 items-center rounded border border-accent bg-accent px-3 py-2 text-sm font-semibold text-white"
-                      : "inline-flex min-h-10 items-center rounded border border-line bg-white/75 px-3 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent"
-                }
+                className={getStatusFilterClass(filter.value, isCurrent)}
               >
                 {filter.label}
               </a>
@@ -476,9 +481,9 @@ export default async function OrdersPage({ searchParams }: PageProps) {
                   key={supplierKey}
                   className="overflow-hidden rounded border border-line/90 bg-white shadow-panel print:break-inside-avoid print:rounded-none print:border-black print:shadow-none"
                 >
-                <div className="flex flex-col gap-2 border-b border-line border-l-4 border-l-accent bg-teal-50/70 px-4 py-2 text-sm lg:flex-row lg:items-start lg:justify-between print:border-black print:border-l-black print:bg-white print:px-2 print:py-2 print:text-xs">
+                <div className="flex flex-col gap-3 border-b border-line border-l-8 border-l-accent bg-teal-100/90 px-5 py-3 text-sm lg:flex-row lg:items-start lg:justify-between print:border-black print:border-l-black print:bg-white print:px-2 print:py-2 print:text-xs">
                   <div>
-                    <h2 className="font-semibold">{supplierName}</h2>
+                    <h2 className="text-lg font-bold text-ink">{supplierName}</h2>
                     <p className="mt-1 text-xs font-semibold text-muted print:text-black">
                       {formatSupplierLeadTime(supplierLeadTime)}
                     </p>
