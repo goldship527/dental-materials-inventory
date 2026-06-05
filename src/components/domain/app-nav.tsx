@@ -1,5 +1,7 @@
 import { auth } from "@/auth";
+import { ClinicSwitcher } from "@/components/domain/clinic-switcher";
 import { isAdminRole } from "@/lib/auth/roles";
+import { getActiveClinicSelection } from "@/lib/db/clinic";
 
 type NavItemId =
   | "home"
@@ -173,6 +175,7 @@ function NavGroup({
 export async function AppNav({ current }: AppNavProps) {
   const session = await auth();
   const canUseAdminMode = isAdminRole(session?.user?.role);
+  const clinicSelection = canUseAdminMode ? await getActiveClinicSelection(session?.user) : null;
   const isAdminMode =
     canUseAdminMode &&
     (current === "overview" ||
@@ -199,6 +202,10 @@ export async function AppNav({ current }: AppNavProps) {
           />
 
           <div className="flex min-w-0 shrink-0 gap-2 overflow-x-auto pb-1 sm:gap-1 xl:overflow-visible xl:pb-0">
+            {clinicSelection?.canSelectClinic ? (
+              <ClinicSwitcher activeClinicId={clinicSelection.activeClinicId} clinics={clinicSelection.clinics} />
+            ) : null}
+
             {isAdminMode ? (
               <a
                 href="/home"

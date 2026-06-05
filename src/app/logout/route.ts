@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { activeClinicCookieName } from "@/lib/db/clinic";
 
 const authCookieNames = [
   "authjs.session-token",
@@ -26,6 +27,8 @@ function clearAuthCookies(request: NextRequest) {
       cookieNames.add(cookie.name);
     }
   }
+
+  cookieNames.add(activeClinicCookieName);
 
   for (const name of cookieNames) {
     response.cookies.set(name, "", {
