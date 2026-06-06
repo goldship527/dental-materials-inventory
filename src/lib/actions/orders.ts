@@ -115,6 +115,10 @@ function buildReceiptLotData(input: {
   };
 }
 
+async function lockTransactionKey(tx: Prisma.TransactionClient, key: string) {
+  await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${key}))`;
+}
+
 async function incrementReceiptStockLot(
   tx: Prisma.TransactionClient,
   input: {
@@ -238,6 +242,8 @@ export async function createOrderRequestWithStateAction(
       if (!stockItem) {
         throw new Error("対象の在庫が見つかりません。");
       }
+
+      await lockTransactionKey(tx, `order-request:${context.clinicId}:${stockItem.product.id}`);
 
       const activeRequest = await tx.orderRequest.findFirst({
         where: {
@@ -705,6 +711,8 @@ export async function receiveOrderRequestForContext(
     receivedExpiryDate: input.receivedExpiryDate ?? null,
   });
   const result = await prisma.$transaction(async (tx) => {
+    await lockTransactionKey(tx, `order-receipt:${input.orderRequestId}`);
+
     const target = await tx.orderRequest.findFirst({
       where: {
         id: input.orderRequestId,
@@ -861,7 +869,7 @@ export async function revertOrderReceiptForContext(
   },
 ) {
   const result = await prisma.$transaction(async (tx) => {
-    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`order-receipt:${input.orderRequestId}`}))`;
+    await lockTransactionKey(tx, `order-receipt:${input.orderRequestId}`);
 
     const target = await tx.orderRequest.findFirst({
       where: {
@@ -914,7 +922,7 @@ export async function revertOrderReceiptForContext(
     });
 
     if (receiptMovement) {
-      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`stock-item:${context.clinicId}:${target.productId}`}))`;
+      await lockTransactionKey(tx, `stock-item:${context.clinicId}:${target.productId}`);
 
       const stockItem = await tx.stockItem.findFirst({
         where: {
@@ -1054,6 +1062,10 @@ export async function markOrderRequestsOrderedForContext(
   const orderRequestIds = orderRequestIdsSchema.parse(input.orderRequestIds);
 
   await prisma.$transaction(async (tx) => {
+    for (const orderRequestId of [...orderRequestIds].sort()) {
+      await lockTransactionKey(tx, `order-request-ordered:${context.clinicId}:${orderRequestId}`);
+    }
+
     const targets = await tx.orderRequest.findMany({
       where: {
         id: {

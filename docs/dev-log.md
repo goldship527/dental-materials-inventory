@@ -6495,3 +6495,22 @@
 - `corepack pnpm typecheck` に成功した。
 - `corepack pnpm exec tsx tests/ui-smoke.test.ts` に成功した。
 - `corepack pnpm build` に成功した。
+
+## 発注・納品操作の二重送信ガード強化（2026-06-06）
+
+### 作業内容
+- 発注候補追加時に `order-request:{clinicId}:{productId}` のアドバイザリロックを取得し、同じ商品への並走追加で発注候補が重複しにくいようにした。
+- 納品確認時に納品取り消しと同じ `order-receipt:{orderRequestId}` のアドバイザリロックを取得し、連打や並走POSTで在庫が二重加算されないようにした。
+- 発注記録作成時に対象発注候補IDをソートして順番にロックし、同じ候補セットへの並走送信で発注記録が重複生成されないようにした。
+- 納品確認の並走テストと、発注記録作成の並走テストを追加した。
+
+### 判断
+- DBスキーマ変更や部分一意インデックス追加は避け、既存の納品取り消し処理で使っているPostgreSQLアドバイザリロックの方針を横展開した。
+- 在庫数、発注状態、権限、クリニック境界の既存仕様は変更していない。
+
+### 検証
+- `corepack pnpm exec tsx tests/order-receipt.test.ts` に成功した。
+- `corepack pnpm exec tsx tests/order-request-status.test.ts` に成功した。
+- `corepack pnpm typecheck` に成功した。
+- `corepack pnpm exec tsx tests/ui-smoke.test.ts` に成功した。
+- `corepack pnpm build` に成功した。

@@ -254,6 +254,70 @@ async function main() {
     assert.equal(groupedOrderRecord.orderedMethod, "LINE");
     assert.equal(groupedOrderRecord.orderedMemo, "Sent as one order");
     assert.equal(groupedOrderRecord.supplierResponseMemo, "Read receipt confirmed");
+
+    const concurrentRequestA = await prisma.orderRequest.create({
+      data: {
+        clinicId: clinic.id,
+        productId: product.id,
+        supplierId: supplier.id,
+        requestedQuantity: 1,
+        status: "CONFIRMED",
+        createdByUserId: user.id,
+      },
+    });
+    const concurrentRequestB = await prisma.orderRequest.create({
+      data: {
+        clinicId: clinic.id,
+        productId: product.id,
+        supplierId: supplier.id,
+        requestedQuantity: 1,
+        status: "CONFIRMED",
+        createdByUserId: user.id,
+      },
+    });
+
+    const concurrentOrderedResults = await Promise.allSettled([
+      markOrderRequestsOrderedForContext(context, {
+        orderRequestIds: [concurrentRequestA.id, concurrentRequestB.id],
+        orderedMethod: "PHONE",
+        orderedMemo: "Concurrent ordered A",
+        supplierResponseMemo: null,
+        revalidate: false,
+      }),
+      markOrderRequestsOrderedForContext(context, {
+        orderRequestIds: [concurrentRequestA.id, concurrentRequestB.id],
+        orderedMethod: "PHONE",
+        orderedMemo: "Concurrent ordered B",
+        supplierResponseMemo: null,
+        revalidate: false,
+      }),
+    ]);
+
+    assert.equal(concurrentOrderedResults.filter((result) => result.status === "fulfilled").length, 1);
+    assert.equal(concurrentOrderedResults.filter((result) => result.status === "rejected").length, 1);
+
+    const concurrentOrderedRequests = await prisma.orderRequest.findMany({
+      where: {
+        id: {
+          in: [concurrentRequestA.id, concurrentRequestB.id],
+        },
+      },
+    });
+    const concurrentOrderRecordIds = new Set(concurrentOrderedRequests.map((row) => row.orderRecordId));
+
+    assert.equal(concurrentOrderedRequests.length, 2);
+    assert.ok(concurrentOrderedRequests.every((row) => row.status === "ORDERED"));
+    assert.equal(concurrentOrderRecordIds.size, 1);
+    assert.equal(
+      await prisma.orderRecord.count({
+        where: {
+          id: {
+            in: Array.from(concurrentOrderRecordIds).filter((id): id is string => id !== null),
+          },
+        },
+      }),
+      1,
+    );
   } finally {
     await prisma.$disconnect();
   }

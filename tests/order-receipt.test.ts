@@ -353,6 +353,65 @@ async function main() {
         revalidate: false,
       }),
     );
+
+    const concurrentRequest = await prisma.orderRequest.create({
+      data: {
+        clinicId: clinic.id,
+        productId: product.id,
+        requestedQuantity: 2,
+        status: "ORDERED",
+        createdByUserId: user.id,
+      },
+    });
+
+    await prisma.stockItem.update({
+      where: {
+        id: stockItemAfterRecordOnlyRevert.id,
+      },
+      data: {
+        quantity: 2,
+      },
+    });
+
+    const concurrentReceipts = await Promise.allSettled([
+      receiveOrderRequestForContext(context, {
+        orderRequestId: concurrentRequest.id,
+        receivedQuantity: 2,
+        receivedMemo: "Concurrent receipt A",
+        applyToStock: true,
+        revalidate: false,
+      }),
+      receiveOrderRequestForContext(context, {
+        orderRequestId: concurrentRequest.id,
+        receivedQuantity: 2,
+        receivedMemo: "Concurrent receipt B",
+        applyToStock: true,
+        revalidate: false,
+      }),
+    ]);
+
+    assert.equal(concurrentReceipts.filter((result) => result.status === "fulfilled").length, 1);
+    assert.equal(concurrentReceipts.filter((result) => result.status === "rejected").length, 1);
+
+    const stockItemAfterConcurrentReceipt = await prisma.stockItem.findFirstOrThrow({
+      where: {
+        clinicId: clinic.id,
+        productId: product.id,
+      },
+    });
+
+    assert.equal(stockItemAfterConcurrentReceipt.quantity, 4);
+    assert.equal(
+      await prisma.stockMovement.count({
+        where: {
+          clinicId: clinic.id,
+          productId: product.id,
+          sourceType: "ORDER_RECEIPT",
+          sourceId: concurrentRequest.id,
+        },
+      }),
+      1,
+    );
   } finally {
     await prisma.$disconnect();
   }
