@@ -6480,3 +6480,18 @@
 - `corepack pnpm typecheck` に成功した。
 - `corepack pnpm exec tsx tests/ui-smoke.test.ts` に成功した。
 - `corepack pnpm build` に成功した。
+
+## 未対応バーコード整理アクションの管理者ガード追加（2026-06-06）
+
+### 作業内容
+- `promoteBarcodeScanLogFromSampleAction` と `ignoreBarcodeScanLogAction` の先頭で `requireAdminUser` を呼び、STAFFが直接POSTしても商品化や無視処理を実行できないようにした。
+
+### 判断
+- 未対応バーコード整理ページはADMIN限定だったが、サーバーアクション本体も管理者権限で守る必要があるため、既存の管理系アクションと同じ `unauthorizedRedirectTo: "/barcode"` の形に揃えた。
+- DBスキーマ、バーコード履歴の内部処理、画面レイアウトは変更していない。
+
+### 検証
+- `corepack pnpm exec tsx tests/barcode-scan-logs.test.ts` に成功した。
+- `corepack pnpm typecheck` に成功した。
+- `corepack pnpm exec tsx tests/ui-smoke.test.ts` に成功した。
+- `corepack pnpm build` に成功した。

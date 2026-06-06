@@ -7,6 +7,7 @@ import { z } from "zod";
 import { createOrFindTestProductFromSampleForContext } from "@/lib/actions/imports";
 import { analyzeBarcodeInput } from "@/lib/barcode/gs1";
 import { normalizeBarcodeText } from "@/lib/barcode/normalize";
+import { requireAdminUser } from "@/lib/auth/admin";
 import { searchProductsByBarcode } from "@/lib/db/barcodes";
 import { type ActiveClinicContext, requireActiveClinic } from "@/lib/db/clinic";
 import { prisma } from "@/lib/db/prisma";
@@ -318,6 +319,9 @@ export async function markMatchingBarcodeScanLogsLinkedForContext(options: {
 }
 
 export async function ignoreBarcodeScanLogAction(formData: FormData) {
+  await requireAdminUser({
+    unauthorizedRedirectTo: "/barcode",
+  });
   const context = await requireActiveClinic();
   const input = resolveBarcodeScanLogSchema.parse({
     logId: formData.get("logId"),
@@ -334,6 +338,9 @@ export async function ignoreBarcodeScanLogAction(formData: FormData) {
 }
 
 export async function promoteBarcodeScanLogFromSampleAction(formData: FormData) {
+  await requireAdminUser({
+    unauthorizedRedirectTo: "/barcode",
+  });
   const context = await requireActiveClinic();
   const input = promoteBarcodeScanLogSchema.parse({
     logId: formData.get("logId"),
