@@ -430,6 +430,9 @@ export async function getPurchaseHistorySetupProductRows(
       {
         name: "asc",
       },
+      {
+        id: "asc",
+      },
     ],
     take,
     }),

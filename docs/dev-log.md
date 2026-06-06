@@ -6611,3 +6611,25 @@
 
 ### 残課題・次アクション
 - `/shortage` の印刷全件出力はコード上は画面用/印刷用の描画分離で対応済み。必要に応じて、51件以上の不足データでブラウザ印刷プレビューの目視確認を行う。
+
+## 2026-06-06 一覧パフォーマンス フェーズ1 低優先指摘A・Bの後始末
+
+### 作業内容
+- `/shortage` の印刷用 `tbody` では `ShortageOrderButton` を生成しないよう、`renderShortageRow` に `interactive` オプションを追加した。
+- 画面用 `tbody` は `interactive: true` のまま発注候補ボタンを表示し、印刷用 `tbody` は `interactive: false` で同じ列構造のまま発注候補セルを空にした。
+- `getPurchaseHistorySetupProductRows` の `orderBy` 末尾に `id asc` を追加し、購入履歴登録商品の整備対象一覧もカテゴリ・名前が同一のときに順序が安定するようにした。
+
+### 判断
+- 指示書どおり、範囲外ページの取得順最適化（C）と空表示 `colSpan=8`（D）は変更していない。
+- 列構成、印刷体裁、`ShortageOrderButton` の props、認証・権限・Cookie・DBスキーマには触れていない。
+
+### 検証
+- `corepack pnpm exec tsx tests/stock-page.test.ts` に成功した。
+- `corepack pnpm exec tsx tests/product-master-page.test.ts` に成功した。
+- `corepack pnpm exec tsx tests/list-pagination-stability.test.ts` に成功した。
+- `corepack pnpm exec tsx tests/ui-smoke.test.ts` に成功した。
+- `corepack pnpm typecheck` に成功した。
+- `corepack pnpm build` に成功した。
+
+### 残課題・次アクション
+- 印刷プレビューの実ブラウザ目視は未実施。必要に応じて51件以上の不足データで確認する。

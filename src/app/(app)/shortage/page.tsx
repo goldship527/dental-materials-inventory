@@ -105,7 +105,7 @@ export default async function ShortagePage({ searchParams }: PageProps) {
   const pagedShortageRows = filteredShortageRows.slice((page - 1) * shortagePageSize, page * shortagePageSize);
   const previousHref = buildShortagePageHref({ q: query }, page - 1);
   const nextHref = buildShortagePageHref({ q: query }, page + 1);
-  const renderShortageRow = (row: StockRow) => {
+  const renderShortageRow = (row: StockRow, options: { interactive: boolean } = { interactive: true }) => {
     const pendingOrders = pendingOrdersByProduct[row.productId];
     const hasPendingOrders = Boolean(pendingOrders && pendingOrders.totalQuantity > 0);
 
@@ -156,11 +156,13 @@ export default async function ShortagePage({ searchParams }: PageProps) {
           )}
         </td>
         <td className="border-b border-line px-4 py-3 print:hidden">
-          <ShortageOrderButton
-            stockItemId={row.stockItemId}
-            isAlreadyAdded={activeOrderProductIds.has(row.productId) || hasPendingOrders}
-            pendingQuantity={pendingOrders?.totalQuantity ?? 0}
-          />
+          {options.interactive ? (
+            <ShortageOrderButton
+              stockItemId={row.stockItemId}
+              isAlreadyAdded={activeOrderProductIds.has(row.productId) || hasPendingOrders}
+              pendingQuantity={pendingOrders?.totalQuantity ?? 0}
+            />
+          ) : null}
         </td>
         <td className="hidden border border-black px-2 py-1.5 print:table-cell" />
       </tr>
@@ -293,10 +295,14 @@ export default async function ShortagePage({ searchParams }: PageProps) {
               </tr>
             </thead>
             <tbody className="print:hidden">
-              {pagedShortageRows.length > 0 ? pagedShortageRows.map(renderShortageRow) : renderEmptyRow()}
+              {pagedShortageRows.length > 0
+                ? pagedShortageRows.map((row) => renderShortageRow(row, { interactive: true }))
+                : renderEmptyRow()}
             </tbody>
             <tbody className="hidden print:table-row-group">
-              {filteredShortageRows.length > 0 ? filteredShortageRows.map(renderShortageRow) : renderEmptyRow()}
+              {filteredShortageRows.length > 0
+                ? filteredShortageRows.map((row) => renderShortageRow(row, { interactive: false }))
+                : renderEmptyRow()}
             </tbody>
           </table>
         </section>
