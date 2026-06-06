@@ -30,7 +30,7 @@ export function SupplierOrderRecordPanel({ orderRequestIds, printHref }: Supplie
           onClick={() => setIsOpen((current) => !current)}
           className="inline-flex min-h-9 items-center justify-center rounded bg-ink px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-slate-700"
         >
-          {isOpen ? "発注記録を閉じる" : "この発注先の発注を記録"}
+          {isOpen ? "入力を閉じる" : "発注済みにする"}
         </button>
       </div>
 
@@ -39,6 +39,9 @@ export function SupplierOrderRecordPanel({ orderRequestIds, printHref }: Supplie
           {orderRequestIds.map((orderRequestId) => (
             <input key={orderRequestId} type="hidden" name="orderRequestId" value={orderRequestId} />
           ))}
+          <p className="text-xs font-semibold text-muted">
+            このディーラーの発注予定を納品待ちに移します。外部送信は行いません。
+          </p>
           <div className="grid gap-2 lg:grid-cols-[auto_12rem_1fr_1fr_auto] lg:items-end">
             <label className="flex h-9 items-center gap-2 whitespace-nowrap text-xs font-semibold text-muted">
               <input type="checkbox" name="confirmOrdered" required className="h-4 w-4 accent-teal-700" />
@@ -78,7 +81,7 @@ export function SupplierOrderRecordPanel({ orderRequestIds, printHref }: Supplie
               type="submit"
               className="h-9 rounded bg-ink px-3 text-xs font-semibold text-white transition hover:bg-slate-700"
             >
-              記録する
+              納品待ちへ移す
             </button>
           </div>
         </form>
