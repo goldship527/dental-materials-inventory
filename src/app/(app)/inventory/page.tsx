@@ -3,7 +3,7 @@ import { auth } from "@/auth";
 import { AppNav } from "@/components/domain/app-nav";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { getActiveStaffOperatorOptionsForClinic } from "@/lib/db/staff-operators";
-import { getCategories, getStockRows } from "@/lib/db/stock";
+import { getCategories, getStockPage } from "@/lib/db/stock";
 import { InventoryAdjustCell } from "./inventory-adjust-cell";
 import { InventoryFilterForm } from "./inventory-filter-form";
 
@@ -12,8 +12,36 @@ type PageProps = {
     q?: string;
     category?: string;
     shortage?: string;
+    page?: string;
   }>;
 };
+
+function parsePage(value: string | undefined) {
+  const page = Number(value);
+
+  return Number.isFinite(page) && page > 0 ? Math.floor(page) : 1;
+}
+
+function buildInventoryPageHref(params: { q: string; category: string; shortageOnly: boolean }, page: number) {
+  const searchParams = new URLSearchParams();
+
+  if (params.q) {
+    searchParams.set("q", params.q);
+  }
+  if (params.category) {
+    searchParams.set("category", params.category);
+  }
+  if (params.shortageOnly) {
+    searchParams.set("shortage", "1");
+  }
+  if (page > 1) {
+    searchParams.set("page", String(page));
+  }
+
+  const queryString = searchParams.toString();
+
+  return queryString ? `/inventory?${queryString}` : "/inventory";
+}
 
 export default async function InventoryPage({ searchParams }: PageProps) {
   const session = await auth();
@@ -27,26 +55,27 @@ export default async function InventoryPage({ searchParams }: PageProps) {
   const query = params.q?.trim() ?? "";
   const category = params.category ?? "";
   const shortageOnly = params.shortage === "1";
-  const [rows, categories, staffOperators] = await Promise.all([
-    getStockRows(context.clinicId),
+  const page = parsePage(params.page);
+  const [stockPage, categories, staffOperators] = await Promise.all([
+    getStockPage(context.clinicId, {
+      q: query,
+      category,
+      shortageOnly,
+      page,
+    }),
     getCategories(context.clinicId),
     getActiveStaffOperatorOptionsForClinic({
       organizationId: context.organizationId,
       clinicId: context.clinicId,
     }),
   ]);
+  const filteredRows = stockPage.rows;
+  if (page > stockPage.pageCount) {
+    redirect(buildInventoryPageHref({ q: query, category, shortageOnly }, stockPage.pageCount));
+  }
 
-  const filteredRows = rows.filter((row) => {
-    const searchText = [row.name, row.productCode, row.janCode, row.category, row.manufacturer]
-      .filter(Boolean)
-      .join(" ")
-      .toLowerCase();
-    const matchesQuery = query ? searchText.includes(query.toLowerCase()) : true;
-    const matchesCategory = category ? row.category === category : true;
-    const matchesShortage = shortageOnly ? row.isShortage : true;
-
-    return matchesQuery && matchesCategory && matchesShortage;
-  });
+  const previousHref = buildInventoryPageHref({ q: query, category, shortageOnly }, stockPage.page - 1);
+  const nextHref = buildInventoryPageHref({ q: query, category, shortageOnly }, stockPage.page + 1);
 
   return (
     <main className="min-h-screen bg-surface px-4 py-6 text-ink sm:px-6 lg:px-8">
@@ -72,8 +101,35 @@ export default async function InventoryPage({ searchParams }: PageProps) {
         />
 
         <section className="overflow-hidden rounded border border-line bg-white shadow-panel">
-          <div className="border-b border-line px-4 py-3 text-sm text-muted">
-            表示 {filteredRows.length} 件 / 全 {rows.length} 件
+          <div className="flex flex-col gap-3 border-b border-line px-4 py-3 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
+            <span>
+              表示 {filteredRows.length} 件 / 全 {stockPage.total} 件
+            </span>
+            <div className="flex items-center gap-2">
+              <a
+                className={`rounded border border-line px-3 py-1.5 text-xs font-semibold transition ${
+                  stockPage.page <= 1 ? "pointer-events-none text-muted/50" : "text-muted hover:border-accent hover:text-accent"
+                }`}
+                href={previousHref}
+                aria-disabled={stockPage.page <= 1}
+              >
+                前へ
+              </a>
+              <span className="text-xs">
+                {stockPage.page} / {stockPage.pageCount}
+              </span>
+              <a
+                className={`rounded border border-line px-3 py-1.5 text-xs font-semibold transition ${
+                  stockPage.page >= stockPage.pageCount
+                    ? "pointer-events-none text-muted/50"
+                    : "text-muted hover:border-accent hover:text-accent"
+                }`}
+                href={nextHref}
+                aria-disabled={stockPage.page >= stockPage.pageCount}
+              >
+                次へ
+              </a>
+            </div>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1240px] border-collapse text-left text-sm">

@@ -2,6 +2,9 @@ import { prisma } from "@/lib/db/prisma";
 import { getOrderRequestStatusCounts } from "@/lib/db/orders";
 import { getStockStatus, type StockStatusKey } from "@/lib/stock/status";
 
+const defaultStockPageSize = 50;
+const maxStockPageSize = 200;
+
 export type StockRow = {
   stockItemId: string;
   productId: string;
@@ -30,6 +33,41 @@ export type StockRow = {
   photoFileName: string | null;
   photoUpdatedAt: number | null;
 };
+
+export type StockPageParams = {
+  q?: string;
+  category?: string;
+  shortageOnly?: boolean;
+  page?: number;
+  pageSize?: number;
+};
+
+export type StockPageResult = {
+  rows: StockRow[];
+  total: number;
+  page: number;
+  pageSize: number;
+  pageCount: number;
+};
+
+function normalizePageInput(page: number | undefined, pageSize: number | undefined) {
+  const normalizedPage = page && Number.isFinite(page) && page > 0 ? Math.floor(page) : 1;
+  const normalizedPageSize =
+    pageSize && Number.isFinite(pageSize) && pageSize > 0
+      ? Math.min(Math.floor(pageSize), maxStockPageSize)
+      : defaultStockPageSize;
+
+  return {
+    page: normalizedPage,
+    pageSize: normalizedPageSize,
+  };
+}
+
+function getStockPageSlice<T>(rows: T[], page: number, pageSize: number) {
+  const start = (page - 1) * pageSize;
+
+  return rows.slice(start, start + pageSize);
+}
 
 export function toStockRow(item: {
   id: string;
@@ -117,10 +155,105 @@ export async function getStockRows(clinicId: string) {
           name: "asc",
         },
       },
+      {
+        id: "asc",
+      },
     ],
   });
 
   return items.map(toStockRow);
+}
+
+export async function getStockPage(clinicId: string, params: StockPageParams = {}): Promise<StockPageResult> {
+  const { page, pageSize } = normalizePageInput(params.page, params.pageSize);
+  const query = params.q?.trim();
+  const where = {
+    clinicId,
+    isUsed: true,
+    product: {
+      isActive: true,
+      ...(params.category ? { category: params.category } : {}),
+      ...(query
+        ? {
+            OR: [
+              { name: { contains: query, mode: "insensitive" as const } },
+              { productCode: { contains: query, mode: "insensitive" as const } },
+              { janCode: { contains: query, mode: "insensitive" as const } },
+              { category: { contains: query, mode: "insensitive" as const } },
+              { manufacturer: { contains: query, mode: "insensitive" as const } },
+            ],
+          }
+        : {}),
+    },
+  };
+  const orderBy = [
+    {
+      product: {
+        category: "asc" as const,
+      },
+    },
+    {
+      product: {
+        name: "asc" as const,
+      },
+    },
+    {
+      id: "asc" as const,
+    },
+  ];
+
+  if (params.shortageOnly) {
+    const items = await prisma.stockItem.findMany({
+      where,
+      include: {
+        product: {
+          include: {
+            primarySupplier: true,
+          },
+        },
+      },
+      orderBy,
+    });
+    const filteredRows = items.map(toStockRow).filter((row) => row.isShortage);
+    const total = filteredRows.length;
+    const pageCount = Math.max(1, Math.ceil(total / pageSize));
+
+    return {
+      rows: getStockPageSlice(filteredRows, page, pageSize),
+      total,
+      page,
+      pageSize,
+      pageCount,
+    };
+  }
+
+  const [total, items] = await Promise.all([
+    prisma.stockItem.count({
+      where,
+    }),
+    prisma.stockItem.findMany({
+      where,
+      include: {
+        product: {
+          include: {
+            primarySupplier: true,
+          },
+        },
+      },
+      orderBy,
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+    }),
+  ]);
+  const pageCount = Math.max(1, Math.ceil(total / pageSize));
+
+  return {
+    rows: items.map(toStockRow),
+    total,
+    page,
+    pageSize,
+    pageCount,
+  };
 }
 
 export async function countShortageItems(clinicId: string) {

@@ -68,8 +68,18 @@ export function getRecommendedMinStockCutoffDate(days: number, today: Date = new
 export async function getRecommendedMinStocks(
   organizationId: string,
   clinicId: string,
-  options?: { days?: number; today?: Date; fallbackLeadDays?: number; safetyFactor?: number },
+  options?: {
+    days?: number;
+    today?: Date;
+    fallbackLeadDays?: number;
+    safetyFactor?: number;
+    productIds?: string[];
+  },
 ): Promise<RecommendedMinStocksByProduct> {
+  if (options?.productIds && options.productIds.length === 0) {
+    return {};
+  }
+
   const days = options?.days ?? 90;
   const today = options?.today ?? new Date();
   const fallbackLeadDays = options?.fallbackLeadDays ?? defaultLeadDays;
@@ -80,6 +90,7 @@ export async function getRecommendedMinStocks(
       where: {
         organizationId,
         isActive: true,
+        ...(options?.productIds ? { id: { in: options.productIds } } : {}),
       },
       select: {
         id: true,
@@ -97,6 +108,7 @@ export async function getRecommendedMinStocks(
           organizationId,
           isActive: true,
         },
+        ...(options?.productIds ? { productId: { in: options.productIds } } : {}),
       },
       select: {
         productId: true,

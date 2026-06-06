@@ -3,7 +3,7 @@ import { auth } from "@/auth";
 import { AppNav } from "@/components/domain/app-nav";
 import { isAdminRole } from "@/lib/auth/roles";
 import { requireActiveClinic } from "@/lib/db/clinic";
-import { getProductCategories, getProductMasterRows } from "@/lib/db/products";
+import { getProductCategories, getProductMasterPage, getPurchaseHistoryProductSummary } from "@/lib/db/products";
 import { isPurchaseHistoryImportSource } from "@/lib/products/import-source";
 import { ProductFilterForm } from "./product-filter-form";
 
@@ -15,8 +15,45 @@ type PageProps = {
     source?: string;
     setup?: string;
     adminDenied?: string;
+    page?: string;
   }>;
 };
+
+function parsePage(value: string | undefined) {
+  const page = Number(value);
+
+  return Number.isFinite(page) && page > 0 ? Math.floor(page) : 1;
+}
+
+function buildProductsPageHref(
+  params: { q: string; category: string; source: string; setup: string; attachBarcode: string },
+  page: number,
+) {
+  const searchParams = new URLSearchParams();
+
+  if (params.q) {
+    searchParams.set("q", params.q);
+  }
+  if (params.category) {
+    searchParams.set("category", params.category);
+  }
+  if (params.source) {
+    searchParams.set("source", params.source);
+  }
+  if (params.setup) {
+    searchParams.set("setup", params.setup);
+  }
+  if (params.attachBarcode) {
+    searchParams.set("attachBarcode", params.attachBarcode);
+  }
+  if (page > 1) {
+    searchParams.set("page", String(page));
+  }
+
+  const queryString = searchParams.toString();
+
+  return queryString ? `/products?${queryString}` : "/products";
+}
 
 const yenFormatter = new Intl.NumberFormat("ja-JP", {
   style: "currency",
@@ -77,39 +114,25 @@ export default async function ProductsPage({ searchParams }: PageProps) {
   const attachBarcode = params.attachBarcode?.trim() ?? "";
   const source = params.source ?? "";
   const setup = params.setup ?? "";
-  const [rows, categories] = await Promise.all([
-    getProductMasterRows(context.organizationId, context.clinicId),
+  const page = parsePage(params.page);
+  const [productPage, categories, purchaseHistorySummary] = await Promise.all([
+    getProductMasterPage(context.organizationId, context.clinicId, {
+      q: query,
+      category,
+      source,
+      setup,
+      page,
+    }),
     getProductCategories(context.organizationId),
+    getPurchaseHistoryProductSummary(context.organizationId, context.clinicId),
   ]);
-  const normalizedQuery = query.toLowerCase();
-  const filteredRows = rows.filter((row) => {
-    const searchText = [
-      row.name,
-      row.nameKana,
-      row.productCode,
-      row.janCode,
-      row.internalCode,
-      row.category,
-      row.manufacturer,
-      row.specification,
-      row.orderUnit,
-      row.supplierName,
-      row.supplierProductCode,
-      row.notes,
-      ...row.barcodes.map((barcode) => barcode.barcode),
-    ]
-      .filter(Boolean)
-      .join(" ")
-      .toLowerCase();
-    const matchesQuery = normalizedQuery ? searchText.includes(normalizedQuery) : true;
-    const matchesCategory = category ? row.category === category : true;
-    const matchesSource = source === "purchase-history" ? isPurchaseHistoryImportSource(row.importSource) : true;
-    const matchesSetup = setup === "1" ? needsInitialSetup(row) : true;
+  const filteredRows = productPage.rows;
+  if (page > productPage.pageCount) {
+    redirect(buildProductsPageHref({ q: query, category, source, setup, attachBarcode }, productPage.pageCount));
+  }
 
-    return matchesQuery && matchesCategory && matchesSource && matchesSetup;
-  });
-  const purchaseHistoryRows = rows.filter((row) => isPurchaseHistoryImportSource(row.importSource));
-  const purchaseHistorySetupRows = purchaseHistoryRows.filter(needsInitialSetup);
+  const previousHref = buildProductsPageHref({ q: query, category, source, setup, attachBarcode }, productPage.page - 1);
+  const nextHref = buildProductsPageHref({ q: query, category, source, setup, attachBarcode }, productPage.page + 1);
   const filterLabel = [
     query ? `検索: ${query}` : "",
     category ? `カテゴリ: ${category}` : "",
@@ -171,13 +194,13 @@ export default async function ProductsPage({ searchParams }: PageProps) {
           setup={setup}
         />
 
-        {!attachBarcode && purchaseHistoryRows.length > 0 ? (
+        {!attachBarcode && purchaseHistorySummary.total > 0 ? (
           <section className="rounded border border-line bg-white p-4 text-sm shadow-panel">
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div>
                 <p className="font-semibold text-ink">購入履歴から登録した商品</p>
                 <p className="mt-1 text-muted">
-                  {purchaseHistoryRows.length}件中、{purchaseHistorySetupRows.length}件はカテゴリ、最低在庫、保管場所などの確認が残っています。
+                  {purchaseHistorySummary.total}件中、{purchaseHistorySummary.needsSetup}件はカテゴリ、最低在庫、保管場所などの確認が残っています。
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -211,9 +234,36 @@ export default async function ProductsPage({ searchParams }: PageProps) {
         ) : null}
 
         <section className="overflow-hidden rounded border border-line bg-white shadow-panel">
-          <div className="border-b border-line px-4 py-3 text-sm text-muted">
-            表示 {filteredRows.length} 件 / 全 {rows.length} 件
-            {filterLabel ? `（${filterLabel}）` : ""}
+          <div className="flex flex-col gap-3 border-b border-line px-4 py-3 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
+            <span>
+              表示 {filteredRows.length} 件 / 全 {productPage.total} 件
+              {filterLabel ? `（${filterLabel}）` : ""}
+            </span>
+            <div className="flex items-center gap-2">
+              <a
+                className={`rounded border border-line px-3 py-1.5 text-xs font-semibold transition ${
+                  productPage.page <= 1 ? "pointer-events-none text-muted/50" : "text-muted hover:border-accent hover:text-accent"
+                }`}
+                href={previousHref}
+                aria-disabled={productPage.page <= 1}
+              >
+                前へ
+              </a>
+              <span className="text-xs">
+                {productPage.page} / {productPage.pageCount}
+              </span>
+              <a
+                className={`rounded border border-line px-3 py-1.5 text-xs font-semibold transition ${
+                  productPage.page >= productPage.pageCount
+                    ? "pointer-events-none text-muted/50"
+                    : "text-muted hover:border-accent hover:text-accent"
+                }`}
+                href={nextHref}
+                aria-disabled={productPage.page >= productPage.pageCount}
+              >
+                次へ
+              </a>
+            </div>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1440px] border-collapse text-left text-sm">

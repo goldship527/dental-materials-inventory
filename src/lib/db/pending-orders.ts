@@ -55,12 +55,18 @@ export function summarizePendingOrderRows(
 export async function getPendingOrdersByProduct(
   organizationId: string,
   clinicId: string,
+  options?: { productIds?: string[] },
 ): Promise<PendingOrdersByProduct> {
+  if (options?.productIds && options.productIds.length === 0) {
+    return {};
+  }
+
   const rows = await prisma.orderRequest.findMany({
     where: {
       clinicId,
       status: "ORDERED",
       receivedAt: null,
+      ...(options?.productIds ? { productId: { in: options.productIds } } : {}),
       clinic: {
         organizationId,
       },

@@ -6514,3 +6514,100 @@
 - `corepack pnpm typecheck` に成功した。
 - `corepack pnpm exec tsx tests/ui-smoke.test.ts` に成功した。
 - `corepack pnpm build` に成功した。
+
+## 2026-06-06 一覧パフォーマンス改善のCodex引き継ぎ準備（計画＋redテスト）
+
+### 作業内容
+- 通常業務の一覧画面（/products・/inventory・/shortage）が「全件取得→JSフィルタ→全件描画」になっている点を、表示速度のボトルネックとして整理した。
+- 実装はCodexが行う前提で、計画書と失敗する（red）受け入れテストだけを先に用意した（コード本体の実装はしていない）。
+- 引き継ぎ計画書 `docs/codex-handoff-list-performance.md` を作成。フェーズ1=DB側フィルタ＋ページネーション（挙動は不変、速くするだけ）。新関数 `getStockPage` / `getProductMasterPage` の契約（引数・返り値・既存関数との同値）を明記。
+- redテストを2本追加:
+  - `tests/stock-page.test.ts`（getStockPage を getStockRows＋現行フィルタのオラクルと同値検証。q/category/不足のみ/minStock=nullフォールバック/ページスライス/範囲外）。
+  - `tests/product-master-page.test.ts`（getProductMasterPage を getProductMasterRows＋現行フィルタのオラクルと同値検証。q/category/source=purchase-history/ページスライス）。
+
+### 前提・非対象
+- 認証・権限・Cookie・ログアウト・DB破壊的変更には触れていない。
+- 重い集計（ABCランク・推奨最低在庫）のキャッシュ化はフェーズ2として別出し。
+- 直近で実装済みの安全修正（発注候補/納品確認のアドバイザリロック、スキャン履歴の管理者ガード）はこのタスクの対象外。現物で実装済みを確認した。
+
+### 検証
+- 追加テストは現状 red（`getStockPage` / `getProductMasterPage` 未実装のため）。意図どおり。
+- `tests/stock-page.test.ts` / `tests/product-master-page.test.ts` は既存テストと同じ `node:test` + `tsx` 方式。`node:`/`process` のtsc TS2591はリポジトリ全体で既存の事象であり、本追加で新規エラーは出していない（テストは `corepack pnpm exec tsx` で実行する）。
+- 実行コマンド（ローカルPostgres要、`docker compose up -d`）:
+  - `corepack pnpm exec tsx tests/stock-page.test.ts`
+  - `corepack pnpm exec tsx tests/product-master-page.test.ts`
+
+### 残課題・次アクション
+- Codexがフェーズ1を実装し、上記2テストをgreenにする（完了条件は引き継ぎ書9節）。
+- フェーズ2: 集計キャッシュ、/shortage の不足判定の完全DB側化、実測に基づくインデックス検討。
+
+## 2026-06-06 一覧パフォーマンス改善フェーズ1実装
+
+### 作業内容
+- `src/lib/db/stock.ts` に `getStockPage` を追加し、在庫一覧の検索語・カテゴリをDB側へ寄せ、ページング結果と絞り込み後の総件数を返すようにした。
+- `src/lib/db/products.ts` に `getProductMasterPage` を追加し、商品マスターの検索語・カテゴリ・購入履歴フィルタをDB側へ寄せ、ページ対象の商品だけを行データへ組み立てるようにした。
+- 商品マスターの納品待ち、ABCランク、推奨最低在庫の補助集計に `productIds` 指定を追加し、既存呼び出しはそのまま、ページング版では対象商品に絞って取得できるようにした。
+- `/inventory` と `/products` を新しいページング関数へ載せ替え、検索条件を維持する「前へ / 次へ」ページャを追加した。
+- `/shortage` は発注先名検索と不足数ソートの既存挙動を保ったまま、ソート後に50件ずつ描画するページャを追加した。
+- 購入履歴登録商品のサマリは全商品行の組み立てを避け、軽量な件数サマリ関数で表示するようにした。
+
+### 判断
+- 認証・権限・Cookie・ログアウト処理、Prisma schema、マイグレーション、DB破壊的変更には触れていない。
+- `shortageOnly` の不足判定は `minStock ?? defaultMinStock` の既存同値性を優先し、フェーズ1では検索・カテゴリをDBで絞った後に既存の `toStockRow` 判定で処理した。
+- ABCランクは「全体の中での使用頻度」という意味を変えないため、計算定義は変えず、ページング版では返却対象だけを絞る形にした。
+
+### 検証
+- `corepack pnpm exec tsx tests/stock-page.test.ts` に成功した。
+- `corepack pnpm exec tsx tests/product-master-page.test.ts` に成功した。
+- `corepack pnpm typecheck` に成功した。
+- `corepack pnpm build` に成功した。
+- 2本のDBテストを並列実行した際、テスト用スキーマのリセットが衝突して片方が `OrderRequestStatus already exists` で失敗したため、単独実行でgreenを確認した。
+
+### 残課題・次アクション
+- フェーズ2候補は、`/shortage` の不足判定完全DB側化、ABC/推奨最低在庫のキャッシュ化、実測に基づくインデックス検討。
+- 画面操作での最終確認が必要なら、開発サーバーを起動してページャと検索条件維持を確認する。
+
+## 2026-06-06 一覧パフォーマンス フェーズ1 レビュー指摘の修正指示（Codex向け）
+
+### 作業内容
+- フェーズ1実装の静的レビューで見つかった3件について、Codex向けの修正指示書と回帰テストを用意した（実装本体はCodexが行う。本作業ではアプリ/DBは起動していない）。
+- 指示書 `docs/codex-handoff-list-performance-fixes.md` を作成。
+  - 修正1【高】/shortage の印刷が現在ページ(最大50件)だけになる回帰。画面はページング・印刷は全件になるよう、行描画を関数化して2-tbody（screen=paged / print=全件）にする案を提示。
+  - 修正2【中】ページネーションの安定タイブレーカ不足。getStockPage/getStockRows/getProductMasterPage/getProductMasterRows の orderBy 末尾に `{ id: "asc" }` を追加（4箇所そろえる）。
+  - 修正3【中】範囲外ページの表示が不自然（「999 / 3」）。データ層の「範囲外=空配列」仕様は維持し、各 page.tsx で `page > pageCount` のとき最終ページへ redirect する案。
+- 回帰テスト `tests/list-pagination-stability.test.ts` を追加。同名・同カテゴリ12件を作り、pageSize=1/5 で全ページを連結し「重複なし・欠落なし」を検証（修正2の担保）。
+
+### 判断・補足
+- レビュー結果として、クリニック/組織の絞り込み、ABCランクの全体内順位の維持、推奨最低在庫/納品待ちの値の不変、setup=1 のフォールバック一致は問題なしと確認した（正しさはフェーズ1で保たれている）。
+- 修正1・修正3は主にUI側のため、回帰テストは修正2のみ実コードで用意。修正1は印刷プレビュー目視＋ui-smoke、修正3はデータ層既存テスト＋手動URL確認で担保する方針を指示書に明記した。
+
+### 検証（このコミット時点）
+- 追加テストは getStockPage/getProductMasterPage 実装済みのため import は通るが、タイブレーカ未追加の現状では分割性が保証されない（修正2実装後に安定して green）。
+- DBテストは並列実行で同一テストスキーマの reset が衝突するため、1ファイルずつ直列で実行すること。
+  - `corepack pnpm exec tsx tests/list-pagination-stability.test.ts`
+
+### 次アクション
+- Codexが修正1〜3を実装し、stock-page / product-master-page / list-pagination-stability / ui-smoke を green にする（完了条件は指示書末尾）。
+
+## 2026-06-06 一覧パフォーマンス フェーズ1 レビュー指摘3件の修正
+
+### 作業内容
+- `/shortage` の行描画をローカル関数化し、画面用はページング後の行、印刷用は検索後の不足在庫全件を描画する2つの `tbody` に分けた。
+- `/inventory`、`/products`、`/shortage` で、`?page=999` のような範囲外ページ指定時に検索条件を維持したまま最終ページへ `redirect` するようにした。
+- `getStockRows` / `getStockPage` / `getProductMasterRows` / `getProductMasterPage` の `orderBy` 末尾に `id asc` を追加し、同一カテゴリ・同一名称の行でもページング順序が安定するようにした。
+
+### 判断
+- データ層の「範囲外ページは空配列を返し、`total` / `pageCount` は維持する」仕様は変更していない。
+- `/shortage` は画面上の長さを抑えつつ、発注確認用の印刷では従来どおり全件出ることを優先した。
+- 認証・権限・Cookie・ログアウト、Prisma schema、マイグレーション、DB破壊的変更には触れていない。
+
+### 検証
+- `corepack pnpm exec tsx tests/stock-page.test.ts` に成功した。
+- `corepack pnpm exec tsx tests/product-master-page.test.ts` に成功した。
+- `corepack pnpm exec tsx tests/list-pagination-stability.test.ts` に成功した。
+- `corepack pnpm exec tsx tests/ui-smoke.test.ts` に成功した。
+- `corepack pnpm typecheck` に成功した。
+- `corepack pnpm build` に成功した。
+
+### 残課題・次アクション
+- `/shortage` の印刷全件出力はコード上は画面用/印刷用の描画分離で対応済み。必要に応じて、51件以上の不足データでブラウザ印刷プレビューの目視確認を行う。

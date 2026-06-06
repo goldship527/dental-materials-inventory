@@ -91,8 +91,12 @@ export function getProductAbcCutoffDate(days: number, today: Date = new Date()):
 export async function getProductAbcRanks(
   organizationId: string,
   clinicId: string,
-  options?: { days?: number; today?: Date },
+  options?: { days?: number; today?: Date; productIds?: string[] },
 ): Promise<ProductAbcRanksByProduct> {
+  if (options?.productIds && options.productIds.length === 0) {
+    return {};
+  }
+
   const days = options?.days ?? 90;
   const today = options?.today ?? new Date();
   const cutoff = getProductAbcCutoffDate(days, today);
@@ -126,10 +130,18 @@ export async function getProductAbcRanks(
   ]);
   const quantityByProduct = sumOutQuantitiesByProduct(outMovements);
 
-  return calculateProductAbcRanks(
+  const ranks = calculateProductAbcRanks(
     products.map((product) => ({
       productId: product.id,
       totalQuantity: quantityByProduct.get(product.id) ?? 0,
     })),
+  );
+
+  if (!options?.productIds) {
+    return ranks;
+  }
+
+  return Object.fromEntries(
+    options.productIds.flatMap((productId) => (ranks[productId] ? [[productId, ranks[productId]]] : [])),
   );
 }

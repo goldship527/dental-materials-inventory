@@ -5,12 +5,15 @@ import { getSupplierLeadTimes, type SupplierLeadTimeStats } from "@/lib/db/suppl
 import type { OrderSendMethodValue } from "@/lib/orders/send-method";
 import type { OrderRequestStatusValue } from "@/lib/orders/status";
 import { normalizeDemoSpecification } from "@/lib/products/demo-specification";
-import { productImportSources } from "@/lib/products/import-source";
+import { isPurchaseHistoryImportSource, productImportSources } from "@/lib/products/import-source";
 import {
   getRecommendedMinStocks,
   type RecommendedMinStocksByProduct,
   type RecommendedMinStockSummary,
 } from "@/lib/stock/recommended-min-stock";
+
+const defaultProductMasterPageSize = 50;
+const maxProductMasterPageSize = 200;
 
 export type ProductMasterRow = {
   id: string;
@@ -74,6 +77,11 @@ export type PurchaseHistorySetupProductRow = {
   recommendedMinStock: RecommendedMinStockSummary | null;
 };
 
+export type PurchaseHistoryProductSummary = {
+  total: number;
+  needsSetup: number;
+};
+
 export type ProductDetail = ProductMasterRow & {
   primarySupplierId: string | null;
   productSuppliers: ProductSupplierSummary[];
@@ -87,6 +95,64 @@ export type ProductPendingOrderSummary = {
   count: number;
   totalQuantity: number;
   latestOrderedAt: Date | null;
+};
+
+export type ProductMasterPageParams = {
+  q?: string;
+  category?: string;
+  source?: string;
+  setup?: string;
+  page?: number;
+  pageSize?: number;
+};
+
+export type ProductMasterPageResult = {
+  rows: ProductMasterRow[];
+  total: number;
+  page: number;
+  pageSize: number;
+  pageCount: number;
+};
+
+type ProductMasterSource = {
+  id: string;
+  productCode: string | null;
+  janCode: string | null;
+  internalCode: string | null;
+  name: string;
+  nameKana: string | null;
+  category: string | null;
+  manufacturer: string | null;
+  specification: string | null;
+  orderUnit: string | null;
+  supplierProductCode: string | null;
+  standardPrice: number | null;
+  defaultMinStock: number;
+  stockUsageMode: string;
+  photoFileName: string | null;
+  photoMimeType: string | null;
+  photoUpdatedAt: Date | null;
+  importSource: string | null;
+  notes: string | null;
+  primarySupplier: {
+    id: string;
+    name: string;
+  } | null;
+  stockItems: Array<{
+    id: string;
+    quantity: number;
+    inUseQuantity: number;
+    discardedQuantity: number;
+    minStock: number | null;
+    location: string | null;
+  }>;
+  barcodes: ProductBarcodeSummary[];
+};
+
+type ProductMasterSummaryMaps = {
+  pendingOrdersByProduct: Record<string, ProductPendingOrderSummary>;
+  abcRanksByProduct: Record<string, ProductAbcRankSummary>;
+  recommendedMinStocksByProduct: RecommendedMinStocksByProduct;
 };
 
 export type ProductSupplierSummary = {
@@ -147,6 +213,138 @@ export type ProductDetailOrderRequest = {
   receivedExpiryDate: Date | null;
   updatedAt: Date;
 };
+
+function normalizeProductMasterPageInput(page: number | undefined, pageSize: number | undefined) {
+  const normalizedPage = page && Number.isFinite(page) && page > 0 ? Math.floor(page) : 1;
+  const normalizedPageSize =
+    pageSize && Number.isFinite(pageSize) && pageSize > 0
+      ? Math.min(Math.floor(pageSize), maxProductMasterPageSize)
+      : defaultProductMasterPageSize;
+
+  return {
+    page: normalizedPage,
+    pageSize: normalizedPageSize,
+  };
+}
+
+function getProductMasterPageSlice<T>(rows: T[], page: number, pageSize: number) {
+  const start = (page - 1) * pageSize;
+
+  return rows.slice(start, start + pageSize);
+}
+
+function needsInitialProductMasterSetup(row: {
+  category: string | null;
+  hasStockItem: boolean;
+  minStock: number;
+  location: string | null;
+}) {
+  return !row.hasStockItem || !row.category || row.category === "未分類" || row.minStock === 0 || !row.location;
+}
+
+function productMatchesCurrentMasterFilters(row: ProductMasterRow, params: ProductMasterPageParams) {
+  const query = params.q?.trim().toLowerCase() ?? "";
+  const searchText = [
+    row.name,
+    row.nameKana,
+    row.productCode,
+    row.janCode,
+    row.internalCode,
+    row.category,
+    row.manufacturer,
+    row.specification,
+    row.orderUnit,
+    row.supplierName,
+    row.supplierProductCode,
+    row.notes,
+    ...row.barcodes.map((barcode) => barcode.barcode),
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+  const matchesQuery = query ? searchText.includes(query) : true;
+  const matchesCategory = params.category ? row.category === params.category : true;
+  const matchesSource =
+    params.source === "purchase-history" ? isPurchaseHistoryImportSource(row.importSource) : true;
+  const matchesSetup = params.setup === "1" ? needsInitialProductMasterSetup(row) : true;
+
+  return matchesQuery && matchesCategory && matchesSource && matchesSetup;
+}
+
+function toProductMasterRow(product: ProductMasterSource, maps: ProductMasterSummaryMaps): ProductMasterRow {
+  const stockItem = product.stockItems[0];
+  const currentQuantity = stockItem?.quantity ?? 0;
+  const inUseQuantity = stockItem?.inUseQuantity ?? 0;
+  const discardedQuantity = stockItem?.discardedQuantity ?? 0;
+  const minStock = stockItem?.minStock ?? product.defaultMinStock;
+  const barcodes =
+    product.barcodes.length > 0
+      ? product.barcodes
+      : product.janCode
+        ? [
+            {
+              id: null,
+              barcode: product.janCode,
+              barcodeType: "JAN",
+              unitLabel: product.orderUnit,
+              isPrimary: true,
+            },
+          ]
+        : [];
+
+  return {
+    id: product.id,
+    productCode: product.productCode,
+    janCode: product.janCode,
+    internalCode: product.internalCode,
+    name: product.name,
+    nameKana: product.nameKana,
+    category: product.category,
+    manufacturer: product.manufacturer,
+    specification: normalizeDemoSpecification(product.specification, product.name, product.orderUnit),
+    orderUnit: product.orderUnit,
+    supplierId: product.primarySupplier?.id ?? null,
+    supplierName: product.primarySupplier?.name ?? null,
+    supplierProductCode: product.supplierProductCode,
+    standardPrice: product.standardPrice,
+    defaultMinStock: product.defaultMinStock,
+    stockUsageMode: product.stockUsageMode,
+    currentQuantity,
+    inUseQuantity,
+    discardedQuantity,
+    totalQuantity: currentQuantity + inUseQuantity,
+    minStock,
+    hasStockItem: Boolean(stockItem),
+    stockItemId: stockItem?.id ?? null,
+    location: stockItem?.location ?? null,
+    photoFileName: product.photoFileName,
+    photoMimeType: product.photoMimeType,
+    photoUpdatedAt: product.photoUpdatedAt,
+    importSource: product.importSource,
+    notes: product.notes,
+    barcodes,
+    pendingOrders: maps.pendingOrdersByProduct[product.id] ?? {
+      count: 0,
+      totalQuantity: 0,
+      latestOrderedAt: null,
+    },
+    abcRank: maps.abcRanksByProduct[product.id] ?? {
+      rank: "UNUSED",
+      totalQuantity: 0,
+      share: 0,
+    },
+    recommendedMinStock: maps.recommendedMinStocksByProduct[product.id] ?? {
+      recommended: null,
+      totalOut90d: 0,
+      monthlyUsage: 0,
+      leadDays: 7,
+      safetyFactor: 1.5,
+      sampleSufficient: false,
+      usesFallbackLeadTime: true,
+      leadTimeSampleCount: null,
+    },
+  };
+}
 
 export async function getProductSupplierOptions(organizationId: string): Promise<ProductSupplierOption[]> {
   return prisma.supplier.findMany({
@@ -244,6 +442,47 @@ export async function getPurchaseHistorySetupProductRows(
   }));
 }
 
+export async function getPurchaseHistoryProductSummary(
+  organizationId: string,
+  clinicId: string,
+): Promise<PurchaseHistoryProductSummary> {
+  const products = await prisma.product.findMany({
+    where: {
+      organizationId,
+      isActive: true,
+      importSource: productImportSources.purchaseHistory,
+    },
+    select: {
+      category: true,
+      defaultMinStock: true,
+      stockItems: {
+        where: {
+          clinicId,
+          isUsed: true,
+        },
+        select: {
+          minStock: true,
+          location: true,
+        },
+      },
+    },
+  });
+
+  return {
+    total: products.length,
+    needsSetup: products.filter((product) => {
+      const stockItem = product.stockItems[0];
+
+      return needsInitialProductMasterSetup({
+        category: product.category,
+        hasStockItem: Boolean(stockItem),
+        minStock: stockItem?.minStock ?? product.defaultMinStock,
+        location: stockItem?.location ?? null,
+      });
+    }).length,
+  };
+}
+
 export async function getProductMasterRows(organizationId: string, clinicId: string): Promise<ProductMasterRow[]> {
   const [products, pendingOrdersByProduct, abcRanksByProduct, recommendedMinStocksByProduct] = await Promise.all([
     prisma.product.findMany({
@@ -297,6 +536,9 @@ export async function getProductMasterRows(organizationId: string, clinicId: str
         {
           name: "asc",
         },
+        {
+          id: "asc",
+        },
       ],
     }),
     getPendingOrdersByProduct(organizationId, clinicId),
@@ -304,80 +546,158 @@ export async function getProductMasterRows(organizationId: string, clinicId: str
     getRecommendedMinStocks(organizationId, clinicId),
   ]);
 
-  return products.map((product) => {
-    const stockItem = product.stockItems[0];
-    const currentQuantity = stockItem?.quantity ?? 0;
-    const inUseQuantity = stockItem?.inUseQuantity ?? 0;
-    const discardedQuantity = stockItem?.discardedQuantity ?? 0;
-    const minStock = stockItem?.minStock ?? product.defaultMinStock;
-    const barcodes =
-      product.barcodes.length > 0
-        ? product.barcodes
-        : product.janCode
-          ? [
-              {
-                id: null,
-                barcode: product.janCode,
-                barcodeType: "JAN",
-                unitLabel: product.orderUnit,
-                isPrimary: true,
-              },
-            ]
-          : [];
+  return products.map((product) =>
+    toProductMasterRow(product, {
+      pendingOrdersByProduct,
+      abcRanksByProduct,
+      recommendedMinStocksByProduct,
+    }),
+  );
+}
+
+export async function getProductMasterPage(
+  organizationId: string,
+  clinicId: string,
+  params: ProductMasterPageParams = {},
+): Promise<ProductMasterPageResult> {
+  const { page, pageSize } = normalizeProductMasterPageInput(params.page, params.pageSize);
+
+  if (params.setup === "1") {
+    const rows = (await getProductMasterRows(organizationId, clinicId)).filter((row) =>
+      productMatchesCurrentMasterFilters(row, params),
+    );
+    const total = rows.length;
+    const pageCount = Math.max(1, Math.ceil(total / pageSize));
 
     return {
-      id: product.id,
-      productCode: product.productCode,
-      janCode: product.janCode,
-      internalCode: product.internalCode,
-      name: product.name,
-      nameKana: product.nameKana,
-      category: product.category,
-      manufacturer: product.manufacturer,
-      specification: normalizeDemoSpecification(product.specification, product.name, product.orderUnit),
-      orderUnit: product.orderUnit,
-      supplierId: product.primarySupplier?.id ?? null,
-      supplierName: product.primarySupplier?.name ?? null,
-      supplierProductCode: product.supplierProductCode,
-      standardPrice: product.standardPrice,
-      defaultMinStock: product.defaultMinStock,
-      stockUsageMode: product.stockUsageMode,
-      currentQuantity,
-      inUseQuantity,
-      discardedQuantity,
-      totalQuantity: currentQuantity + inUseQuantity,
-      minStock,
-      hasStockItem: Boolean(stockItem),
-      stockItemId: stockItem?.id ?? null,
-      location: stockItem?.location ?? null,
-      photoFileName: product.photoFileName,
-      photoMimeType: product.photoMimeType,
-      photoUpdatedAt: product.photoUpdatedAt,
-      importSource: product.importSource,
-      notes: product.notes,
-      barcodes,
-      pendingOrders: pendingOrdersByProduct[product.id] ?? {
-        count: 0,
-        totalQuantity: 0,
-        latestOrderedAt: null,
-      },
-      abcRank: abcRanksByProduct[product.id] ?? {
-        rank: "UNUSED",
-        totalQuantity: 0,
-        share: 0,
-      },
-      recommendedMinStock: recommendedMinStocksByProduct[product.id] ?? {
-        recommended: null,
-        totalOut90d: 0,
-        monthlyUsage: 0,
-        leadDays: 7,
-        safetyFactor: 1.5,
-        sampleSufficient: false,
-        usesFallbackLeadTime: true,
-        leadTimeSampleCount: null,
-      },
+      rows: getProductMasterPageSlice(rows, page, pageSize),
+      total,
+      page,
+      pageSize,
+      pageCount,
     };
-  });
+  }
+
+  const query = params.q?.trim();
+  const where = {
+    organizationId,
+    isActive: true,
+    ...(params.category ? { category: params.category } : {}),
+    ...(params.source === "purchase-history" ? { importSource: productImportSources.purchaseHistory } : {}),
+    ...(query
+      ? {
+          OR: [
+            { name: { contains: query, mode: "insensitive" as const } },
+            { nameKana: { contains: query, mode: "insensitive" as const } },
+            { productCode: { contains: query, mode: "insensitive" as const } },
+            { janCode: { contains: query, mode: "insensitive" as const } },
+            { internalCode: { contains: query, mode: "insensitive" as const } },
+            { category: { contains: query, mode: "insensitive" as const } },
+            { manufacturer: { contains: query, mode: "insensitive" as const } },
+            { specification: { contains: query, mode: "insensitive" as const } },
+            { orderUnit: { contains: query, mode: "insensitive" as const } },
+            { supplierProductCode: { contains: query, mode: "insensitive" as const } },
+            { notes: { contains: query, mode: "insensitive" as const } },
+            {
+              primarySupplier: {
+                is: {
+                  name: { contains: query, mode: "insensitive" as const },
+                },
+              },
+            },
+            {
+              barcodes: {
+                some: {
+                  barcode: { contains: query, mode: "insensitive" as const },
+                },
+              },
+            },
+          ],
+        }
+      : {}),
+  };
+  const orderBy = [
+    {
+      category: "asc" as const,
+    },
+    {
+      name: "asc" as const,
+    },
+    {
+      id: "asc" as const,
+    },
+  ];
+  const [total, products] = await Promise.all([
+    prisma.product.count({
+      where,
+    }),
+    prisma.product.findMany({
+      where,
+      include: {
+        primarySupplier: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        stockItems: {
+          where: {
+            clinicId,
+            isUsed: true,
+          },
+          select: {
+            id: true,
+            quantity: true,
+            inUseQuantity: true,
+            discardedQuantity: true,
+            minStock: true,
+            location: true,
+          },
+        },
+        barcodes: {
+          select: {
+            id: true,
+            barcode: true,
+            barcodeType: true,
+            unitLabel: true,
+            isPrimary: true,
+          },
+          orderBy: [
+            {
+              isPrimary: "desc",
+            },
+            {
+              barcode: "asc",
+            },
+          ],
+        },
+      },
+      orderBy,
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+    }),
+  ]);
+  const productIds = products.map((product) => product.id);
+  const [pendingOrdersByProduct, abcRanksByProduct, recommendedMinStocksByProduct] = await Promise.all([
+    getPendingOrdersByProduct(organizationId, clinicId, { productIds }),
+    getProductAbcRanks(organizationId, clinicId, { productIds }),
+    getRecommendedMinStocks(organizationId, clinicId, { productIds }),
+  ]);
+  const pageCount = Math.max(1, Math.ceil(total / pageSize));
+
+  return {
+    rows: products.map((product) =>
+      toProductMasterRow(product, {
+        pendingOrdersByProduct,
+        abcRanksByProduct,
+        recommendedMinStocksByProduct,
+      }),
+    ),
+    total,
+    page,
+    pageSize,
+    pageCount,
+  };
 }
 
 export async function getProductDetail(
