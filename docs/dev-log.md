@@ -6383,6 +6383,35 @@
 - `corepack pnpm exec tsx tests/ui-smoke.test.ts` に成功した。
 - `corepack pnpm build` に成功した。
 
+## 2026-06-06 日常操作の共通作業スタッフ選択と発注・納品スタッフ記録
+
+### 作業内容
+- 共通ナビに「作業スタッフ」選択を追加し、クリニック別・当日限定で `localStorage` に保持するようにした。
+- `/quick`、`/inventory`、商品詳細の使用中管理、`/orders` の発注済み化・納品確認で、画面上部で選んだ作業スタッフを使うようにした。
+- 発注記録に `orderedByStaffId`、発注候補の納品確認に `receivedByStaffId` を追加し、発注画面・発注記録一覧・商品詳細・発注先詳細でスタッフ名を表示するようにした。
+- 納品確認による入庫履歴には、これまでどおり `StockMovement.performedByStaffId` も記録する。
+- サーバーアクションでは送信されたスタッフIDをそのまま信用せず、対象クリニックに紐づく有効なスタッフ担当者かを検証するようにした。
+
+### 判断
+- 棚卸し、バーコード出入庫、管理系画面は今回の共通スタッフ選択の対象外とした。
+- クリニックをまたいでスタッフ選択が残らないよう、保存キーに clinicId を含めた。
+- 日をまたいだ古い選択は自動で消えるよう、保存値に日付を含めた。
+- 既存データを壊さないよう、追加したDB列は nullable とした。
+
+### 検証
+- `corepack pnpm prisma format` に成功した。
+- `corepack pnpm prisma:generate` に成功した。
+- `corepack pnpm typecheck` に成功した。
+- `corepack pnpm exec tsx tests/order-request-status.test.ts` に成功した。
+- `corepack pnpm exec tsx tests/order-receipt.test.ts` に成功した。
+- `corepack pnpm exec tsx tests/order-print.test.ts` に成功した。
+- `corepack pnpm exec tsx tests/ui-smoke.test.ts` に成功した。
+- `corepack pnpm build` に成功した。
+
+### 残課題・次アクション
+- Supabase環境では、`OrderRequest.receivedByStaffId` と `OrderRecord.orderedByStaffId` の追加を本番/デモDBへ反映する必要がある。
+- 実ブラウザで、スタッフ選択後に `/quick`、`/inventory`、`/orders` をまたいでも選択が維持されるかを目視確認する。
+
 ## 2026-06-06 納品確認者の表示追加
 
 ### 作業内容

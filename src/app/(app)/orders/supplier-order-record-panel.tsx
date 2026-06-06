@@ -1,16 +1,30 @@
 "use client";
 
 import { useState } from "react";
+import { useWorkStaffSelection } from "@/components/domain/work-staff-selection";
 import { markOrderRequestsOrderedAction } from "@/lib/actions/orders";
+import type { StaffOperatorOption } from "@/lib/db/staff-operators";
 import { orderSendMethodLabels, orderSendMethodValues } from "@/lib/orders/send-method";
 
 type SupplierOrderRecordPanelProps = {
+  clinicId: string;
   orderRequestIds: string[];
   printHref: string;
+  staffOperators: StaffOperatorOption[];
 };
 
-export function SupplierOrderRecordPanel({ orderRequestIds, printHref }: SupplierOrderRecordPanelProps) {
+export function SupplierOrderRecordPanel({
+  clinicId,
+  orderRequestIds,
+  printHref,
+  staffOperators,
+}: SupplierOrderRecordPanelProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const { hasStaffOperators, selectedStaffOperator, selectedStaffOperatorId } = useWorkStaffSelection({
+    clinicId,
+    staffOperators,
+  });
+  const canSubmit = selectedStaffOperatorId.length > 0;
 
   if (orderRequestIds.length === 0) {
     return null;
@@ -41,6 +55,10 @@ export function SupplierOrderRecordPanel({ orderRequestIds, printHref }: Supplie
           ))}
           <p className="text-xs font-semibold text-muted">
             このディーラーの発注予定を納品待ちに移します。外部送信は行いません。
+          </p>
+          <input type="hidden" name="staffOperatorId" value={selectedStaffOperatorId} />
+          <p className="text-xs font-semibold text-muted">
+            発注スタッフ: {selectedStaffOperator ? selectedStaffOperator.displayName : "画面上部で選択してください"}
           </p>
           <div className="grid gap-2 lg:grid-cols-[auto_12rem_1fr_1fr_auto] lg:items-end">
             <label className="flex h-9 items-center gap-2 whitespace-nowrap text-xs font-semibold text-muted">
@@ -79,11 +97,17 @@ export function SupplierOrderRecordPanel({ orderRequestIds, printHref }: Supplie
             />
             <button
               type="submit"
-              className="h-9 rounded bg-ink px-3 text-xs font-semibold text-white transition hover:bg-slate-700"
+              disabled={!canSubmit}
+              className="h-9 rounded bg-ink px-3 text-xs font-semibold text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
               納品待ちへ移す
             </button>
           </div>
+          {!hasStaffOperators ? (
+            <p className="text-xs font-semibold text-danger">有効な作業スタッフがありません。</p>
+          ) : !canSubmit ? (
+            <p className="text-xs font-semibold text-warning">画面上部で作業スタッフを選択してください。</p>
+          ) : null}
         </form>
       ) : null}
     </div>

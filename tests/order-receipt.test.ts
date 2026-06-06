@@ -43,6 +43,19 @@ async function main() {
         clinicId: clinic.id,
       },
     });
+    const staffOperator = await prisma.staffOperator.create({
+      data: {
+        organizationId: organization.id,
+        displayName: "Order Receipt Staff",
+        barcode: "ORDER-RECEIPT-STAFF",
+      },
+    });
+    await prisma.staffOperatorClinicAssignment.create({
+      data: {
+        staffOperatorId: staffOperator.id,
+        clinicId: clinic.id,
+      },
+    });
     await prisma.stockItem.create({
       data: {
         clinicId: clinic.id,
@@ -73,6 +86,7 @@ async function main() {
     const result = await receiveOrderRequestForContext(context, {
       orderRequestId: request.id,
       receivedQuantity: 2,
+      receivedByStaffId: staffOperator.id,
       receivedMemo: "Arrived in two boxes",
       receivedLotNumber: "LOT-ORDER-001",
       receivedExpiryDateText: "2027-05-31",
@@ -97,6 +111,7 @@ async function main() {
     assert.equal(receivedRequest.receivedExpiryDateText, "2027-05-31");
     assert.equal(receivedRequest.receivedExpiryDate?.toISOString(), "2027-05-31T00:00:00.000Z");
     assert.equal(receivedRequest.receivedByUserId, user.id);
+    assert.equal(receivedRequest.receivedByStaffId, staffOperator.id);
 
     const stockItem = await prisma.stockItem.findFirstOrThrow({
       where: {
@@ -124,6 +139,7 @@ async function main() {
     assert.equal(movement.lotNumber, "LOT-ORDER-001");
     assert.equal(movement.expiryDateText, "2027-05-31");
     assert.equal(movement.expiryDate?.toISOString(), "2027-05-31T00:00:00.000Z");
+    assert.equal(movement.performedByStaffId, staffOperator.id);
 
     const receiptLot = await prisma.stockLot.findUniqueOrThrow({
       where: {
@@ -150,6 +166,7 @@ async function main() {
       receiveOrderRequestForContext(context, {
         orderRequestId: request.id,
         receivedQuantity: 1,
+        receivedByStaffId: staffOperator.id,
         receivedMemo: null,
         applyToStock: true,
         revalidate: false,
@@ -177,6 +194,7 @@ async function main() {
     assert.equal(revertedRequest.receivedExpiryDateText, null);
     assert.equal(revertedRequest.receivedExpiryDate, null);
     assert.equal(revertedRequest.receivedByUserId, null);
+    assert.equal(revertedRequest.receivedByStaffId, null);
 
     const stockItemAfterRevert = await prisma.stockItem.findFirstOrThrow({
       where: {
@@ -248,6 +266,7 @@ async function main() {
       receiveOrderRequestForContext(context, {
         orderRequestId: draftRequest.id,
         receivedQuantity: 1,
+        receivedByStaffId: staffOperator.id,
         receivedMemo: null,
         applyToStock: false,
         revalidate: false,
@@ -268,6 +287,7 @@ async function main() {
       receiveOrderRequestForContext(context, {
         orderRequestId: orderedRequest.id,
         receivedQuantity: 2,
+        receivedByStaffId: staffOperator.id,
         receivedMemo: null,
         applyToStock: false,
         revalidate: false,
@@ -277,6 +297,7 @@ async function main() {
     await receiveOrderRequestForContext(context, {
       orderRequestId: orderedRequest.id,
       receivedQuantity: 1,
+      receivedByStaffId: staffOperator.id,
       receivedMemo: "Record only",
       receivedLotNumber: "LOT-RECORD-ONLY",
       receivedExpiryDateText: "2028-01-31",
@@ -293,6 +314,7 @@ async function main() {
 
     assert.equal(recordOnlyReceivedRequest.receivedLotNumber, "LOT-RECORD-ONLY");
     assert.equal(recordOnlyReceivedRequest.receivedExpiryDateText, "2028-01-31");
+    assert.equal(recordOnlyReceivedRequest.receivedByStaffId, staffOperator.id);
     assert.equal(
       await prisma.stockLot.count({
         where: {
@@ -333,6 +355,7 @@ async function main() {
     await receiveOrderRequestForContext(context, {
       orderRequestId: stockReflectedRequest.id,
       receivedQuantity: 2,
+      receivedByStaffId: staffOperator.id,
       receivedMemo: null,
       applyToStock: true,
       revalidate: false,
@@ -377,6 +400,7 @@ async function main() {
       receiveOrderRequestForContext(context, {
         orderRequestId: concurrentRequest.id,
         receivedQuantity: 2,
+        receivedByStaffId: staffOperator.id,
         receivedMemo: "Concurrent receipt A",
         applyToStock: true,
         revalidate: false,
@@ -384,6 +408,7 @@ async function main() {
       receiveOrderRequestForContext(context, {
         orderRequestId: concurrentRequest.id,
         receivedQuantity: 2,
+        receivedByStaffId: staffOperator.id,
         receivedMemo: "Concurrent receipt B",
         applyToStock: true,
         revalidate: false,

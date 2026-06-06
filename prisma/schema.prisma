@@ -156,9 +156,11 @@ model StaffOperator {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  organization      Organization                    @relation(fields: [organizationId], references: [id])
-  clinicAssignments StaffOperatorClinicAssignment[]
-  stockMovements    StockMovement[]
+  organization          Organization                    @relation(fields: [organizationId], references: [id])
+  clinicAssignments     StaffOperatorClinicAssignment[]
+  stockMovements        StockMovement[]
+  orderedOrderRecords   OrderRecord[]                   @relation("OrderRecordOrderedByStaff")
+  receivedOrderRequests OrderRequest[]                  @relation("OrderRequestReceivedByStaff")
 
   @@unique([organizationId, barcode])
   @@index([organizationId, isActive])
@@ -559,16 +561,18 @@ model OrderRequest {
   receivedExpiryDateText String?
   receivedExpiryDate     DateTime?
   receivedByUserId       String?
+  receivedByStaffId      String?
   createdByUserId        String
   createdAt              DateTime           @default(now())
   updatedAt              DateTime           @updatedAt
 
-  clinic         Clinic       @relation(fields: [clinicId], references: [id])
-  product        Product      @relation(fields: [productId], references: [id])
-  supplier       Supplier?    @relation(fields: [supplierId], references: [id])
-  orderRecord    OrderRecord? @relation(fields: [orderRecordId], references: [id])
-  createdByUser  User         @relation("OrderRequestCreatedBy", fields: [createdByUserId], references: [id])
-  receivedByUser User?        @relation("OrderRequestReceivedBy", fields: [receivedByUserId], references: [id])
+  clinic          Clinic         @relation(fields: [clinicId], references: [id])
+  product         Product        @relation(fields: [productId], references: [id])
+  supplier        Supplier?      @relation(fields: [supplierId], references: [id])
+  orderRecord     OrderRecord?   @relation(fields: [orderRecordId], references: [id])
+  createdByUser   User           @relation("OrderRequestCreatedBy", fields: [createdByUserId], references: [id])
+  receivedByUser  User?          @relation("OrderRequestReceivedBy", fields: [receivedByUserId], references: [id])
+  receivedByStaff StaffOperator? @relation("OrderRequestReceivedByStaff", fields: [receivedByStaffId], references: [id])
 
   @@index([clinicId, status])
   @@index([productId])
@@ -576,6 +580,7 @@ model OrderRequest {
   @@index([orderRecordId])
   @@index([createdByUserId])
   @@index([receivedByUserId])
+  @@index([receivedByStaffId])
 }
 
 model OrderRecord {
@@ -587,15 +592,18 @@ model OrderRecord {
   orderedMemo          String?
   supplierResponseMemo String?
   createdByUserId      String
+  orderedByStaffId     String?
   createdAt            DateTime        @default(now())
   updatedAt            DateTime        @updatedAt
 
-  clinic        Clinic         @relation(fields: [clinicId], references: [id])
-  supplier      Supplier?      @relation(fields: [supplierId], references: [id])
-  createdByUser User           @relation("OrderRecordCreatedBy", fields: [createdByUserId], references: [id])
-  orderRequests OrderRequest[]
+  clinic         Clinic         @relation(fields: [clinicId], references: [id])
+  supplier       Supplier?      @relation(fields: [supplierId], references: [id])
+  createdByUser  User           @relation("OrderRecordCreatedBy", fields: [createdByUserId], references: [id])
+  orderedByStaff StaffOperator? @relation("OrderRecordOrderedByStaff", fields: [orderedByStaffId], references: [id])
+  orderRequests  OrderRequest[]
 
   @@index([clinicId, orderedAt])
   @@index([supplierId])
   @@index([createdByUserId])
+  @@index([orderedByStaffId])
 }

@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { prisma } from "@/lib/db/prisma";
+import { findActiveStaffOperatorByIdForClinic } from "@/lib/db/staff-operators";
 import { orderSendMethodValues } from "@/lib/orders/send-method";
 import { printableOrderRequestStatuses } from "@/lib/orders/status";
 import { orderRequestStatusLabels, type OrderRequestStatusValue } from "@/lib/orders/status";
@@ -19,6 +20,7 @@ const orderSendMethodSchema = z.enum(orderSendMethodValues, {
   message: "送付方法を選択してください。",
 });
 const orderedConfirmationSchema = z.literal("on");
+const staffOperatorIdSchema = z.string().trim().min(1, "作業スタッフを選択してください。");
 const receivedQuantitySchema = z.coerce
   .number()
   .int("納品数量は整数で入力してください。")
@@ -72,6 +74,23 @@ function toActionError(error: unknown): OrderActionState {
     status: "error",
     message: "発注候補を更新できませんでした。",
   };
+}
+
+async function resolveActiveStaffOperatorForContext(
+  context: ActiveClinicContext,
+  staffOperatorId: string,
+) {
+  const staffOperator = await findActiveStaffOperatorByIdForClinic({
+    organizationId: context.organizationId,
+    clinicId: context.clinicId,
+    staffOperatorId: staffOperatorIdSchema.parse(staffOperatorId),
+  });
+
+  if (!staffOperator) {
+    throw new Error("このクリニックで有効な作業スタッフを選択してください。");
+  }
+
+  return staffOperator;
 }
 
 function parseReceivedExpiryDate(value: string) {
@@ -370,6 +389,7 @@ export async function updateOrderRequestStatusWithStateAction(
     const orderedMethodValue = formData.get("orderedMethod");
     const orderedMemoValue = orderedMemoSchema.parse(formData.get("orderedMemo") ?? "");
     const supplierResponseMemoValue = supplierResponseMemoSchema.parse(formData.get("supplierResponseMemo") ?? "");
+    const orderedByStaffIdValue = formData.get("staffOperatorId");
     const memo = memoValue.length > 0 ? memoValue : null;
 
     const request = await updateOrderRequestStatusForContext(context, {
@@ -380,6 +400,10 @@ export async function updateOrderRequestStatusWithStateAction(
         status === "ORDERED" ? orderSendMethodSchema.parse(orderedMethodValue || undefined) : null,
       orderedMemo: orderedMemoValue.length > 0 ? orderedMemoValue : null,
       supplierResponseMemo: supplierResponseMemoValue.length > 0 ? supplierResponseMemoValue : null,
+      orderedByStaffId:
+        status === "ORDERED" && typeof orderedByStaffIdValue === "string" && orderedByStaffIdValue.length > 0
+          ? staffOperatorIdSchema.parse(orderedByStaffIdValue)
+          : null,
     });
 
     const label = orderRequestStatusLabels[status];
@@ -425,6 +449,7 @@ export async function updateOrderRequestStatusForContext(
     orderedMethod?: (typeof orderSendMethodValues)[number] | null;
     orderedMemo?: string | null;
     supplierResponseMemo?: string | null;
+    orderedByStaffId?: string | null;
     revalidate?: boolean;
   },
 ) {
@@ -441,6 +466,11 @@ export async function updateOrderRequestStatusForContext(
       orderedMethod: true,
       orderedMemo: true,
       supplierResponseMemo: true,
+      orderRecord: {
+        select: {
+          orderedByStaffId: true,
+        },
+      },
       receivedAt: true,
       status: true,
     },
@@ -456,6 +486,15 @@ export async function updateOrderRequestStatusForContext(
 
   if (input.status === "ORDERED" && target.status !== "ORDERED" && !input.orderedMethod) {
     throw new Error("発注を記録する場合は、送付方法を選択してください。");
+  }
+
+  const orderedByStaff =
+    input.status === "ORDERED" && input.orderedByStaffId
+      ? await resolveActiveStaffOperatorForContext(context, input.orderedByStaffId)
+      : null;
+
+  if (input.status === "ORDERED" && target.status !== "ORDERED" && !orderedByStaff) {
+    throw new Error("発注済みにする場合は、作業スタッフを選択してください。");
   }
 
   const request = await prisma.$transaction(async (tx) => {
@@ -493,6 +532,7 @@ export async function updateOrderRequestStatusForContext(
             orderedMethod,
             orderedMemo,
             supplierResponseMemo,
+            orderedByStaffId: orderedByStaff?.id ?? target.orderRecord?.orderedByStaffId ?? null,
           },
           select: {
             id: true,
@@ -510,6 +550,7 @@ export async function updateOrderRequestStatusForContext(
             orderedMemo,
             supplierResponseMemo,
             createdByUserId: context.userId,
+            orderedByStaffId: orderedByStaff?.id ?? null,
           },
           select: {
             id: true,
@@ -671,11 +712,13 @@ export async function receiveOrderRequestWithStateAction(
     const receivedMemoValue = receivedMemoSchema.parse(formData.get("receivedMemo") ?? "");
     const receivedLotNumberValue = receivedLotNumberSchema.parse(formData.get("receivedLotNumber") ?? "");
     const receivedExpiryDateValue = receivedExpiryDateSchema.parse(formData.get("receivedExpiryDate") ?? "");
+    const receivedByStaffId = staffOperatorIdSchema.parse(formData.get("staffOperatorId"));
     const applyToStock = formData.get("applyToStock") === "on";
 
     const result = await receiveOrderRequestForContext(context, {
       orderRequestId,
       receivedQuantity,
+      receivedByStaffId,
       receivedMemo: receivedMemoValue.length > 0 ? receivedMemoValue : null,
       receivedLotNumber: receivedLotNumberValue.length > 0 ? receivedLotNumberValue : null,
       receivedExpiryDateText: receivedExpiryDateValue.length > 0 ? receivedExpiryDateValue : null,
@@ -697,6 +740,7 @@ export async function receiveOrderRequestForContext(
   input: {
     orderRequestId: string;
     receivedQuantity: number;
+    receivedByStaffId: string;
     receivedMemo: string | null;
     receivedLotNumber?: string | null;
     receivedExpiryDateText?: string | null;
@@ -705,6 +749,7 @@ export async function receiveOrderRequestForContext(
     revalidate?: boolean;
   },
 ) {
+  const receivedByStaff = await resolveActiveStaffOperatorForContext(context, input.receivedByStaffId);
   const lotData = buildReceiptLotData({
     receivedLotNumber: input.receivedLotNumber ?? null,
     receivedExpiryDateText: input.receivedExpiryDateText ?? null,
@@ -807,6 +852,7 @@ export async function receiveOrderRequestForContext(
           expiryDateText: lotData?.expiryDateText || null,
           expiryDate: lotData?.expiryDate ?? null,
           userId: context.userId,
+          performedByStaffId: receivedByStaff.id,
           memo: input.receivedMemo,
         },
       });
@@ -824,6 +870,7 @@ export async function receiveOrderRequestForContext(
         receivedExpiryDateText: lotData?.expiryDateText || null,
         receivedExpiryDate: lotData?.expiryDate ?? null,
         receivedByUserId: context.userId,
+        receivedByStaffId: receivedByStaff.id,
       },
     });
 
@@ -1017,6 +1064,7 @@ export async function revertOrderReceiptForContext(
         receivedExpiryDateText: null,
         receivedExpiryDate: null,
         receivedByUserId: null,
+        receivedByStaffId: null,
       },
     });
 
@@ -1040,12 +1088,14 @@ export async function markOrderRequestsOrderedAction(formData: FormData) {
   const orderedMethod = orderSendMethodSchema.parse(formData.get("orderedMethod") || undefined);
   const orderedMemoValue = orderedMemoSchema.parse(formData.get("orderedMemo") ?? "");
   const supplierResponseMemoValue = supplierResponseMemoSchema.parse(formData.get("supplierResponseMemo") ?? "");
+  const orderedByStaffId = staffOperatorIdSchema.parse(formData.get("staffOperatorId"));
 
   await markOrderRequestsOrderedForContext(context, {
     orderRequestIds,
     orderedMethod,
     orderedMemo: orderedMemoValue.length > 0 ? orderedMemoValue : null,
     supplierResponseMemo: supplierResponseMemoValue.length > 0 ? supplierResponseMemoValue : null,
+    orderedByStaffId,
   });
 }
 
@@ -1056,10 +1106,12 @@ export async function markOrderRequestsOrderedForContext(
     orderedMethod: (typeof orderSendMethodValues)[number];
     orderedMemo: string | null;
     supplierResponseMemo: string | null;
+    orderedByStaffId: string;
     revalidate?: boolean;
   },
 ) {
   const orderRequestIds = orderRequestIdsSchema.parse(input.orderRequestIds);
+  const orderedByStaff = await resolveActiveStaffOperatorForContext(context, input.orderedByStaffId);
 
   await prisma.$transaction(async (tx) => {
     for (const orderRequestId of [...orderRequestIds].sort()) {
@@ -1103,6 +1155,7 @@ export async function markOrderRequestsOrderedForContext(
         orderedMemo: input.orderedMemo,
         supplierResponseMemo: input.supplierResponseMemo,
         createdByUserId: context.userId,
+        orderedByStaffId: orderedByStaff.id,
       },
       select: {
         id: true,

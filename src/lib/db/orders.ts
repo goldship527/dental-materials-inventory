@@ -35,6 +35,7 @@ export type OrderRequestRow = {
   orderedMethod: OrderSendMethodValue | null;
   orderedMemo: string | null;
   supplierResponseMemo: string | null;
+  orderedByStaffName: string | null;
   receivedQuantity: number | null;
   receivedAt: Date | null;
   receivedMemo: string | null;
@@ -42,6 +43,7 @@ export type OrderRequestRow = {
   receivedExpiryDateText: string | null;
   receivedExpiryDate: Date | null;
   receivedByUserName: string | null;
+  receivedByStaffName: string | null;
   updatedAt: Date;
 };
 
@@ -95,9 +97,23 @@ export async function getOrderRequestRows(clinicId: string): Promise<OrderReques
         },
       },
       supplier: true,
+      orderRecord: {
+        select: {
+          orderedByStaff: {
+            select: {
+              displayName: true,
+            },
+          },
+        },
+      },
       receivedByUser: {
         select: {
           name: true,
+        },
+      },
+      receivedByStaff: {
+        select: {
+          displayName: true,
         },
       },
     },
@@ -176,6 +192,7 @@ export async function getOrderRequestRows(clinicId: string): Promise<OrderReques
       orderedMethod: request.orderedMethod,
       orderedMemo: request.orderedMemo,
       supplierResponseMemo: request.supplierResponseMemo,
+      orderedByStaffName: request.orderRecord?.orderedByStaff?.displayName ?? null,
       receivedQuantity: request.receivedQuantity,
       receivedAt: request.receivedAt,
       receivedMemo: request.receivedMemo,
@@ -183,6 +200,7 @@ export async function getOrderRequestRows(clinicId: string): Promise<OrderReques
       receivedExpiryDateText: request.receivedExpiryDateText,
       receivedExpiryDate: request.receivedExpiryDate,
       receivedByUserName: request.receivedByUser?.name ?? null,
+      receivedByStaffName: request.receivedByStaff?.displayName ?? null,
       updatedAt: request.updatedAt,
     };
   });

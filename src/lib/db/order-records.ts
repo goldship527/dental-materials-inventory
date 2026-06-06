@@ -20,6 +20,7 @@ export type OrderRecordListRow = {
   orderedMemo: string | null;
   supplierResponseMemo: string | null;
   createdByUserName: string;
+  orderedByStaffName: string | null;
   requestCount: number;
   totalRequestedQuantity: number;
   receivedRequestCount: number;
@@ -44,6 +45,11 @@ export async function getOrderRecordListRows(clinicId: string): Promise<OrderRec
       createdByUser: {
         select: {
           name: true,
+        },
+      },
+      orderedByStaff: {
+        select: {
+          displayName: true,
         },
       },
       orderRequests: {
@@ -97,6 +103,7 @@ export async function getOrderRecordListRows(clinicId: string): Promise<OrderRec
       orderedMemo: record.orderedMemo,
       supplierResponseMemo: record.supplierResponseMemo,
       createdByUserName: record.createdByUser.name,
+      orderedByStaffName: record.orderedByStaff?.displayName ?? null,
       requestCount: requests.length,
       totalRequestedQuantity: requests.reduce((sum, request) => sum + request.requestedQuantity, 0),
       receivedRequestCount: receivedRequests.length,

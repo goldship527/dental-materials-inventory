@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { useWorkStaffSelection } from "@/components/domain/work-staff-selection";
 import {
   receiveOrderRequestWithStateAction,
   revertOrderReceiptWithStateAction,
@@ -10,6 +11,7 @@ import {
   type OrderActionState,
 } from "@/lib/actions/orders";
 import type { OrderRequestRow } from "@/lib/db/orders";
+import type { StaffOperatorOption } from "@/lib/db/staff-operators";
 import { orderSendMethodLabels, orderSendMethodValues } from "@/lib/orders/send-method";
 import {
   orderRequestStatuses,
@@ -28,7 +30,9 @@ const dateTimeFormatter = new Intl.DateTimeFormat("ja-JP", {
   minute: "2-digit",
 });
 type OrderRequestRowProps = {
+  clinicId: string;
   row: OrderRequestRow;
+  staffOperators: StaffOperatorOption[];
 };
 
 type ActiveOrderPanel = "supplier" | "quantity" | "receipt" | "status" | null;
@@ -93,7 +97,7 @@ function getOrderRowStatusLabel(row: OrderRequestRow) {
   return orderRequestStatusLabels[row.status];
 }
 
-export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
+export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderRequestRowProps) {
   const [activePanel, setActivePanel] = useState<ActiveOrderPanel>(null);
   const [requestedQuantity, setRequestedQuantity] = useState(row.requestedQuantity);
   const [selectedStatus, setSelectedStatus] = useState<OrderRequestStatusValue>(row.status === "DRAFT" ? "CONFIRMED" : row.status);
@@ -128,6 +132,12 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
         ? supplierState
         : quantityState;
   const canChangeSupplier = printableOrderRequestStatuses.includes(row.status) && row.supplierOptions.length > 0;
+  const { hasStaffOperators, selectedStaffOperator, selectedStaffOperatorId } = useWorkStaffSelection({
+    clinicId,
+    staffOperators,
+  });
+  const hasSelectedStaffOperator = selectedStaffOperatorId.length > 0;
+  const requiresStaffForStatus = selectedStatus === "ORDERED" && row.status !== "ORDERED";
 
   function changeRequestedQuantity(nextQuantity: number) {
     const normalizedQuantity = Math.max(1, Math.min(9999, Math.trunc(Number.isFinite(nextQuantity) ? nextQuantity : 1)));
@@ -321,6 +331,7 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
           {row.status === "ORDERED" ? (
             <div className="grid gap-0.5 text-xs text-muted">
               {row.orderRecordId ? <span>発注記録: {formatOrderRecordId(row.orderRecordId)}</span> : null}
+              {row.orderedByStaffName ? <span>発注スタッフ: {row.orderedByStaffName}</span> : null}
               {row.orderedMethod ? <span>送付方法: {orderSendMethodLabels[row.orderedMethod]}</span> : null}
               {row.orderedMemo ? <span className="line-clamp-1">送付メモ: {row.orderedMemo}</span> : null}
               {row.supplierResponseMemo ? (
@@ -341,6 +352,9 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
               <span>
                 納品済み {dateTimeFormatter.format(row.receivedAt)} / {row.receivedQuantity ?? "-"} 個
               </span>
+              {row.receivedByStaffName ? (
+                <span className="font-normal text-muted">確認スタッフ: {row.receivedByStaffName}</span>
+              ) : null}
               {row.receivedByUserName ? (
                 <span className="font-normal text-muted">確認者: {row.receivedByUserName}</span>
               ) : null}
@@ -369,6 +383,10 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
               {activePanel === "receipt" ? (
                 <form action={receiptAction} className="grid gap-1.5 rounded border border-yellow-200 bg-yellow-50 p-2">
                   <input type="hidden" name="orderRequestId" value={row.id} />
+                  <input type="hidden" name="staffOperatorId" value={selectedStaffOperatorId} />
+                  <p className="text-xs font-semibold text-muted">
+                    確認スタッフ: {selectedStaffOperator ? selectedStaffOperator.displayName : "画面上部で選択してください"}
+                  </p>
                   <div className="grid gap-1.5 sm:grid-cols-[1fr_auto] sm:items-end">
                     <label className="grid gap-1 text-xs font-semibold text-muted">
                       納品数量
@@ -394,11 +412,16 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
                   />
                   <button
                     type="submit"
-                    disabled={isReceiptPending}
+                    disabled={isReceiptPending || !hasSelectedStaffOperator}
                     className="h-9 rounded bg-warning px-3 text-xs font-semibold text-white transition hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {isReceiptPending ? "確認中" : "納品を確認"}
                   </button>
+                  {!hasStaffOperators ? (
+                    <p className="text-xs font-semibold text-danger">有効な作業スタッフがありません。</p>
+                  ) : !hasSelectedStaffOperator ? (
+                    <p className="text-xs font-semibold text-warning">画面上部で作業スタッフを選択してください。</p>
+                  ) : null}
                 </form>
               ) : null}
             </div>
@@ -444,6 +467,9 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
           {row.status === "ORDERED" && row.orderedMethod ? (
             <p className="text-xs text-muted">送付方法: {orderSendMethodLabels[row.orderedMethod]}</p>
           ) : null}
+          {row.status === "ORDERED" && row.orderedByStaffName ? (
+            <p className="text-xs text-muted">発注スタッフ: {row.orderedByStaffName}</p>
+          ) : null}
           {row.status === "ORDERED" && row.orderedMemo ? (
             <p className="text-xs text-muted">送付メモ: {row.orderedMemo}</p>
           ) : null}
@@ -452,6 +478,14 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
           ) : null}
           {selectedStatus === "ORDERED" ? (
             <>
+              {requiresStaffForStatus ? (
+                <>
+                  <input type="hidden" name="staffOperatorId" value={selectedStaffOperatorId} />
+                  <p className="text-xs font-semibold text-muted">
+                    発注スタッフ: {selectedStaffOperator ? selectedStaffOperator.displayName : "画面上部で選択してください"}
+                  </p>
+                </>
+              ) : null}
               <label className="grid gap-1 text-xs font-semibold text-muted">
                 送付方法
                 <select
@@ -499,11 +533,16 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
           />
           <button
             type="submit"
-            disabled={isStatusPending}
+            disabled={isStatusPending || (requiresStaffForStatus && !hasSelectedStaffOperator)}
             className="h-9 rounded border border-line bg-white/75 px-3 text-xs font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isStatusPending ? "変更中" : "状態・メモを更新"}
           </button>
+          {requiresStaffForStatus && !hasStaffOperators ? (
+            <p className="text-xs font-semibold text-danger">有効な作業スタッフがありません。</p>
+          ) : requiresStaffForStatus && !hasSelectedStaffOperator ? (
+            <p className="text-xs font-semibold text-warning">画面上部で作業スタッフを選択してください。</p>
+          ) : null}
             </form>
           ) : null}
         </div>

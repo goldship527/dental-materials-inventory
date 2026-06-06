@@ -1,7 +1,9 @@
 import { auth } from "@/auth";
 import { ClinicSwitcher } from "@/components/domain/clinic-switcher";
+import { WorkStaffSelector } from "@/components/domain/work-staff-selector";
 import { isAdminRole } from "@/lib/auth/roles";
-import { getActiveClinicSelection } from "@/lib/db/clinic";
+import { requireActiveClinic } from "@/lib/db/clinic";
+import { getActiveStaffOperatorOptionsForClinic } from "@/lib/db/staff-operators";
 
 type NavItemId =
   | "home"
@@ -180,7 +182,17 @@ function NavGroup({
 export async function AppNav({ current }: AppNavProps) {
   const session = await auth();
   const canUseAdminMode = isAdminRole(session?.user?.role);
-  const clinicSelection = canUseAdminMode ? await getActiveClinicSelection(session?.user) : null;
+  const activeClinicContext = session?.user?.id
+    ? await requireActiveClinic({ sessionUser: session.user })
+    : null;
+  const clinicSelection =
+    activeClinicContext?.canSelectClinic && activeClinicContext.availableClinics
+      ? {
+          activeClinicId: activeClinicContext.clinicId,
+          canSelectClinic: true,
+          clinics: activeClinicContext.availableClinics,
+        }
+      : null;
   const isAdminMode =
     canUseAdminMode &&
     (current === "overview" ||
@@ -191,6 +203,15 @@ export async function AppNav({ current }: AppNavProps) {
       current === "auditLogs" ||
       current === "storage" ||
       current === "settings");
+  const shouldShowWorkStaffSelector =
+    Boolean(activeClinicContext) && !isAdminMode && current !== "barcode" && current !== "stocktake";
+  const staffOperators =
+    shouldShowWorkStaffSelector && activeClinicContext
+      ? await getActiveStaffOperatorOptionsForClinic({
+          organizationId: activeClinicContext.organizationId,
+          clinicId: activeClinicContext.clinicId,
+        })
+      : [];
   const modeItems = isAdminMode ? adminNavItems : workNavItems;
   const navLayoutClassName = isAdminMode
     ? "mx-auto flex w-full max-w-7xl flex-col gap-2"
@@ -215,6 +236,10 @@ export async function AppNav({ current }: AppNavProps) {
           />
 
           <div className={actionGroupClassName}>
+            {shouldShowWorkStaffSelector && activeClinicContext ? (
+              <WorkStaffSelector clinicId={activeClinicContext.clinicId} staffOperators={staffOperators} />
+            ) : null}
+
             {clinicSelection?.canSelectClinic ? (
               <ClinicSwitcher activeClinicId={clinicSelection.activeClinicId} clinics={clinicSelection.clinics} />
             ) : null}

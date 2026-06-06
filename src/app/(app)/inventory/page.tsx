@@ -176,6 +176,7 @@ export default async function InventoryPage({ searchParams }: PageProps) {
                         stockItemId={row.stockItemId}
                         quantity={row.quantity}
                         stockUpdatedAt={row.stockUpdatedAt}
+                        clinicId={context.clinicId}
                         staffOperators={staffOperators}
                       />
                     </td>

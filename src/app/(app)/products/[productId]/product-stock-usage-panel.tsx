@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { useWorkStaffSelection } from "@/components/domain/work-staff-selection";
 import { moveStockUsageWithStateAction, type StockUsageActionState } from "@/lib/actions/stock-usage";
 import type { StaffOperatorOption } from "@/lib/db/staff-operators";
 
@@ -9,6 +10,7 @@ type ProductStockUsagePanelProps = {
   availableQuantity: number;
   inUseQuantity: number;
   discardedQuantity: number;
+  clinicId: string;
   staffOperators: StaffOperatorOption[];
 };
 
@@ -19,6 +21,7 @@ function StockUsageForm({
   operation,
   title,
   maxQuantity,
+  clinicId,
   staffOperators,
   discardFrom,
 }: {
@@ -26,16 +29,22 @@ function StockUsageForm({
   operation: "START_USE" | "END_USE" | "DISCARD";
   title: string;
   maxQuantity: number;
+  clinicId: string;
   staffOperators: StaffOperatorOption[];
   discardFrom?: "AVAILABLE" | "IN_USE";
 }) {
   const [state, formAction, isPending] = useActionState(moveStockUsageWithStateAction, initialState);
-  const isDisabled = maxQuantity <= 0 || staffOperators.length === 0 || isPending;
+  const { hasStaffOperators, selectedStaffOperator, selectedStaffOperatorId } = useWorkStaffSelection({
+    clinicId,
+    staffOperators,
+  });
+  const isDisabled = maxQuantity <= 0 || selectedStaffOperatorId.length === 0 || isPending;
 
   return (
     <form action={formAction} className="grid gap-3 rounded border border-line bg-gray-50 p-3">
       <input type="hidden" name="stockItemId" value={stockItemId} />
       <input type="hidden" name="operation" value={operation} />
+      <input type="hidden" name="staffOperatorId" value={selectedStaffOperatorId} />
       {discardFrom ? <input type="hidden" name="discardFrom" value={discardFrom} /> : null}
 
       <div className="flex items-center justify-between gap-3">
@@ -56,21 +65,12 @@ function StockUsageForm({
             className="h-10 rounded border border-line bg-white px-3 text-right text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
           />
         </label>
-        <label className="grid gap-1 text-xs font-semibold text-muted sm:col-span-2">
+        <div className="grid gap-1 text-xs font-semibold text-muted sm:col-span-2">
           作業スタッフ
-          <select
-            name="staffOperatorId"
-            defaultValue=""
-            className="h-10 rounded border border-line bg-white px-3 text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
-          >
-            <option value="">選択してください</option>
-            {staffOperators.map((staffOperator) => (
-              <option key={staffOperator.id} value={staffOperator.id}>
-                {staffOperator.displayName}
-              </option>
-            ))}
-          </select>
-        </label>
+          <p className="flex h-10 items-center rounded border border-line bg-white px-3 text-sm text-ink">
+            {selectedStaffOperator ? selectedStaffOperator.displayName : "画面上部で選択してください"}
+          </p>
+        </div>
       </div>
 
       <label className="grid gap-1 text-xs font-semibold text-muted">
@@ -94,6 +94,11 @@ function StockUsageForm({
           {state.message}
         </p>
       ) : null}
+      {!hasStaffOperators ? (
+        <p className="text-xs font-semibold text-danger">有効な作業スタッフがありません。</p>
+      ) : selectedStaffOperatorId.length === 0 ? (
+        <p className="text-xs font-semibold text-warning">画面上部で作業スタッフを選択してください。</p>
+      ) : null}
     </form>
   );
 }
@@ -103,6 +108,7 @@ export function ProductStockUsagePanel({
   availableQuantity,
   inUseQuantity,
   discardedQuantity,
+  clinicId,
   staffOperators,
 }: ProductStockUsagePanelProps) {
   return (
@@ -122,6 +128,7 @@ export function ProductStockUsagePanel({
           operation="START_USE"
           title="使用開始"
           maxQuantity={availableQuantity}
+          clinicId={clinicId}
           staffOperators={staffOperators}
         />
         <StockUsageForm
@@ -129,6 +136,7 @@ export function ProductStockUsagePanel({
           operation="END_USE"
           title="使用終了"
           maxQuantity={inUseQuantity}
+          clinicId={clinicId}
           staffOperators={staffOperators}
         />
         <StockUsageForm
@@ -136,6 +144,7 @@ export function ProductStockUsagePanel({
           operation="DISCARD"
           title="廃棄（使用可能から）"
           maxQuantity={availableQuantity}
+          clinicId={clinicId}
           staffOperators={staffOperators}
           discardFrom="AVAILABLE"
         />
@@ -144,6 +153,7 @@ export function ProductStockUsagePanel({
           operation="DISCARD"
           title="廃棄（使用中から）"
           maxQuantity={inUseQuantity}
+          clinicId={clinicId}
           staffOperators={staffOperators}
           discardFrom="IN_USE"
         />

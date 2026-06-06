@@ -50,9 +50,11 @@ export type SupplierDetailOrderRequest = {
   orderedAt: Date | null;
   orderedMethod: OrderSendMethodValue | null;
   orderedMemo: string | null;
+  orderedByStaffName: string | null;
   supplierResponseMemo: string | null;
   receivedQuantity: number | null;
   receivedAt: Date | null;
+  receivedByStaffName: string | null;
   receivedMemo: string | null;
   receivedLotNumber: string | null;
   receivedExpiryDateText: string | null;
@@ -199,6 +201,20 @@ export async function getSupplierDetail(
               productCode: true,
             },
           },
+          orderRecord: {
+            select: {
+              orderedByStaff: {
+                select: {
+                  displayName: true,
+                },
+              },
+            },
+          },
+          receivedByStaff: {
+            select: {
+              displayName: true,
+            },
+          },
         },
         orderBy: {
           updatedAt: "desc",
@@ -267,9 +283,11 @@ export async function getSupplierDetail(
       orderedAt: request.orderedAt,
       orderedMethod: request.orderedMethod,
       orderedMemo: request.orderedMemo,
+      orderedByStaffName: request.orderRecord?.orderedByStaff?.displayName ?? null,
       supplierResponseMemo: request.supplierResponseMemo,
       receivedQuantity: request.receivedQuantity,
       receivedAt: request.receivedAt,
+      receivedByStaffName: request.receivedByStaff?.displayName ?? null,
       receivedMemo: request.receivedMemo,
       receivedLotNumber: request.receivedLotNumber,
       receivedExpiryDateText: request.receivedExpiryDateText,

@@ -8,10 +8,11 @@ type InventoryAdjustCellProps = {
   stockItemId: string;
   quantity: number;
   stockUpdatedAt: number;
+  clinicId: string;
   staffOperators: StaffOperatorOption[];
 };
 
-export function InventoryAdjustCell({ stockItemId, quantity, stockUpdatedAt, staffOperators }: InventoryAdjustCellProps) {
+export function InventoryAdjustCell({ stockItemId, quantity, stockUpdatedAt, clinicId, staffOperators }: InventoryAdjustCellProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   if (!isOpen) {
@@ -32,6 +33,7 @@ export function InventoryAdjustCell({ stockItemId, quantity, stockUpdatedAt, sta
         stockItemId={stockItemId}
         quantity={quantity}
         stockUpdatedAt={stockUpdatedAt}
+        clinicId={clinicId}
         staffOperators={staffOperators}
       />
       <button

@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { AppNav } from "@/components/domain/app-nav";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { getOrderRequestRows, type OrderRequestRow } from "@/lib/db/orders";
+import { getActiveStaffOperatorOptionsForClinic, type StaffOperatorOption } from "@/lib/db/staff-operators";
 import { getSupplierLeadTimes, type SupplierLeadTimeStats } from "@/lib/db/supplier-lead-times";
 import { orderPrintUnassignedSupplierId } from "@/lib/orders/print";
 import {
@@ -178,7 +179,15 @@ function sortRowsByStatusFlow(rows: OrderRequestRow[]) {
   return [...rows].sort((firstRow, secondRow) => orderRequestStatusRank[firstRow.status] - orderRequestStatusRank[secondRow.status]);
 }
 
-function OrderRequestRowsTable({ rows }: { rows: OrderRequestRow[] }) {
+function OrderRequestRowsTable({
+  clinicId,
+  rows,
+  staffOperators,
+}: {
+  clinicId: string;
+  rows: OrderRequestRow[];
+  staffOperators: StaffOperatorOption[];
+}) {
   return (
     <div className="overflow-x-auto">
       <table className="w-full min-w-[960px] border-collapse text-left text-sm print:min-w-0 print:text-[10.5px]">
@@ -213,7 +222,9 @@ function OrderRequestRowsTable({ rows }: { rows: OrderRequestRow[] }) {
           {rows.map((row) => (
             <OrderRequestTableRow
               key={`${row.id}-${row.status}-${row.requestedQuantity}-${row.memo ?? ""}-${row.orderedMethod ?? ""}-${row.orderedMemo ?? ""}-${row.supplierResponseMemo ?? ""}`}
+              clinicId={clinicId}
               row={row}
+              staffOperators={staffOperators}
             />
           ))}
         </tbody>
@@ -237,9 +248,13 @@ export default async function OrdersPage({ searchParams }: PageProps) {
     ? (params.status as OrderListFilterValue)
     : defaultOrderListFilter;
   const selectedStatusLabel = statusFilters.find((filter) => filter.value === selectedStatus)?.label ?? "";
-  const [rows, supplierLeadTimes] = await Promise.all([
+  const [rows, supplierLeadTimes, staffOperators] = await Promise.all([
     getOrderRequestRows(context.clinicId),
     getSupplierLeadTimes(context.organizationId),
+    getActiveStaffOperatorOptionsForClinic({
+      organizationId: context.organizationId,
+      clinicId: context.clinicId,
+    }),
   ]);
   const queryFilteredRows = rows.filter((row) => {
     const searchText = [row.name, row.productCode, row.category, row.supplierName, row.memo]
@@ -548,13 +563,19 @@ export default async function OrdersPage({ searchParams }: PageProps) {
                           </span>
                           {block.key === "active" && activeRows.length > 0 ? (
                             <SupplierOrderRecordPanel
+                              clinicId={context.clinicId}
                               orderRequestIds={activeRows.map((row) => row.id)}
                               printHref={buildOrdersPrintHref(activeRows[0]?.supplierId)}
+                              staffOperators={staffOperators}
                             />
                           ) : null}
                         </div>
                       </div>
-                      <OrderRequestRowsTable rows={block.rows} />
+                      <OrderRequestRowsTable
+                        clinicId={context.clinicId}
+                        rows={block.rows}
+                        staffOperators={staffOperators}
+                      />
                     </section>
                   ))}
                 </div>

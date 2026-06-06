@@ -293,6 +293,9 @@ export default async function SupplierDetailPage({ params }: PageProps) {
                       {request.status === "ORDERED" && request.orderRecordId ? (
                         <p className="text-muted">発注記録: {formatOrderRecordId(request.orderRecordId)}</p>
                       ) : null}
+                      {request.status === "ORDERED" && request.orderedByStaffName ? (
+                        <p className="text-muted">発注スタッフ: {request.orderedByStaffName}</p>
+                      ) : null}
                       {request.status === "ORDERED" && request.orderedMethod ? (
                         <p className="text-muted">送付方法: {orderSendMethodLabels[request.orderedMethod]}</p>
                       ) : null}
@@ -306,6 +309,9 @@ export default async function SupplierDetailPage({ params }: PageProps) {
                         <p className="font-semibold text-blue-800">
                           納品確認済み {dateTimeFormatter.format(request.receivedAt)} / 数量 {request.receivedQuantity ?? "-"}
                         </p>
+                      ) : null}
+                      {request.receivedAt && request.receivedByStaffName ? (
+                        <p className="text-muted">確認スタッフ: {request.receivedByStaffName}</p>
                       ) : null}
                       {request.receivedLotNumber || request.receivedExpiryDateText || request.receivedExpiryDate ? (
                         <p className="text-muted">

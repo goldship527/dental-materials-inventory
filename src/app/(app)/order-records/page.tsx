@@ -60,6 +60,7 @@ export default async function OrderRecordsPage({ searchParams }: PageProps) {
       row.orderedMemo,
       row.supplierResponseMemo,
       row.createdByUserName,
+      row.orderedByStaffName,
       ...row.requests.flatMap((request) => [request.productName, request.productCode]),
     ]
       .filter(Boolean)
@@ -176,6 +177,9 @@ export default async function OrderRecordsPage({ searchParams }: PageProps) {
                       <td className="border-b border-line px-4 py-3">
                         <span className="font-semibold text-ink">{formatOrderRecordId(row.id)}</span>
                         <p className="mt-1 text-xs text-muted">作成者: {row.createdByUserName}</p>
+                        {row.orderedByStaffName ? (
+                          <p className="mt-1 text-xs text-muted">発注スタッフ: {row.orderedByStaffName}</p>
+                        ) : null}
                       </td>
                       <td className="border-b border-line px-4 py-3">
                         {row.supplierId ? (

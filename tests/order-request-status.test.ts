@@ -56,6 +56,19 @@ async function main() {
         clinicId: otherClinic.id,
       },
     });
+    const staffOperator = await prisma.staffOperator.create({
+      data: {
+        organizationId: organization.id,
+        displayName: "Order Status Staff",
+        barcode: "ORDER-STATUS-STAFF",
+      },
+    });
+    await prisma.staffOperatorClinicAssignment.create({
+      data: {
+        staffOperatorId: staffOperator.id,
+        clinicId: clinic.id,
+      },
+    });
 
     const request = await prisma.orderRequest.create({
       data: {
@@ -126,6 +139,7 @@ async function main() {
       orderedMethod: "FAX",
       orderedMemo: "Faxed order draft",
       supplierResponseMemo: "No response yet",
+      orderedByStaffId: staffOperator.id,
       revalidate: false,
     });
 
@@ -153,6 +167,7 @@ async function main() {
     assert.equal(orderRecord.orderedMethod, "FAX");
     assert.equal(orderRecord.orderedMemo, "Faxed order draft");
     assert.equal(orderRecord.supplierResponseMemo, "No response yet");
+    assert.equal(orderRecord.orderedByStaffId, staffOperator.id);
 
     await updateOrderRequestStatusForContext(context, {
       orderRequestId: request.id,
@@ -224,6 +239,7 @@ async function main() {
       orderedMethod: "LINE",
       orderedMemo: "Sent as one order",
       supplierResponseMemo: "Read receipt confirmed",
+      orderedByStaffId: staffOperator.id,
       revalidate: false,
     });
 
@@ -254,6 +270,7 @@ async function main() {
     assert.equal(groupedOrderRecord.orderedMethod, "LINE");
     assert.equal(groupedOrderRecord.orderedMemo, "Sent as one order");
     assert.equal(groupedOrderRecord.supplierResponseMemo, "Read receipt confirmed");
+    assert.equal(groupedOrderRecord.orderedByStaffId, staffOperator.id);
 
     const concurrentRequestA = await prisma.orderRequest.create({
       data: {
@@ -282,6 +299,7 @@ async function main() {
         orderedMethod: "PHONE",
         orderedMemo: "Concurrent ordered A",
         supplierResponseMemo: null,
+        orderedByStaffId: staffOperator.id,
         revalidate: false,
       }),
       markOrderRequestsOrderedForContext(context, {
@@ -289,6 +307,7 @@ async function main() {
         orderedMethod: "PHONE",
         orderedMemo: "Concurrent ordered B",
         supplierResponseMemo: null,
+        orderedByStaffId: staffOperator.id,
         revalidate: false,
       }),
     ]);

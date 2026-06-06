@@ -194,7 +194,7 @@ export default async function QuickPage({ searchParams }: PageProps) {
           </div>
         </section>
 
-        <QuickCardGrid cards={visibleCards} staffOperators={staffOperators} />
+        <QuickCardGrid cards={visibleCards} clinicId={context.clinicId} staffOperators={staffOperators} />
 
         <section className="rounded border border-line/90 bg-panel/95 p-4 shadow-panel">
           <h2 className="text-base font-semibold">直近のクイック出庫操作</h2>
