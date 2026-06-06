@@ -6464,3 +6464,19 @@
 - `corepack pnpm typecheck` に成功した。
 - `corepack pnpm exec tsx tests/ui-smoke.test.ts` に成功した。
 - `corepack pnpm build` に成功した。
+
+## 在庫ステータス表示の共通化（2026-06-06）
+
+### 作業内容
+- `/barcode` と `/barcode/stock` のローカル在庫ステータス判定を、`src/lib/stock/status.ts` の `getStockStatus` へ差し替えた。
+- 商品詳細の在庫ステータス表示でも、在庫行なし以外のラベルとバッジ色を共通 `getStockStatus` から取得するようにした。
+- 各画面で独自に持っていた「在庫なし」「不足中」「最低在庫ちょうど」「在庫あり」系の表示揺れを、在庫一覧・クイック出庫と同じ正本に寄せた。
+
+### 判断
+- 在庫状態は現場判断の核になるため、画面ごとの言葉や色の違いを減らすことを優先した。
+- DB、在庫数計算、権限、バーコード検索、出入庫処理は変更していない。
+
+### 検証
+- `corepack pnpm typecheck` に成功した。
+- `corepack pnpm exec tsx tests/ui-smoke.test.ts` に成功した。
+- `corepack pnpm build` に成功した。

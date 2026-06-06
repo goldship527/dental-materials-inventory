@@ -8,6 +8,7 @@ import { analyzeBarcodeInput } from "@/lib/barcode/gs1";
 import { searchProductsByBarcode } from "@/lib/db/barcodes";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { findMedicalDeviceSampleRecordsByJan } from "@/lib/imports/medical-device-samples";
+import { getStockStatus } from "@/lib/stock/status";
 import { BarcodeSearchForm } from "./barcode-search-form";
 
 type PageProps = {
@@ -16,34 +17,6 @@ type PageProps = {
     scanLog?: string;
   }>;
 };
-
-function getStockStatusLabel(quantity: number, minStock: number) {
-  if (quantity === 0) {
-    return {
-      label: "在庫なし",
-      className: "bg-red-50 text-danger",
-    };
-  }
-
-  if (quantity < minStock) {
-    return {
-      label: "不足中",
-      className: "bg-yellow-50 text-warning",
-    };
-  }
-
-  if (quantity === minStock) {
-    return {
-      label: "最低在庫ちょうど",
-      className: "bg-yellow-50 text-warning",
-    };
-  }
-
-  return {
-    label: "在庫あり",
-    className: "bg-emerald-50 text-accent",
-  };
-}
 
 function formatGs1ExpiryDate(value: Date | null, fallback: string | null) {
   if (!value) {
@@ -178,8 +151,8 @@ export default async function BarcodePage({ searchParams }: PageProps) {
             {results.length > 0 ? (
               <div className="grid gap-0 divide-y divide-line">
                 {results.map((result) => {
-                  const stockStatus = getStockStatusLabel(result.quantity, result.minStock);
-                  const shortageCount = Math.max(0, result.minStock - result.quantity);
+                  const stockStatus = getStockStatus(result.quantity, result.minStock);
+                  const shortageCount = stockStatus.shortageCount;
 
                   return (
                     <article key={result.productId} className="grid gap-4 p-5 lg:grid-cols-[1fr_auto] lg:items-start">
@@ -191,7 +164,7 @@ export default async function BarcodePage({ searchParams }: PageProps) {
                           >
                             {result.productName}
                           </a>
-                          <span className={`rounded px-3 py-1 text-xs font-semibold ${stockStatus.className}`}>
+                          <span className={`rounded px-3 py-1 text-xs font-semibold ${stockStatus.badgeClassName}`}>
                             {stockStatus.label}
                           </span>
                         </div>

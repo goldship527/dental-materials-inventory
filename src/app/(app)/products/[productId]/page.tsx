@@ -9,6 +9,7 @@ import { getStockMovementSourceLabel, getStockMovementTypeLabel } from "@/lib/db
 import { orderSendMethodLabels } from "@/lib/orders/send-method";
 import { createEmptyOrderRequestStatusCounts, orderRequestStatusLabels, printableOrderRequestStatuses } from "@/lib/orders/status";
 import { buildProductPhotoUrl } from "@/lib/product-photos/url";
+import { getStockStatus as getSharedStockStatus, stockStatusKeys } from "@/lib/stock/status";
 import { ProductOrderRequestButton } from "./product-order-request-button";
 import { ProductStockUsagePanel } from "./product-stock-usage-panel";
 import { ProductStockItemCreateForm } from "./product-stock-item-create-form";
@@ -122,37 +123,39 @@ function getStockStatus(currentQuantity: number, minStock: number, hasStockItem:
     };
   }
 
-  if (currentQuantity === 0) {
+  const stockStatus = getSharedStockStatus(currentQuantity, minStock);
+
+  if (stockStatus.key === stockStatusKeys.out) {
     return {
-      label: "在庫なし",
+      label: stockStatus.label,
       description: "補充が必要",
-      badgeClass: "bg-red-50 text-danger",
+      badgeClass: stockStatus.badgeClassName,
       panelClass: "border-danger/40 bg-red-50/40",
     };
   }
 
-  if (currentQuantity < minStock) {
+  if (stockStatus.key === stockStatusKeys.shortage) {
     return {
-      label: "不足中",
+      label: stockStatus.label,
       description: "最低在庫を下回っています",
-      badgeClass: "bg-yellow-50 text-warning",
+      badgeClass: stockStatus.badgeClassName,
       panelClass: "border-warning/40 bg-yellow-50/50",
     };
   }
 
-  if (currentQuantity === minStock) {
+  if (stockStatus.key === stockStatusKeys.atMin) {
     return {
-      label: "最低在庫ちょうど",
+      label: stockStatus.label,
       description: "補充判断が必要",
-      badgeClass: "bg-yellow-50 text-warning",
+      badgeClass: stockStatus.badgeClassName,
       panelClass: "border-warning/40 bg-yellow-50/50",
     };
   }
 
   return {
-    label: "在庫あり",
+    label: stockStatus.label,
     description: "最低在庫を上回っています",
-    badgeClass: "bg-emerald-50 text-accent",
+    badgeClass: stockStatus.badgeClassName,
     panelClass: "border-line bg-white",
   };
 }

@@ -4,6 +4,7 @@ import { AppNav } from "@/components/domain/app-nav";
 import { analyzeBarcodeInput } from "@/lib/barcode/gs1";
 import { searchProductsByBarcode } from "@/lib/db/barcodes";
 import { requireActiveClinic } from "@/lib/db/clinic";
+import { getStockStatus } from "@/lib/stock/status";
 import { BarcodeStockForm } from "./barcode-stock-form";
 import { BarcodeStockStaffFlow } from "./barcode-stock-staff-flow";
 
@@ -28,34 +29,6 @@ function formatLotExpiryDate(expiryDate: Date | null, expiryDateText: string | n
   return expiryDateText || "-";
 }
 
-function getStockStatusLabel(quantity: number, minStock: number) {
-  if (quantity === 0) {
-    return {
-      label: "在庫なし",
-      className: "bg-red-50 text-danger",
-    };
-  }
-
-  if (quantity < minStock) {
-    return {
-      label: "不足中",
-      className: "bg-yellow-50 text-warning",
-    };
-  }
-
-  if (quantity === minStock) {
-    return {
-      label: "ぎりぎり",
-      className: "bg-amber-50 text-warning",
-    };
-  }
-
-  return {
-    label: "在庫あり",
-    className: "bg-emerald-50 text-accent",
-  };
-}
-
 export default async function BarcodeStockPage({ searchParams }: PageProps) {
   const session = await auth();
 
@@ -69,7 +42,7 @@ export default async function BarcodeStockPage({ searchParams }: PageProps) {
   const barcodeAnalysis = barcode ? analyzeBarcodeInput(barcode) : null;
   const results = barcode ? await searchProductsByBarcode(context.clinicId, barcode) : [];
   const selectedProduct = results.length === 1 ? results[0] : null;
-  const status = selectedProduct ? getStockStatusLabel(selectedProduct.quantity, selectedProduct.minStock) : null;
+  const status = selectedProduct ? getStockStatus(selectedProduct.quantity, selectedProduct.minStock) : null;
 
   return (
     <main className="min-h-screen bg-surface px-4 py-6 text-ink sm:px-6 lg:px-8">
@@ -150,7 +123,7 @@ export default async function BarcodeStockPage({ searchParams }: PageProps) {
                       {selectedProduct.productCode ?? "コード未設定"} / JAN {selectedProduct.janCode ?? "-"}
                     </p>
                   </div>
-                  <span className={`shrink-0 rounded px-3 py-1 text-xs font-semibold ${status.className}`}>
+                  <span className={`shrink-0 rounded px-3 py-1 text-xs font-semibold ${status.badgeClassName}`}>
                     {status.label}
                   </span>
                 </div>
