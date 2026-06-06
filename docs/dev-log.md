@@ -6383,6 +6383,23 @@
 - `corepack pnpm exec tsx tests/ui-smoke.test.ts` に成功した。
 - `corepack pnpm build` に成功した。
 
+## 2026-06-06 納品確認者の表示追加
+
+### 作業内容
+- `/orders` の納品済み表示に、納品確認を実行したログインユーザー名を `確認者: ...` として表示するようにした。
+- `getOrderRequestRows` で既存の `receivedByUserId` リレーションから `User.name` を取得し、`OrderRequestRow.receivedByUserName` として画面へ渡すようにした。
+- 印刷テスト用の `OrderRequestRow` ダミーデータにも `receivedByUserName` を追加した。
+
+### 判断
+- 新しく誰かを選択・保存するのではなく、既存で保存済みの「アプリ上で納品確認したユーザー」を見える化した。
+- DBスキーマ、納品確認処理、在庫反映、権限、Cookie は変更していない。
+
+### 検証
+- `corepack pnpm typecheck` に成功した。
+- `corepack pnpm exec tsx tests/order-print.test.ts` に成功した。
+- `corepack pnpm exec tsx tests/ui-smoke.test.ts` に成功した。
+- `corepack pnpm build` に成功した。
+
 ## 2026-06-06 発注先別の発注済み操作文言調整
 
 ### 作業内容

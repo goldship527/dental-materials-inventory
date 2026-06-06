@@ -341,6 +341,9 @@ export function OrderRequestTableRow({ row }: OrderRequestRowProps) {
               <span>
                 納品済み {dateTimeFormatter.format(row.receivedAt)} / {row.receivedQuantity ?? "-"} 個
               </span>
+              {row.receivedByUserName ? (
+                <span className="font-normal text-muted">確認者: {row.receivedByUserName}</span>
+              ) : null}
               {row.receivedMemo ? <span className="font-normal text-muted">{row.receivedMemo}</span> : null}
               <form action={receiptRevertAction}>
                 <input type="hidden" name="orderRequestId" value={row.id} />

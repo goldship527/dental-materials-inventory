@@ -41,6 +41,7 @@ export type OrderRequestRow = {
   receivedLotNumber: string | null;
   receivedExpiryDateText: string | null;
   receivedExpiryDate: Date | null;
+  receivedByUserName: string | null;
   updatedAt: Date;
 };
 
@@ -94,6 +95,11 @@ export async function getOrderRequestRows(clinicId: string): Promise<OrderReques
         },
       },
       supplier: true,
+      receivedByUser: {
+        select: {
+          name: true,
+        },
+      },
     },
     orderBy: [
       {
@@ -176,6 +182,7 @@ export async function getOrderRequestRows(clinicId: string): Promise<OrderReques
       receivedLotNumber: request.receivedLotNumber,
       receivedExpiryDateText: request.receivedExpiryDateText,
       receivedExpiryDate: request.receivedExpiryDate,
+      receivedByUserName: request.receivedByUser?.name ?? null,
       updatedAt: request.updatedAt,
     };
   });
