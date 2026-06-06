@@ -111,20 +111,35 @@ function getStatusCardClass(status: OrderStatusFilterValue) {
 }
 
 function getStatusFilterClass(status: OrderListFilterValue, isCurrent: boolean) {
+  const baseClass =
+    "inline-flex min-h-10 items-center rounded border px-4 py-2 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2";
+
   if (status === "ALL") {
     return isCurrent
-      ? "inline-flex min-h-10 items-center rounded border border-ink bg-ink px-4 py-2 text-sm font-semibold text-white"
-      : "inline-flex min-h-10 items-center rounded border border-line bg-white/75 px-4 py-2 text-sm font-semibold text-muted transition hover:border-ink hover:bg-white hover:text-ink";
+      ? `${baseClass} border-ink bg-ink text-white shadow-sm ring-2 ring-ink/20 focus-visible:ring-ink/50`
+      : `${baseClass} border-line bg-white/75 text-muted hover:border-ink hover:bg-white hover:text-ink focus-visible:ring-ink/30`;
   }
 
-  const toneClass = getStatusCardClass(status);
+  const toneClassByStatus: Record<OrderStatusFilterValue, { current: string; idle: string }> = {
+    PLANNED: {
+      current: "border-accent bg-teal-100 text-accentDeep shadow-sm ring-2 ring-accent/25 focus-visible:ring-accent/50",
+      idle: "border-teal-100 bg-white/75 text-accent hover:border-accent hover:bg-teal-50 focus-visible:ring-accent/30",
+    },
+    AWAITING_RECEIPT: {
+      current: "border-yellow-400 bg-yellow-100 text-warning shadow-sm ring-2 ring-yellow-200 focus-visible:ring-yellow-300",
+      idle: "border-yellow-200 bg-white/75 text-warning hover:border-yellow-400 hover:bg-yellow-50 focus-visible:ring-yellow-300",
+    },
+    RECEIVED: {
+      current: "border-green-300 bg-green-100 text-success shadow-sm ring-2 ring-green-200 focus-visible:ring-green-300",
+      idle: "border-green-100 bg-white/75 text-success hover:border-green-300 hover:bg-green-50 focus-visible:ring-green-300",
+    },
+    SKIPPED: {
+      current: "border-muted bg-subtle text-ink shadow-sm ring-2 ring-line focus-visible:ring-muted/40",
+      idle: "border-line bg-white/75 text-muted hover:border-muted hover:bg-subtle hover:text-ink focus-visible:ring-muted/30",
+    },
+  };
 
-  return isCurrent
-    ? `inline-flex min-h-10 items-center rounded border px-4 py-2 text-sm font-semibold ${toneClass}`
-    : `inline-flex min-h-10 items-center rounded border bg-white/75 px-4 py-2 text-sm font-semibold transition hover:bg-white ${toneClass.replace(
-        "bg-teal-50",
-        "hover:bg-teal-50",
-      ).replace("bg-yellow-50", "hover:bg-yellow-50").replace("bg-green-50", "hover:bg-green-50").replace("bg-subtle", "hover:bg-subtle")}`;
+  return `${baseClass} ${isCurrent ? toneClassByStatus[status].current : toneClassByStatus[status].idle}`;
 }
 
 function formatSupplierLeadTime(leadTime: SupplierLeadTimeStats | undefined) {
