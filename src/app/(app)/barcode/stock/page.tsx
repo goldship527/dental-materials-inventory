@@ -4,9 +4,10 @@ import { AppNav } from "@/components/domain/app-nav";
 import { analyzeBarcodeInput } from "@/lib/barcode/gs1";
 import { searchProductsByBarcode } from "@/lib/db/barcodes";
 import { requireActiveClinic } from "@/lib/db/clinic";
+import { getActiveStaffOperatorOptionsForClinic } from "@/lib/db/staff-operators";
 import { getStockStatus } from "@/lib/stock/status";
-import { BarcodeStockForm } from "./barcode-stock-form";
-import { BarcodeStockStaffFlow } from "./barcode-stock-staff-flow";
+import { BarcodeSearchForm } from "../barcode-search-form";
+import { BarcodeStockForm, productBarcodeInputId } from "./barcode-stock-form";
 
 type PageProps = {
   searchParams?: Promise<{
@@ -40,7 +41,13 @@ export default async function BarcodeStockPage({ searchParams }: PageProps) {
   const params = (await searchParams) ?? {};
   const barcode = params.barcode?.trim() ?? "";
   const barcodeAnalysis = barcode ? analyzeBarcodeInput(barcode) : null;
-  const results = barcode ? await searchProductsByBarcode(context.clinicId, barcode) : [];
+  const [results, staffOperators] = await Promise.all([
+    barcode ? searchProductsByBarcode(context.clinicId, barcode) : Promise.resolve([]),
+    getActiveStaffOperatorOptionsForClinic({
+      organizationId: context.organizationId,
+      clinicId: context.clinicId,
+    }),
+  ]);
   const selectedProduct = results.length === 1 ? results[0] : null;
   const status = selectedProduct ? getStockStatus(selectedProduct.quantity, selectedProduct.minStock) : null;
 
@@ -77,10 +84,20 @@ export default async function BarcodeStockPage({ searchParams }: PageProps) {
         </header>
 
 
-        <BarcodeStockStaffFlow barcode={barcode}>
+        <BarcodeSearchForm
+          defaultBarcode={barcode}
+          actionPath="/barcode/stock"
+          autoFocusInput
+          autoSubmitOnScan
+          clearHref="/barcode/stock"
+          inputId={productBarcodeInputId}
+          label="商品バーコード"
+          placeholder="JAN / GTIN / 商品バーコード"
+        />
+
           {!barcode ? (
             <section className="rounded border border-line bg-white p-5 text-sm text-muted shadow-panel">
-              <p className="font-semibold text-ink">3. 商品バーコードを読み取ってください。</p>
+              <p className="font-semibold text-ink">商品バーコードを読み取ってください。</p>
               <p className="mt-2">商品が1件に特定できたら、入出庫区分、数量、理由を確認して確定します。</p>
             </section>
           ) : null}
@@ -177,10 +194,11 @@ export default async function BarcodeStockPage({ searchParams }: PageProps) {
                 barcode={barcode}
                 productId={selectedProduct.productId}
                 currentQuantity={selectedProduct.quantity}
+                clinicId={context.clinicId}
+                staffOperators={staffOperators}
               />
             </section>
           ) : null}
-        </BarcodeStockStaffFlow>
       </div>
     </main>
   );

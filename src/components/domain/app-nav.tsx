@@ -207,7 +207,7 @@ export async function AppNav({ current }: AppNavProps) {
       current === "storage" ||
       current === "settings");
   const shouldShowWorkStaffSelector =
-    Boolean(activeClinicContext) && !isAdminMode && current !== "barcode" && current !== "stocktake";
+    Boolean(activeClinicContext) && !isAdminMode && current !== "stocktake";
   const staffOperators =
     shouldShowWorkStaffSelector && activeClinicContext
       ? await getActiveStaffOperatorOptionsForClinic({

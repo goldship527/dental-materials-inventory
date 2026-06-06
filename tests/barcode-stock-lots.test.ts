@@ -121,7 +121,7 @@ async function main() {
   try {
     const data = await seedTestData(prisma);
     const baseInput = {
-      staffBarcode: data.staffOperator.barcode,
+      staffOperatorId: data.staffOperator.id,
       barcode: gs1Input,
       productId: data.product.id,
       reason: "納品",

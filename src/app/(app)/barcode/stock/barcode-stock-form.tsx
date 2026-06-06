@@ -1,26 +1,45 @@
 "use client";
 
 import { useActionState, useEffect, useMemo, useState } from "react";
+import { useWorkStaffSelection } from "@/components/domain/work-staff-selection";
 import { barcodeStockMoveAction, type BarcodeStockActionState } from "@/lib/actions/barcode-stock";
 import { barcodeStockInReasons, barcodeStockOutReasons } from "@/lib/barcode/stock-reasons";
-import { productBarcodeInputId, useBarcodeStockStaff } from "./barcode-stock-staff-flow";
+import type { StaffOperatorOption } from "@/lib/db/staff-operators";
+
+export const productBarcodeInputId = "barcode-stock-product-barcode";
 
 type BarcodeStockFormProps = {
   barcode: string;
   productId: string;
   currentQuantity: number;
+  clinicId: string;
+  staffOperators: StaffOperatorOption[];
 };
 
 const initialState: BarcodeStockActionState = {};
 
-export function BarcodeStockForm({ barcode, productId, currentQuantity }: BarcodeStockFormProps) {
+export function BarcodeStockForm({
+  barcode,
+  productId,
+  currentQuantity,
+  clinicId,
+  staffOperators,
+}: BarcodeStockFormProps) {
   const [state, formAction, isPending] = useActionState(barcodeStockMoveAction, initialState);
-  const { staffBarcode, clearStaffBarcode } = useBarcodeStockStaff();
+  const { hasStaffOperators, selectedStaffOperator, selectedStaffOperatorId } = useWorkStaffSelection({
+    clinicId,
+    staffOperators,
+  });
   const [movementType, setMovementType] = useState<"OUT" | "IN">("OUT");
   const [reason, setReason] = useState<string>("使用");
   const [quantity, setQuantity] = useState(1);
   const displayQuantity = state.afterQuantity ?? currentQuantity;
-  const reasonOptions = useMemo(() => (movementType === "OUT" ? barcodeStockOutReasons : barcodeStockInReasons), [movementType]);
+  const reasonOptions = useMemo(
+    () => (movementType === "OUT" ? barcodeStockOutReasons : barcodeStockInReasons),
+    [movementType],
+  );
+  const isSubmitDisabled =
+    isPending || !selectedStaffOperatorId || (movementType === "OUT" && quantity > displayQuantity);
 
   useEffect(() => {
     if (state.status !== "success") {
@@ -49,13 +68,13 @@ export function BarcodeStockForm({ barcode, productId, currentQuantity }: Barcod
       <input type="hidden" name="barcode" value={barcode} />
       <input type="hidden" name="productId" value={productId} />
       <input type="hidden" name="movementType" value={movementType} />
-      <input type="hidden" name="staffBarcode" value={staffBarcode} />
+      <input type="hidden" name="staffOperatorId" value={selectedStaffOperatorId} />
 
       <div className="mb-4">
-        <p className="text-xs font-semibold text-accent">3. 入出庫確認</p>
+        <p className="text-xs font-semibold text-accent">入出庫確認</p>
         <h2 className="mt-1 text-xl font-semibold">数量と理由を確認して確定</h2>
         <p className="mt-2 text-sm text-muted">
-          確定後は商品バーコード欄へ戻ります。同じ担当者のまま次の商品を続けて読み取れます。
+          確定後は商品バーコード欄へ戻ります。画面上部で選んだ作業スタッフで記録します。
         </p>
       </div>
 
@@ -66,24 +85,20 @@ export function BarcodeStockForm({ barcode, productId, currentQuantity }: Barcod
         </div>
         <div className="rounded border border-line bg-gray-50 px-4 py-3">
           <p className="text-xs font-semibold text-muted">次に読むもの</p>
-          <p className="mt-1 text-sm font-semibold text-ink">確定後は商品バーコード</p>
+          <p className="mt-1 text-sm font-semibold text-ink">確定後の商品バーコード</p>
         </div>
       </div>
 
       <section className="mb-5 rounded border border-blue-100 bg-blue-50 p-4">
-        <div className="flex flex-col gap-2 text-xs font-semibold text-blue-900 sm:flex-row sm:items-center sm:justify-between">
-          <p>
-            担当者バーコード: <span className="font-mono">{staffBarcode}</span>
-          </p>
-          <button
-            type="button"
-            onClick={clearStaffBarcode}
-            className="self-start rounded border border-blue-200 bg-white px-3 py-1 text-xs font-semibold text-blue-900 transition hover:border-blue-400 sm:self-auto"
-          >
-            担当者を変更
-          </button>
-        </div>
-        <p className="mt-2 text-xs leading-5 text-blue-800">在庫確定時に、この担当者バーコードをサーバー側で再検証します。</p>
+        <p className="text-xs font-semibold text-blue-900">作業スタッフ</p>
+        <p className="mt-1 text-sm font-semibold text-ink">
+          {selectedStaffOperator ? selectedStaffOperator.displayName : hasStaffOperators ? "未選択" : "未登録"}
+        </p>
+        <p className="mt-2 text-xs leading-5 text-blue-800">
+          {hasStaffOperators
+            ? "画面上部で作業スタッフを選んでから確定してください。"
+            : "このクリニックで有効な作業スタッフが登録されていません。"}
+        </p>
       </section>
 
       <div className="grid gap-5 lg:grid-cols-[1fr_1fr]">
@@ -113,7 +128,9 @@ export function BarcodeStockForm({ barcode, productId, currentQuantity }: Barcod
               入庫
             </button>
           </div>
-          <p className="mt-3 text-sm text-muted">現在庫: <span className="font-semibold text-ink">{displayQuantity}</span></p>
+          <p className="mt-3 text-sm text-muted">
+            現在庫: <span className="font-semibold text-ink">{displayQuantity}</span>
+          </p>
         </section>
 
         <section>
@@ -190,9 +207,7 @@ export function BarcodeStockForm({ barcode, productId, currentQuantity }: Barcod
           className="rounded border border-line px-3 py-2 text-sm font-normal text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
         />
       </label>
-      <p className="mt-2 text-xs text-muted">
-        個人情報や秘密情報は入力しないでください。
-      </p>
+      <p className="mt-2 text-xs text-muted">個人情報や患者情報は入力しないでください。</p>
 
       {state.message ? (
         <div
@@ -226,7 +241,7 @@ export function BarcodeStockForm({ barcode, productId, currentQuantity }: Barcod
 
       <button
         type="submit"
-        disabled={isPending || (movementType === "OUT" && quantity > displayQuantity)}
+        disabled={isSubmitDisabled}
         className={
           movementType === "OUT"
             ? "mt-5 h-12 w-full rounded bg-ink px-5 text-base font-semibold text-white transition hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-60"

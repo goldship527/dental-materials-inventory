@@ -6756,6 +6756,30 @@
 ### 残課題・次アクション
 - 実画面で発注画面を開き、初期表示とボタンサイズが感覚に合うか確認する。
 
+## 2026-06-06 バーコード出入庫の作業スタッフ選択を共通化
+
+### 作業内容
+- `/barcode` / `/barcode/stock` でも共通ヘッダーの「作業スタッフ」選択を表示するようにした。
+- `/barcode/stock` の専用「担当者バーコードを先に読む」フローを廃止し、商品バーコード読み取りから入出庫確認へ進める構成に変更した。
+- バーコード入出庫フォームは、ヘッダーで選んだ `staffOperatorId` を送信し、未選択時は確定ボタンを押せないようにした。
+- `barcodeStockMoveAction` は送信されたスタッフIDを組織・クリニック・有効状態で再検証してから `StockMovement.performedByStaffId` に記録するようにした。
+- 古いバーコード出入庫専用スタッフ保持コンポーネントを削除した。
+
+### 判断
+- 作業スタッフはクリニック単位・当日単位で共通ヘッダーに保持する既存方針に合わせた。
+- 担当者バーコード自体の管理画面・印刷機能は残し、今回の変更対象はバーコード出入庫の操作導線だけに限定した。
+- 認証、権限、Cookie、Prisma schema、マイグレーション、DB破壊的変更には触れていない。
+
+### 検証
+- `corepack pnpm exec tsc --noEmit --incremental false` に成功した。
+- `corepack pnpm exec tsx tests/barcode-stock-reasons.test.ts` に成功した。
+- `corepack pnpm exec tsx tests/barcode-stock-lots.test.ts` に成功した。
+- `corepack pnpm exec tsx tests/ui-smoke.test.ts` に成功した。
+- `npm.cmd run build` に成功した。
+
+### 残課題・次アクション
+- 実機バーコードスキャナーで、ヘッダーの作業スタッフ選択後に商品バーコード連続読み取りが自然に続けられるか確認する。
+
 ## 2026-06-06 発注画面の状態フィルタ選択表示強化
 
 ### 作業内容
