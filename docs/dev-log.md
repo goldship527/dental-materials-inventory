@@ -6450,3 +6450,17 @@
 - `corepack pnpm typecheck` に成功した。
 - `corepack pnpm exec tsx tests/ui-smoke.test.ts` に成功した。
 - `corepack pnpm build` に成功した。
+
+## 共通ヘッダーのアクティブ表示調整（2026-06-06）
+
+### 作業内容
+- 共通ヘッダーの現在ページリンクから `shadow-sm` を外し、周囲のフラットなナビボタンから浮いて見えにくい表示にした。
+
+### 判断
+- 管理メニュー周りのレビューでは重大な表示崩れはなく、アクティブ表示の影だけが軽微な違和感として残っていたため、`AppNav` の1箇所だけを最小修正した。
+- 認証、権限、クリニック切替、ログアウト処理は変更していない。
+
+### 検証
+- `corepack pnpm typecheck` に成功した。
+- `corepack pnpm exec tsx tests/ui-smoke.test.ts` に成功した。
+- `corepack pnpm build` に成功した。

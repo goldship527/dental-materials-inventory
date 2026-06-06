@@ -145,7 +145,7 @@ function NavLink({ item, current }: { item: NavItem; current: NavItemId }) {
       aria-current={isCurrent ? "page" : undefined}
       className={
         isCurrent
-          ? "inline-flex h-11 shrink-0 items-center whitespace-nowrap rounded border border-accent/30 bg-teal-50 px-3 text-sm font-semibold text-accent shadow-sm sm:h-9"
+          ? "inline-flex h-11 shrink-0 items-center whitespace-nowrap rounded border border-accent/30 bg-teal-50 px-3 text-sm font-semibold text-accent sm:h-9"
           : "inline-flex h-11 shrink-0 items-center whitespace-nowrap rounded border border-transparent px-3 text-sm font-semibold text-muted transition hover:border-line hover:bg-white/80 hover:text-ink sm:h-9"
       }
     >
