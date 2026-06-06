@@ -169,9 +169,7 @@ export default async function HomePage({ searchParams }: PageProps) {
 
         <header className="flex flex-col gap-4 border-b border-line pb-5 print:border-none md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-            <h1 className="mt-2 text-3xl font-semibold tracking-normal">ホーム</h1>
-            <p className="mt-2 text-sm text-muted">{session.user.name} としてログイン中</p>
+            <h1 className="text-3xl font-semibold tracking-normal">ホーム</h1>
           </div>
         </header>
 

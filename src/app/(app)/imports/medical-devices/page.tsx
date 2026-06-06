@@ -58,13 +58,11 @@ export default async function MedicalDeviceImportPreviewPage({ searchParams }: P
 
   if (cacheResult.status === "missing") {
     return (
-      <main className="min-h-screen bg-surface px-4 py-6 text-ink sm:px-6 lg:px-8">
-        <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
-          <AppNav current="imports" />
-
+      <>
+        <AppNav current="imports" />
+        <main className="mx-auto grid w-full max-w-7xl gap-6 px-4 py-8 text-ink sm:px-6 lg:px-8">
           <header className="border-b border-line pb-5">
-            <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-            <h1 className="mt-2 text-3xl font-semibold">医療機器データ取り込みプレビュー</h1>
+            <h1 className="text-2xl font-semibold">医療機器データ取り込みプレビュー</h1>
           </header>
           <section className="rounded border border-line bg-white p-5 text-sm text-muted shadow-panel">
             <p className="font-semibold text-ink">ローカルキャッシュがまだありません。</p>
@@ -74,8 +72,8 @@ export default async function MedicalDeviceImportPreviewPage({ searchParams }: P
               <code className="rounded bg-gray-50 px-1 py-0.5">{cacheResult.cachePath}</code> を作成してください。
             </p>
           </section>
-        </div>
-      </main>
+        </main>
+      </>
     );
   }
 
@@ -143,31 +141,15 @@ export default async function MedicalDeviceImportPreviewPage({ searchParams }: P
   }
 
   return (
-    <main className="min-h-screen bg-surface px-4 py-6 text-ink sm:px-6 lg:px-8">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
-        <AppNav current="imports" />
-
-        <header className="flex flex-col gap-4 border-b border-line pb-5 lg:flex-row lg:items-end lg:justify-between">
+    <>
+      <AppNav current="imports" />
+      <main className="mx-auto grid w-full max-w-7xl gap-6 px-4 py-8 text-ink sm:px-6 lg:px-8">
+        <header className="border-b border-line pb-5">
           <div>
-            <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-            <h1 className="mt-2 text-3xl font-semibold">医療機器データ取り込みプレビュー</h1>
+            <h1 className="text-2xl font-semibold">医療機器データ取り込みプレビュー</h1>
             <p className="mt-2 text-sm text-muted">
               取込サンプルを表示しています。
             </p>
-          </div>
-          <div className="flex flex-wrap gap-2 text-sm font-semibold">
-            <a
-              className="inline-flex h-11 items-center rounded border border-line bg-white px-4 text-ink transition hover:border-accent hover:bg-teal-50 hover:text-accent"
-              href="/setup"
-            >
-              初期設定へ戻る
-            </a>
-            <a
-              className="inline-flex h-11 items-center rounded border border-line bg-white px-4 text-ink transition hover:border-accent hover:bg-teal-50 hover:text-accent"
-              href="/home"
-            >
-              ホームへ戻る
-            </a>
           </div>
         </header>
 
@@ -266,7 +248,7 @@ export default async function MedicalDeviceImportPreviewPage({ searchParams }: P
           </div>
           {visible.length === 0 ? <p className="p-6 text-center text-sm text-muted">条件に合うデータがありません。</p> : null}
         </section>
-      </div>
-    </main>
+      </main>
+    </>
   );
 }
