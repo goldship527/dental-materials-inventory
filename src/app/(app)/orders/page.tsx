@@ -13,12 +13,15 @@ import { OrderRequestTableRow } from "./order-request-row";
 import { OrdersPrintButton } from "./print-button";
 import { SupplierOrderRecordPanel } from "./supplier-order-record-panel";
 
-type OrderListFilterValue = "" | "PLANNED" | "AWAITING_RECEIPT" | "RECEIVED" | "SKIPPED";
+type OrderListFilterValue = "ALL" | "PLANNED" | "AWAITING_RECEIPT" | "RECEIVED" | "SKIPPED";
+type OrderStatusFilterValue = Exclude<OrderListFilterValue, "ALL">;
+
+const defaultOrderListFilter: OrderListFilterValue = "PLANNED";
 
 const statusFilters: { label: string; value: OrderListFilterValue }[] = [
   {
     label: "すべて",
-    value: "",
+    value: "ALL",
   },
   {
     label: "発注予定",
@@ -56,7 +59,7 @@ function buildOrdersHref(status: OrderListFilterValue, query: string) {
     params.set("q", query);
   }
 
-  if (status) {
+  if (status !== defaultOrderListFilter) {
     params.set("status", status);
   }
 
@@ -71,7 +74,7 @@ function buildOrdersPrintHref(supplierId: string | null | undefined) {
   return `/orders/print?supplierId=${encodeURIComponent(selectedSupplierId)}`;
 }
 
-function getSupplierStatusChipClass(status: Exclude<OrderListFilterValue, "">) {
+function getSupplierStatusChipClass(status: OrderStatusFilterValue) {
   if (status === "SKIPPED") {
     return "border-line bg-subtle text-muted";
   }
@@ -91,7 +94,7 @@ function getSupplierStatusChipClass(status: Exclude<OrderListFilterValue, "">) {
   return "border-line bg-white/80 text-muted";
 }
 
-function getStatusCardClass(status: Exclude<OrderListFilterValue, "">) {
+function getStatusCardClass(status: OrderStatusFilterValue) {
   if (status === "PLANNED") {
     return "border-teal-100 bg-teal-50 text-accent";
   }
@@ -108,17 +111,17 @@ function getStatusCardClass(status: Exclude<OrderListFilterValue, "">) {
 }
 
 function getStatusFilterClass(status: OrderListFilterValue, isCurrent: boolean) {
-  if (!status) {
+  if (status === "ALL") {
     return isCurrent
-      ? "inline-flex min-h-9 items-center rounded border border-ink bg-ink px-3 py-1.5 text-xs font-semibold text-white"
-      : "inline-flex min-h-9 items-center rounded border border-line bg-white/75 px-3 py-1.5 text-xs font-semibold text-muted transition hover:border-ink hover:bg-white hover:text-ink";
+      ? "inline-flex min-h-10 items-center rounded border border-ink bg-ink px-4 py-2 text-sm font-semibold text-white"
+      : "inline-flex min-h-10 items-center rounded border border-line bg-white/75 px-4 py-2 text-sm font-semibold text-muted transition hover:border-ink hover:bg-white hover:text-ink";
   }
 
   const toneClass = getStatusCardClass(status);
 
   return isCurrent
-    ? `inline-flex min-h-9 items-center rounded border px-3 py-1.5 text-xs font-semibold ${toneClass}`
-    : `inline-flex min-h-9 items-center rounded border bg-white/75 px-3 py-1.5 text-xs font-semibold transition hover:bg-white ${toneClass.replace(
+    ? `inline-flex min-h-10 items-center rounded border px-4 py-2 text-sm font-semibold ${toneClass}`
+    : `inline-flex min-h-10 items-center rounded border bg-white/75 px-4 py-2 text-sm font-semibold transition hover:bg-white ${toneClass.replace(
         "bg-teal-50",
         "hover:bg-teal-50",
       ).replace("bg-yellow-50", "hover:bg-yellow-50").replace("bg-green-50", "hover:bg-green-50").replace("bg-subtle", "hover:bg-subtle")}`;
@@ -137,7 +140,7 @@ function formatSupplierLeadTime(leadTime: SupplierLeadTimeStats | undefined) {
 }
 
 function matchesOrderListFilter(row: OrderRequestRow, filter: OrderListFilterValue) {
-  if (!filter) {
+  if (filter === "ALL") {
     return true;
   }
 
@@ -217,7 +220,7 @@ export default async function OrdersPage({ searchParams }: PageProps) {
   const normalizedQuery = query.toLowerCase();
   const selectedStatus = statusFilters.some((filter) => filter.value === params.status)
     ? (params.status as OrderListFilterValue)
-    : "";
+    : defaultOrderListFilter;
   const selectedStatusLabel = statusFilters.find((filter) => filter.value === selectedStatus)?.label ?? "";
   const [rows, supplierLeadTimes] = await Promise.all([
     getOrderRequestRows(context.clinicId),
@@ -255,7 +258,7 @@ export default async function OrdersPage({ searchParams }: PageProps) {
     },
   ];
   const countByStatus = Object.fromEntries(counts.map((item) => [item.status, item.count])) as Record<
-    Exclude<OrderListFilterValue, "">,
+    OrderStatusFilterValue,
     number
   >;
   const groupedRows = Array.from(
@@ -281,7 +284,7 @@ export default async function OrdersPage({ searchParams }: PageProps) {
     hour: "2-digit",
     minute: "2-digit",
   }).format(new Date());
-  const hasFilter = Boolean(query || selectedStatus);
+  const hasFilter = Boolean(query || selectedStatusLabel);
   const filterLabel = [
     query ? `検索: ${query}` : "",
     selectedStatusLabel ? `状態: ${selectedStatusLabel}` : "",
@@ -301,7 +304,7 @@ export default async function OrdersPage({ searchParams }: PageProps) {
         <header className="flex flex-col gap-3 border-b border-line pb-4 md:flex-row md:items-end md:justify-between print:border-black print:pb-3">
           <div>
             <p className="text-sm font-semibold text-accent print:text-black">{context.clinicName}</p>
-            <h1 className="mt-2 text-3xl font-semibold print:text-2xl">発注候補</h1>
+            <h1 className="mt-2 text-3xl font-semibold print:text-2xl">発注</h1>
             <p className="mt-2 text-sm text-muted print:text-xs print:text-black">
               <span className="hidden print:inline">この一覧は発注前の確認用で、外部発注送信済みではありません。</span>
               発行日時: {generatedAt}
@@ -360,7 +363,7 @@ export default async function OrdersPage({ searchParams }: PageProps) {
             placeholder="商品名・商品コード・カテゴリ・発注先・メモ"
             className="h-10 rounded border border-line bg-white/90 px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
           />
-          {selectedStatus ? <input type="hidden" name="status" value={selectedStatus} /> : null}
+          {selectedStatus !== defaultOrderListFilter ? <input type="hidden" name="status" value={selectedStatus} /> : null}
           <button
             type="submit"
             className="h-10 rounded bg-accent px-4 text-sm font-semibold text-white transition hover:bg-accentDeep"
@@ -369,7 +372,7 @@ export default async function OrdersPage({ searchParams }: PageProps) {
           </button>
           <a
             className="flex h-10 items-center justify-center rounded border border-line bg-white/75 px-4 text-sm font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent"
-            href={selectedStatus ? buildOrdersHref(selectedStatus, "") : "/orders"}
+            href={buildOrdersHref(selectedStatus, "")}
           >
             クリア
           </a>
@@ -381,7 +384,7 @@ export default async function OrdersPage({ searchParams }: PageProps) {
 
             return (
               <a
-                key={filter.value || "all"}
+                key={filter.value}
                 href={buildOrdersHref(filter.value, query)}
                 aria-current={isCurrent ? "page" : undefined}
                 className={getStatusFilterClass(filter.value, isCurrent)}
