@@ -6850,3 +6850,14 @@
 - `corepack pnpm build` に成功した。
 - `corepack pnpm exec tsx tests/ui-smoke.test.ts` に成功した。
 - `corepack pnpm db:upsert-demo-accounts` に成功し、ローカルDBで `test@example.com` と `clinic2@example.com` が `STAFF`、`admin@example.com` が `ADMIN` であることを確認した。
+
+## 2026-06-07 公開デモDBへのログインアカウント反映
+
+### 作業内容
+- `.env.supabase.local` の接続先に対して、`corepack pnpm db:upsert-demo-accounts` を実行した。
+- 公開デモDBに `クリニック1共通`、`クリニック2共通`、`管理者個人アカウント` を非破壊で追加・更新した。
+- 連続ログイン失敗による一時ロックの可能性を避けるため、対象デモアカウントのログイン失敗記録だけ削除した。
+
+### 検証
+- 公開デモURLで、3つのデモアカウントすべてがCSRF取得、Credentialsログイン、`/home` 表示まで成功することをHTTP確認した。
+- 公開デモ用パスワード、DB接続文字列、`AUTH_SECRET` はログやドキュメントに記載していない。
