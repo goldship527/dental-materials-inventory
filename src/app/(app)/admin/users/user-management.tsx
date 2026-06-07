@@ -35,7 +35,13 @@ const dateTimeFormatter = new Intl.DateTimeFormat("ja-JP", {
 });
 
 function roleLabel(role: string) {
-  return normalizeUserRole(role) === userRoles.admin ? "管理者" : "スタッフ";
+  return normalizeUserRole(role) === userRoles.admin ? "管理者個人" : "クリニック共通";
+}
+
+function roleDescription(role: string) {
+  return normalizeUserRole(role) === userRoles.admin
+    ? "本部・事務など、個人ごとの管理者アカウント"
+    : "院内スタッフが日常業務で使う共通アカウント";
 }
 
 function StatusMessage({ state }: { state: AdminUserActionState }) {
@@ -64,7 +70,10 @@ export function UserManagement({ users, currentUserId }: UserManagementProps) {
   return (
     <div className="grid min-w-0 gap-6">
       <section className="min-w-0 rounded border border-line bg-white p-5 shadow-panel">
-        <h2 className="text-lg font-semibold">ユーザー追加</h2>
+        <h2 className="text-lg font-semibold">ログインアカウント追加</h2>
+        <p className="mt-2 text-sm leading-6 text-muted">
+          クリニック共通アカウントは「クリニック共通」で作成します。ADMIN権限は共通アカウントには付けず、管理者本人の個人アカウントにだけ付けます。
+        </p>
         <form action={createAction} className="mt-4 grid gap-4 md:grid-cols-2">
           <label className="grid gap-1 text-sm font-semibold text-muted">
             表示名
@@ -98,15 +107,18 @@ export function UserManagement({ users, currentUserId }: UserManagementProps) {
             />
           </label>
           <label className="grid gap-1 text-sm font-semibold text-muted">
-            権限
+            アカウント種別
             <select
               className="h-11 rounded border border-line px-3 text-base text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
               defaultValue={userRoles.staff}
               name="role"
             >
-              <option value={userRoles.staff}>スタッフ</option>
-              <option value={userRoles.admin}>管理者</option>
+              <option value={userRoles.staff}>クリニック共通</option>
+              <option value={userRoles.admin}>管理者個人</option>
             </select>
+            <span className="text-xs font-normal text-muted">
+              クリニック共通は日常ログイン用、管理者個人は本部・事務の管理操作用です。
+            </span>
           </label>
           <div className="md:col-span-2">
             <button
@@ -114,7 +126,7 @@ export function UserManagement({ users, currentUserId }: UserManagementProps) {
               disabled={isCreating}
               type="submit"
             >
-              {isCreating ? "追加中" : "ユーザーを追加"}
+              {isCreating ? "追加中" : "ログインアカウントを追加"}
             </button>
           </div>
         </form>
@@ -126,8 +138,10 @@ export function UserManagement({ users, currentUserId }: UserManagementProps) {
       <section className="min-w-0 rounded border border-line bg-white p-5 shadow-panel">
         <div className="flex flex-col gap-2 border-b border-line pb-4 md:flex-row md:items-end md:justify-between">
           <div>
-            <h2 className="text-lg font-semibold">ユーザー一覧</h2>
-            <p className="mt-1 text-sm text-muted">有効なユーザーだけがログインできます。</p>
+            <h2 className="text-lg font-semibold">ログインアカウント一覧</h2>
+            <p className="mt-1 text-sm text-muted">
+              クリニック共通アカウントは一般ユーザー、管理者は個人アカウントとして扱います。
+            </p>
           </div>
           <p className="text-sm font-semibold text-muted">合計 {users.length} 件</p>
         </div>
@@ -137,7 +151,7 @@ export function UserManagement({ users, currentUserId }: UserManagementProps) {
             <thead>
               <tr className="text-muted">
                 <th className="border-b border-line px-3 py-2 font-semibold">ユーザー</th>
-                <th className="border-b border-line px-3 py-2 font-semibold">権限</th>
+                <th className="border-b border-line px-3 py-2 font-semibold">種別</th>
                 <th className="border-b border-line px-3 py-2 font-semibold">状態</th>
                 <th className="border-b border-line px-3 py-2 font-semibold">更新日</th>
                 <th className="border-b border-line px-3 py-2 font-semibold">操作</th>
@@ -153,7 +167,10 @@ export function UserManagement({ users, currentUserId }: UserManagementProps) {
                       <p className="font-semibold">{user.name}</p>
                       <p className="mt-1 text-xs text-muted">{user.email}</p>
                     </td>
-                    <td className="border-b border-line px-3 py-3 align-top">{roleLabel(user.role)}</td>
+                    <td className="border-b border-line px-3 py-3 align-top">
+                      <p className="font-semibold">{roleLabel(user.role)}</p>
+                      <p className="mt-1 text-xs leading-5 text-muted">{roleDescription(user.role)}</p>
+                    </td>
                     <td className="border-b border-line px-3 py-3 align-top">
                       <span
                         className={

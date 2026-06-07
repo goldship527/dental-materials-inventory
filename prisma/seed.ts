@@ -4,25 +4,46 @@ import { buildDemoSpecification } from "../src/lib/products/demo-specification";
 
 const prisma = new PrismaClient();
 
-const demoLoginEmail = process.env.DEMO_LOGIN_EMAIL?.trim() || "test@example.com";
-const demoLoginPassword = process.env.DEMO_LOGIN_PASSWORD || "password";
-const demoUserName = normalizeDemoUserName(process.env.DEMO_USER_NAME);
+const clinic1LoginEmail = process.env.DEMO_LOGIN_EMAIL?.trim() || "test@example.com";
+const clinic1LoginPassword = process.env.DEMO_LOGIN_PASSWORD || "password";
+const clinic1UserName = normalizeDemoUserName(process.env.DEMO_USER_NAME, "クリニック1共通");
+const clinic2LoginEmail = process.env.DEMO_CLINIC2_LOGIN_EMAIL?.trim() || "clinic2@example.com";
+const clinic2LoginPassword = process.env.DEMO_CLINIC2_LOGIN_PASSWORD || clinic1LoginPassword;
+const clinic2UserName = normalizeDemoUserName(process.env.DEMO_CLINIC2_USER_NAME, "クリニック2共通");
+const adminLoginEmail = process.env.DEMO_ADMIN_EMAIL?.trim() || "admin@example.com";
+const adminLoginPassword = process.env.DEMO_ADMIN_PASSWORD || clinic1LoginPassword;
+const adminUserName = normalizeDemoUserName(process.env.DEMO_ADMIN_USER_NAME, "管理者個人アカウント");
 
-function normalizeDemoUserName(value: string | undefined) {
-  const name = value?.trim() || "テストユーザー";
+function normalizeDemoUserName(value: string | undefined, fallback: string) {
+  const name = value?.trim() || fallback;
   const utf8ByteLength = Buffer.byteLength(name, "utf8");
 
   if (utf8ByteLength === 0 || utf8ByteLength > 120) {
-    throw new Error("DEMO_USER_NAME must be 1 to 120 bytes as UTF-8.");
+    throw new Error("Demo user display names must be 1 to 120 bytes as UTF-8.");
   }
 
   if (name.includes("�") || /[繝譁縺螳]/.test(name)) {
     throw new Error(
-      "DEMO_USER_NAME looks garbled. Set it again as UTF-8 text, for example テストユーザー.",
+      "A demo user display name looks garbled. Set it again as UTF-8 text, for example クリニック1共通.",
     );
   }
 
   return name;
+}
+
+function assertUniqueDemoEmails(accounts: { label: string; email: string }[]) {
+  const seen = new Map<string, string>();
+
+  for (const account of accounts) {
+    const email = account.email.toLowerCase();
+    const existingLabel = seen.get(email);
+
+    if (existingLabel) {
+      throw new Error(`${account.label} and ${existingLabel} must use different demo login emails.`);
+    }
+
+    seen.set(email, account.label);
+  }
 }
 
 const suppliers = [
@@ -98,7 +119,7 @@ function quantityFor(index: number, minStock: number) {
   return minStock + ((index * 3) % 8);
 }
 
-function branchQuantityFor(index: number, minStock: number) {
+function clinic2QuantityFor(index: number, minStock: number) {
   if (index < 3) {
     return 0;
   }
@@ -143,28 +164,58 @@ async function main() {
   const clinic = await prisma.clinic.create({
     data: {
       organizationId: organization.id,
-      name: "テストクリニック",
+      name: "クリニック1",
       address: "開発用の架空住所",
       phone: "000-0000-0000",
     },
   });
 
-  const branchClinic = await prisma.clinic.create({
+  const clinic2 = await prisma.clinic.create({
     data: {
       organizationId: organization.id,
-      name: "テスト分院",
-      address: "開発用の架空住所 分院",
+      name: "クリニック2",
+      address: "開発用の架空住所 2",
       phone: "000-0000-0001",
     },
   });
 
-  const passwordHash = await bcrypt.hash(demoLoginPassword, 12);
-  const user = await prisma.user.create({
+  assertUniqueDemoEmails([
+    { label: "Clinic 1 account", email: clinic1LoginEmail },
+    { label: "Clinic 2 account", email: clinic2LoginEmail },
+    { label: "Admin account", email: adminLoginEmail },
+  ]);
+
+  const clinic1PasswordHash = await bcrypt.hash(clinic1LoginPassword, 12);
+  const clinic1User = await prisma.user.create({
     data: {
       organizationId: organization.id,
-      name: demoUserName,
-      email: demoLoginEmail,
-      passwordHash,
+      name: clinic1UserName,
+      email: clinic1LoginEmail.toLowerCase(),
+      passwordHash: clinic1PasswordHash,
+      role: "STAFF",
+      isActive: true,
+    },
+  });
+
+  const clinic2PasswordHash = await bcrypt.hash(clinic2LoginPassword, 12);
+  const clinic2User = await prisma.user.create({
+    data: {
+      organizationId: organization.id,
+      name: clinic2UserName,
+      email: clinic2LoginEmail.toLowerCase(),
+      passwordHash: clinic2PasswordHash,
+      role: "STAFF",
+      isActive: true,
+    },
+  });
+
+  const adminPasswordHash = await bcrypt.hash(adminLoginPassword, 12);
+  const adminUser = await prisma.user.create({
+    data: {
+      organizationId: organization.id,
+      name: adminUserName,
+      email: adminLoginEmail.toLowerCase(),
+      passwordHash: adminPasswordHash,
       role: "ADMIN",
       isActive: true,
     },
@@ -173,12 +224,20 @@ async function main() {
   await prisma.userClinicAssignment.createMany({
     data: [
       {
-        userId: user.id,
+        userId: clinic1User.id,
         clinicId: clinic.id,
       },
       {
-        userId: user.id,
-        clinicId: branchClinic.id,
+        userId: clinic2User.id,
+        clinicId: clinic2.id,
+      },
+      {
+        userId: adminUser.id,
+        clinicId: clinic.id,
+      },
+      {
+        userId: adminUser.id,
+        clinicId: clinic2.id,
       },
     ],
   });
@@ -186,7 +245,7 @@ async function main() {
   await prisma.staffOperator.create({
     data: {
       organizationId: organization.id,
-      displayName: "テストスタッフ",
+      displayName: "クリニック1スタッフ",
       barcode: "STAFF-0001",
       operatorType: "REGULAR",
       clinicAssignments: {
@@ -200,12 +259,12 @@ async function main() {
   await prisma.staffOperator.create({
     data: {
       organizationId: organization.id,
-      displayName: "テスト分院スタッフ",
+      displayName: "クリニック2スタッフ",
       barcode: "STAFF-0002",
       operatorType: "REGULAR",
       clinicAssignments: {
         create: {
-          clinicId: branchClinic.id,
+          clinicId: clinic2.id,
         },
       },
     },
@@ -274,14 +333,14 @@ async function main() {
       },
     });
 
-    const branchQuantity = branchQuantityFor(index, defaultMinStock);
+    const clinic2Quantity = clinic2QuantityFor(index, defaultMinStock);
     await prisma.stockItem.create({
       data: {
-        clinicId: branchClinic.id,
+        clinicId: clinic2.id,
         productId: product.id,
-        quantity: branchQuantity,
+        quantity: clinic2Quantity,
         minStock: index % 5 === 0 ? defaultMinStock + 2 : null,
-        location: `分院棚-${(index % 6) + 1}`,
+        location: `クリニック2棚-${(index % 6) + 1}`,
         isUsed: true,
       },
     });
@@ -301,7 +360,7 @@ async function main() {
   for (const [index, product] of products.slice(0, 12).entries()) {
     await prisma.favoriteProductCard.create({
       data: {
-        clinicId: branchClinic.id,
+        clinicId: clinic2.id,
         productId: product.id,
         displayOrder: index + 1,
         categoryTab: product.category,
@@ -310,11 +369,13 @@ async function main() {
   }
 
   console.log("Seed completed");
-  console.log(`Login email: ${user.email}`);
-  console.log("Login password: value from DEMO_LOGIN_PASSWORD, or local default if unset");
+  console.log(`Clinic 1 account: ${clinic1User.email} / STAFF`);
+  console.log(`Clinic 2 account: ${clinic2User.email} / STAFF`);
+  console.log(`Admin account: ${adminUser.email} / ADMIN`);
+  console.log("Login passwords: values from DEMO_*_PASSWORD, or local default if unset");
   console.log("Clinics: 2");
   console.log(`Products: ${products.length}`);
-  console.log("Intentional shortages: first 10 products in main clinic, first 8 products in branch clinic");
+  console.log("Intentional shortages: first 10 products in clinic 1, first 8 products in clinic 2");
 }
 
 main()

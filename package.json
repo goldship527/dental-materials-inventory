@@ -16,7 +16,8 @@
     "prisma:generate": "prisma generate",
     "prepare:barcode-constraints": "tsx scripts/prepare-barcode-constraints.ts",
     "db:push": "prisma db push",
-    "db:seed": "prisma db seed"
+    "db:seed": "prisma db seed",
+    "db:upsert-demo-accounts": "tsx scripts/upsert-demo-login-accounts.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",

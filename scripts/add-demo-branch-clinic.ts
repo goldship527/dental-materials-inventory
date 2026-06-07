@@ -3,8 +3,8 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 const organizationName = "テスト法人";
-const branchClinicName = "テスト分院";
-const branchStaffName = "テスト分院スタッフ";
+const branchClinicName = "クリニック2";
+const branchStaffName = "クリニック2スタッフ";
 const branchStaffBarcode = "STAFF-0002";
 
 function branchQuantityFor(index: number, minStock: number) {
@@ -52,7 +52,7 @@ async function main() {
       data: {
         organizationId: organization.id,
         name: branchClinicName,
-        address: "開発用の架空住所 分院",
+        address: "開発用の架空住所 2",
         phone: "000-0000-0001",
       },
       select: {
@@ -178,7 +178,7 @@ async function main() {
         productId: product.id,
         quantity: branchQuantityFor(index, product.defaultMinStock),
         minStock: index % 5 === 0 ? product.defaultMinStock + 2 : null,
-        location: `分院棚-${(index % 6) + 1}`,
+        location: `クリニック2棚-${(index % 6) + 1}`,
         isUsed: true,
       },
     });

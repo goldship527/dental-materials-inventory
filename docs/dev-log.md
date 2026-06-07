@@ -6829,3 +6829,24 @@
 - `corepack pnpm typecheck` に成功した。
 - `corepack pnpm build` に成功した。
 - `corepack pnpm exec tsx tests/ui-smoke.test.ts` は、テストDBリセット時の `corepack pnpm prisma db push --skip-generate --force-reset` が `Schema engine error` で停止したため未完了。今回の表示変更とは別のDB準備段階で停止している。
+
+## 2026-06-07 ログインアカウント運用の整理
+
+### 作業内容
+- クリニック共通ログインを `STAFF`、本部・事務職員などの個人ログインを `ADMIN` として扱う方針に整理した。
+- 開発seedを、`クリニック1共通`、`クリニック2共通`、`管理者個人アカウント` の3ログイン構成に変更した。
+- クリニック名は `本院`、`分院` ではなく `クリニック1`、`クリニック2` を使うようにした。
+- 管理画面の文言を `ユーザー管理` から `ログインアカウント管理` に寄せ、クリニック共通アカウントには管理者権限を付けない説明を追加した。
+- 既存ローカルDBを初期化せずに、デモ用ログインとクリニック名を整える `db:upsert-demo-accounts` を追加した。
+- 発注・不足印刷仕様とスタッフマニュアルから、共通ログイン由来で誤解を招く `確認者` 欄の説明を削除した。
+
+### 判断
+- 実作業者はログインアカウントではなく `StaffOperator` で記録する既存方針を維持した。
+- 既存DBの古い `テストクリニック`、`テスト分院` は、非破壊スクリプトで `クリニック1`、`クリニック2` に寄せられるようにした。
+- パスワードは開発用の架空値だけを `.env.example` とドキュメントに載せ、実運用の秘密情報は追加していない。
+
+### 検証
+- `corepack pnpm typecheck` に成功した。
+- `corepack pnpm build` に成功した。
+- `corepack pnpm exec tsx tests/ui-smoke.test.ts` に成功した。
+- `corepack pnpm db:upsert-demo-accounts` に成功し、ローカルDBで `test@example.com` と `clinic2@example.com` が `STAFF`、`admin@example.com` が `ADMIN` であることを確認した。

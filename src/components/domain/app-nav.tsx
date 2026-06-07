@@ -101,7 +101,7 @@ const adminNavItems = [
   },
   {
     id: "admin",
-    label: "ユーザー管理",
+    label: "ログインアカウント",
     href: "/admin/users",
   },
   {

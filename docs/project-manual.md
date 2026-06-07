@@ -35,7 +35,7 @@
 
 ## 3. 現在の到達点
 
-2026-05-27時点で、商品マスタ新規作成、商品写真1枚登録、商品マスタ一括取り込み、発注先マスタ一括取り込み、発注先連絡先管理、管理者ユーザー管理、監査ログ、発注書下書き、発注記録、納品待ち・納品済み表示、簡易納品確認、スタッフ担当者バーコード、本部ダッシュボードまで実装済み。
+2026-05-27時点で、商品マスタ新規作成、商品写真1枚登録、商品マスタ一括取り込み、発注先マスタ一括取り込み、発注先連絡先管理、ログインアカウント管理、監査ログ、発注書下書き、発注記録、納品待ち・納品済み表示、簡易納品確認、スタッフ担当者バーコード、本部ダッシュボードまで実装済み。
 
 現時点の到達点:
 
@@ -100,7 +100,7 @@
 - 発注先マスタCSV/Excel貼り付け一括取り込み
 - 商品ごとの複数取扱発注先
 - 発注先マスタ新規作成、連絡先管理
-- 管理者ユーザー管理、監査ログ、ログイン試行制限
+- ログインアカウント管理、監査ログ、ログイン試行制限
 - 本部ダッシュボード `/admin/overview`
 
 ### フェーズ4: 在庫判断支援と通知
@@ -206,6 +206,12 @@ corepack pnpm db:push
 corepack pnpm db:seed
 ```
 
+既存の開発DBを初期化せず、クリニック共通アカウントと管理者個人アカウントだけを整える場合は次を実行する。
+
+```powershell
+corepack pnpm db:upsert-demo-accounts
+```
+
 開発サーバーを起動する。
 
 ```powershell
@@ -215,11 +221,20 @@ corepack pnpm dev
 ## 8. 開発確認用ログイン
 
 ```text
+クリニック1共通
 email: test@example.com
+password: password
+
+クリニック2共通
+email: clinic2@example.com
+password: password
+
+管理者個人
+email: admin@example.com
 password: password
 ```
 
-これは開発確認用のテストアカウントである。  
+これは開発確認用のテストアカウントである。クリニック共通アカウントは一般ユーザーとして日常業務を確認し、管理画面は管理者個人アカウントで確認する。
 スタッフ配布用マニュアルには、この情報を直接書かない。
 
 ## 9. 複数クリニック運用の基本方針
@@ -230,9 +245,9 @@ password: password
 https://example.vercel.app/login
 ```
 
-クリニックごとにログインアカウントとパスワードを分ける。通常スタッフは、自分のクリニック用アカウントでログインし、自院の在庫を扱う。
+クリニックごとにログインアカウントとパスワードを分ける。通常スタッフは、自分のクリニック用の共通アカウントでログインし、自院の在庫を扱う。クリニック共通アカウントにはADMIN権限を持たせない。
 
-本部担当者や管理者はADMINアカウントでログインし、`/admin/overview` の本部ダッシュボードで同一組織内のクリニック状況を横断確認する。
+本部担当者や管理者は、個人ごとのADMINアカウントでログインし、`/admin/overview` の本部ダッシュボードで同一組織内のクリニック状況を横断確認する。
 
 現時点の本部ダッシュボード:
 
@@ -316,6 +331,12 @@ AUTH_URL
 DEMO_LOGIN_EMAIL
 DEMO_LOGIN_PASSWORD
 DEMO_USER_NAME
+DEMO_CLINIC2_LOGIN_EMAIL
+DEMO_CLINIC2_LOGIN_PASSWORD
+DEMO_CLINIC2_USER_NAME
+DEMO_ADMIN_EMAIL
+DEMO_ADMIN_PASSWORD
+DEMO_ADMIN_USER_NAME
 SUPABASE_URL
 SUPABASE_SERVICE_ROLE_KEY
 SUPABASE_STORAGE_BUCKET

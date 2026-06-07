@@ -10,8 +10,8 @@ const adminPassword = "AdminSmoke123!";
 const staffEmail = "ui-smoke-staff@example.test";
 const staffPassword = "StaffSmoke123!";
 const authSecret = "ui-smoke-test-auth-secret-at-least-32-chars";
-const mainClinicName = "UIスモーク本院";
-const branchClinicName = "UIスモーク分院";
+const mainClinicName = "UIスモーククリニック1";
+const branchClinicName = "UIスモーククリニック2";
 
 type SeedResult = {
   mainClinicId: string;
@@ -234,14 +234,14 @@ async function seedUiSmokeDatabase(prisma: typeof import("../src/lib/db/prisma")
       data: {
         organizationId: organization.id,
         name: mainClinicName,
-        address: "開発用テスト住所 本院",
+        address: "開発用テスト住所 クリニック1",
       },
     }),
     prisma.clinic.create({
       data: {
         organizationId: organization.id,
         name: branchClinicName,
-        address: "開発用テスト住所 分院",
+        address: "開発用テスト住所 クリニック2",
       },
     }),
   ]);
@@ -352,7 +352,7 @@ async function seedUiSmokeDatabase(prisma: typeof import("../src/lib/db/prisma")
           productId: product.id,
           quantity: index === 9 ? 3 : index,
           minStock: 5,
-          location: `本院棚-${index}`,
+          location: `クリニック1棚-${index}`,
           isUsed: true,
         },
         {
@@ -360,7 +360,7 @@ async function seedUiSmokeDatabase(prisma: typeof import("../src/lib/db/prisma")
           productId: product.id,
           quantity: index === 9 ? 12 : index + 10,
           minStock: 5,
-          location: `分院棚-${index}`,
+          location: `クリニック2棚-${index}`,
           isUsed: true,
         },
       ],
@@ -495,18 +495,18 @@ async function main() {
 
     const adminInventoryHtml = await assertOkPage(baseUrl, adminJar, "/inventory");
     assertIncludes(adminInventoryHtml, mainClinicName);
-    assertIncludes(adminInventoryHtml, "本院棚-9");
+    assertIncludes(adminInventoryHtml, "クリニック1棚-9");
 
     adminJar.set(activeClinicCookieName, seed.branchClinicId);
     const branchHomeHtml = await assertOkPage(baseUrl, adminJar, "/home");
     const branchInventoryHtml = await assertOkPage(baseUrl, adminJar, "/inventory");
     assertIncludes(branchHomeHtml, branchClinicName);
     assertIncludes(branchInventoryHtml, branchClinicName);
-    assertIncludes(branchInventoryHtml, "分院棚-9");
+    assertIncludes(branchInventoryHtml, "クリニック2棚-9");
 
     const adminOverviewHtml = await assertOkPage(baseUrl, adminJar, "/admin/overview");
     assertIncludes(adminOverviewHtml, "本部ダッシュボード");
-    assertIncludes(adminOverviewHtml, "ユーザー管理");
+    assertIncludes(adminOverviewHtml, "ログインアカウント");
     assertIncludes(adminOverviewHtml, "担当者");
 
     adminJar.set(activeClinicCookieName, seed.mainClinicId);
@@ -525,7 +525,7 @@ async function main() {
     const staffInventoryHtml = await assertOkPage(baseUrl, staffJar, "/inventory");
     assertIncludes(staffHomeHtml, mainClinicName);
     assertIncludes(staffInventoryHtml, mainClinicName);
-    assertIncludes(staffInventoryHtml, "本院棚-9");
+    assertIncludes(staffInventoryHtml, "クリニック1棚-9");
     assertNotIncludes(staffHomeHtml, "id=\"active-clinic-id\"");
     assertNotIncludes(staffHomeHtml, branchClinicName);
     assertNotIncludes(staffInventoryHtml, branchClinicName);

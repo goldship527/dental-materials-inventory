@@ -36,7 +36,7 @@ export default async function AdminAuditLogsPage() {
           <p className="text-sm font-semibold text-accent">管理</p>
           <h1 className="text-2xl font-bold tracking-tight text-ink">監査ログ</h1>
           <p className="max-w-3xl text-sm leading-6 text-muted">
-            ユーザー管理、商品マスタ、発注先、棚卸確定、履歴取り消しなどの重要操作を直近100件まで表示します。
+            ログインアカウント管理、商品マスタ、発注先、棚卸確定、履歴取り消しなどの重要操作を直近100件まで表示します。
           </p>
         </header>
 

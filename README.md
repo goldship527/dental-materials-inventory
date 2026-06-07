@@ -14,7 +14,7 @@
 
 ## 現在の実装状況
 
-2026-05-27時点で、商品写真ストレージ、管理者ユーザー管理、スタッフ担当者バーコード管理・編集・印刷、商品マスタ一括取り込み、ディーラー購入履歴インポート、購入履歴登録商品の一括整備、発注先マスタ一括取り込み、発注先連絡先管理、発注書下書き、発注記録、送付方法・送付メモ・先方対応メモ、納品待ち・納品済み表示、簡易納品確認、バーコード入出庫、期限ロット一覧、入出庫履歴CSV出力、本部向けの読み取り専用ダッシュボード、使用個数CSV出力まで実装済みです。
+2026-05-27時点で、商品写真ストレージ、ログインアカウント管理、スタッフ担当者バーコード管理・編集・印刷、商品マスタ一括取り込み、ディーラー購入履歴インポート、購入履歴登録商品の一括整備、発注先マスタ一括取り込み、発注先連絡先管理、発注書下書き、発注記録、送付方法・送付メモ・先方対応メモ、納品待ち・納品済み表示、簡易納品確認、バーコード入出庫、期限ロット一覧、入出庫履歴CSV出力、本部向けの読み取り専用ダッシュボード、使用個数CSV出力まで実装済みです。
 
 フェーズ4として、不足在庫・商品一覧・商品詳細での納品待ち表示、長期在庫レポート、発注先ごとの平均納品日数表示、使用頻度ABC分析、推奨最低在庫の参考表示、異常出庫検知、朝のダイジェスト通知設定も実装済みです。
 
@@ -96,7 +96,7 @@
   - `/admin/overview/[clinicId]/orders`
   - `/admin/overview/[clinicId]/movements`
 - 管理者向け使用個数CSV出力 `/admin/overview/usage-export`
-- 管理者向けユーザー管理 `/admin/users`
+- 管理者向けログインアカウント管理 `/admin/users`
 - 管理者向けスタッフ担当者管理 `/admin/staff-operators`
 - スタッフ担当者の名前、バーコード、利用クリニック編集
 - 担当者バーコードのCode 128印刷 `/admin/staff-operators/labels`
@@ -202,6 +202,12 @@ corepack pnpm db:push
 corepack pnpm db:seed
 ```
 
+既存の開発DBを初期化せず、クリニック共通アカウントと管理者個人アカウントだけを整える場合は次を実行します。
+
+```powershell
+corepack pnpm db:upsert-demo-accounts
+```
+
 開発サーバーを起動します。
 
 ```powershell
@@ -210,14 +216,29 @@ corepack pnpm dev
 
 ## 開発用ログイン
 
+日常業務の確認では、クリニック共通アカウントを使います。クリニック共通アカウントは一般ユーザーで、ADMIN権限は持たせません。
+
 ```text
+クリニック1共通
 email: test@example.com
+password: password
+
+クリニック2共通
+email: clinic2@example.com
+password: password
+```
+
+管理画面や本部ダッシュボードの確認では、管理者個人アカウントを使います。
+
+```text
+管理者個人
+email: admin@example.com
 password: password
 ```
 
 これは開発用のテストアカウントです。実在の患者情報、実在クリニック名、実在会社名、秘密情報は入れないでください。
 
-公開デモ環境では、ログインメールとパスワードを環境変数 `DEMO_LOGIN_EMAIL`、`DEMO_LOGIN_PASSWORD` で設定します。公開デモ用のパスワードやDB接続文字列は、README、Git、チャットには書かないでください。
+公開デモ環境では、クリニック1共通ログインを `DEMO_LOGIN_EMAIL`、`DEMO_LOGIN_PASSWORD`、クリニック2共通ログインを `DEMO_CLINIC2_LOGIN_EMAIL`、`DEMO_CLINIC2_LOGIN_PASSWORD`、管理者個人ログインを `DEMO_ADMIN_EMAIL`、`DEMO_ADMIN_PASSWORD` で設定できます。公開デモ用のパスワードやDB接続文字列は、README、Git、チャットには書かないでください。
 
 ## 公開デモで必要なVercel環境変数
 
@@ -228,6 +249,12 @@ AUTH_URL
 DEMO_LOGIN_EMAIL
 DEMO_LOGIN_PASSWORD
 DEMO_USER_NAME
+DEMO_CLINIC2_LOGIN_EMAIL
+DEMO_CLINIC2_LOGIN_PASSWORD
+DEMO_CLINIC2_USER_NAME
+DEMO_ADMIN_EMAIL
+DEMO_ADMIN_PASSWORD
+DEMO_ADMIN_USER_NAME
 SUPABASE_URL
 SUPABASE_SERVICE_ROLE_KEY
 SUPABASE_STORAGE_BUCKET

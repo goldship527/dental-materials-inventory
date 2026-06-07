@@ -52,7 +52,7 @@ function toActionError(error: unknown): AdminUserActionState {
 
   return {
     status: "error",
-    message: "ユーザー管理の処理に失敗しました。",
+    message: "ログインアカウント管理の処理に失敗しました。",
   };
 }
 
