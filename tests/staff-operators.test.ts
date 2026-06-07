@@ -47,7 +47,7 @@ async function main() {
     deactivateStaffOperatorForContext,
     updateStaffOperatorForContext,
   } = await import("../src/lib/actions/staff-operators");
-  const { findActiveStaffOperatorForClinic } = await import("../src/lib/db/staff-operators");
+  const { findActiveStaffOperatorForClinic, getNextStaffOperatorBarcodeFromValues } = await import("../src/lib/db/staff-operators");
 
   try {
     const data = await seedTestData(prisma);
@@ -55,7 +55,6 @@ async function main() {
       adminUserId: data.admin.id,
       organizationId: data.organization.id,
       displayName: "Roaming Staff",
-      barcode: "staff-001",
       clinicIds: [data.clinic.id, data.otherClinic.id],
     });
 
@@ -68,7 +67,7 @@ async function main() {
       },
     });
 
-    assert.equal(created.barcode, "STAFF-001");
+    assert.equal(created.barcode, "STAFF-0001");
     assert.equal(created.operatorType, "REGULAR");
     assert.equal(created.clinicAssignments.length, 2);
     assert.deepEqual(
@@ -79,7 +78,7 @@ async function main() {
     const resolved = await findActiveStaffOperatorForClinic({
       organizationId: data.organization.id,
       clinicId: data.clinic.id,
-      barcode: "staff-001",
+      barcode: "staff-0001",
     });
 
     assert.equal(resolved?.id, staff.id);
@@ -87,7 +86,7 @@ async function main() {
     const otherClinicResolved = await findActiveStaffOperatorForClinic({
       organizationId: data.organization.id,
       clinicId: data.otherClinic.id,
-      barcode: "STAFF-001",
+      barcode: "STAFF-0001",
     });
 
     assert.equal(otherClinicResolved?.id, staff.id);
@@ -97,7 +96,6 @@ async function main() {
       organizationId: data.organization.id,
       staffOperatorId: staff.id,
       displayName: "Edited Staff",
-      barcode: "staff-002",
       clinicIds: [data.clinic.id],
     });
 
@@ -111,35 +109,32 @@ async function main() {
     });
 
     assert.equal(updated.displayName, "Edited Staff");
-    assert.equal(updated.barcode, "STAFF-002");
+    assert.equal(updated.barcode, "STAFF-0001");
     assert.equal(updated.clinicAssignments.length, 1);
     assert.equal(updated.clinicAssignments[0].clinicId, data.clinic.id);
-
-    const oldBarcodeResolved = await findActiveStaffOperatorForClinic({
-      organizationId: data.organization.id,
-      clinicId: data.clinic.id,
-      barcode: "STAFF-001",
-    });
-
-    assert.equal(oldBarcodeResolved, null);
 
     const removedClinicResolved = await findActiveStaffOperatorForClinic({
       organizationId: data.organization.id,
       clinicId: data.otherClinic.id,
-      barcode: "STAFF-002",
+      barcode: "STAFF-0001",
     });
 
     assert.equal(removedClinicResolved, null);
 
-    await assert.rejects(() =>
-      createStaffOperatorForContext({
-        adminUserId: data.admin.id,
-        organizationId: data.organization.id,
-        displayName: "Duplicate Staff",
-        barcode: "STAFF-002",
-        clinicIds: [data.clinic.id],
-      }),
-    );
+    const secondStaff = await createStaffOperatorForContext({
+      adminUserId: data.admin.id,
+      organizationId: data.organization.id,
+      displayName: "Second Staff",
+      clinicIds: [data.clinic.id],
+    });
+    const secondCreated = await prisma.staffOperator.findUniqueOrThrow({
+      where: {
+        id: secondStaff.id,
+      },
+    });
+
+    assert.equal(secondCreated.barcode, "STAFF-0002");
+    assert.equal(getNextStaffOperatorBarcodeFromValues(["STAFF-0001", "STAFF-0003"]), "STAFF-0002");
 
     await deactivateStaffOperatorForContext({
       adminUserId: data.admin.id,
@@ -150,10 +145,24 @@ async function main() {
     const inactiveResolved = await findActiveStaffOperatorForClinic({
       organizationId: data.organization.id,
       clinicId: data.clinic.id,
-      barcode: "STAFF-002",
+      barcode: "STAFF-0001",
     });
 
     assert.equal(inactiveResolved, null);
+
+    const thirdStaff = await createStaffOperatorForContext({
+      adminUserId: data.admin.id,
+      organizationId: data.organization.id,
+      displayName: "Third Staff",
+      clinicIds: [data.clinic.id],
+    });
+    const thirdCreated = await prisma.staffOperator.findUniqueOrThrow({
+      where: {
+        id: thirdStaff.id,
+      },
+    });
+
+    assert.equal(thirdCreated.barcode, "STAFF-0003");
   } finally {
     await prisma.$disconnect();
   }

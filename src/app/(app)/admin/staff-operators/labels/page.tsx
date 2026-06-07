@@ -1,13 +1,34 @@
 import { AppNav } from "@/components/domain/app-nav";
 import { Code128Barcode } from "@/components/domain/code128-barcode";
 import { requireAdminUser } from "@/lib/auth/admin";
-import { getStaffOperatorRows } from "@/lib/db/staff-operators";
+import { getStaffOperatorClinicOptions, getStaffOperatorRows } from "@/lib/db/staff-operators";
 import { BarcodePrintButton } from "../../../imports/medical-devices/barcode-print-button";
 
-export default async function StaffOperatorLabelsPage() {
+type PageProps = {
+  searchParams?: Promise<{
+    clinicId?: string;
+  }>;
+};
+
+function filterLinkClass(isSelected: boolean) {
+  return isSelected
+    ? "rounded border border-accent bg-accent px-3 py-2 text-sm font-semibold text-white"
+    : "rounded border border-line bg-white px-3 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent";
+}
+
+export default async function StaffOperatorLabelsPage({ searchParams }: PageProps) {
   const context = await requireAdminUser();
-  const operators = await getStaffOperatorRows(context.organizationId);
-  const activeOperators = operators.filter((operator) => operator.isActive);
+  const params = (await searchParams) ?? {};
+  const [operators, clinics] = await Promise.all([
+    getStaffOperatorRows(context.organizationId),
+    getStaffOperatorClinicOptions(context.organizationId),
+  ]);
+  const selectedClinic = clinics.find((clinic) => clinic.id === params.clinicId) ?? null;
+  const activeOperators = operators.filter(
+    (operator) =>
+      operator.isActive &&
+      (!selectedClinic || operator.assignedClinics.some((clinic) => clinic.id === selectedClinic.id)),
+  );
 
   return (
     <main className="min-h-screen bg-surface px-6 py-8 text-ink print:bg-white print:px-0 print:py-0">
@@ -38,7 +59,7 @@ export default async function StaffOperatorLabelsPage() {
             <p className="text-sm font-semibold text-accent">管理</p>
             <h1 className="mt-2 text-3xl font-semibold">担当者バーコード印刷</h1>
             <p className="mt-2 text-sm text-muted">
-              登録済みの担当者バーコードをCode 128形式で印刷します。印刷したカードをスキャンすると、担当者バーコード欄に同じ文字列が入力されます。
+              必要な場合だけ、担当者の内部バーコードをCode 128形式で印刷します。クリニックごとに絞り込んで印刷できます。
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -53,10 +74,26 @@ export default async function StaffOperatorLabelsPage() {
         </header>
 
         <section className="rounded border border-line bg-white p-4 text-sm text-muted shadow-panel print:hidden">
-          <p>
-            有効な担当者 {activeOperators.length.toLocaleString()} 件を表示しています。担当者バーコードには氏名や個人情報を直接入れず、
-            `STAFF-0001` のような内部コードを使います。
-          </p>
+          <div className="grid gap-3">
+            <p>
+              {selectedClinic ? `${selectedClinic.name} の` : "全クリニックの"}有効な担当者 {activeOperators.length.toLocaleString()} 件を表示しています。
+              担当者バーコードには氏名や個人情報を直接入れず、`STAFF-0001` のような内部コードを使います。
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <a className={filterLinkClass(!selectedClinic)} href="/admin/staff-operators/labels">
+                すべて
+              </a>
+              {clinics.map((clinic) => (
+                <a
+                  className={filterLinkClass(selectedClinic?.id === clinic.id)}
+                  href={`/admin/staff-operators/labels?clinicId=${encodeURIComponent(clinic.id)}`}
+                  key={clinic.id}
+                >
+                  {clinic.name}
+                </a>
+              ))}
+            </div>
+          </div>
         </section>
 
         <section className="label-grid grid gap-4 md:grid-cols-2">

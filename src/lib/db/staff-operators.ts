@@ -1,3 +1,4 @@
+import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
 import { normalizeBarcodeText } from "@/lib/barcode/normalize";
 
@@ -30,6 +31,48 @@ export type StaffOperatorOption = {
 
 export function normalizeStaffOperatorBarcode(value: string) {
   return normalizeBarcodeText(value).toUpperCase();
+}
+
+export function getNextStaffOperatorBarcodeFromValues(barcodes: string[]) {
+  const usedNumbers = new Set<number>();
+
+  for (const barcode of barcodes) {
+    const match = /^STAFF-(\d+)$/.exec(normalizeStaffOperatorBarcode(barcode));
+
+    if (!match) {
+      continue;
+    }
+
+    const parsed = Number.parseInt(match[1]!, 10);
+
+    if (Number.isSafeInteger(parsed) && parsed > 0) {
+      usedNumbers.add(parsed);
+    }
+  }
+
+  let candidate = 1;
+
+  while (usedNumbers.has(candidate)) {
+    candidate += 1;
+  }
+
+  return `STAFF-${String(candidate).padStart(4, "0")}`;
+}
+
+export async function getNextStaffOperatorBarcode(
+  organizationId: string,
+  db: Prisma.TransactionClient | typeof prisma = prisma,
+) {
+  const rows = await db.staffOperator.findMany({
+    where: {
+      organizationId,
+    },
+    select: {
+      barcode: true,
+    },
+  });
+
+  return getNextStaffOperatorBarcodeFromValues(rows.map((row) => row.barcode));
 }
 
 export async function getStaffOperatorRows(organizationId: string): Promise<StaffOperatorRow[]> {

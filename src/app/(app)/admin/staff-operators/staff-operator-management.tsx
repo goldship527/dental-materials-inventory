@@ -62,17 +62,7 @@ export function StaffOperatorManagement({ operators, clinics }: StaffOperatorMan
               required
             />
           </label>
-          <label className="grid gap-1 text-sm font-semibold text-muted">
-            担当者バーコード
-            <input
-              className="h-11 rounded border border-line px-3 font-mono text-base text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
-              maxLength={64}
-              name="barcode"
-              placeholder="例: STAFF-0001"
-              required
-            />
-          </label>
-          <fieldset className="grid gap-2 rounded border border-line p-3 md:row-span-2">
+          <fieldset className="grid gap-2 rounded border border-line p-3">
             <legend className="px-1 text-sm font-semibold text-muted">利用できるクリニック</legend>
             <div className="grid gap-2">
               {clinics.map((clinic, index) => (
@@ -122,11 +112,10 @@ export function StaffOperatorManagement({ operators, clinics }: StaffOperatorMan
         </div>
 
         <div className="mt-4 max-w-full overflow-x-auto">
-          <table className="min-w-[1100px] border-separate border-spacing-0 text-left text-sm">
+          <table className="min-w-[900px] border-separate border-spacing-0 text-left text-sm">
             <thead>
               <tr className="text-muted">
                 <th className="border-b border-line px-3 py-2 font-semibold">担当者</th>
-                <th className="border-b border-line px-3 py-2 font-semibold">バーコード</th>
                 <th className="border-b border-line px-3 py-2 font-semibold">クリニック</th>
                 <th className="border-b border-line px-3 py-2 font-semibold">状態</th>
                 <th className="border-b border-line px-3 py-2 font-semibold">更新日</th>
@@ -153,82 +142,71 @@ export function StaffOperatorManagement({ operators, clinics }: StaffOperatorMan
                         defaultValue={operator.displayName}
                       />
                     </td>
-                    <td className="border-b border-line px-3 py-3 align-top">
-                      <input
-                        className="h-10 w-full min-w-36 rounded border border-line px-3 font-mono text-sm text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
-                        form={updateFormId}
-                        maxLength={64}
-                        name="barcode"
-                        required
-                        type="text"
-                        defaultValue={operator.barcode}
-                      />
+                    <td className="border-b border-line px-3 py-3 align-top text-muted">
+                      <div className="grid min-w-48 gap-2">
+                        {clinics.map((clinic) => (
+                          <label key={clinic.id} className="flex items-center gap-2 text-sm font-semibold text-ink">
+                            <input
+                              className="h-4 w-4 rounded border-line text-accent focus:ring-accent/20"
+                              defaultChecked={assignedClinicIds.has(clinic.id)}
+                              form={updateFormId}
+                              name="clinicIds"
+                              type="checkbox"
+                              value={clinic.id}
+                            />
+                            {clinic.name}
+                          </label>
+                        ))}
+                      </div>
                     </td>
-                  <td className="border-b border-line px-3 py-3 align-top text-muted">
-                    <div className="grid min-w-48 gap-2">
-                      {clinics.map((clinic) => (
-                        <label key={clinic.id} className="flex items-center gap-2 text-sm font-semibold text-ink">
-                          <input
-                            className="h-4 w-4 rounded border-line text-accent focus:ring-accent/20"
-                            defaultChecked={assignedClinicIds.has(clinic.id)}
-                            form={updateFormId}
-                            name="clinicIds"
-                            type="checkbox"
-                            value={clinic.id}
-                          />
-                          {clinic.name}
-                        </label>
-                      ))}
-                    </div>
-                  </td>
-                  <td className="border-b border-line px-3 py-3 align-top">
-                    <span
-                      className={
-                        operator.isActive
-                          ? "rounded bg-emerald-50 px-2 py-1 text-xs font-semibold text-accent"
-                          : "rounded bg-gray-100 px-2 py-1 text-xs font-semibold text-muted"
-                      }
-                    >
-                      {operator.isActive ? "有効" : "無効"}
-                    </span>
-                  </td>
-                  <td className="border-b border-line px-3 py-3 align-top text-muted">
-                    {dateTimeFormatter.format(operator.updatedAt)}
-                  </td>
-                  <td className="border-b border-line px-3 py-3 align-top">
-                    <div className="flex flex-wrap gap-2">
-                      <button
-                        className="h-11 rounded bg-accent px-3 text-sm font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-50"
-                        disabled={isUpdating}
-                        form={updateFormId}
-                        type="submit"
+                    <td className="border-b border-line px-3 py-3 align-top">
+                      <span
+                        className={
+                          operator.isActive
+                            ? "rounded bg-emerald-50 px-2 py-1 text-xs font-semibold text-accent"
+                            : "rounded bg-gray-100 px-2 py-1 text-xs font-semibold text-muted"
+                        }
                       >
-                        {isUpdating ? "保存中" : "保存"}
-                      </button>
-                    {operator.isActive ? (
-                      <form
-                        action={deactivateAction}
-                        onSubmit={(event) => {
-                          if (!window.confirm(`${operator.displayName} を無効化しますか？`)) {
-                            event.preventDefault();
-                          }
-                        }}
-                      >
-                        <input name="staffOperatorId" type="hidden" value={operator.id} />
+                        {operator.isActive ? "有効" : "無効"}
+                      </span>
+                    </td>
+                    <td className="border-b border-line px-3 py-3 align-top text-muted">
+                      {dateTimeFormatter.format(operator.updatedAt)}
+                    </td>
+                    <td className="border-b border-line px-3 py-3 align-top">
+                      <div className="flex flex-wrap gap-2">
                         <button
-                          className="h-11 rounded border border-line bg-white px-3 text-sm font-semibold text-muted transition hover:border-danger hover:text-danger disabled:cursor-not-allowed disabled:opacity-50"
-                          disabled={isDeactivating}
+                          className="h-11 rounded bg-accent px-3 text-sm font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-50"
+                          disabled={isUpdating}
+                          form={updateFormId}
                           type="submit"
                         >
-                          {isDeactivating ? "無効化中" : "無効化"}
+                          {isUpdating ? "保存中" : "保存"}
                         </button>
-                      </form>
-                    ) : (
-                      <span className="text-xs text-muted">-</span>
-                    )}
-                    </div>
-                  </td>
-                </tr>
+                        {operator.isActive ? (
+                          <form
+                            action={deactivateAction}
+                            onSubmit={(event) => {
+                              if (!window.confirm(`${operator.displayName} を無効化しますか？`)) {
+                                event.preventDefault();
+                              }
+                            }}
+                          >
+                            <input name="staffOperatorId" type="hidden" value={operator.id} />
+                            <button
+                              className="h-11 rounded border border-line bg-white px-3 text-sm font-semibold text-muted transition hover:border-danger hover:text-danger disabled:cursor-not-allowed disabled:opacity-50"
+                              disabled={isDeactivating}
+                              type="submit"
+                            >
+                              {isDeactivating ? "無効化中" : "無効化"}
+                            </button>
+                          </form>
+                        ) : (
+                          <span className="text-xs text-muted">-</span>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
                 );
               })}
             </tbody>
