@@ -189,7 +189,7 @@ export function UserManagement({ users, currentUserId }: UserManagementProps) {
                             disabled={!user.isActive || isResetting}
                             type="submit"
                           >
-                            リセット
+                            {isResetting ? "リセット中" : "リセット"}
                           </button>
                         </form>
                         {user.isActive ? (
@@ -207,7 +207,7 @@ export function UserManagement({ users, currentUserId }: UserManagementProps) {
                               disabled={isSelf || isDeactivating}
                               type="submit"
                             >
-                              {isSelf ? "自分は無効化不可" : "無効化"}
+                              {isSelf ? "自分は無効化不可" : isDeactivating ? "無効化中" : "無効化"}
                             </button>
                           </form>
                         ) : null}

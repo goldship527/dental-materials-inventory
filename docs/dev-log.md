@@ -6795,3 +6795,37 @@
 - `corepack pnpm typecheck` に成功した。
 - `corepack pnpm exec tsx tests/ui-smoke.test.ts` に成功した。
 - `corepack pnpm build` に成功した。
+
+## 2026-06-07 発注・納品まわりの確認者表示を非表示化
+
+### 作業内容
+- `/orders` の納品済みカードから、共通ログインアカウント由来の `確認者` 表示を削除した。
+- `/orders`、`/orders/print`、`/shortage` の印刷用確認欄から `確認者` 枠を削除した。
+- 実作業者として使う `確認スタッフ`、`発注スタッフ` 表示と、DB上の `receivedByUserId` 保存処理は変更していない。
+
+### 判断
+- テストクリニックでは共通アカウントでログインするため、画面上の `確認者` は実務上の個人確認にならず、誤解を避けるため表示しないことにした。
+- 履歴データと保存処理は残し、将来個人アカウント運用へ変える余地は維持した。
+
+### 検証
+- `corepack pnpm typecheck` に成功した。
+- `corepack pnpm build` に成功した。
+- `corepack pnpm exec tsx tests/ui-smoke.test.ts` は、テストDBリセット時の `corepack pnpm prisma db push --skip-generate --force-reset` が `Schema engine error` で停止したため未完了。今回の表示変更とは別のDB準備段階で停止している。
+
+## 2026-06-07 実行系ボタンの待機表示強化
+
+### 作業内容
+- Server Actionフォーム用の共通 `SubmitButton` を追加し、送信中はスピナー、待機文言、`disabled` をまとめて出せるようにした。
+- バーコード履歴保存、テスト商品追加、未対応バーコード整理、発注を納品待ちへ移す、棚卸セッション開始、棚卸セッション破棄、ログアウトに待機表示を追加した。
+- クイック出庫カードの `...` 表示を、押した操作に合わせて `出庫中` / `入庫中` に変更した。
+- 管理者ユーザーとスタッフ担当者のリセット、保存、無効化ボタンも、処理中の文言へ切り替わるようにした。
+
+### 判断
+- ナビ、検索、フィルタ、印刷などの単なる画面移動・表示切替ボタンは対象外にした。
+- 保存、更新、確定、取り消し、作成、無効化など、二重押しで重複処理やエラーになりやすい実行系ボタンを優先した。
+- DB処理、権限、保存内容は変更していない。
+
+### 検証
+- `corepack pnpm typecheck` に成功した。
+- `corepack pnpm build` に成功した。
+- `corepack pnpm exec tsx tests/ui-smoke.test.ts` は、テストDBリセット時の `corepack pnpm prisma db push --skip-generate --force-reset` が `Schema engine error` で停止したため未完了。今回の表示変更とは別のDB準備段階で停止している。

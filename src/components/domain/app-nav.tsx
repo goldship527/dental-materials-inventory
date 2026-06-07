@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import { ClinicSwitcher } from "@/components/domain/clinic-switcher";
 import { WorkStaffSelector } from "@/components/domain/work-staff-selector";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { isAdminRole } from "@/lib/auth/roles";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { getActiveStaffOperatorOptionsForClinic } from "@/lib/db/staff-operators";
@@ -229,8 +230,8 @@ export async function AppNav({ current }: AppNavProps) {
     ? "inline-flex h-9 shrink-0 items-center whitespace-nowrap rounded border border-line bg-white/80 px-2 text-xs font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent"
     : "inline-flex h-11 shrink-0 items-center whitespace-nowrap rounded border border-line bg-white/80 px-3 text-sm font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent sm:h-9";
   const logoutButtonClassName = isAdminMode
-    ? "inline-flex h-9 shrink-0 items-center justify-center whitespace-nowrap rounded border border-line bg-white/80 px-2 text-xs font-semibold text-muted transition hover:border-danger hover:bg-white hover:text-danger"
-    : "inline-flex h-11 shrink-0 items-center justify-center whitespace-nowrap rounded border border-line bg-white/80 px-3 text-sm font-semibold text-muted transition hover:border-danger hover:bg-white hover:text-danger sm:h-9";
+    ? "inline-flex h-9 shrink-0 items-center justify-center whitespace-nowrap rounded border border-line bg-white/80 px-2 text-xs font-semibold text-muted transition hover:border-danger hover:bg-white hover:text-danger disabled:cursor-not-allowed disabled:opacity-50"
+    : "inline-flex h-11 shrink-0 items-center justify-center whitespace-nowrap rounded border border-line bg-white/80 px-3 text-sm font-semibold text-muted transition hover:border-danger hover:bg-white hover:text-danger disabled:cursor-not-allowed disabled:opacity-50 sm:h-9";
 
   return (
     <nav
@@ -268,12 +269,12 @@ export async function AppNav({ current }: AppNavProps) {
             ))}
 
             <form action="/logout" method="post" className="shrink-0">
-              <button
-                type="submit"
+              <SubmitButton
+                pendingLabel="ログアウト中"
                 className={logoutButtonClassName}
               >
                 ログアウト
-              </button>
+              </SubmitButton>
             </form>
           </div>
         </div>

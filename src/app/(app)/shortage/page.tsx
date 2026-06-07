@@ -223,8 +223,7 @@ export default async function ShortagePage({ searchParams }: PageProps) {
           </a>
         </form>
 
-        <section className="hidden grid-cols-3 gap-3 text-xs print:grid">
-          <div className="border border-black px-3 py-2">確認者</div>
+        <section className="hidden grid-cols-2 gap-3 text-xs print:grid">
           <div className="border border-black px-3 py-2">発注確認</div>
           <div className="border border-black px-3 py-2">備考</div>
         </section>

@@ -355,9 +355,6 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
               {row.receivedByStaffName ? (
                 <span className="font-normal text-muted">確認スタッフ: {row.receivedByStaffName}</span>
               ) : null}
-              {row.receivedByUserName ? (
-                <span className="font-normal text-muted">確認者: {row.receivedByUserName}</span>
-              ) : null}
               {row.receivedMemo ? <span className="font-normal text-muted">{row.receivedMemo}</span> : null}
               <form action={receiptRevertAction}>
                 <input type="hidden" name="orderRequestId" value={row.id} />

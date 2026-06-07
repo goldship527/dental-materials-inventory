@@ -425,8 +425,7 @@ export default async function OrdersPage({ searchParams }: PageProps) {
           })}
         </section>
 
-        <section className="hidden grid-cols-3 gap-3 text-xs print:grid">
-          <div className="min-h-12 border border-black px-3 py-2">確認者</div>
+        <section className="hidden grid-cols-2 gap-3 text-xs print:grid">
           <div className="min-h-12 border border-black px-3 py-2">発注前確認</div>
           <div className="min-h-12 border border-black px-3 py-2">印刷備考</div>
         </section>

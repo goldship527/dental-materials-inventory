@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { AppNav } from "@/components/domain/app-nav";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { createBarcodeScanLogAction } from "@/lib/actions/barcode-scan-logs";
 import { createTestProductFromSampleAction } from "@/lib/actions/imports";
 import { isAdminRole } from "@/lib/auth/roles";
@@ -109,12 +110,12 @@ export default async function BarcodePage({ searchParams }: PageProps) {
                 </div>
                 <form action={createBarcodeScanLogAction}>
                   <input type="hidden" name="rawInput" value={barcode} />
-                  <button
-                    type="submit"
-                    className="rounded border border-accent bg-white px-4 py-2 text-sm font-semibold text-accent transition hover:bg-teal-50"
+                  <SubmitButton
+                    pendingLabel="保存中"
+                    className="rounded border border-accent bg-white px-4 py-2 text-sm font-semibold text-accent transition hover:bg-teal-50 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     履歴に保存
-                  </button>
+                  </SubmitButton>
                 </form>
               </div>
               {hasAnalysisBadges ? (
@@ -276,12 +277,12 @@ export default async function BarcodePage({ searchParams }: PageProps) {
                               <input type="hidden" name="janCode" value={sample.janCode} />
                               <input type="hidden" name="sourceFile" value={sample.sourceFile} />
                               <input type="hidden" name="sourceRow" value={sample.sourceRow} />
-                              <button
-                                type="submit"
-                                className="rounded bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-800"
+                              <SubmitButton
+                                pendingLabel="追加中"
+                                className="rounded bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-50"
                               >
                                 テスト商品として在庫に追加
-                              </button>
+                              </SubmitButton>
                             </form>
                             <a
                               className="rounded border border-line bg-white px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"

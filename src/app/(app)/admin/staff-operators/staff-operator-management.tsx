@@ -203,7 +203,7 @@ export function StaffOperatorManagement({ operators, clinics }: StaffOperatorMan
                         form={updateFormId}
                         type="submit"
                       >
-                        保存
+                        {isUpdating ? "保存中" : "保存"}
                       </button>
                     {operator.isActive ? (
                       <form
@@ -220,7 +220,7 @@ export function StaffOperatorManagement({ operators, clinics }: StaffOperatorMan
                           disabled={isDeactivating}
                           type="submit"
                         >
-                          無効化
+                          {isDeactivating ? "無効化中" : "無効化"}
                         </button>
                       </form>
                     ) : (

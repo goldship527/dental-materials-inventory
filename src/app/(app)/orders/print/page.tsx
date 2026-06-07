@@ -318,8 +318,7 @@ export default async function OrdersPrintPage({ searchParams }: PageProps) {
                   </table>
                 </div>
 
-                <div className="grid gap-3 border-t border-line p-4 text-sm md:grid-cols-3 print:border-black print:p-3 print:text-xs">
-                  <div className="min-h-14 border border-line px-3 py-2 print:border-black">確認者</div>
+                <div className="grid gap-3 border-t border-line p-4 text-sm md:grid-cols-2 print:border-black print:p-3 print:text-xs">
                   <div className="min-h-14 border border-line px-3 py-2 print:border-black">発注日</div>
                   <div className="min-h-14 border border-line px-3 py-2 print:border-black">送信・連絡方法</div>
                 </div>

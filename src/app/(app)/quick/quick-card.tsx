@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { quickMoveWithStateAction, type StockActionState } from "@/lib/actions/stock";
 import type { StockRow } from "@/lib/db/stock";
 import { buildProductPhotoUrl } from "@/lib/product-photos/url";
@@ -15,6 +15,7 @@ type QuickCardProps = {
 
 export function QuickCard({ categoryLabel, row, selectedStaffOperatorId }: QuickCardProps) {
   const [state, formAction, isPending] = useActionState(quickMoveWithStateAction, initialState);
+  const [pendingDelta, setPendingDelta] = useState<"-1" | "+1" | null>(null);
   const isStaffSelected = selectedStaffOperatorId.length > 0;
   const photoUrl = buildProductPhotoUrl({
     id: row.productId,
@@ -62,7 +63,7 @@ export function QuickCard({ categoryLabel, row, selectedStaffOperatorId }: Quick
         </span>
       ) : null}
       <div className="grid grid-cols-[1.25fr_1fr] gap-2">
-        <form action={formAction}>
+        <form action={formAction} onSubmit={() => setPendingDelta("-1")}>
           <input type="hidden" name="stockItemId" value={row.stockItemId} />
           <input type="hidden" name="delta" value="-1" />
           <input type="hidden" name="staffOperatorId" value={selectedStaffOperatorId} />
@@ -71,10 +72,10 @@ export function QuickCard({ categoryLabel, row, selectedStaffOperatorId }: Quick
             disabled={row.quantity <= 0 || !isStaffSelected || isPending}
             className="h-11 w-full rounded border border-red-200 bg-red-50 text-2xl font-semibold text-danger transition hover:border-red-300 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-40"
           >
-            {isPending ? "..." : "-1"}
+            {isPending && pendingDelta === "-1" ? "出庫中" : "-1"}
           </button>
         </form>
-        <form action={formAction}>
+        <form action={formAction} onSubmit={() => setPendingDelta("+1")}>
           <input type="hidden" name="stockItemId" value={row.stockItemId} />
           <input type="hidden" name="delta" value="1" />
           <input type="hidden" name="staffOperatorId" value={selectedStaffOperatorId} />
@@ -83,7 +84,7 @@ export function QuickCard({ categoryLabel, row, selectedStaffOperatorId }: Quick
             disabled={!isStaffSelected || isPending}
             className="h-11 w-full rounded border border-line bg-white text-xl font-semibold text-accent transition hover:border-accent hover:bg-teal-50 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {isPending ? "..." : "+1"}
+            {isPending && pendingDelta === "+1" ? "入庫中" : "+1"}
           </button>
         </form>
       </div>

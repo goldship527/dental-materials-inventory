@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useWorkStaffSelection } from "@/components/domain/work-staff-selection";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { markOrderRequestsOrderedAction } from "@/lib/actions/orders";
 import type { StaffOperatorOption } from "@/lib/db/staff-operators";
 import { orderSendMethodLabels, orderSendMethodValues } from "@/lib/orders/send-method";
@@ -95,13 +96,13 @@ export function SupplierOrderRecordPanel({
               maxLength={300}
               className="h-9 min-h-9 rounded border border-line bg-white px-2 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
             />
-            <button
-              type="submit"
+            <SubmitButton
+              pendingLabel="移動中"
               disabled={!canSubmit}
               className="h-9 rounded bg-ink px-3 text-xs font-semibold text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
               納品待ちへ移す
-            </button>
+            </SubmitButton>
           </div>
           {!hasStaffOperators ? (
             <p className="text-xs font-semibold text-danger">有効な作業スタッフがありません。</p>

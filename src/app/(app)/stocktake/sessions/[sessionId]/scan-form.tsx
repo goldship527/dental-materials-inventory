@@ -2,6 +2,7 @@
 
 import { useMemo, useRef, useState, useTransition, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { SubmitButton } from "@/components/ui/submit-button";
 import {
   commitStocktakeSessionFromClient,
   discardStocktakeSessionAction,
@@ -546,12 +547,12 @@ export function StocktakeSessionScanForm({ session }: StocktakeSessionScanFormPr
                 }}
               >
                 <input type="hidden" name="sessionId" value={session.id} />
-                <button
-                  type="submit"
-                  className="h-10 rounded border border-danger px-4 text-xs font-semibold text-danger transition hover:bg-red-50"
+                <SubmitButton
+                  pendingLabel="破棄中"
+                  className="h-10 rounded border border-danger px-4 text-xs font-semibold text-danger transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   破棄する
-                </button>
+                </SubmitButton>
               </form>
             ) : null}
           </div>

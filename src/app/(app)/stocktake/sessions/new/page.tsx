@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { AppNav } from "@/components/domain/app-nav";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { startStocktakeSessionAction } from "@/lib/actions/stocktake-sessions";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { getStocktakeStartSummary } from "@/lib/db/stocktake-sessions";
@@ -78,13 +79,13 @@ export default async function NewStocktakeSessionPage() {
               />
             </label>
             <div className="mt-5 flex flex-wrap gap-3">
-              <button
-                type="submit"
+              <SubmitButton
+                pendingLabel="開始中"
                 disabled={summary.itemCount === 0}
                 className="h-11 rounded bg-accent px-5 text-sm font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 セッションを開始
-              </button>
+              </SubmitButton>
               <a
                 className="inline-flex h-11 items-center rounded border border-line px-5 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
                 href="/stocktake/sessions"
