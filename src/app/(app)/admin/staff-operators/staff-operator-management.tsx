@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
 import {
   createStaffOperatorAction,
   deactivateStaffOperatorAction,
@@ -42,10 +43,28 @@ function StatusMessage({ state }: { state: StaffOperatorActionState }) {
   );
 }
 
+function RowSubmitButton({
+  children,
+  pendingLabel,
+  className,
+}: {
+  children: string;
+  pendingLabel: string;
+  className: string;
+}) {
+  const { pending } = useFormStatus();
+
+  return (
+    <button className={className} disabled={pending} type="submit" aria-busy={pending}>
+      {pending ? pendingLabel : children}
+    </button>
+  );
+}
+
 export function StaffOperatorManagement({ operators, clinics }: StaffOperatorManagementProps) {
   const [createState, createAction, isCreating] = useActionState(createStaffOperatorAction, initialState);
-  const [updateState, updateAction, isUpdating] = useActionState(updateStaffOperatorAction, initialState);
-  const [deactivateState, deactivateAction, isDeactivating] = useActionState(deactivateStaffOperatorAction, initialState);
+  const [updateState, updateAction] = useActionState(updateStaffOperatorAction, initialState);
+  const [deactivateState, deactivateAction] = useActionState(deactivateStaffOperatorAction, initialState);
 
   return (
     <div className="grid min-w-0 gap-6">
@@ -130,8 +149,6 @@ export function StaffOperatorManagement({ operators, clinics }: StaffOperatorMan
                 return (
                   <tr key={operator.id}>
                     <td className="border-b border-line px-3 py-3 align-top">
-                      <form action={updateAction} id={updateFormId} />
-                      <input form={updateFormId} name="staffOperatorId" type="hidden" value={operator.id} />
                       <input
                         className="h-10 w-full min-w-36 rounded border border-line px-3 text-sm font-semibold text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
                         form={updateFormId}
@@ -175,14 +192,15 @@ export function StaffOperatorManagement({ operators, clinics }: StaffOperatorMan
                     </td>
                     <td className="border-b border-line px-3 py-3 align-top">
                       <div className="flex flex-wrap gap-2">
-                        <button
-                          className="h-11 rounded bg-accent px-3 text-sm font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-50"
-                          disabled={isUpdating}
-                          form={updateFormId}
-                          type="submit"
-                        >
-                          {isUpdating ? "保存中" : "保存"}
-                        </button>
+                        <form action={updateAction} id={updateFormId}>
+                          <input name="staffOperatorId" type="hidden" value={operator.id} />
+                          <RowSubmitButton
+                            className="h-11 rounded bg-accent px-3 text-sm font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-50"
+                            pendingLabel="保存中"
+                          >
+                            保存
+                          </RowSubmitButton>
+                        </form>
                         {operator.isActive ? (
                           <form
                             action={deactivateAction}
@@ -193,13 +211,12 @@ export function StaffOperatorManagement({ operators, clinics }: StaffOperatorMan
                             }}
                           >
                             <input name="staffOperatorId" type="hidden" value={operator.id} />
-                            <button
+                            <RowSubmitButton
                               className="h-11 rounded border border-line bg-white px-3 text-sm font-semibold text-muted transition hover:border-danger hover:text-danger disabled:cursor-not-allowed disabled:opacity-50"
-                              disabled={isDeactivating}
-                              type="submit"
+                              pendingLabel="無効化中"
                             >
-                              {isDeactivating ? "無効化中" : "無効化"}
-                            </button>
+                              無効化
+                            </RowSubmitButton>
                           </form>
                         ) : (
                           <span className="text-xs text-muted">-</span>
