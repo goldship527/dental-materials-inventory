@@ -93,12 +93,38 @@ async function resolveActiveStaffOperatorForContext(
   return staffOperator;
 }
 
-function parseReceivedExpiryDate(value: string) {
-  if (!value) {
+function parseReceivedExpiryDateText(value: string | null | undefined) {
+  const text = value?.trim() ?? "";
+
+  if (/^\d{6}$/.test(text)) {
+    const year = 2000 + Number(text.slice(0, 2));
+    const month = Number(text.slice(2, 4));
+    const dayText = text.slice(4, 6);
+    const day = Number(dayText);
+
+    if (month < 1 || month > 12) {
+      throw new Error("有効期限の日付を確認してください。");
+    }
+
+    const resolvedDay = day === 0 ? new Date(Date.UTC(year, month, 0)).getUTCDate() : day;
+    const parsedDate = new Date(Date.UTC(year, month - 1, resolvedDay));
+
+    if (
+      parsedDate.getUTCFullYear() !== year ||
+      parsedDate.getUTCMonth() !== month - 1 ||
+      parsedDate.getUTCDate() !== resolvedDay
+    ) {
+      throw new Error("有効期限の日付を確認してください。");
+    }
+
+    return parsedDate;
+  }
+
+  if (!text) {
     return null;
   }
 
-  const [yearText, monthText, dayText] = value.split("-");
+  const [yearText, monthText, dayText] = text.split("-");
   const year = Number(yearText);
   const month = Number(monthText);
   const day = Number(dayText);
@@ -113,6 +139,14 @@ function parseReceivedExpiryDate(value: string) {
   }
 
   return parsedDate;
+}
+
+function parseReceivedExpiryDate(value: string) {
+  if (!value) {
+    return null;
+  }
+
+  return parseReceivedExpiryDateText(value);
 }
 
 function buildReceiptLotData(input: {
@@ -735,6 +769,151 @@ export async function receiveOrderRequestWithStateAction(
   }
 }
 
+export async function applyOrderReceiptLine(
+  tx: Prisma.TransactionClient,
+  input: {
+    context: ActiveClinicContext;
+    orderRequestId: string;
+    receivedQuantity: number;
+    receivedByStaffId: string;
+    receivedMemo: string | null;
+    receivedLotNumber?: string | null;
+    receivedExpiryDateText?: string | null;
+    receivedExpiryDate?: Date | null;
+    applyToStock: boolean;
+  },
+) {
+  const receivedByStaff = await resolveActiveStaffOperatorForContext(input.context, input.receivedByStaffId);
+  const lotData = buildReceiptLotData({
+    receivedLotNumber: input.receivedLotNumber ?? null,
+    receivedExpiryDateText: input.receivedExpiryDateText ?? null,
+    receivedExpiryDate: input.receivedExpiryDate ?? null,
+  });
+
+  await lockTransactionKey(tx, `order-receipt:${input.orderRequestId}`);
+
+  const target = await tx.orderRequest.findFirst({
+    where: {
+      id: input.orderRequestId,
+      clinicId: input.context.clinicId,
+    },
+    select: {
+      id: true,
+      productId: true,
+      requestedQuantity: true,
+      status: true,
+      receivedAt: true,
+      product: {
+        select: {
+          name: true,
+        },
+      },
+    },
+  });
+
+  if (!target) {
+    throw new Error("対象の発注候補が見つかりません。");
+  }
+
+  if (target.status !== "ORDERED") {
+    throw new Error("納品確認できるのは、納品待ちの候補だけです。");
+  }
+
+  if (target.receivedAt) {
+    throw new Error("この発注候補はすでに納品確認済みです。");
+  }
+
+  if (input.receivedQuantity > target.requestedQuantity) {
+    throw new Error("納品数量は発注数量以下で入力してください。");
+  }
+
+  let afterQuantity: number | null = null;
+
+  if (input.applyToStock) {
+    const stockItem = await tx.stockItem.findFirst({
+      where: {
+        clinicId: input.context.clinicId,
+        productId: target.productId,
+        isUsed: true,
+      },
+      select: {
+        id: true,
+        quantity: true,
+      },
+    });
+
+    if (!stockItem) {
+      throw new Error("対象商品の在庫行が見つかりません。在庫一覧で在庫行を確認してください。");
+    }
+
+    const updatedStockItem = await tx.stockItem.update({
+      where: {
+        id: stockItem.id,
+      },
+      data: {
+        quantity: {
+          increment: input.receivedQuantity,
+        },
+      },
+      select: {
+        quantity: true,
+      },
+    });
+
+    afterQuantity = updatedStockItem.quantity;
+
+    if (lotData) {
+      await incrementReceiptStockLot(tx, {
+        clinicId: input.context.clinicId,
+        productId: target.productId,
+        quantity: input.receivedQuantity,
+        lotData,
+      });
+    }
+
+    await tx.stockMovement.create({
+      data: {
+        clinicId: input.context.clinicId,
+        productId: target.productId,
+        movementType: "IN",
+        quantity: input.receivedQuantity,
+        beforeQuantity: stockItem.quantity,
+        afterQuantity,
+        reason: "納品",
+        sourceType: "ORDER_RECEIPT",
+        sourceId: target.id,
+        lotNumber: lotData?.lotNumber || null,
+        expiryDateText: lotData?.expiryDateText || null,
+        expiryDate: lotData?.expiryDate ?? null,
+        userId: input.context.userId,
+        performedByStaffId: receivedByStaff.id,
+        memo: input.receivedMemo,
+      },
+    });
+  }
+
+  await tx.orderRequest.update({
+    where: {
+      id: target.id,
+    },
+    data: {
+      receivedQuantity: input.receivedQuantity,
+      receivedAt: new Date(),
+      receivedMemo: input.receivedMemo,
+      receivedLotNumber: lotData?.lotNumber || null,
+      receivedExpiryDateText: lotData?.expiryDateText || null,
+      receivedExpiryDate: lotData?.expiryDate ?? null,
+      receivedByUserId: input.context.userId,
+      receivedByStaffId: receivedByStaff.id,
+    },
+  });
+
+  return {
+    productName: target.product.name,
+    afterQuantity,
+  };
+}
+
 export async function receiveOrderRequestForContext(
   context: ActiveClinicContext,
   input: {
@@ -749,136 +928,19 @@ export async function receiveOrderRequestForContext(
     revalidate?: boolean;
   },
 ) {
-  const receivedByStaff = await resolveActiveStaffOperatorForContext(context, input.receivedByStaffId);
-  const lotData = buildReceiptLotData({
-    receivedLotNumber: input.receivedLotNumber ?? null,
-    receivedExpiryDateText: input.receivedExpiryDateText ?? null,
-    receivedExpiryDate: input.receivedExpiryDate ?? null,
-  });
-  const result = await prisma.$transaction(async (tx) => {
-    await lockTransactionKey(tx, `order-receipt:${input.orderRequestId}`);
-
-    const target = await tx.orderRequest.findFirst({
-      where: {
-        id: input.orderRequestId,
-        clinicId: context.clinicId,
-      },
-      select: {
-        id: true,
-        productId: true,
-        requestedQuantity: true,
-        status: true,
-        receivedAt: true,
-        product: {
-          select: {
-            name: true,
-          },
-        },
-      },
-    });
-
-    if (!target) {
-      throw new Error("対象の発注候補が見つかりません。");
-    }
-
-    if (target.status !== "ORDERED") {
-      throw new Error("納品確認できるのは、納品待ちの候補だけです。");
-    }
-
-    if (target.receivedAt) {
-      throw new Error("この発注候補はすでに納品確認済みです。");
-    }
-
-    if (input.receivedQuantity > target.requestedQuantity) {
-      throw new Error("納品数量は発注数量以下で入力してください。");
-    }
-
-    let afterQuantity: number | null = null;
-
-    if (input.applyToStock) {
-      const stockItem = await tx.stockItem.findFirst({
-        where: {
-          clinicId: context.clinicId,
-          productId: target.productId,
-          isUsed: true,
-        },
-        select: {
-          id: true,
-          quantity: true,
-        },
-      });
-
-      if (!stockItem) {
-        throw new Error("対象商品の在庫行が見つかりません。在庫一覧で在庫行を確認してください。");
-      }
-
-      const updatedStockItem = await tx.stockItem.update({
-        where: {
-          id: stockItem.id,
-        },
-        data: {
-          quantity: {
-            increment: input.receivedQuantity,
-          },
-        },
-        select: {
-          quantity: true,
-        },
-      });
-
-      afterQuantity = updatedStockItem.quantity;
-
-      if (lotData) {
-        await incrementReceiptStockLot(tx, {
-          clinicId: context.clinicId,
-          productId: target.productId,
-          quantity: input.receivedQuantity,
-          lotData,
-        });
-      }
-
-      await tx.stockMovement.create({
-        data: {
-          clinicId: context.clinicId,
-          productId: target.productId,
-          movementType: "IN",
-          quantity: input.receivedQuantity,
-          beforeQuantity: stockItem.quantity,
-          afterQuantity,
-          reason: "納品",
-          sourceType: "ORDER_RECEIPT",
-          sourceId: target.id,
-          lotNumber: lotData?.lotNumber || null,
-          expiryDateText: lotData?.expiryDateText || null,
-          expiryDate: lotData?.expiryDate ?? null,
-          userId: context.userId,
-          performedByStaffId: receivedByStaff.id,
-          memo: input.receivedMemo,
-        },
-      });
-    }
-
-    await tx.orderRequest.update({
-      where: {
-        id: target.id,
-      },
-      data: {
-        receivedQuantity: input.receivedQuantity,
-        receivedAt: new Date(),
-        receivedMemo: input.receivedMemo,
-        receivedLotNumber: lotData?.lotNumber || null,
-        receivedExpiryDateText: lotData?.expiryDateText || null,
-        receivedExpiryDate: lotData?.expiryDate ?? null,
-        receivedByUserId: context.userId,
-        receivedByStaffId: receivedByStaff.id,
-      },
-    });
-
-    return {
-      productName: target.product.name,
-      afterQuantity,
-    };
-  });
+  const result = await prisma.$transaction((tx) =>
+    applyOrderReceiptLine(tx, {
+      context,
+      orderRequestId: input.orderRequestId,
+      receivedQuantity: input.receivedQuantity,
+      receivedByStaffId: input.receivedByStaffId,
+      receivedMemo: input.receivedMemo,
+      receivedLotNumber: input.receivedLotNumber,
+      receivedExpiryDateText: input.receivedExpiryDateText,
+      receivedExpiryDate: input.receivedExpiryDate,
+      applyToStock: input.applyToStock,
+    }),
+  );
 
   if (input.revalidate ?? true) {
     revalidateOrderPages();

@@ -69,6 +69,12 @@ export default async function BarcodePage({ searchParams }: PageProps) {
             <h1 className="mt-2 text-3xl font-semibold">バーコード検索</h1>
           </div>
           <div className="flex shrink-0 flex-wrap gap-3">
+            <a className="inline-flex h-11 items-center justify-center rounded bg-ink px-4 text-sm font-semibold text-white transition hover:bg-gray-700" href="/barcode/batch?mode=receive">
+              納品
+            </a>
+            <a className="inline-flex h-11 items-center justify-center rounded border border-accent px-4 text-sm font-semibold text-accent transition hover:bg-teal-50" href="/barcode/batch">
+              連続出庫
+            </a>
             <a className="inline-flex h-11 items-center justify-center rounded bg-accent px-4 text-sm font-semibold text-white transition hover:bg-teal-800" href={`/barcode/stock${barcode ? `?barcode=${encodeURIComponent(barcode)}` : ""}`}>
               出入庫
             </a>

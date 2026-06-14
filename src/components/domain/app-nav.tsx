@@ -15,6 +15,9 @@ type NavItemId =
   | "products"
   | "suppliers"
   | "barcode"
+  | "barcodeOut"
+  | "barcodeReceive"
+  | "barcodeBatch"
   | "imports"
   | "quick"
   | "shortage"
@@ -47,24 +50,19 @@ const workNavItems = [
     href: "/home",
   },
   {
-    id: "quick",
+    id: "barcodeOut",
     label: "出庫",
-    href: "/quick",
+    href: "/barcode/out",
   },
   {
-    id: "barcode",
-    label: "バーコード検索",
-    href: "/barcode",
+    id: "barcodeReceive",
+    label: "納品",
+    href: "/barcode/receive",
   },
   {
     id: "inventory",
     label: "在庫",
     href: "/inventory",
-  },
-  {
-    id: "shortage",
-    label: "不足",
-    href: "/shortage",
   },
   {
     id: "orders",

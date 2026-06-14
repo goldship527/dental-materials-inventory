@@ -2,8 +2,15 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { LoginForm } from "./login-form";
 
-export default async function LoginPage() {
+type PageProps = {
+  searchParams?: Promise<{
+    error?: string;
+  }>;
+};
+
+export default async function LoginPage({ searchParams }: PageProps) {
   const session = await auth();
+  const params = (await searchParams) ?? {};
 
   if (session?.user) {
     redirect("/home");
@@ -37,7 +44,13 @@ export default async function LoginPage() {
               メールアドレスとパスワードを入力してください。
             </p>
             <div className="mt-6">
-              <LoginForm />
+              <LoginForm
+                errorMessage={
+                  params.error === "credentials"
+                    ? "メールアドレスまたはパスワードが違います。"
+                    : undefined
+                }
+              />
             </div>
           </section>
         </div>

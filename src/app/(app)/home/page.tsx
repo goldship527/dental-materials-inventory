@@ -31,30 +31,21 @@ export default async function HomePage({ searchParams }: PageProps) {
   const canUseAdminMode = isAdminRole(session.user.role);
   const summary = await getDashboardSummary(context.clinicId, context.organizationId);
   const plannedOrderRequestCount = summary.orderRequestStatusCounts.DRAFT + summary.orderRequestStatusCounts.CONFIRMED;
-  const primaryActionItems = [
+  const pendingReceiveCount = summary.orderRequestStatusCounts.ORDERED;
+  const operationItems = [
     {
-      title: "クイック出庫",
-      description: "よく使う材料の出庫を素早く記録します",
-      href: "/quick",
-      badge: `${summary.favoriteCardCount} 件`,
-      tone: "primary",
-      imageSrc: "/images/home-actions/quick-stock.png",
+      title: "出庫する",
+      description: "使った材料をバーコードで連続読み取りし、出庫リストからまとめて確定します。",
+      href: "/barcode/out",
+      badge: "出庫",
+      tone: "out",
     },
     {
-      title: "不足在庫",
-      description: "最低在庫を下回った材料を確認します",
-      href: "/shortage",
-      badge: `${summary.shortageCount} 件`,
-      tone: summary.shortageCount > 0 ? "warning" : "normal",
-      imageSrc: "/images/home-actions/shortage-check.png",
-    },
-    {
-      title: "発注候補",
-      description: "発注予定の候補を発注先ごとに確認します",
-      href: "/orders",
-      badge: `発注予定 ${plannedOrderRequestCount} 件`,
-      tone: plannedOrderRequestCount > 0 ? "warning" : "normal",
-      imageSrc: "/images/home-actions/order-candidates.png",
+      title: "納品する",
+      description: "届いた材料をバーコードで連続読み取りし、納品待ちに一致したものをまとめて受領します。",
+      href: "/barcode/receive",
+      badge: "納品",
+      tone: "receive",
     },
   ];
   const attentionItems = [
@@ -73,11 +64,11 @@ export default async function HomePage({ searchParams }: PageProps) {
       isWarning: summary.shortageCount > 0,
     },
     {
-      title: "発注候補 発注予定",
-      href: "/orders",
-      value: `${plannedOrderRequestCount} 件`,
-      note: "これから発注する候補",
-      isWarning: plannedOrderRequestCount > 0,
+      title: "納品待ち",
+      href: "/orders?status=ORDERED",
+      value: `${pendingReceiveCount} 件`,
+      note: "受領確認を待っている発注",
+      isWarning: pendingReceiveCount > 0,
     },
     {
       title: "期限ロット",
@@ -109,6 +100,22 @@ export default async function HomePage({ searchParams }: PageProps) {
       badge: `${summary.stockItemCount} 件`,
     },
     {
+      title: "発注",
+      description: "発注予定、納品待ち、納品済み",
+      href: "/orders",
+      badge: `予定 ${plannedOrderRequestCount} 件`,
+    },
+    {
+      title: "入出庫履歴",
+      description: "在庫変更の記録",
+      href: "/movements",
+    },
+    {
+      title: "棚卸",
+      description: "実在庫の入力と確定",
+      href: "/stocktake/sessions",
+    },
+    {
       title: "商品マスタ",
       description: "商品コード、規格、発注単位",
       href: "/products",
@@ -125,14 +132,16 @@ export default async function HomePage({ searchParams }: PageProps) {
       href: "/suppliers",
     },
     {
-      title: "入出庫履歴",
-      description: "在庫変更の記録",
-      href: "/movements",
+      title: "クイック出庫",
+      description: "バーコードなしの予備導線",
+      href: "/quick",
+      badge: `${summary.favoriteCardCount} 件`,
     },
     {
-      title: "棚卸",
-      description: "実在庫の入力と確定",
-      href: "/stocktake/sessions",
+      title: "不足在庫",
+      description: "最低在庫を下回った材料",
+      href: "/shortage",
+      badge: `${summary.shortageCount} 件`,
     },
   ];
   const adminMenuItems = [
@@ -170,6 +179,7 @@ export default async function HomePage({ searchParams }: PageProps) {
         <header className="flex flex-col gap-4 border-b border-line pb-5 print:border-none md:flex-row md:items-end md:justify-between">
           <div>
             <h1 className="text-3xl font-semibold tracking-normal">ホーム</h1>
+            <p className="mt-2 text-sm leading-6 text-muted">今日の作業を選んでください。</p>
           </div>
         </header>
 
@@ -179,52 +189,64 @@ export default async function HomePage({ searchParams }: PageProps) {
           </section>
         ) : null}
 
-        <section className="grid gap-3 print:hidden sm:grid-cols-2 lg:grid-cols-3">
-          {primaryActionItems.map((item) => (
+        <section className="grid gap-4 print:hidden md:grid-cols-2">
+          {operationItems.map((item) => (
             <a
               key={item.href}
               href={item.href}
-              className="relative min-h-36 overflow-hidden rounded border border-line bg-white p-5 shadow-panel transition hover:border-accent hover:shadow-md"
+              className={
+                item.tone === "out"
+                  ? "min-h-40 rounded border-2 border-blue-600 bg-blue-50 p-6 shadow-panel transition hover:shadow-md"
+                  : "min-h-40 rounded border-2 border-emerald-700 bg-emerald-50 p-6 shadow-panel transition hover:shadow-md"
+              }
             >
-              <img
-                src={item.imageSrc}
-                alt=""
-                aria-hidden="true"
-                className="pointer-events-none absolute inset-y-0 right-0 h-full w-1/2 object-cover object-right opacity-70"
-              />
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-white via-white/70 to-white/10" />
-              <div className="relative z-10 flex items-start justify-between gap-3">
-                <p className="text-xl font-semibold">{item.title}</p>
+              <div className="flex items-start justify-between gap-4">
+                <p
+                  className={
+                    item.tone === "out"
+                      ? "text-3xl font-semibold text-blue-700"
+                      : "text-3xl font-semibold text-emerald-800"
+                  }
+                >
+                  {item.title}
+                </p>
                 <span
                   className={
-                    item.tone === "warning"
-                      ? "shrink-0 rounded bg-gray-50 px-3 py-1 text-xs font-semibold text-accent"
-                      : "shrink-0 rounded bg-gray-50 px-3 py-1 text-xs font-semibold text-muted"
+                    item.tone === "out"
+                      ? "shrink-0 rounded bg-white/80 px-3 py-1 text-xs font-semibold text-blue-700"
+                      : "shrink-0 rounded bg-white/80 px-3 py-1 text-xs font-semibold text-emerald-800"
                   }
                 >
                   {item.badge}
                 </span>
               </div>
-              <p className="relative z-10 mt-3 text-sm leading-6 text-muted">{item.description}</p>
+              <p className="mt-4 max-w-2xl text-sm leading-6 text-muted">{item.description}</p>
             </a>
           ))}
         </section>
 
         <section className="grid gap-3">
+          <h2 className="text-lg font-semibold">今日の注意</h2>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {attentionItems.map((item) => (
               <a
                 key={item.title}
-                className="rounded border border-line bg-white p-4 shadow-panel transition hover:border-accent hover:shadow-md"
+                className="rounded border border-line bg-white px-4 py-3 shadow-panel transition hover:border-accent hover:shadow-md"
                 href={item.href}
               >
-                <p className="text-sm font-semibold text-muted">{item.title}</p>
-                <p className={item.isWarning ? "mt-2 text-2xl font-semibold text-accent" : "mt-2 text-2xl font-semibold text-ink"}>
-                  {item.value}
-                </p>
-                <p className="mt-2 text-sm leading-6 text-muted">
-                  {item.note}
-                </p>
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-sm font-semibold text-muted">{item.title}</p>
+                  <p
+                    className={
+                      item.isWarning
+                        ? "rounded bg-red-50 px-2.5 py-1 text-sm font-semibold text-danger"
+                        : "rounded bg-gray-50 px-2.5 py-1 text-sm font-semibold text-muted"
+                    }
+                  >
+                    {item.value}
+                  </p>
+                </div>
+                <p className="mt-2 text-xs leading-5 text-muted">{item.note}</p>
               </a>
             ))}
           </div>
@@ -259,7 +281,7 @@ export default async function HomePage({ searchParams }: PageProps) {
         </section>
 
         <section className="grid gap-3 print:hidden">
-          <h2 className="text-lg font-semibold">確認メニュー</h2>
+          <h2 className="text-lg font-semibold">確認・管理</h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {menuItems.map((item) => (
               <a

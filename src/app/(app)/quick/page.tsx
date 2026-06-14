@@ -129,18 +129,30 @@ export default async function QuickPage({ searchParams }: PageProps) {
         <section className="rounded border border-accent/25 bg-white p-4 shadow-panel">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <p className="text-sm font-semibold text-accent">バーコード出入庫</p>
-              <h2 className="mt-1 text-xl font-semibold">担当者バーコードから開始</h2>
+              <p className="text-sm font-semibold text-accent">バーコード作業</p>
+              <h2 className="mt-1 text-xl font-semibold">連続スキャンまたは1件ずつ出入庫</h2>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-muted">
-                担当者バーコードを読み取ってから商品バーコードを読み取り、入庫・出庫を確定します。
+                バーコードがある材料は、連続スキャン画面でまとめて処理できます。
               </p>
             </div>
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
               <a
+                className="inline-flex h-11 items-center justify-center rounded bg-ink px-4 text-sm font-semibold text-white transition hover:bg-gray-700"
+                href="/barcode/batch"
+              >
+                連続出庫
+              </a>
+              <a
+                className="inline-flex h-11 items-center justify-center rounded border border-accent bg-white px-4 text-sm font-semibold text-accent transition hover:bg-teal-50"
+                href="/barcode/batch?mode=receive"
+              >
+                納品
+              </a>
+              <a
                 className="inline-flex h-11 items-center justify-center rounded bg-accent px-4 text-sm font-semibold text-white transition hover:bg-teal-800"
                 href="/barcode/stock"
               >
-                バーコード出入庫を開始
+                1件ずつ出入庫
               </a>
               <a
                 className="inline-flex h-11 items-center justify-center rounded border border-line bg-white px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"

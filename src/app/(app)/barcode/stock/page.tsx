@@ -63,6 +63,18 @@ export default async function BarcodeStockPage({ searchParams }: PageProps) {
           </div>
           <div className="flex shrink-0 flex-wrap gap-3">
             <a
+              className="inline-flex h-11 items-center justify-center rounded bg-accent px-4 text-sm font-semibold text-white transition hover:bg-teal-800"
+              href="/barcode/batch?mode=receive"
+            >
+              納品
+            </a>
+            <a
+              className="inline-flex h-11 items-center justify-center rounded border border-accent px-4 text-sm font-semibold text-accent transition hover:bg-teal-50"
+              href="/barcode/batch"
+            >
+              連続出庫
+            </a>
+            <a
               className="inline-flex h-11 items-center justify-center rounded border border-line px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
               href="/barcode"
             >
