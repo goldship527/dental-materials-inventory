@@ -281,7 +281,7 @@ export default async function HomePage({ searchParams }: PageProps) {
         </section>
 
         <section className="grid gap-3 print:hidden">
-          <h2 className="text-lg font-semibold">確認・管理</h2>
+          <h2 className="text-lg font-semibold">確認メニュー</h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {menuItems.map((item) => (
               <a
