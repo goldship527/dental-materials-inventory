@@ -7,6 +7,7 @@ import { getProductDetail, getProductSupplierOptions } from "@/lib/db/products";
 import { BarcodeManagement } from "./barcode-management";
 import { PhotoManagement } from "./photo-management";
 import { ProductEditForm } from "./product-edit-form";
+import { barcodeUiEnabled } from "@/lib/workflow-features";
 
 type PageProps = {
   params: Promise<{
@@ -61,12 +62,12 @@ export default async function ProductEditPage({ params, searchParams }: PageProp
             productName={product.name}
             photoUpdatedAt={product.photoUpdatedAt?.getTime() ?? null}
           />
-          <BarcodeManagement
+          {barcodeUiEnabled && <BarcodeManagement
             productId={product.id}
             janCode={product.janCode}
             barcodes={product.barcodes}
             defaultNewBarcode={newBarcode}
-          />
+          />}
         </div>
       </main>
     </>

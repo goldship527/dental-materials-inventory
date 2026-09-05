@@ -7,6 +7,7 @@ import {
   type ProductMasterFieldName,
 } from "@/lib/actions/products";
 import type { ProductDetail } from "@/lib/db/products";
+import { barcodeUiEnabled } from "@/lib/workflow-features";
 
 type SupplierOption = {
   id: string;
@@ -80,7 +81,7 @@ export function ProductEditForm({ product, suppliers }: ProductEditFormProps) {
             {fieldError("productCode")}
           </label>
 
-          <label className="grid gap-1 text-sm font-semibold text-muted">
+          {barcodeUiEnabled ? <label className="grid gap-1 text-sm font-semibold text-muted">
             JANコード
             <input
               name="janCode"
@@ -91,7 +92,7 @@ export function ProductEditForm({ product, suppliers }: ProductEditFormProps) {
               className={controlClass("janCode", "h-11 font-mono")}
             />
             {fieldError("janCode")}
-          </label>
+          </label> : <input type="hidden" name="janCode" value={valueOrEmpty(product.janCode)} />}
 
           <label className="grid gap-1 text-sm font-semibold text-muted">
             カテゴリ

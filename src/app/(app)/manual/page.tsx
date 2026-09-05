@@ -5,6 +5,7 @@ import { auth } from "@/auth";
 import { AppNav } from "@/components/domain/app-nav";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { ManualViewer } from "./manual-viewer";
+import { barcodeUiEnabled } from "@/lib/workflow-features";
 
 export default async function ManualPage() {
   const session = await auth();
@@ -35,6 +36,13 @@ export default async function ManualPage() {
             </a>
           </header>
 
+          {!barcodeUiEnabled && <section className="grid gap-3 rounded-xl border border-line bg-panel p-5 text-base">
+            <h2 className="text-lg font-semibold">現在の出庫は商品カードから行います</h2>
+            <p>「出庫」から商品名・規格やカテゴリで探し、商品を選んでください。担当者、出庫数、在庫と同じ単位で出すことを確認して確定します。</p>
+            <p>箱から本などへの換算はまだ行いません。単位が不明な商品は管理者に確認してください。納品は発注の納品待ち一覧から確認します。</p>
+            <p className="text-sm text-muted">バーコードは一時保留中です。以下のバーコード関連の説明は、再開時の参考として残しています。</p>
+            <a href="/stock-out" className="inline-flex min-h-12 items-center justify-center rounded-lg border border-muted px-4 font-semibold focus-visible:ring-2 focus-visible:ring-accent">商品カードの出庫を開く</a>
+          </section>}
           <ManualViewer markdown={markdown} />
         </div>
       </main>

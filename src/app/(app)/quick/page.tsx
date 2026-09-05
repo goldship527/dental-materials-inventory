@@ -6,6 +6,7 @@ import { prisma } from "@/lib/db/prisma";
 import { getActiveStaffOperatorOptionsForClinic } from "@/lib/db/staff-operators";
 import { toStockRow } from "@/lib/db/stock";
 import { QuickCardGrid } from "./quick-card-grid";
+import { barcodeUiEnabled } from "@/lib/workflow-features";
 
 type PageProps = {
   searchParams?: Promise<{
@@ -14,6 +15,7 @@ type PageProps = {
 };
 
 export default async function QuickPage({ searchParams }: PageProps) {
+  if (!barcodeUiEnabled) redirect("/stock-out");
   const session = await auth();
 
   if (!session?.user) {

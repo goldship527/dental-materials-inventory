@@ -4,6 +4,7 @@ import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createProductAction, type CreateProductInput, type ProductMasterActionState } from "@/lib/actions/products";
 import type { ProductSupplierOption } from "@/lib/db/products";
+import { barcodeUiEnabled } from "@/lib/workflow-features";
 
 type ProductCreateFormProps = {
   suppliers: ProductSupplierOption[];
@@ -69,7 +70,7 @@ export function ProductCreateForm({ suppliers }: ProductCreateFormProps) {
             {fieldError("productCode")}
           </label>
 
-          <label className="grid gap-1 text-sm font-semibold text-muted">
+          {barcodeUiEnabled && <label className="grid gap-1 text-sm font-semibold text-muted">
             JANコード
             <input
               name="janCode"
@@ -80,7 +81,7 @@ export function ProductCreateForm({ suppliers }: ProductCreateFormProps) {
               className={controlClass("janCode", "h-11 font-mono")}
             />
             {fieldError("janCode")}
-          </label>
+          </label>}
 
           <label className="grid gap-1 text-sm font-semibold text-muted">
             内部コード

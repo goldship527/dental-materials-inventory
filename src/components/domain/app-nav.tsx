@@ -5,6 +5,7 @@ import { SubmitButton } from "@/components/ui/submit-button";
 import { isAdminRole } from "@/lib/auth/roles";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { getActiveStaffOperatorOptionsForClinic } from "@/lib/db/staff-operators";
+import { isWorkflowLinkVisible, receivePath, stockOutPath } from "@/lib/workflow-features";
 
 type NavItemId =
   | "home"
@@ -52,12 +53,12 @@ const workNavItems = [
   {
     id: "barcodeOut",
     label: "出庫",
-    href: "/barcode/out",
+    href: stockOutPath,
   },
   {
     id: "barcodeReceive",
     label: "納品",
-    href: "/barcode/receive",
+    href: receivePath,
   },
   {
     id: "inventory",
@@ -141,7 +142,7 @@ function NavLink({ item, current, compact = false }: { item: NavItem; current: N
   const isCurrent = item.id === current;
   const baseClassName = compact
     ? "inline-flex h-9 shrink-0 items-center whitespace-nowrap rounded px-2 text-xs font-semibold"
-    : "inline-flex h-11 shrink-0 items-center whitespace-nowrap rounded px-3 text-sm font-semibold sm:h-9";
+    : "inline-flex h-12 shrink-0 items-center whitespace-nowrap rounded px-3 text-sm font-semibold";
 
   return (
     <a
@@ -174,7 +175,7 @@ function NavGroup({
       aria-label={ariaLabel}
       className="flex min-w-0 gap-2 overflow-x-auto pb-1 sm:gap-1 lg:pb-0"
     >
-      {items.map((item) => (
+      {items.filter(item => isWorkflowLinkVisible(item.href)).map((item) => (
         <NavLink key={item.id} item={item} current={current} compact={compact} />
       ))}
     </div>

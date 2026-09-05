@@ -13,6 +13,7 @@ import { getStockStatus as getSharedStockStatus, stockStatusKeys } from "@/lib/s
 import { ProductOrderRequestButton } from "./product-order-request-button";
 import { ProductStockUsagePanel } from "./product-stock-usage-panel";
 import { ProductStockItemCreateForm } from "./product-stock-item-create-form";
+import { barcodeUiEnabled } from "@/lib/workflow-features";
 
 type PageProps = {
   params: Promise<{
@@ -513,10 +514,10 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
                 <dt className="font-semibold text-muted">商品コード</dt>
                 <dd className="mt-1">{product.productCode ?? "-"}</dd>
               </div>
-              <div>
+              {barcodeUiEnabled && <div>
                 <dt className="font-semibold text-muted">JAN</dt>
                 <dd className="mt-1">{product.janCode ?? "-"}</dd>
-              </div>
+              </div>}
               <div>
                 <dt className="font-semibold text-muted">内部コード</dt>
                 <dd className="mt-1">{product.internalCode ?? "-"}</dd>
@@ -610,7 +611,7 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
             </div>
           </div>
 
-          <div className="rounded border border-line bg-white p-4 shadow-panel">
+          {barcodeUiEnabled && <div className="rounded border border-line bg-white p-4 shadow-panel">
             <h2 className="text-lg font-semibold">バーコード</h2>
             <div className="mt-3 grid gap-2">
               {product.barcodes.length > 0 ? (
@@ -624,7 +625,7 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
                 <p className="text-sm text-muted">バーコードは登録されていません。</p>
               )}
             </div>
-          </div>
+          </div>}
         </section>
 
         <section className="grid gap-3 lg:grid-cols-2">
