@@ -334,7 +334,7 @@ async function seedUiSmokeDatabase(prisma: typeof import("../src/lib/db/prisma")
         category: index <= 5 ? "スモークカテゴリA" : "スモークカテゴリB",
         manufacturer: "UIスモークメーカー",
         specification: "開発用テスト規格",
-        orderUnit: "箱",
+        orderUnit: index === 10 ? null : "箱",
         supplierProductCode: `SUP-UI-${String(index).padStart(4, "0")}`,
         standardPrice: 1000 + index,
         defaultMinStock: 5,
@@ -489,6 +489,7 @@ async function main() {
       "/shortage",
       "/orders",
       "/movements",
+      "/stock-out",
       "/admin/overview",
       "/admin/users",
       "/admin/staff-operators",
@@ -530,13 +531,30 @@ async function main() {
     assertIncludes(productDetailHtml, "P-0009");
     assertNotIncludes(productDetailHtml, "4900000000009");
     assertIncludes(productDetailHtml, "使用頻度 A");
+    assertIncludes(productDetailHtml, "在庫・納品・出庫の単位");
+
+    const stockOutHtml = await assertOkPage(baseUrl, adminJar, "/stock-out");
+    assertNotIncludes(stockOutHtml, "商品を選び、単位と数量を確認して出庫します。");
+    assertTextOrder(stockOutHtml, ["カテゴリー", "すべて", "商品名・規格で検索"]);
+    assertIncludes(stockOutHtml, "数量");
+    assertIncludes(stockOutHtml, "1箱を出庫");
+    assertIncludes(stockOutHtml, "出庫数を1減らす");
+    assertIncludes(stockOutHtml, "出庫数を1増やす");
+    assertIncludes(stockOutHtml, "単位の決め方を見る");
+    assertIncludes(stockOutHtml, "商品設定で単位を入力");
+    assertIncludes(stockOutHtml, "name=\"unitConfirmed\"");
+    assertIncludes(stockOutHtml, "value=\"yes\"");
+    assertNotIncludes(stockOutHtml, "出庫内容の確認");
+    assertNotIncludes(stockOutHtml, "在庫と同じ「箱」単位で出します");
 
     const staffJar = await login(baseUrl, staffEmail, staffPassword);
     const staffHomeHtml = await assertOkPage(baseUrl, staffJar, "/home");
     const staffInventoryHtml = await assertOkPage(baseUrl, staffJar, "/inventory");
+    const staffStockOutHtml = await assertOkPage(baseUrl, staffJar, "/stock-out");
     assertIncludes(staffHomeHtml, mainClinicName);
     assertIncludes(staffInventoryHtml, mainClinicName);
     assertIncludes(staffInventoryHtml, "クリニック1棚-9");
+    assertIncludes(staffStockOutHtml, "1箱を出庫");
     assertNotIncludes(staffHomeHtml, "id=\"active-clinic-id\"");
     assertNotIncludes(staffHomeHtml, branchClinicName);
     assertNotIncludes(staffInventoryHtml, branchClinicName);

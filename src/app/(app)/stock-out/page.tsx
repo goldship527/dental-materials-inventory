@@ -17,7 +17,6 @@ export default async function StockOutPage() {
         <AppNav current="barcodeOut" />
         <header>
           <h1 className="text-2xl font-semibold">出庫する</h1>
-          <p className="mt-1 text-base">商品を選び、単位と数量を確認して出庫します。</p>
         </header>
         <StockOutCatalog key={context.clinicId} cards={cards} clinicId={context.clinicId} staffOperators={staffOperators} />
       </div>
