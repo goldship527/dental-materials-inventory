@@ -512,9 +512,12 @@ async function main() {
     adminJar.set(activeClinicCookieName, seed.branchClinicId);
     const branchHomeHtml = await assertOkPage(baseUrl, adminJar, "/home");
     const branchInventoryHtml = await assertOkPage(baseUrl, adminJar, "/inventory");
+    const branchReceiveHtml = await assertOkPage(baseUrl, adminJar, "/receive");
     assertIncludes(branchHomeHtml, branchClinicName);
     assertIncludes(branchInventoryHtml, branchClinicName);
     assertIncludes(branchInventoryHtml, "クリニック2棚-9");
+    assertIncludes(branchReceiveHtml, "納品待ちの商品はありません");
+    assertNotIncludes(branchReceiveHtml, "作業スタッフを選ぶと、納品を確定できるようになります");
 
     const adminOverviewHtml = await assertOkPage(baseUrl, adminJar, "/admin/overview");
     assertIncludes(adminOverviewHtml, "本部ダッシュボード");
@@ -547,11 +550,22 @@ async function main() {
     assertIncludes(stockOutHtml, "対象規格: テスト");
     assertNotIncludes(stockOutHtml, "開発用注文名 1セット");
     assertNotIncludes(stockOutHtml, "画面上部で作業スタッフを選択してください");
+    assertIncludes(stockOutHtml, "作業スタッフを選ぶと、出庫できるようになります");
+    assertIncludes(stockOutHtml, "aria-live=\"polite\"");
+    assertIncludes(stockOutHtml, "min-h-4");
+    assertNotIncludes(stockOutHtml, "auto-rows-fr");
     assertIncludes(stockOutHtml, "h-20 w-20");
     assertIncludes(stockOutHtml, "sm:min-h-20 lg:min-h-24");
+    assertIncludes(stockOutHtml, "flow-root sm:min-h-20 lg:min-h-24");
+    assertIncludes(stockOutHtml, "float-left mb-1 mr-2");
     assertIncludes(stockOutHtml, "border-line bg-white/80 text-muted");
     assertNotIncludes(stockOutHtml, "出庫内容の確認");
     assertNotIncludes(stockOutHtml, "在庫と同じ「箱」単位で出します");
+
+    const receiveHtml = await assertOkPage(baseUrl, adminJar, "/receive");
+    assertIncludes(receiveHtml, "作業スタッフを選ぶと、納品を確定できるようになります");
+    assertNotIncludes(receiveHtml, "overflow-x-auto pb-1\" aria-label=\"カテゴリで絞り込む");
+    assertIncludes(receiveHtml, "h-20 w-20");
 
     const staffJar = await login(baseUrl, staffEmail, staffPassword);
     const staffHomeHtml = await assertOkPage(baseUrl, staffJar, "/home");
