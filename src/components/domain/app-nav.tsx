@@ -138,11 +138,25 @@ const helpNavItems = [
   },
 ] as const satisfies readonly NavItem[];
 
-function NavLink({ item, current, compact = false }: { item: NavItem; current: NavItemId; compact?: boolean }) {
+function NavLink({
+  item,
+  current,
+  compact = false,
+  utility = false,
+}: {
+  item: NavItem;
+  current: NavItemId;
+  compact?: boolean;
+  utility?: boolean;
+}) {
   const isCurrent = item.id === current;
-  const baseClassName = compact
-    ? "inline-flex h-9 shrink-0 items-center whitespace-nowrap rounded px-2 text-xs font-semibold"
-    : "inline-flex h-12 shrink-0 items-center whitespace-nowrap rounded px-3 text-sm font-semibold";
+  const baseClassName = utility
+    ? compact
+      ? "inline-flex h-9 shrink-0 items-center whitespace-nowrap rounded px-2 text-xs font-semibold"
+      : "inline-flex h-11 shrink-0 items-center whitespace-nowrap rounded px-3 text-sm font-semibold sm:h-9"
+    : compact
+      ? "inline-flex h-9 shrink-0 items-center whitespace-nowrap rounded px-2 text-xs font-semibold"
+      : "inline-flex h-12 shrink-0 items-center whitespace-nowrap rounded px-3 text-sm font-semibold";
 
   return (
     <a
@@ -151,7 +165,9 @@ function NavLink({ item, current, compact = false }: { item: NavItem; current: N
       className={
         isCurrent
           ? `${baseClassName} border border-accent/30 bg-teal-50 text-accent`
-          : `${baseClassName} border border-transparent text-muted transition hover:border-line hover:bg-white/80 hover:text-ink`
+          : utility
+            ? `${baseClassName} border border-line bg-white/80 text-muted transition hover:border-accent hover:bg-white hover:text-accent`
+            : `${baseClassName} border border-transparent text-muted transition hover:border-line hover:bg-white/80 hover:text-ink`
       }
     >
       {item.label}
@@ -264,7 +280,7 @@ export async function AppNav({ current }: AppNavProps) {
             ) : null}
 
             {helpNavItems.map((item) => (
-              <NavLink key={item.id} item={item} current={current} compact={isAdminMode} />
+              <NavLink key={item.id} item={item} current={current} compact={isAdminMode} utility />
             ))}
 
             <form action="/logout" method="post" className="shrink-0">

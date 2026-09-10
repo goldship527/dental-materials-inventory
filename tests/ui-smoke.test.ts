@@ -544,6 +544,8 @@ async function main() {
     assertIncludes(stockOutHtml, "商品設定で単位を入力");
     assertIncludes(stockOutHtml, "name=\"unitConfirmed\"");
     assertIncludes(stockOutHtml, "value=\"yes\"");
+    assertIncludes(stockOutHtml, "sm:min-h-24 lg:min-h-28");
+    assertIncludes(stockOutHtml, "border-line bg-white/80 text-muted");
     assertNotIncludes(stockOutHtml, "出庫内容の確認");
     assertNotIncludes(stockOutHtml, "在庫と同じ「箱」単位で出します");
 
