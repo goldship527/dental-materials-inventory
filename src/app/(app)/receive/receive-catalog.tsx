@@ -18,8 +18,8 @@ function ReceiptPhoto({row}: {row: ReceiptCard}) {
   const [failed, setFailed] = useState(false);
   const url = buildProductPhotoUrl({id: row.productId, photoUpdatedAt: row.photoUpdatedAt});
 
-  return url && !failed ? <img src={url} alt="" loading="lazy" width={64} height={64} onError={() => setFailed(true)} className="h-16 w-16 shrink-0 rounded-lg border border-line bg-panel object-contain" /> :
-    <span aria-hidden="true" className="grid h-16 w-16 shrink-0 place-items-center rounded-lg border border-line bg-subtle text-ink">
+  return url && !failed ? <img src={url} alt="" loading="lazy" width={80} height={80} onError={() => setFailed(true)} className="h-20 w-20 shrink-0 rounded-lg border border-line bg-panel object-contain" /> :
+    <span aria-hidden="true" className="grid h-20 w-20 shrink-0 place-items-center rounded-lg border border-line bg-subtle text-ink">
       <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.4"><path d="m3 7 9-4 9 4v10l-9 4-9-4V7Zm0 0 9 4 9-4M12 11v10M7.5 5l9 4" /></svg>
     </span>;
 }
@@ -43,7 +43,7 @@ function ReceiptItem({row, staffId, onReceived}: {row: ReceiptCard; staffId: str
       setResult({status: "error", message: "通信結果を確認できません。履歴を確認してから一覧を更新してください。"});
     } finally { setPending(false); router.refresh(); }
   }
-  return <article className="flex min-w-0 flex-col gap-2 rounded-lg border border-line bg-panel p-2.5 shadow-panel">
+  return <article className="flex min-w-0 flex-col gap-1.5 rounded-lg border border-line bg-panel p-2 shadow-panel">
     <div className="flex items-start gap-2"><ReceiptPhoto row={row} /><div className="min-w-0 flex-1"><p className="text-xs leading-4 text-muted">{row.supplierName || "発注先未設定"} / {row.category || "未分類"}</p><h3 className="mt-0.5 break-words text-base font-semibold leading-5">{row.name}</h3></div></div>
     <p className="flex items-baseline gap-1 rounded-lg bg-subtle px-2 py-1.5"><span className="text-xs">発注数</span><strong className="text-2xl tabular-nums">{row.requestedQuantity}</strong><span className="text-sm">{row.orderUnit || "単位未確認"}</span></p>
     {result ? <div role={result.status === "success" ? "status" : "alert"} className="grid gap-2"><p>{result.message}</p>{result.status !== "success" && <a className="underline" href="/movements">入出庫履歴を確認</a>}</div> : open ?
@@ -64,7 +64,6 @@ function ReceiptItem({row, staffId, onReceived}: {row: ReceiptCard; staffId: str
         <button className={button} disabled={pending} type="button" onClick={() => setOpen(false)}>閉じる</button>
       </form> : <button className={`${primary} mt-auto`} onClick={() => setOpen(true)}>届いた商品を確認</button>}
     {!row.orderUnit && <p className="text-sm font-semibold">単位を確認してから納品してください。</p>}
-    {open && !staffId && <p className="text-sm font-semibold">画面上部で作業スタッフを選択してください。</p>}
   </article>;
 }
 
