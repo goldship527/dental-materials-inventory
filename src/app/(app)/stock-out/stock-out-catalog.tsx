@@ -10,7 +10,7 @@ import { buildProductPhotoUrl } from "@/lib/product-photos/url";
 import { IssueInstructions } from "@/components/domain/issue-instructions";
 
 const focusStyle = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2";
-const buttonStyle = `min-h-12 rounded-lg border border-muted bg-panel px-4 text-base font-semibold text-ink hover:border-accent hover:bg-subtle active:bg-subtle ${focusStyle}`;
+const buttonStyle = `min-h-12 rounded-lg border border-muted bg-panel px-4 text-base font-semibold text-ink hover:border-accent hover:bg-subtle active:bg-subtle disabled:cursor-not-allowed disabled:border-line disabled:bg-subtle disabled:text-muted ${focusStyle}`;
 const primaryStyle = `min-h-12 rounded-lg bg-accent px-4 text-base font-semibold text-panel hover:bg-accentDeep active:bg-accentDeep disabled:cursor-not-allowed disabled:bg-subtle disabled:text-muted ${focusStyle}`;
 const categoryButtonStyle = `min-h-9 whitespace-nowrap rounded-lg border border-muted bg-panel px-2.5 text-xs font-semibold text-ink hover:border-accent hover:bg-subtle active:bg-subtle sm:text-sm ${focusStyle}`;
 const selectedCategoryButtonStyle = `min-h-9 whitespace-nowrap rounded-lg bg-accent px-2.5 text-xs font-semibold text-panel hover:bg-accentDeep active:bg-accentDeep sm:text-sm ${focusStyle}`;
@@ -85,9 +85,9 @@ function InlineIssueControl({card, selectedStaffOperatorId, onResult}: {
     <button type="submit" disabled={pending || !valid || !selectedStaffOperatorId} aria-label={`${card.name}を${valid ? number : "入力した数量"}${unit}出庫する`} className={`${primaryStyle} px-2`}>
       {pending ? "記録中…" : `${valid ? number : "—"}${unit}を出庫`}
     </button>
-    {(!valid || selectedStaffOperatorId) && <p aria-live="polite" className={`text-xs ${valid ? "text-muted" : "font-semibold text-danger"}`}>
-      {valid ? `出庫後 ${card.quantity - number}${unit}` : "現在庫以下の整数を入力してください"}
-    </p>}
+    <p aria-live="polite" className={`min-h-4 text-xs ${valid ? "text-muted" : "font-semibold text-danger"}`}>
+      {!valid ? "現在庫以下の整数を入力してください" : selectedStaffOperatorId ? `出庫後 ${card.quantity - number}${unit}` : ""}
+    </p>
     </form>
 }
 
@@ -120,16 +120,19 @@ export function StockOutCatalog({cards, clinicId, staffOperators}: {cards: Stock
       <p>{feedback.message}</p>
       <div className="flex gap-3"><a href="/stock-out" className={`underline ${focusStyle}`}>最新の一覧を表示</a>{feedback.status === "error" && <a href="/movements" className={`underline ${focusStyle}`}>入出庫履歴を確認</a>}</div>
     </section>}
+    {!staff.selectedStaffOperatorId && filtered.length > 0 && <p role="status" className="rounded-lg border border-accent bg-subtle px-3 py-2 text-base font-semibold">
+      画面上部で作業スタッフを選ぶと、出庫できるようになります。
+    </p>}
     {!filtered.length ? <section className="rounded-xl border border-line bg-panel p-6 text-center">
       <h2 className="text-lg font-semibold">{cards.length ? "条件に合う商品がありません" : "このクリニックの在庫商品はまだありません"}</h2>
       <p className="mt-2 text-base">{cards.length ? "商品名やカテゴリを変えてお試しください。" : "対象クリニックと在庫登録を確認してください。"}</p>
       {cards.length ? <button type="button" className={`${buttonStyle} mt-4`} onClick={clearFilters}>絞り込みを解除する</button> : <a href="/inventory" className="mt-4 inline-flex min-h-12 items-center underline">在庫一覧を確認する</a>}
-    </section> : <section aria-label="在庫商品のカード" className="grid auto-rows-fr gap-2 sm:grid-cols-2 lg:grid-cols-4">
+    </section> : <section aria-label="在庫商品のカード" className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
       {filtered.slice(0, limit).map(card => {
         const unit = cardStockUnit(card.orderUnit);
         const blocked = cardIssueBlockReason(card);
         return <article key={card.stockItemId} className="flex h-full min-w-0 flex-col gap-1 rounded-lg border border-line bg-panel p-2 shadow-panel">
-          <div className="flex items-start gap-2 sm:min-h-20 lg:min-h-24"><StockPhoto card={card} /><div className="min-w-0 flex-1"><p className="text-xs text-muted">{card.category || "未分類"}</p><h2 className="whitespace-normal text-base font-semibold leading-5 [overflow-wrap:anywhere]">{card.name}</h2>{card.specification && <p className="mt-0.5 whitespace-normal text-xs leading-4 text-muted [overflow-wrap:anywhere]">{card.specification}</p>}</div></div>
+          <div className="flow-root sm:min-h-20 lg:min-h-24"><div className="float-left mb-1 mr-2"><StockPhoto card={card} /></div><p className="text-xs text-muted">{card.category || "未分類"}</p><h2 className="whitespace-normal text-base font-semibold leading-5 [overflow-wrap:anywhere]">{card.name}</h2>{card.specification && <p className="mt-0.5 whitespace-normal text-xs leading-4 text-muted [overflow-wrap:anywhere]">{card.specification}</p>}</div>
           <IssueInstructions text={card.issueHint} compact />
           <div className="flex flex-wrap items-baseline justify-between gap-x-2 gap-y-1 rounded-lg bg-subtle px-2 py-1.5"><p className="flex items-baseline gap-1"><span className="text-xs">現在庫</span><strong className="text-2xl tabular-nums">{card.quantity}</strong> <span className="text-sm">{unit || "単位未確認"}</span></p><p className="text-xs">基準 <strong className="text-base tabular-nums">{card.minStock}</strong> {unit || ""}</p></div>
           {card.quantity < card.minStock && <p className="text-xs font-semibold">{card.quantity === 0 ? "在庫切れ" : "基準在庫を下回っています"}</p>}
