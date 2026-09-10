@@ -537,7 +537,7 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
                 <dd className="mt-1">{product.specification ?? "-"}</dd>
               </div>
               <div>
-                <dt className="font-semibold text-muted">発注単位</dt>
+                <dt className="font-semibold text-muted">在庫・納品・出庫の単位</dt>
                 <dd className="mt-1">{product.orderUnit ?? "-"}</dd>
               </div>
               <div>

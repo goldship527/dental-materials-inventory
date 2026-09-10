@@ -131,7 +131,7 @@ export function ProductEditForm({ product, suppliers }: ProductEditFormProps) {
           </label>
 
           <label className="grid gap-1 text-sm font-semibold text-muted">
-            発注単位
+            在庫・納品・出庫の単位
             <input
               name="orderUnit"
               defaultValue={valueOrEmpty(product.orderUnit)}
@@ -139,6 +139,9 @@ export function ProductEditForm({ product, suppliers }: ProductEditFormProps) {
               aria-invalid={Boolean(getFieldError("orderUnit"))}
               className={controlClass("orderUnit", "h-11")}
             />
+            <span className="text-xs font-normal leading-5">
+              現在庫と基準数に使っている数え方（箱・袋・本・個など）を入力します。箱から中身への換算は自動では行いません。
+            </span>
             {fieldError("orderUnit")}
           </label>
         </div>
