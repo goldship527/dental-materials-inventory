@@ -117,7 +117,7 @@ export function ProductImportForm() {
                 setFileName("");
                 setSourceText(event.target.value);
               }}
-              placeholder={"商品名\tJANコード\tカテゴリ\tメーカー\t最低在庫"}
+              placeholder={"商品名\tカテゴリ\tメーカー\t最低在庫"}
               className="min-h-32 rounded border border-line px-3 py-2 text-sm font-normal text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
             />
           </label>
@@ -136,7 +136,7 @@ export function ProductImportForm() {
             {isPreviewPending ? "確認中" : "プレビュー"}
           </button>
           <p className="text-sm text-muted">
-            対応列: 商品名、商品コード、JANコード、内部コード、カテゴリ、メーカー、規格、発注単位、発注先、発注先品番、標準価格、最低在庫、備考
+            対応列: 商品名、商品コード、内部コード、カテゴリ、メーカー、規格、発注単位、発注先、発注先品番、標準価格、最低在庫、備考
           </p>
         </div>
       </form>
@@ -185,7 +185,6 @@ export function ProductImportForm() {
                   <th className="border-b border-line px-3 py-2">行</th>
                   <th className="border-b border-line px-3 py-2">状態</th>
                   <th className="border-b border-line px-3 py-2">商品名</th>
-                  <th className="border-b border-line px-3 py-2">JAN</th>
                   <th className="border-b border-line px-3 py-2">カテゴリ</th>
                   <th className="border-b border-line px-3 py-2">メーカー</th>
                   <th className="border-b border-line px-3 py-2">発注先</th>
@@ -198,7 +197,6 @@ export function ProductImportForm() {
                     <td className="border-b border-line px-3 py-2">{row.rowNumber}</td>
                     <td className="border-b border-line px-3 py-2 font-semibold">{statusLabel(row)}</td>
                     <td className="border-b border-line px-3 py-2">{row.name || "-"}</td>
-                    <td className="border-b border-line px-3 py-2 font-mono text-xs">{row.janCode ?? "-"}</td>
                     <td className="border-b border-line px-3 py-2">{row.category ?? "-"}</td>
                     <td className="border-b border-line px-3 py-2">{row.manufacturer ?? "-"}</td>
                     <td className="border-b border-line px-3 py-2">{row.primarySupplierName ?? "-"}</td>

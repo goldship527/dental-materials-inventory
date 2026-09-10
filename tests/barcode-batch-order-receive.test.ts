@@ -221,6 +221,31 @@ async function main() {
       1,
     );
 
+    const shortfallOrder = await prisma.orderRequest.findFirstOrThrow({
+      where: {
+        clinicId: base.clinic.id,
+        productId: first.product.id,
+        status: "ORDERED",
+        receivedAt: null,
+        requestedQuantity: 1,
+        memo: {
+          contains: first.orderRequest.id,
+        },
+      },
+    });
+
+    const shortfallResolution = await resolveBatchScanForContext(base.context, {
+      mode: "IN",
+      barcode: janCode,
+    });
+
+    assert.equal(shortfallResolution.kind, "product");
+    if (shortfallResolution.kind === "product") {
+      assert.equal(shortfallResolution.status, "receivable");
+      assert.equal(shortfallResolution.orderRequestId, shortfallOrder.id);
+      assert.equal(shortfallResolution.requestedQuantity, 1);
+    }
+
     const partialResult = await batchOrderReceiveForContext(base.context, {
       staffOperatorId: base.staffOperator.id,
       lines: [
@@ -258,6 +283,20 @@ async function main() {
     });
 
     assert.equal(secondStockItem.quantity, 3);
+    assert.equal(
+      await prisma.orderRequest.count({
+        where: {
+          clinicId: base.clinic.id,
+          productId: second.product.id,
+          status: "ORDERED",
+          receivedAt: null,
+          memo: {
+            contains: second.orderRequest.id,
+          },
+        },
+      }),
+      0,
+    );
 
     const overQuantityOrder = await createOrderedProduct(prisma, {
       organizationId: base.organization.id,

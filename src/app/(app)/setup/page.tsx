@@ -4,6 +4,7 @@ import { AppNav } from "@/components/domain/app-nav";
 import { requireAdminUser } from "@/lib/auth/admin";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { buildOnboardingSteps, getOnboardingSummary } from "@/lib/db/onboarding";
+import { barcodeUiEnabled } from "@/lib/workflow-features";
 
 function getStatusClassName(status: "done" | "todo" | "attention") {
   if (status === "done") {
@@ -41,9 +42,10 @@ export default async function SetupPage() {
   });
   const context = await requireActiveClinic();
   const summary = await getOnboardingSummary(context.organizationId, context.clinicId);
-  const steps = buildOnboardingSteps(summary);
+  const steps = buildOnboardingSteps(summary).filter(step => barcodeUiEnabled || step.id !== "barcodes");
+  const completedStepCount = steps.filter(step => step.status === "done").length;
   const completionPercent =
-    summary.totalStepCount === 0 ? 0 : Math.round((summary.completedStepCount / summary.totalStepCount) * 100);
+    steps.length === 0 ? 0 : Math.round((completedStepCount / steps.length) * 100);
   const summaryCards = [
     {
       label: "商品マスタ",
@@ -78,20 +80,20 @@ export default async function SetupPage() {
           <div>
             <h1 className="text-2xl font-semibold tracking-normal">初期設定チェック</h1>
             <p className="mt-2 text-sm leading-6 text-muted">
-              商品、発注先、バーコード、最低在庫の登録状況をまとめて確認できます。
+              {barcodeUiEnabled ? "商品、発注先、バーコード、最低在庫の登録状況をまとめて確認できます。" : "商品、発注先、最低在庫の登録状況をまとめて確認できます。"}
             </p>
           </div>
           <div className="rounded border border-line bg-white px-5 py-4 shadow-panel">
             <p className="text-sm font-semibold text-muted">進捗</p>
             <p className="mt-2 text-3xl font-semibold">{completionPercent}%</p>
             <p className="mt-1 text-sm text-muted">
-              {summary.completedStepCount} / {summary.totalStepCount} 項目
+              {completedStepCount} / {steps.length} 項目
             </p>
           </div>
         </header>
 
         <section className="grid gap-4 md:grid-cols-4">
-          {summaryCards.map((card) => (
+          {summaryCards.filter(card => barcodeUiEnabled || card.label !== "バーコード").map((card) => (
             <div key={card.label} className="rounded border border-line bg-white p-5 shadow-panel">
               <p className="text-sm font-semibold text-muted">{card.label}</p>
               <p className="mt-2 text-2xl font-semibold">{card.value}</p>
@@ -135,8 +137,8 @@ export default async function SetupPage() {
           <h2 className="text-xl font-semibold">おすすめの進め方</h2>
           <div className="mt-4 grid gap-3 text-sm leading-6 text-muted md:grid-cols-3">
             <p>まず商品マスタを一括取り込みし、商品名とカテゴリの土台を作ります。</p>
-            <p>次に発注先、バーコード、最低在庫を整えると、不足一覧と発注候補が使いやすくなります。</p>
-            <p>未対応バーコードは、実際に読み取った後で既存商品へ紐づけると現場に合わせて整理できます。</p>
+            <p>{barcodeUiEnabled ? "次に発注先、バーコード、最低在庫を整えると、不足一覧と発注候補が使いやすくなります。" : "次に発注先、在庫の単位、最低在庫を確認します。"}</p>
+            <p>{barcodeUiEnabled ? "未対応バーコードは、実際に読み取った後で既存商品へ紐づけると現場に合わせて整理できます。" : "出庫画面では商品のカードから選び、単位と数量を確認して記録できます。"}</p>
           </div>
         </section>
       </main>

@@ -6,6 +6,7 @@ import { requireActiveClinic } from "@/lib/db/clinic";
 import { getProductCategories, getProductMasterPage, getPurchaseHistoryProductSummary } from "@/lib/db/products";
 import { isPurchaseHistoryImportSource } from "@/lib/products/import-source";
 import { ProductFilterForm } from "./product-filter-form";
+import { barcodeUiEnabled } from "@/lib/workflow-features";
 
 type PageProps = {
   searchParams?: Promise<{
@@ -301,7 +302,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
                           {row.name}
                         </a>
                         <p className="mt-1 text-xs text-muted">
-                          {row.productCode ?? "コード未設定"} / JAN {row.janCode ?? "-"}
+                          {row.productCode ?? "コード未設定"}{barcodeUiEnabled ? ` / JAN ${row.janCode ?? "-"}` : ""}
                         </p>
                         {canManageProducts && isPurchaseHistoryImportSource(row.importSource) ? (
                           <div className="mt-2 flex flex-wrap gap-2">

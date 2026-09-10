@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { barcodeUiEnabled } from "@/lib/workflow-features";
 import { auth } from "@/auth";
 import { AppNav } from "@/components/domain/app-nav";
 import { isAdminRole } from "@/lib/auth/roles";
@@ -54,6 +55,7 @@ function formatGs1ExpiryDate(value: Date | null, fallback: string | null) {
 }
 
 export default async function BarcodeScansPage({ searchParams }: PageProps) {
+  if (!barcodeUiEnabled) redirect("/movements");
   const session = await auth();
 
   if (!session?.user) {

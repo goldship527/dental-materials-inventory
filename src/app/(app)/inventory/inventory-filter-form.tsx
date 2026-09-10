@@ -45,7 +45,7 @@ export function InventoryFilterForm({
           type="search"
           name="q"
           defaultValue={defaultQuery}
-          placeholder="商品名・商品コード・JANコード"
+          placeholder="商品名・商品コード"
           className="h-11 rounded border border-line px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
         />
         {defaultCategory ? <input type="hidden" name="category" value={defaultCategory} /> : null}

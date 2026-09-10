@@ -13,6 +13,8 @@ import { getStockStatus as getSharedStockStatus, stockStatusKeys } from "@/lib/s
 import { ProductOrderRequestButton } from "./product-order-request-button";
 import { ProductStockUsagePanel } from "./product-stock-usage-panel";
 import { ProductStockItemCreateForm } from "./product-stock-item-create-form";
+import { barcodeUiEnabled } from "@/lib/workflow-features";
+import { IssueInstructions, getIssueInstructions } from "@/components/domain/issue-instructions";
 
 type PageProps = {
   params: Promise<{
@@ -466,7 +468,7 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <h2 className="text-lg font-semibold">ロット別在庫</h2>
-              <p className="mt-1 text-sm text-muted">バーコード入出庫や納品確認で記録したロット番号と有効期限を表示します。</p>
+              <p className="mt-1 text-sm text-muted">入出庫や納品確認で記録したロット番号と有効期限を表示します。</p>
             </div>
             <div className="flex flex-wrap items-center gap-3">
               <a className="text-sm font-semibold text-accent hover:underline" href={`/stock-lots?q=${encodeURIComponent(product.name)}`}>
@@ -508,15 +510,16 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
         <section className="grid gap-3 lg:grid-cols-[1.3fr_1fr]">
           <div className="rounded border border-line bg-white p-4 shadow-panel">
             <h2 className="text-lg font-semibold">基本情報</h2>
+            <div className="mt-3"><IssueInstructions text={getIssueInstructions(product.notes)} /></div>
             <dl className="mt-3 grid gap-x-4 gap-y-2 text-sm sm:grid-cols-2">
               <div>
                 <dt className="font-semibold text-muted">商品コード</dt>
                 <dd className="mt-1">{product.productCode ?? "-"}</dd>
               </div>
-              <div>
+              {barcodeUiEnabled && <div>
                 <dt className="font-semibold text-muted">JAN</dt>
                 <dd className="mt-1">{product.janCode ?? "-"}</dd>
-              </div>
+              </div>}
               <div>
                 <dt className="font-semibold text-muted">内部コード</dt>
                 <dd className="mt-1">{product.internalCode ?? "-"}</dd>
@@ -565,7 +568,6 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
                 <dd className="mt-1">{product.supplierProductCode ?? "-"}</dd>
               </div>
             </dl>
-            {product.notes ? <p className="mt-3 text-sm text-muted">{product.notes}</p> : null}
             <div className="mt-4 border-t border-line pt-3">
               <div className="flex items-center justify-between gap-3">
                 <h3 className="text-sm font-semibold text-ink">取扱発注先</h3>
@@ -598,7 +600,6 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
                         {formatPrice(productSupplier.standardPrice)}
                       </p>
                       <p className="mt-1 text-xs font-semibold text-muted">{formatLeadTime(productSupplier.leadTime)}</p>
-                      {productSupplier.notes ? <p className="mt-1 text-xs text-muted">{productSupplier.notes}</p> : null}
                     </div>
                   ))
                 ) : (
@@ -610,7 +611,7 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
             </div>
           </div>
 
-          <div className="rounded border border-line bg-white p-4 shadow-panel">
+          {barcodeUiEnabled && <div className="rounded border border-line bg-white p-4 shadow-panel">
             <h2 className="text-lg font-semibold">バーコード</h2>
             <div className="mt-3 grid gap-2">
               {product.barcodes.length > 0 ? (
@@ -624,7 +625,7 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
                 <p className="text-sm text-muted">バーコードは登録されていません。</p>
               )}
             </div>
-          </div>
+          </div>}
         </section>
 
         <section className="grid gap-3 lg:grid-cols-2">

@@ -1,4 +1,5 @@
 "use client";
+import { barcodeUiEnabled } from "@/lib/workflow-features";
 
 type MovementFilterFormProps = {
   categories: string[];
@@ -24,7 +25,7 @@ const sourceOptions = [
   { value: "ORDER_RECEIPT_REVERT", label: "納品確認取り消し" },
   { value: "MANUAL", label: "在庫一覧" },
   { value: "QUICK_CARD", label: "クイック出庫" },
-  { value: "BARCODE_STOCK", label: "バーコード出入庫" },
+  ...(barcodeUiEnabled ? [{ value: "BARCODE_STOCK", label: "バーコード出入庫" }] : []),
   { value: "STOCKTAKE", label: "棚卸" },
   { value: "STOCKTAKE_SESSION", label: "棚卸セッション" },
   { value: "REVERT", label: "履歴取り消し" },

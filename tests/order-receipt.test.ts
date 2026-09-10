@@ -113,6 +113,22 @@ async function main() {
     assert.equal(receivedRequest.receivedByUserId, user.id);
     assert.equal(receivedRequest.receivedByStaffId, staffOperator.id);
 
+    const shortfallBackorder = await prisma.orderRequest.findFirstOrThrow({
+      where: {
+        clinicId: clinic.id,
+        productId: product.id,
+        status: "ORDERED",
+        receivedAt: null,
+        requestedQuantity: 1,
+        memo: {
+          contains: request.id,
+        },
+      },
+    });
+
+    assert.equal(shortfallBackorder.supplierId, request.supplierId);
+    assert.equal(shortfallBackorder.createdByUserId, user.id);
+
     const stockItem = await prisma.stockItem.findFirstOrThrow({
       where: {
         clinicId: clinic.id,
@@ -360,6 +376,21 @@ async function main() {
       applyToStock: true,
       revalidate: false,
     });
+
+    assert.equal(
+      await prisma.orderRequest.count({
+        where: {
+          clinicId: clinic.id,
+          productId: product.id,
+          status: "ORDERED",
+          receivedAt: null,
+          memo: {
+            contains: stockReflectedRequest.id,
+          },
+        },
+      }),
+      0,
+    );
 
     await prisma.stockItem.update({
       where: {

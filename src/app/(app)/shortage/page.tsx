@@ -206,7 +206,7 @@ export default async function ShortagePage({ searchParams }: PageProps) {
             type="search"
             name="q"
             defaultValue={query}
-            placeholder="商品名・商品コード・JAN・カテゴリ・発注先"
+            placeholder="商品名・商品コード・カテゴリ・発注先"
             className="h-11 rounded border border-line px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
           />
           <button

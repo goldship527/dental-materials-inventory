@@ -4,8 +4,10 @@ import { AppNav } from "@/components/domain/app-nav";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { getActiveStaffOperatorOptionsForClinic } from "@/lib/db/staff-operators";
 import { BarcodeBatchClient } from "../batch/barcode-batch-client";
+import { barcodeUiEnabled } from "@/lib/workflow-features";
 
 export default async function BarcodeOutPage() {
+  if (!barcodeUiEnabled) redirect("/stock-out");
   const session = await auth();
 
   if (!session?.user) {

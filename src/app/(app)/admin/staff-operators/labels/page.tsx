@@ -1,4 +1,6 @@
 import { AppNav } from "@/components/domain/app-nav";
+import { redirect } from "next/navigation";
+import { barcodeUiEnabled } from "@/lib/workflow-features";
 import { Code128Barcode } from "@/components/domain/code128-barcode";
 import { requireAdminUser } from "@/lib/auth/admin";
 import { getStaffOperatorClinicOptions, getStaffOperatorRows } from "@/lib/db/staff-operators";
@@ -17,6 +19,7 @@ function filterLinkClass(isSelected: boolean) {
 }
 
 export default async function StaffOperatorLabelsPage({ searchParams }: PageProps) {
+  if (!barcodeUiEnabled) redirect("/admin/staff-operators");
   const context = await requireAdminUser();
   const params = (await searchParams) ?? {};
   const [operators, clinics] = await Promise.all([

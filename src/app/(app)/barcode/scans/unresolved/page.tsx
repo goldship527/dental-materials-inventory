@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { barcodeUiEnabled } from "@/lib/workflow-features";
 import { auth } from "@/auth";
 import { AppNav } from "@/components/domain/app-nav";
 import { requireAdminUser } from "@/lib/auth/admin";
@@ -50,6 +51,7 @@ function getResolutionHint(log: BarcodeScanLogRow) {
 }
 
 export default async function UnresolvedBarcodeScansPage() {
+  if (!barcodeUiEnabled) redirect("/products");
   const session = await auth();
 
   if (!session?.user) {

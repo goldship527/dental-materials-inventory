@@ -152,7 +152,7 @@ export default async function InventoryPage({ searchParams }: PageProps) {
                         {row.name}
                       </a>
                       <p className="mt-1 text-xs text-muted">
-                        {row.productCode} / JAN {row.janCode ?? "-"}
+                        {row.productCode}
                       </p>
                     </td>
                     <td className="border-b border-line px-4 py-3">{row.category ?? "-"}</td>

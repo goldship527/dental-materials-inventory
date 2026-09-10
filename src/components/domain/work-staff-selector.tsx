@@ -21,7 +21,7 @@ export function WorkStaffSelector({ clinicId, staffOperators }: WorkStaffSelecto
         value={selectedStaffOperatorId}
         onChange={(event) => selectStaffOperator(event.target.value)}
         disabled={!hasStaffOperators}
-        className="h-11 w-44 rounded border border-line bg-white px-3 text-sm font-semibold text-ink outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-muted sm:h-9"
+        className="h-12 w-44 rounded border border-muted bg-panel px-3 text-base font-semibold text-ink outline-none transition focus:border-accent focus:ring-2 focus:ring-accent disabled:cursor-not-allowed disabled:bg-subtle disabled:text-muted"
       >
         <option value="">{hasStaffOperators ? "選択" : "未登録"}</option>
         {staffOperators.map((staffOperator) => (

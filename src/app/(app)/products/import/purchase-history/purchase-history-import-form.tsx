@@ -24,8 +24,8 @@ const statusLabels: Record<PurchaseHistoryMatchStatus, string> = {
 };
 
 const reasonLabels: Record<PurchaseHistoryMatchReason, string> = {
-  JAN_EXACT: "JAN一致",
-  BARCODE_EXACT: "追加バーコード一致",
+  JAN_EXACT: "登録コード一致",
+  BARCODE_EXACT: "登録コード一致",
   SUPPLIER_PRODUCT_CODE_EXACT: "発注先品番一致",
   DEALER_PRODUCT_CODE_EXACT: "ディーラー商品コード一致",
   MANUFACTURER_AND_NAME_EXACT: "メーカー名+商品名一致",
@@ -193,7 +193,7 @@ export function PurchaseHistoryImportForm() {
               className="block w-full rounded border border-line bg-white px-3 py-2 text-sm text-ink file:mr-3 file:rounded file:border-0 file:bg-accent file:px-3 file:py-2 file:text-sm file:font-semibold file:text-white"
             />
             <span className="text-xs font-normal text-muted">
-              推奨ヘッダー: purchaseDate, dealerName, dealerProductCode, supplierProductCode, janCode, productName
+              推奨ヘッダー: purchaseDate, dealerName, dealerProductCode, supplierProductCode, productName
             </span>
           </label>
 
@@ -207,7 +207,7 @@ export function PurchaseHistoryImportForm() {
                 setReviewDecisions({});
                 setSourceText(event.target.value);
               }}
-              placeholder={"購入日\tディーラー名\tディーラー商品コード\t発注先品番\tJANコード\t商品名\tメーカー名\t規格\t購入数量\t単価\t金額"}
+              placeholder={"購入日\tディーラー名\tディーラー商品コード\t発注先品番\t商品名\tメーカー名\t規格\t購入数量\t単価\t金額"}
               className="min-h-36 rounded border border-line px-3 py-2 text-sm font-normal text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
             />
           </label>
@@ -283,7 +283,6 @@ export function PurchaseHistoryImportForm() {
                   <th className="border-b border-line px-3 py-2">商品名</th>
                   <th className="border-b border-line px-3 py-2">一致/候補</th>
                   <th className="border-b border-line px-3 py-2">今回の扱い</th>
-                  <th className="border-b border-line px-3 py-2">JAN</th>
                   <th className="border-b border-line px-3 py-2">発注先品番</th>
                   <th className="border-b border-line px-3 py-2">購入回数</th>
                   <th className="border-b border-line px-3 py-2">合計数量</th>
@@ -342,7 +341,6 @@ export function PurchaseHistoryImportForm() {
                         "-"
                       )}
                     </td>
-                    <td className="border-b border-line px-3 py-2 font-mono text-xs">{row.janCode ?? "-"}</td>
                     <td className="border-b border-line px-3 py-2 font-mono text-xs">
                       {row.supplierProductCode ?? row.dealerProductCode ?? "-"}
                     </td>

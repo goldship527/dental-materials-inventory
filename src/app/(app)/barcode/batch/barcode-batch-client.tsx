@@ -35,6 +35,7 @@ type BatchLine = {
   lotNumber: string | null;
   expiryDateText: string | null;
   quantity: number;
+  isQuantityEdited: boolean;
   message: string;
 };
 
@@ -167,10 +168,10 @@ export function BarcodeBatchClient({ clinicId, initialMode, fixedMode, staffOper
     }
 
     const productLabel = resolution.productName ?? resolution.barcode;
-    const shouldIncrementReceiveLine =
+    const isDuplicateReceiveLine =
       mode === "IN" &&
       resolution.status === "receivable" &&
-      resolution.orderRequestId &&
+      Boolean(resolution.orderRequestId) &&
       lines.some((line) => line.orderRequestId === resolution.orderRequestId);
     const shouldIncrementStockOutLine =
       mode === "OUT" &&
@@ -195,14 +196,7 @@ export function BarcodeBatchClient({ clinicId, initialMode, fixedMode, staffOper
         const existingIndex = currentLines.findIndex((line) => line.orderRequestId === resolution.orderRequestId);
 
         if (existingIndex >= 0) {
-          return currentLines.map((line, index) =>
-            index === existingIndex
-              ? {
-                  ...line,
-                  quantity: clampQuantity(line.quantity + 1),
-                }
-              : line,
-          );
+          return currentLines;
         }
       }
 
@@ -249,16 +243,19 @@ export function BarcodeBatchClient({ clinicId, initialMode, fixedMode, staffOper
           lotNumber: resolution.lotNumber,
           expiryDateText: resolution.expiryDateText,
           quantity: initialQuantity,
+          isQuantityEdited: false,
           message: resolution.message,
         },
       ];
     });
     setScanMessage(
-      shouldIncrementReceiveLine || shouldIncrementStockOutLine
-        ? `${productLabel} の数量を +1 しました。`
-        : readyStatuses.has(resolution.status)
-          ? `${productLabel} を追加しました。`
-          : resolution.message,
+      isDuplicateReceiveLine
+        ? `${productLabel} はすでにリストにあります（満数のままです）。`
+        : shouldIncrementStockOutLine
+          ? `${productLabel} の数量を +1 しました。`
+          : readyStatuses.has(resolution.status)
+            ? `${productLabel} を追加しました。`
+            : resolution.message,
     );
   }
 
@@ -312,7 +309,9 @@ export function BarcodeBatchClient({ clinicId, initialMode, fixedMode, staffOper
 
   function updateLineQuantity(lineId: string, quantity: number) {
     setLines((currentLines) =>
-      currentLines.map((line) => (line.id === lineId ? { ...line, quantity: clampQuantity(quantity) } : line)),
+      currentLines.map((line) =>
+        line.id === lineId ? { ...line, quantity: clampQuantity(quantity), isQuantityEdited: true } : line,
+      ),
     );
   }
 
@@ -400,6 +399,17 @@ export function BarcodeBatchClient({ clinicId, initialMode, fixedMode, staffOper
   }
 
   const totalQuantity = useMemo(() => readyLines.reduce((total, line) => total + line.quantity, 0), [readyLines]);
+  const fullReceiptCount = readyLines.filter(
+    (line) =>
+      line.status === "receivable" &&
+      line.requestedQuantity !== null &&
+      line.quantity === line.requestedQuantity,
+  ).length;
+  const adjustedReceiptCount = readyLines.filter(
+    (line) =>
+      line.status === "receivable" &&
+      (line.requestedQuantity === null || line.quantity !== line.requestedQuantity),
+  ).length;
   const displayedLines = useMemo(() => [...lines].reverse(), [lines]);
 
   return (
@@ -498,7 +508,9 @@ export function BarcodeBatchClient({ clinicId, initialMode, fixedMode, staffOper
                 {mode === "IN" ? "受領確認リスト" : "出庫リスト"}
               </p>
               <p className="mt-0.5 text-base font-semibold text-ink">
-                確定対象 {readyLines.length} 件 / 数量 {totalQuantity} / 確認必要 {blockedLines} 件
+                {mode === "IN"
+                  ? `満数 ${fullReceiptCount} / 数量変更 ${adjustedReceiptCount} / 確認必要 ${blockedLines}`
+                  : `確定対象 ${readyLines.length} 件 / 数量 ${totalQuantity} / 確認必要 ${blockedLines} 件`}
               </p>
             </div>
             <button
@@ -516,17 +528,18 @@ export function BarcodeBatchClient({ clinicId, initialMode, fixedMode, staffOper
           ) : (
             <div className="divide-y divide-line">
               {displayedLines.map((line) => {
-              const isReceiveOver =
-                line.status === "receivable" &&
-                line.requestedQuantity !== null &&
-                line.quantity > line.requestedQuantity;
-              const isStockOutOver =
-                line.status === "stock-out-ready" &&
-                line.currentQuantity !== null &&
-                line.quantity > line.currentQuantity;
+                const isReceiveOver =
+                  line.status === "receivable" &&
+                  line.requestedQuantity !== null &&
+                  line.quantity > line.requestedQuantity;
+                const isStockOutOver =
+                  line.status === "stock-out-ready" &&
+                  line.currentQuantity !== null &&
+                  line.quantity > line.currentQuantity;
+                const isReceiveLocked = line.status === "receivable" && !line.isQuantityEdited;
 
-              return (
-                <article key={line.id} className={`grid gap-3 border-l-4 p-3 ${getLineTone(line.status)} lg:grid-cols-[1fr_auto]`}>
+                return (
+                  <article key={line.id} className={`grid gap-3 border-l-4 p-3 ${getLineTone(line.status)} lg:grid-cols-[1fr_auto]`}>
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="text-base font-semibold text-ink">{line.productName ?? "確認必要"}</p>
@@ -537,6 +550,13 @@ export function BarcodeBatchClient({ clinicId, initialMode, fixedMode, staffOper
                             ? "出庫OK"
                             : "確認必要"}
                       </span>
+                      {line.status === "receivable" ? (
+                        <span className="rounded bg-gray-100 px-2 py-1 text-xs font-semibold text-muted">
+                          {line.requestedQuantity !== null && line.quantity === line.requestedQuantity
+                            ? "満数"
+                            : "数量変更"}
+                        </span>
+                      ) : null}
                     </div>
                     <p className="mt-1 break-all font-mono text-xs text-muted">{line.barcode}</p>
                     <p className="mt-1 text-xs text-muted">
@@ -568,7 +588,8 @@ export function BarcodeBatchClient({ clinicId, initialMode, fixedMode, staffOper
                     <button
                       type="button"
                       onClick={() => updateLineQuantity(line.id, line.quantity - 1)}
-                      className="h-9 rounded border border-line text-base font-semibold text-muted transition hover:border-accent hover:text-accent"
+                      disabled={!readyStatuses.has(line.status) || isReceiveLocked}
+                      className="h-9 rounded border border-line text-base font-semibold text-muted transition hover:border-accent hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
                       aria-label="数量を減らす"
                     >
                       -
@@ -580,25 +601,40 @@ export function BarcodeBatchClient({ clinicId, initialMode, fixedMode, staffOper
                       step={1}
                       value={line.quantity}
                       onChange={(event) => updateLineQuantity(line.id, Number(event.target.value))}
-                      disabled={!readyStatuses.has(line.status)}
+                      disabled={!readyStatuses.has(line.status) || isReceiveLocked}
                       className="h-9 rounded border border-line px-2 text-center text-base font-semibold outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 disabled:bg-gray-100 disabled:text-muted"
                     />
                     <button
                       type="button"
                       onClick={() => updateLineQuantity(line.id, line.quantity + 1)}
-                      disabled={!readyStatuses.has(line.status)}
+                      disabled={!readyStatuses.has(line.status) || isReceiveLocked}
                       className="h-9 rounded border border-line text-base font-semibold text-muted transition hover:border-accent hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
                       aria-label="数量を増やす"
                     >
                       +
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => removeLine(line.id)}
-                      className="h-9 rounded border border-line px-3 text-xs font-semibold text-muted transition hover:border-danger hover:text-danger"
-                    >
-                      削除
-                    </button>
+                    <div className="flex gap-2">
+                      {isReceiveLocked ? (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setLines((currentLines) =>
+                              currentLines.map((l) => (l.id === line.id ? { ...l, isQuantityEdited: true } : l)),
+                            )
+                          }
+                          className="h-9 rounded border border-line px-3 text-xs font-semibold text-muted transition hover:border-accent hover:text-accent"
+                        >
+                          数量変更
+                        </button>
+                      ) : null}
+                      <button
+                        type="button"
+                        onClick={() => removeLine(line.id)}
+                        className="h-9 rounded border border-line px-3 text-xs font-semibold text-muted transition hover:border-danger hover:text-danger"
+                      >
+                        削除
+                      </button>
+                    </div>
                   </div>
                 </article>
               );

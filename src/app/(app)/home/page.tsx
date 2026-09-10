@@ -4,6 +4,7 @@ import { AppNav } from "@/components/domain/app-nav";
 import { isAdminRole } from "@/lib/auth/roles";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { getDashboardSummary } from "@/lib/db/dashboard";
+import { barcodeUiEnabled, isWorkflowLinkVisible, receivePath, stockOutPath } from "@/lib/workflow-features";
 
 const movementDateFormatter = new Intl.DateTimeFormat("ja-JP", {
   timeZone: "Asia/Tokyo",
@@ -35,15 +36,15 @@ export default async function HomePage({ searchParams }: PageProps) {
   const operationItems = [
     {
       title: "出庫する",
-      description: "使った材料をバーコードで連続読み取りし、出庫リストからまとめて確定します。",
-      href: "/barcode/out",
+      description: barcodeUiEnabled ? "使った材料をバーコードで連続読み取りし、出庫リストからまとめて確定します。" : "商品のカードから選び、出す単位と数量を確認して記録します。",
+      href: stockOutPath,
       badge: "出庫",
       tone: "out",
     },
     {
       title: "納品する",
-      description: "届いた材料をバーコードで連続読み取りし、納品待ちに一致したものをまとめて受領します。",
-      href: "/barcode/receive",
+      description: barcodeUiEnabled ? "届いた材料をバーコードで連続読み取りし、納品待ちに一致したものをまとめて受領します。" : "納品待ちの発注を選び、届いた材料の数量を確認します。",
+      href: receivePath,
       badge: "納品",
       tone: "receive",
     },
@@ -147,7 +148,7 @@ export default async function HomePage({ searchParams }: PageProps) {
   const adminMenuItems = [
     {
       title: "初期設定",
-      description: "商品、発注先、バーコード、最低在庫",
+      description: barcodeUiEnabled ? "商品、発注先、バーコード、最低在庫" : "商品、発注先、最低在庫",
       href: "/setup",
     },
     {
@@ -164,7 +165,7 @@ export default async function HomePage({ searchParams }: PageProps) {
     },
     {
       title: "担当者管理",
-      description: "クイック出庫用のスタッフ登録",
+      description: "出庫を記録するスタッフの登録",
       href: "/admin/staff-operators",
     },
   ];
@@ -196,16 +197,16 @@ export default async function HomePage({ searchParams }: PageProps) {
               href={item.href}
               className={
                 item.tone === "out"
-                  ? "min-h-40 rounded border-2 border-blue-600 bg-blue-50 p-6 shadow-panel transition hover:shadow-md"
-                  : "min-h-40 rounded border-2 border-emerald-700 bg-emerald-50 p-6 shadow-panel transition hover:shadow-md"
+                  ? "min-h-40 rounded-xl border-2 border-accent bg-panel p-6 shadow-panel transition hover:bg-subtle focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
+                  : "min-h-40 rounded-xl border-2 border-muted bg-panel p-6 shadow-panel transition hover:bg-subtle focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
               }
             >
               <div className="flex items-start justify-between gap-4">
                 <p
                   className={
                     item.tone === "out"
-                      ? "text-3xl font-semibold text-blue-700"
-                      : "text-3xl font-semibold text-emerald-800"
+                      ? "text-3xl font-semibold text-accent"
+                      : "text-3xl font-semibold text-ink"
                   }
                 >
                   {item.title}
@@ -213,8 +214,8 @@ export default async function HomePage({ searchParams }: PageProps) {
                 <span
                   className={
                     item.tone === "out"
-                      ? "shrink-0 rounded bg-white/80 px-3 py-1 text-xs font-semibold text-blue-700"
-                      : "shrink-0 rounded bg-white/80 px-3 py-1 text-xs font-semibold text-emerald-800"
+                      ? "shrink-0 rounded bg-subtle px-3 py-1 text-sm font-semibold text-accent"
+                      : "shrink-0 rounded bg-subtle px-3 py-1 text-sm font-semibold text-ink"
                   }
                 >
                   {item.badge}
@@ -283,7 +284,7 @@ export default async function HomePage({ searchParams }: PageProps) {
         <section className="grid gap-3 print:hidden">
           <h2 className="text-lg font-semibold">確認メニュー</h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {menuItems.map((item) => (
+            {menuItems.filter(item => isWorkflowLinkVisible(item.href)).map((item) => (
               <a
                 key={item.href}
                 href={item.href}
@@ -313,7 +314,7 @@ export default async function HomePage({ searchParams }: PageProps) {
           <section className="grid gap-3 print:hidden">
             <h2 className="text-lg font-semibold">管理メニュー</h2>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {adminMenuItems.map((item) => (
+              {adminMenuItems.filter(item => isWorkflowLinkVisible(item.href)).map((item) => (
                 <a
                   key={item.href}
                   href={item.href}

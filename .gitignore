@@ -39,3 +39,6 @@ Thumbs.db
 .idea
 
 .vercel
+
+# Local Codex development server output
+/.codex-dev-server.log
