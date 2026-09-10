@@ -7,16 +7,20 @@ import type { StaffOperatorOption } from "@/lib/db/staff-operators";
 import { issueStockCardAction, type CardIssueResult } from "@/lib/actions/card-issue";
 import { cardIssueBlockReason, cardStockUnit, filterStockOutCards, type StockOutCard } from "@/lib/stock/card-issue";
 import { buildProductPhotoUrl } from "@/lib/product-photos/url";
+import { IssueInstructions } from "@/components/domain/issue-instructions";
 
 const focusStyle = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2";
 const buttonStyle = `min-h-12 rounded-lg border border-muted bg-panel px-4 text-base font-semibold text-ink hover:border-accent hover:bg-subtle active:bg-subtle ${focusStyle}`;
 const primaryStyle = `min-h-12 rounded-lg bg-accent px-4 text-base font-semibold text-panel hover:bg-accentDeep active:bg-accentDeep disabled:cursor-not-allowed disabled:bg-subtle disabled:text-muted ${focusStyle}`;
+const categoryButtonStyle = `min-h-10 shrink-0 whitespace-nowrap rounded-lg border border-muted bg-panel px-3 text-sm font-semibold text-ink hover:border-accent hover:bg-subtle active:bg-subtle ${focusStyle}`;
+const selectedCategoryButtonStyle = `min-h-10 shrink-0 whitespace-nowrap rounded-lg bg-accent px-3 text-sm font-semibold text-panel hover:bg-accentDeep active:bg-accentDeep ${focusStyle}`;
 
 function StockPhoto({card}: {card: StockOutCard}) {
   const [failed, setFailed] = useState(false);
   const url = buildProductPhotoUrl({id: card.productId, photoUpdatedAt: card.photoUpdatedAt});
-  return url && !failed ? <img src={url} alt="" loading="lazy" width={56} height={56} onError={() => setFailed(true)} className="h-14 w-14 shrink-0 rounded-lg border border-line object-contain" /> :
-    <span aria-hidden="true" className="grid h-14 w-14 shrink-0 place-items-center rounded-lg border border-line bg-subtle text-ink">
+  const sizeClass = "h-16 w-16";
+  return url && !failed ? <img src={url} alt="" loading="lazy" width={96} height={96} onError={() => setFailed(true)} className={`${sizeClass} shrink-0 rounded-lg border border-line bg-panel object-contain`} /> :
+    <span aria-hidden="true" className={`grid ${sizeClass} shrink-0 place-items-center rounded-lg border border-line bg-subtle text-ink`}>
       <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.4"><path d="m3 7 9-4 9 4v10l-9 4-9-4V7Zm0 0 9 4 9-4M12 11v10M7.5 5l9 4" /></svg>
     </span>;
 }
@@ -82,7 +86,7 @@ function IssueDialog({card, staffOperators, selectedStaffOperatorId, selectStaff
           </select>
         </label>
         <div className="rounded-lg bg-subtle p-3 text-base">現在庫 <strong className="text-2xl tabular-nums">{card.quantity}</strong> {unit} ／ 基準 {card.minStock}{unit}</div>
-        {card.issueHint && <p className="text-sm text-muted">元表の出し方: {card.issueHint}</p>}
+        <IssueInstructions text={card.issueHint} />
         <div><label htmlFor={`${titleId}-quantity`} className="text-sm font-semibold">出庫数（{unit}）</label>
           <div className="mt-2 grid grid-cols-[56px_1fr_56px] gap-3">
             <button type="button" className={buttonStyle} disabled={pending || number <= 1} aria-label="出庫数を1減らす" onClick={() => setQuantity(String(Math.max(1, (Number.isFinite(number) ? number : 1) - 1)))}>−</button>
@@ -114,29 +118,31 @@ export function StockOutCatalog({cards, clinicId, staffOperators}: {cards: Stock
   const filtered = useMemo(() => filterStockOutCards(cards, query, category), [cards, query, category]);
   const clearFilters = () => { setQuery(""); setCategory(null); setLimit(24); };
   return <>
-    <section aria-label="商品を絞り込む" className="grid gap-3 rounded-xl border border-line bg-panel p-4">
-      <label htmlFor={searchId} className="text-sm font-semibold">商品名・規格で検索</label>
-      <div className="flex gap-2"><input id={searchId} type="search" value={query} onChange={event => { setQuery(event.target.value); setLimit(24); }} placeholder="商品名やサイズを入力" className={`h-12 min-w-0 flex-1 rounded-lg border border-muted bg-panel px-3 text-base ${focusStyle}`} />
-        {(query || category) && <button type="button" onClick={clearFilters} className={buttonStyle}>解除</button>}</div>
-      <details className="rounded-lg border border-line">
-        <summary className={`min-h-12 cursor-pointer px-3 py-3 text-base font-semibold ${focusStyle}`}>カテゴリ: {category || "すべて"} <span className="text-sm font-normal">（選ぶ）</span></summary>
-        <div className="flex flex-wrap gap-2 p-3 pt-0">{[null, ...categories].map(value => <button key={value || "all"} type="button" aria-pressed={category === value} onClick={() => { setCategory(value); setLimit(24); }} className={category === value ? primaryStyle : buttonStyle}>{category === value ? "✓ " : ""}{value || "すべて"}</button>)}</div>
-      </details>
+    <section aria-label="商品を絞り込む" className="grid gap-2 rounded-xl border border-line bg-panel p-3">
+      <div className="flex min-w-0 items-center gap-2 overflow-x-auto pb-1" aria-label="カテゴリで絞り込む">
+        <p className="shrink-0 text-sm font-semibold">カテゴリー</p>
+        {[null, ...categories].map(value => <button key={value || "all"} type="button" aria-pressed={category === value} onClick={() => { setCategory(value); setLimit(24); }} className={category === value ? selectedCategoryButtonStyle : categoryButtonStyle}>{category === value ? "✓ " : ""}{value || "すべて"}</button>)}
+      </div>
+      <div className="grid gap-1">
+        <label htmlFor={searchId} className="text-sm font-semibold">商品名・規格で検索</label>
+        <div className="flex gap-2"><input id={searchId} type="search" value={query} onChange={event => { setQuery(event.target.value); setLimit(24); }} placeholder="商品名やサイズを入力" className={`h-10 min-w-0 flex-1 rounded-lg border border-muted bg-panel px-3 text-base ${focusStyle}`} />
+          {(query || category) && <button type="button" onClick={clearFilters} className={buttonStyle}>解除</button>}</div>
+      </div>
       <div className="flex flex-wrap justify-between gap-2 text-sm text-muted"><p role="status">{filtered.length}商品 ／ 全{cards.length}商品</p><p>担当: {staff.selectedStaffOperator?.displayName || "出庫確認時に選択"}</p></div>
     </section>
     {!filtered.length ? <section className="rounded-xl border border-line bg-panel p-6 text-center">
       <h2 className="text-lg font-semibold">{cards.length ? "条件に合う商品がありません" : "このクリニックの在庫商品はまだありません"}</h2>
       <p className="mt-2 text-base">{cards.length ? "商品名やカテゴリを変えてお試しください。" : "対象クリニックと在庫登録を確認してください。"}</p>
       {cards.length ? <button type="button" className={`${buttonStyle} mt-4`} onClick={clearFilters}>絞り込みを解除する</button> : <a href="/inventory" className="mt-4 inline-flex min-h-12 items-center underline">在庫一覧を確認する</a>}
-    </section> : <section aria-label="在庫商品のカード" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+    </section> : <section aria-label="在庫商品のカード" className="grid items-start gap-2 sm:grid-cols-2 lg:grid-cols-4">
       {filtered.slice(0, limit).map(card => {
         const unit = cardStockUnit(card.orderUnit);
         const blocked = cardIssueBlockReason(card);
-        return <article key={card.stockItemId} className="flex min-w-0 flex-col gap-3 rounded-xl border border-line bg-panel p-4 shadow-panel">
-          <div className="flex items-start gap-3"><StockPhoto card={card} /><div className="min-w-0"><p className="text-sm text-muted">{card.category || "未分類"}</p><h2 className="mt-1 break-words text-base font-semibold leading-6">{card.name}</h2></div></div>
-          {card.specification && <p className="break-words text-sm leading-5 text-muted">{card.specification}</p>}
-          <div className="mt-auto flex flex-wrap items-end justify-between gap-2 rounded-lg bg-subtle p-3"><p><span className="block text-sm">現在庫</span><strong className="text-3xl tabular-nums">{card.quantity}</strong> <span className="text-base">{unit || "単位未確認"}</span></p><p className="text-sm">基準 <strong className="text-lg tabular-nums">{card.minStock}</strong> {unit || ""}</p></div>
-          {card.quantity < card.minStock && <p className="text-sm font-semibold">{card.quantity === 0 ? "在庫切れ" : "基準在庫を下回っています"}</p>}
+        return <article key={card.stockItemId} className="flex min-w-0 flex-col gap-1.5 rounded-lg border border-line bg-panel p-2.5 shadow-panel">
+          <div className="flex items-start gap-2"><StockPhoto card={card} /><div className="min-w-0 flex-1"><p className="text-xs text-muted">{card.category || "未分類"}</p><h2 className="break-words text-base font-semibold leading-5">{card.name}</h2>{card.specification && <p className="mt-0.5 break-words text-xs leading-4 text-muted">{card.specification}</p>}</div></div>
+          <IssueInstructions text={card.issueHint} compact />
+          <div className="flex flex-wrap items-baseline justify-between gap-x-2 gap-y-1 rounded-lg bg-subtle px-2 py-1.5"><p className="flex items-baseline gap-1"><span className="text-xs">現在庫</span><strong className="text-2xl tabular-nums">{card.quantity}</strong> <span className="text-sm">{unit || "単位未確認"}</span></p><p className="text-xs">基準 <strong className="text-base tabular-nums">{card.minStock}</strong> {unit || ""}</p></div>
+          {card.quantity < card.minStock && <p className="text-xs font-semibold">{card.quantity === 0 ? "在庫切れ" : "基準在庫を下回っています"}</p>}
           {blocked ? <div className="grid gap-1"><p className="text-sm font-semibold">{blocked}</p><a href={`/products/${card.productId}`} className={`inline-flex min-h-12 items-center justify-center rounded-lg border border-muted text-base underline ${focusStyle}`}>商品詳細を確認</a></div> :
             <button type="button" className={primaryStyle} aria-label={`${card.name}を出庫する`} onClick={event => { lastTrigger.current = event.currentTarget; setSelected(card); }}>出庫する <span className="text-sm">（{unit}単位）</span></button>}
         </article>;

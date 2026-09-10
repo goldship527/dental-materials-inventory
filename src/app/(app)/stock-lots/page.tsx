@@ -194,7 +194,7 @@ export default async function StockLotsPage({ searchParams }: PageProps) {
                 className="h-11 rounded border border-line bg-white px-3 text-base font-normal text-ink outline-none transition placeholder:text-muted focus:border-accent"
                 defaultValue={query}
                 name="q"
-                placeholder="商品名、商品コード、JAN、ロット番号"
+                placeholder="商品名、商品コード、ロット番号"
                 type="search"
               />
             </label>
@@ -253,7 +253,7 @@ export default async function StockLotsPage({ searchParams }: PageProps) {
                           {lot.productName}
                         </a>
                         <p className="mt-1 text-xs text-muted">
-                          {lot.productCode ?? "-"} / JAN {lot.janCode ?? "-"} / {lot.category ?? "-"}
+                          {lot.productCode ?? "-"} / {lot.category ?? "-"}
                         </p>
                       </td>
                       <td className="border-b border-line px-4 py-3 font-mono">{lot.lotNumber || "-"}</td>

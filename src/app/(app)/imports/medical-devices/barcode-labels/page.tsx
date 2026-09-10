@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { barcodeUiEnabled } from "@/lib/workflow-features";
 import { auth } from "@/auth";
 import { Ean13Barcode } from "@/components/domain/ean13-barcode";
 import { AppNav } from "@/components/domain/app-nav";
@@ -35,6 +36,7 @@ function buildBackHref(q: string, sourceFile: string, duplicateOnly: boolean) {
 }
 
 export default async function MedicalDeviceBarcodeLabelsPage({ searchParams }: PageProps) {
+  if (!barcodeUiEnabled) redirect("/products/import");
   const session = await auth();
 
   if (!session?.user) {

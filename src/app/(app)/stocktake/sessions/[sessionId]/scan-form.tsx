@@ -10,6 +10,7 @@ import {
   updateStocktakeSessionItemAction,
 } from "@/lib/actions/stocktake-sessions";
 import { analyzeBarcodeInput } from "@/lib/barcode/gs1";
+import { barcodeUiEnabled } from "@/lib/workflow-features";
 import type { StocktakeSessionDetail, StocktakeSessionItemRow } from "@/lib/db/stocktake-sessions";
 
 type StocktakeSessionScanFormProps = {
@@ -445,7 +446,7 @@ export function StocktakeSessionScanForm({ session }: StocktakeSessionScanFormPr
 
   return (
     <div className="flex flex-col gap-6">
-      <section className="sticky top-0 z-10 rounded border border-line bg-white p-4 shadow-panel">
+      {barcodeUiEnabled && <section className="sticky top-0 z-10 rounded border border-line bg-white p-4 shadow-panel">
         <form onSubmit={handleBarcodeSubmit} className="grid gap-3 md:grid-cols-[1fr_auto]">
           <label className="grid gap-2 text-sm font-semibold text-muted">
             スキャナー入力
@@ -472,6 +473,7 @@ export function StocktakeSessionScanForm({ session }: StocktakeSessionScanFormPr
         ) : null}
       </section>
 
+      }
       <section className="grid gap-3 rounded border border-line bg-white p-4 shadow-panel md:grid-cols-[1fr_240px]">
         <label className="grid gap-2 text-sm font-semibold text-muted">
           商品検索

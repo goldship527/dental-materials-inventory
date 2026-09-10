@@ -10,6 +10,7 @@ function buildRow(overrides: Partial<OrderRequestRow>): OrderRequestRow {
   return {
     id: "request-1",
     productId: "product-1",
+    photoUpdatedAt: null,
     productCode: "P-001",
     name: "Print Test Product",
     category: "Consumables",

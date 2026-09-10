@@ -56,7 +56,7 @@ function fakeTransaction(options: {staffMissing?: boolean; stockMissing?: boolea
 test("barcode UI is paused without deleting the legacy workflow", () => {
   assert.equal(barcodeUiEnabled, false);
   assert.equal(stockOutPath, "/stock-out");
-  assert.equal(receivePath, "/orders?status=ORDERED");
+  assert.equal(receivePath, "/receive");
   for (const path of ["/barcode", "/barcode/out", "/barcode/receive", "/quick", "/imports/medical-devices"]) assert.equal(isWorkflowLinkVisible(path), false);
   assert.equal(isWorkflowLinkVisible("/stock-out"), true);
 });

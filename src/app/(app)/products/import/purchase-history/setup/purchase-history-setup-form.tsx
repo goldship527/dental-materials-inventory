@@ -84,7 +84,7 @@ export function PurchaseHistorySetupForm({ products, categories }: PurchaseHisto
                     <td className="border-b border-line px-3 py-3">
                       <p className="font-semibold text-ink">{product.name}</p>
                       <p className="mt-1 text-xs text-muted">
-                        {product.productCode ?? "コード未設定"} / JAN {product.janCode ?? "-"}
+                        {product.productCode ?? "コード未設定"}
                       </p>
                     </td>
                     <td className="border-b border-line px-3 py-3">

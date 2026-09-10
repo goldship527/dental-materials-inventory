@@ -138,7 +138,7 @@ export default async function DormantStockPage({ searchParams }: PageProps) {
                 className="h-11 rounded border border-line bg-white px-3 text-base font-normal text-ink outline-none transition placeholder:text-muted focus:border-accent"
                 defaultValue={query}
                 name="q"
-                placeholder="商品名、商品コード、JAN、カテゴリ、保管場所"
+                placeholder="商品名、商品コード、カテゴリ、保管場所"
                 type="search"
               />
             </label>
@@ -200,7 +200,7 @@ export default async function DormantStockPage({ searchParams }: PageProps) {
                           {row.productName}
                         </a>
                         <p className="mt-1 text-xs text-muted">
-                          {row.productCode ?? "-"} / JAN {row.janCode ?? "-"}
+                          {row.productCode ?? "-"}
                         </p>
                       </td>
                       <td className="border-b border-line px-4 py-3">{row.category ?? "-"}</td>

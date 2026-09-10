@@ -9,6 +9,7 @@ import {
 export type OrderRequestRow = {
   id: string;
   productId: string;
+  photoUpdatedAt: Date | null;
   productCode: string | null;
   name: string;
   category: string | null;
@@ -164,6 +165,7 @@ export async function getOrderRequestRows(clinicId: string): Promise<OrderReques
     return {
       id: request.id,
       productId: request.productId,
+      photoUpdatedAt: request.product.photoUpdatedAt,
       productCode: request.product.productCode,
       name: request.product.name,
       category: request.product.category,

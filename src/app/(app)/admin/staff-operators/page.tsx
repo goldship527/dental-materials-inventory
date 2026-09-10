@@ -18,7 +18,7 @@ export default async function AdminStaffOperatorsPage() {
           <p className="text-sm font-semibold text-accent">管理</p>
           <h1 className="text-2xl font-bold tracking-tight text-ink">スタッフ担当者</h1>
           <p className="max-w-3xl text-sm leading-6 text-muted">
-            バーコード出入庫で実際に作業した担当者を記録するためのスタッフバーコードを管理します。
+            入出庫で実際に作業した担当者を管理します。
             ログインアカウントとは分けて扱い、複数クリニックで作業する担当者は利用できるクリニックを複数選びます。
           </p>
         </header>

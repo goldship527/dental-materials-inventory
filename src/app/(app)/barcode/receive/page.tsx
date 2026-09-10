@@ -7,7 +7,7 @@ import { BarcodeBatchClient } from "../batch/barcode-batch-client";
 import { barcodeUiEnabled } from "@/lib/workflow-features";
 
 export default async function BarcodeReceivePage() {
-  if (!barcodeUiEnabled) redirect("/orders?status=ORDERED");
+  if (!barcodeUiEnabled) redirect("/receive");
   const session = await auth();
 
   if (!session?.user) {

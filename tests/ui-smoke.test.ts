@@ -165,9 +165,19 @@ function stopProcessTree(server: ChildProcessWithoutNullStreams | null) {
   }
 
   if (process.platform === "win32") {
-    execFileSync("taskkill", ["/pid", String(server.pid), "/T", "/F"], {
-      stdio: "ignore",
-    });
+    try {
+      execFileSync("taskkill", ["/pid", String(server.pid), "/T", "/F"], {
+        stdio: "ignore",
+      });
+    } catch (error) {
+      try {
+        process.kill(server.pid, 0);
+      } catch {
+        return;
+      }
+
+      throw error;
+    }
     return;
   }
 
@@ -368,6 +378,7 @@ async function seedUiSmokeDatabase(prisma: typeof import("../src/lib/db/prisma")
   }
 
   const product9 = products[8]!;
+  const recentMovementAt = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
   await prisma.favoriteProductCard.createMany({
     data: products.slice(0, 3).map((product, index) => ({
@@ -401,7 +412,7 @@ async function seedUiSmokeDatabase(prisma: typeof import("../src/lib/db/prisma")
         sourceType: "MANUAL",
         reason: "UI smoke abc rank",
         userId: admin.id,
-        createdAt: new Date("2026-06-01T00:00:00.000Z"),
+        createdAt: recentMovementAt,
       },
       {
         clinicId: mainClinic.id,
@@ -413,7 +424,7 @@ async function seedUiSmokeDatabase(prisma: typeof import("../src/lib/db/prisma")
         sourceType: "MANUAL",
         reason: "UI smoke secondary rank",
         userId: admin.id,
-        createdAt: new Date("2026-06-01T00:00:00.000Z"),
+        createdAt: recentMovementAt,
       },
     ],
   });
@@ -513,11 +524,11 @@ async function main() {
     const productsHtml = await assertOkPage(baseUrl, adminJar, "/products");
     assertTextOrder(productsHtml, ["商品", "現在庫", "納品待ち", "最低在庫", "保管場所", "カテゴリ"]);
     assertIncludes(productsHtml, "P-0009");
-    assertIncludes(productsHtml, "JAN 4900000000009");
+    assertNotIncludes(productsHtml, "JAN 4900000000009");
 
     const productDetailHtml = await assertOkPage(baseUrl, adminJar, `/products/${seed.product9Id}`);
     assertIncludes(productDetailHtml, "P-0009");
-    assertIncludes(productDetailHtml, "4900000000009");
+    assertNotIncludes(productDetailHtml, "4900000000009");
     assertIncludes(productDetailHtml, "使用頻度 A");
 
     const staffJar = await login(baseUrl, staffEmail, staffPassword);

@@ -781,6 +781,7 @@ export async function applyOrderReceiptLine(
     receivedExpiryDateText?: string | null;
     receivedExpiryDate?: Date | null;
     applyToStock: boolean;
+    createShortfallBackorder?: boolean;
   },
 ) {
   const receivedByStaff = await resolveActiveStaffOperatorForContext(input.context, input.receivedByStaffId);
@@ -800,8 +801,14 @@ export async function applyOrderReceiptLine(
     select: {
       id: true,
       productId: true,
+      supplierId: true,
+      orderRecordId: true,
       requestedQuantity: true,
       status: true,
+      orderedAt: true,
+      orderedMethod: true,
+      orderedMemo: true,
+      supplierResponseMemo: true,
       receivedAt: true,
       product: {
         select: {
@@ -908,6 +915,27 @@ export async function applyOrderReceiptLine(
     },
   });
 
+  const shortfall = target.requestedQuantity - input.receivedQuantity;
+
+  if ((input.createShortfallBackorder ?? true) && shortfall > 0) {
+    await tx.orderRequest.create({
+      data: {
+        clinicId: input.context.clinicId,
+        productId: target.productId,
+        supplierId: target.supplierId,
+        orderRecordId: target.orderRecordId,
+        status: "ORDERED",
+        requestedQuantity: shortfall,
+        orderedAt: target.orderedAt,
+        orderedMethod: target.orderedMethod,
+        orderedMemo: target.orderedMemo,
+        supplierResponseMemo: target.supplierResponseMemo,
+        createdByUserId: input.context.userId,
+        memo: `元発注 ${target.id} の不足分 ${shortfall} を繰越`,
+      },
+    });
+  }
+
   return {
     productName: target.product.name,
     afterQuantity,
@@ -925,6 +953,7 @@ export async function receiveOrderRequestForContext(
     receivedExpiryDateText?: string | null;
     receivedExpiryDate?: Date | null;
     applyToStock: boolean;
+    createShortfallBackorder?: boolean;
     revalidate?: boolean;
   },
 ) {
@@ -939,6 +968,7 @@ export async function receiveOrderRequestForContext(
       receivedExpiryDateText: input.receivedExpiryDateText,
       receivedExpiryDate: input.receivedExpiryDate,
       applyToStock: input.applyToStock,
+      createShortfallBackorder: input.createShortfallBackorder,
     }),
   );
 

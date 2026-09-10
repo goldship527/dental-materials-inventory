@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { barcodeUiEnabled } from "@/lib/workflow-features";
 import { auth } from "@/auth";
 import { AppNav } from "@/components/domain/app-nav";
 import { SubmitButton } from "@/components/ui/submit-button";
@@ -32,6 +33,7 @@ function formatGs1ExpiryDate(value: Date | null, fallback: string | null) {
 }
 
 export default async function BarcodePage({ searchParams }: PageProps) {
+  if (!barcodeUiEnabled) redirect("/stock-out");
   const session = await auth();
 
   if (!session?.user) {
