@@ -333,7 +333,7 @@ async function seedUiSmokeDatabase(prisma: typeof import("../src/lib/db/prisma")
         name: `UIスモーク商品${String(index).padStart(2, "0")}`,
         category: index <= 5 ? "スモークカテゴリA" : "スモークカテゴリB",
         manufacturer: "UIスモークメーカー",
-        specification: "開発用テスト規格",
+        specification: index === 1 ? "対象規格: テスト / 元表発注名: 開発用注文名 1セット" : "開発用テスト規格",
         orderUnit: index === 10 ? null : "箱",
         supplierProductCode: `SUP-UI-${String(index).padStart(4, "0")}`,
         standardPrice: 1000 + index,
@@ -544,7 +544,11 @@ async function main() {
     assertIncludes(stockOutHtml, "商品設定で単位を入力");
     assertIncludes(stockOutHtml, "name=\"unitConfirmed\"");
     assertIncludes(stockOutHtml, "value=\"yes\"");
-    assertIncludes(stockOutHtml, "sm:min-h-24 lg:min-h-28");
+    assertIncludes(stockOutHtml, "対象規格: テスト");
+    assertNotIncludes(stockOutHtml, "開発用注文名 1セット");
+    assertNotIncludes(stockOutHtml, "画面上部で作業スタッフを選択してください");
+    assertIncludes(stockOutHtml, "h-20 w-20");
+    assertIncludes(stockOutHtml, "sm:min-h-20 lg:min-h-24");
     assertIncludes(stockOutHtml, "border-line bg-white/80 text-muted");
     assertNotIncludes(stockOutHtml, "出庫内容の確認");
     assertNotIncludes(stockOutHtml, "在庫と同じ「箱」単位で出します");

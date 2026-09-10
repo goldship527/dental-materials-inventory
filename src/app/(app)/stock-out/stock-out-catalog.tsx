@@ -18,8 +18,8 @@ const selectedCategoryButtonStyle = `min-h-9 whitespace-nowrap rounded-lg bg-acc
 function StockPhoto({card}: {card: StockOutCard}) {
   const [failed, setFailed] = useState(false);
   const url = buildProductPhotoUrl({id: card.productId, photoUpdatedAt: card.photoUpdatedAt});
-  const sizeClass = "h-16 w-16";
-  return url && !failed ? <img src={url} alt="" loading="lazy" width={96} height={96} onError={() => setFailed(true)} className={`${sizeClass} shrink-0 rounded-lg border border-line bg-panel object-contain`} /> :
+  const sizeClass = "h-20 w-20";
+  return url && !failed ? <img src={url} alt="" loading="lazy" width={80} height={80} onError={() => setFailed(true)} className={`${sizeClass} shrink-0 rounded-lg border border-line bg-panel object-contain`} /> :
     <span aria-hidden="true" className={`grid ${sizeClass} shrink-0 place-items-center rounded-lg border border-line bg-subtle text-ink`}>
       <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.4"><path d="m3 7 9-4 9 4v10l-9 4-9-4V7Zm0 0 9 4 9-4M12 11v10M7.5 5l9 4" /></svg>
     </span>;
@@ -85,9 +85,9 @@ function InlineIssueControl({card, selectedStaffOperatorId, onResult}: {
     <button type="submit" disabled={pending || !valid || !selectedStaffOperatorId} aria-label={`${card.name}を${valid ? number : "入力した数量"}${unit}出庫する`} className={`${primaryStyle} px-2`}>
       {pending ? "記録中…" : `${valid ? number : "—"}${unit}を出庫`}
     </button>
-    <p aria-live="polite" className={`min-h-4 text-xs ${valid ? "text-muted" : "font-semibold text-danger"}`}>
-      {!selectedStaffOperatorId ? "画面上部で作業スタッフを選択してください" : valid ? `出庫後 ${card.quantity - number}${unit}` : "現在庫以下の整数を入力してください"}
-    </p>
+    {(!valid || selectedStaffOperatorId) && <p aria-live="polite" className={`text-xs ${valid ? "text-muted" : "font-semibold text-danger"}`}>
+      {valid ? `出庫後 ${card.quantity - number}${unit}` : "現在庫以下の整数を入力してください"}
+    </p>}
     </form>
 }
 
@@ -128,8 +128,8 @@ export function StockOutCatalog({cards, clinicId, staffOperators}: {cards: Stock
       {filtered.slice(0, limit).map(card => {
         const unit = cardStockUnit(card.orderUnit);
         const blocked = cardIssueBlockReason(card);
-        return <article key={card.stockItemId} className="flex h-full min-w-0 flex-col gap-1.5 rounded-lg border border-line bg-panel p-2.5 shadow-panel">
-          <div className="flex items-start gap-2 sm:min-h-24 lg:min-h-28"><StockPhoto card={card} /><div className="min-w-0 flex-1"><p className="text-xs text-muted">{card.category || "未分類"}</p><h2 className="whitespace-normal text-base font-semibold leading-5 [overflow-wrap:anywhere]">{card.name}</h2>{card.specification && <p className="mt-0.5 whitespace-normal text-xs leading-4 text-muted [overflow-wrap:anywhere]">{card.specification}</p>}</div></div>
+        return <article key={card.stockItemId} className="flex h-full min-w-0 flex-col gap-1 rounded-lg border border-line bg-panel p-2 shadow-panel">
+          <div className="flex items-start gap-2 sm:min-h-20 lg:min-h-24"><StockPhoto card={card} /><div className="min-w-0 flex-1"><p className="text-xs text-muted">{card.category || "未分類"}</p><h2 className="whitespace-normal text-base font-semibold leading-5 [overflow-wrap:anywhere]">{card.name}</h2>{card.specification && <p className="mt-0.5 whitespace-normal text-xs leading-4 text-muted [overflow-wrap:anywhere]">{card.specification}</p>}</div></div>
           <IssueInstructions text={card.issueHint} compact />
           <div className="flex flex-wrap items-baseline justify-between gap-x-2 gap-y-1 rounded-lg bg-subtle px-2 py-1.5"><p className="flex items-baseline gap-1"><span className="text-xs">現在庫</span><strong className="text-2xl tabular-nums">{card.quantity}</strong> <span className="text-sm">{unit || "単位未確認"}</span></p><p className="text-xs">基準 <strong className="text-base tabular-nums">{card.minStock}</strong> {unit || ""}</p></div>
           {card.quantity < card.minStock && <p className="text-xs font-semibold">{card.quantity === 0 ? "在庫切れ" : "基準在庫を下回っています"}</p>}

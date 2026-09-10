@@ -1,5 +1,6 @@
 import type { PrismaClient } from "@prisma/client";
 import type { StockOutCard } from "@/lib/stock/card-issue";
+import { getDailyCardSpecification } from "@/lib/products/daily-card-display";
 
 export async function getCardStockRows(db: Pick<PrismaClient, "stockItem">, context: {clinicId: string; organizationId: string}): Promise<StockOutCard[]> {
   const items = await db.stockItem.findMany({
@@ -11,7 +12,7 @@ export async function getCardStockRows(db: Pick<PrismaClient, "stockItem">, cont
   });
   return items.map(item => ({
     stockItemId: item.id, productId: item.productId, name: item.product.name,
-    specification: item.product.specification, category: item.product.category,
+    specification: getDailyCardSpecification(item.product.specification), category: item.product.category,
     orderUnit: item.product.orderUnit, quantity: item.quantity,
     minStock: item.minStock ?? item.product.defaultMinStock,
     stockUpdatedAt: item.updatedAt.getTime(), stockUsageMode: item.product.stockUsageMode,
