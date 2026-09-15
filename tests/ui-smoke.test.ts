@@ -535,6 +535,11 @@ async function main() {
     assertNotIncludes(productDetailHtml, "4900000000009");
     assertIncludes(productDetailHtml, "使用頻度 A");
     assertIncludes(productDetailHtml, "在庫・納品・出庫の単位");
+    assertIncludes(productDetailHtml, "aria-label=\"在庫サマリー\"");
+    assertNotIncludes(productDetailHtml, "推奨最低在庫");
+    assertNotIncludes(productDetailHtml, "内部コード");
+    assertNotIncludes(productDetailHtml, "ロット別在庫");
+    assertNotIncludes(productDetailHtml, "期限ロット一覧で確認");
 
     const stockOutHtml = await assertOkPage(baseUrl, adminJar, "/stock-out");
     assertNotIncludes(stockOutHtml, "商品を選び、単位と数量を確認して出庫します。");
@@ -558,6 +563,8 @@ async function main() {
     assertIncludes(stockOutHtml, "sm:min-h-20 lg:min-h-24");
     assertIncludes(stockOutHtml, "flow-root sm:min-h-20 lg:min-h-24");
     assertIncludes(stockOutHtml, "float-left mb-1 mr-2");
+    assertIncludes(stockOutHtml, `/products/${seed.product9Id}`);
+    assertIncludes(stockOutHtml, "商品詳細を開く");
     assertIncludes(stockOutHtml, "border-line bg-white/80 text-muted");
     assertNotIncludes(stockOutHtml, "出庫内容の確認");
     assertNotIncludes(stockOutHtml, "在庫と同じ「箱」単位で出します");
