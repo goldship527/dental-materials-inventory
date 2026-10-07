@@ -42,13 +42,13 @@ jobs:
           node - <<'NODE'
           const fs = require('node:fs');
           const url = new URL('postgresql://');
-          url.username = 'ci_receipt';
-          url.password = process.env.CI_DB_PASSWORD;
           url.hostname = '127.0.0.1';
           url.port = '5432';
           url.pathname = '/receipt_regression';
+          url.username = 'ci_receipt';
+          url.password = process.env.CI_DB_PASSWORD;
           fs.writeFileSync('.env', `DATABASE_URL=${url.toString()}\n`);
-          if (!process.env.CI_DB_PASSWORD || process.env.DATABASE_URL || url.hostname !== '127.0.0.1' || url.pathname !== '/receipt_regression') {
+          if (!process.env.CI_DB_PASSWORD || process.env.DATABASE_URL || url.hostname !== '127.0.0.1' || url.pathname !== '/receipt_regression' || url.username !== 'ci_receipt' || !url.password) {
             throw new Error('Test database isolation check failed');
           }
           console.log('Isolated local CI database confirmed');
