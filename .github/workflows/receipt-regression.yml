@@ -1,0 +1,62 @@
+name: Receipt regression
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  receipt-regression:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: ci_receipt
+          POSTGRES_DB: receipt_regression
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ci_receipt -d receipt_regression"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          package-manager-cache: false
+      - name: Install dependencies
+        run: |
+          corepack enable
+          corepack pnpm install --frozen-lockfile
+      - name: Configure isolated test database
+        run: |
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const url = new URL('postgresql://');
+          url.username = 'ci_receipt';
+          url.hostname = '127.0.0.1';
+          url.port = '5432';
+          url.pathname = '/receipt_regression';
+          fs.writeFileSync('.env', `DATABASE_URL=${url.toString()}\n`);
+          if (process.env.DATABASE_URL || url.hostname !== '127.0.0.1' || url.pathname !== '/receipt_regression') {
+            throw new Error('Test database isolation check failed');
+          }
+          console.log('Isolated local CI database confirmed');
+          NODE
+      - name: Receipt and stock regression tests
+        run: |
+          corepack pnpm exec tsx tests/order-receipt-single-connection.test.ts
+          corepack pnpm exec tsx tests/order-receipt.test.ts
+          corepack pnpm exec tsx tests/barcode-batch-order-receive.test.ts
+          node --import tsx --test tests/card-issue.test.ts
+      - name: Typecheck and build
+        run: |
+          corepack pnpm typecheck
+          corepack pnpm build

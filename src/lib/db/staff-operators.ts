@@ -170,8 +170,8 @@ export async function findActiveStaffOperatorByIdForClinic(options: {
   organizationId: string;
   clinicId: string;
   staffOperatorId: string;
-}) {
-  return prisma.staffOperator.findFirst({
+}, db: Prisma.TransactionClient | typeof prisma = prisma) {
+  return db.staffOperator.findFirst({
     where: {
       id: options.staffOperatorId,
       organizationId: options.organizationId,
