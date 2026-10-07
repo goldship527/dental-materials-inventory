@@ -57,7 +57,9 @@ jobs:
         run: |
           corepack pnpm exec tsx tests/order-receipt-single-connection.test.ts
           corepack pnpm exec tsx tests/order-receipt.test.ts
+          corepack pnpm exec tsx tests/order-revert-and-edit-guards.test.ts
           corepack pnpm exec tsx tests/barcode-batch-order-receive.test.ts
+          corepack pnpm exec tsx tests/order-request-status.test.ts
           node --import tsx --test tests/card-issue.test.ts
       - name: Typecheck and build
         run: |

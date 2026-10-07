@@ -11,6 +11,10 @@ export const orderRequestStatusLabels: Record<OrderRequestStatusValue, string> =
   ORDERED: "納品待ち",
 };
 
+export function canChangeOrderRequestQuantity(status: OrderRequestStatusValue, receivedAt: Date | null) {
+  return printableOrderRequestStatuses.includes(status) || (status === "ORDERED" && receivedAt === null);
+}
+
 export function createEmptyOrderRequestStatusCounts(): Record<OrderRequestStatusValue, number> {
   return Object.fromEntries(allOrderRequestStatuses.map((status) => [status, 0])) as Record<OrderRequestStatusValue, number>;
 }

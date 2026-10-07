@@ -547,6 +547,7 @@ model OrderRequest {
   productId              String
   supplierId             String?
   orderRecordId          String?
+  backorderOfId          String?
   status                 OrderRequestStatus @default(DRAFT)
   requestedQuantity      Int
   memo                   String?
@@ -570,6 +571,8 @@ model OrderRequest {
   product         Product        @relation(fields: [productId], references: [id])
   supplier        Supplier?      @relation(fields: [supplierId], references: [id])
   orderRecord     OrderRecord?   @relation(fields: [orderRecordId], references: [id])
+  backorderOf     OrderRequest?  @relation("OrderRequestBackorders", fields: [backorderOfId], references: [id], onDelete: SetNull)
+  backorders      OrderRequest[] @relation("OrderRequestBackorders")
   createdByUser   User           @relation("OrderRequestCreatedBy", fields: [createdByUserId], references: [id])
   receivedByUser  User?          @relation("OrderRequestReceivedBy", fields: [receivedByUserId], references: [id])
   receivedByStaff StaffOperator? @relation("OrderRequestReceivedByStaff", fields: [receivedByStaffId], references: [id])
@@ -578,6 +581,7 @@ model OrderRequest {
   @@index([productId])
   @@index([supplierId])
   @@index([orderRecordId])
+  @@index([backorderOfId])
   @@index([createdByUserId])
   @@index([receivedByUserId])
   @@index([receivedByStaffId])

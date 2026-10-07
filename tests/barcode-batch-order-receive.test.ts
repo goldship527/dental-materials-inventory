@@ -234,6 +234,8 @@ async function main() {
       },
     });
 
+    assert.equal(shortfallOrder.backorderOfId, first.orderRequest.id);
+
     const shortfallResolution = await resolveBatchScanForContext(base.context, {
       mode: "IN",
       barcode: janCode,
