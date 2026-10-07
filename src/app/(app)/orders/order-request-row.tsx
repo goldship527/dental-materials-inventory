@@ -38,8 +38,9 @@ type OrderRequestRowProps = {
 
 type ActiveOrderPanel = "supplier" | "quantity" | "receipt" | "status" | null;
 
-const statusOptions = orderRequestStatuses;
+const statusOptions = orderRequestStatuses.filter((status) => status !== "SUGGESTED");
 const statusOptionLabels: Record<OrderRequestStatusValue, string> = {
+  SUGGESTED: "確認待ち",
   DRAFT: "発注予定",
   CONFIRMED: "発注予定",
   ORDERED: "納品待ち",
@@ -51,6 +52,9 @@ function formatOrderRecordId(orderRecordId: string | null) {
 }
 
 function getStatusBadgeClass(row: OrderRequestRow) {
+  if (row.status === "SUGGESTED") {
+    return "border-blue-200 bg-blue-50 text-blue-700";
+  }
   if (row.status === "SKIPPED") {
     return "border-line bg-subtle text-muted";
   }
@@ -71,6 +75,9 @@ function getStatusBadgeClass(row: OrderRequestRow) {
 }
 
 function getRowToneClass(row: OrderRequestRow) {
+  if (row.status === "SUGGESTED") {
+    return "border-l-4 border-l-blue-400";
+  }
   if (row.status === "ORDERED" && row.receivedAt) {
     return "border-l-4 border-l-green-400";
   }
@@ -101,7 +108,9 @@ function getOrderRowStatusLabel(row: OrderRequestRow) {
 export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderRequestRowProps) {
   const [activePanel, setActivePanel] = useState<ActiveOrderPanel>(null);
   const [requestedQuantity, setRequestedQuantity] = useState(row.requestedQuantity);
-  const [selectedStatus, setSelectedStatus] = useState<OrderRequestStatusValue>(row.status === "DRAFT" ? "CONFIRMED" : row.status);
+  const [selectedStatus, setSelectedStatus] = useState<OrderRequestStatusValue>(
+    row.status === "DRAFT" || row.status === "SUGGESTED" ? "CONFIRMED" : row.status,
+  );
   const [selectedSupplierId, setSelectedSupplierId] = useState(row.supplierId ?? "");
   const [quantityState, quantityAction, isQuantityPending] = useActionState(
     updateOrderRequestQuantityWithStateAction,
@@ -133,7 +142,8 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
         ? supplierState
         : quantityState;
   const canChangeQuantity = canChangeOrderRequestQuantity(row.status, row.receivedAt);
-  const canChangeSupplier = printableOrderRequestStatuses.includes(row.status) && row.supplierOptions.length > 0;
+  const canChangeSupplier =
+    (row.status === "SUGGESTED" || printableOrderRequestStatuses.includes(row.status)) && row.supplierOptions.length > 0;
   const { hasStaffOperators, selectedStaffOperator, selectedStaffOperatorId } = useWorkStaffSelection({
     clinicId,
     staffOperators,
@@ -192,6 +202,14 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
             </p>
           </div>
         </div>
+        {row.status === "SUGGESTED" ? (
+          <div className="mt-2 grid gap-1 rounded border border-blue-100 bg-blue-50 px-2 py-1.5 text-xs text-blue-800 print:hidden">
+            <span className="font-semibold">不足 {row.requestedQuantity}{row.orderUnit ? `（${row.orderUnit}）` : ""}</span>
+            <span>
+              基準 {row.minStock} − 現在庫 {row.quantity} − 納品待ち {row.pendingOrderedQuantity} − 発注予定 {row.plannedQuantity}
+            </span>
+          </div>
+        ) : null}
       </td>
       <td className="border-b border-line px-3 py-2 print:border print:border-black print:px-2 print:py-1.5">
         {row.supplierId && row.supplierName ? (
@@ -269,7 +287,11 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
               onClick={() => togglePanel("quantity")}
               className="inline-flex h-8 w-fit items-center rounded border border-line bg-white/75 px-3 text-xs font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent print:hidden"
             >
-              {activePanel === "quantity" ? "閉じる" : "数量変更"}
+              {activePanel === "quantity"
+                ? "閉じる"
+                : row.status === "SUGGESTED"
+                  ? "数量を変えて発注予定へ"
+                  : "数量変更"}
             </button>
           ) : null}
           {canChangeQuantity && activePanel === "quantity" ? (
@@ -332,6 +354,32 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
               </span>
             ) : null}
           </div>
+          {row.status === "SUGGESTED" ? (
+            <div className="flex flex-wrap gap-2">
+              <form action={statusAction}>
+                <input type="hidden" name="orderRequestId" value={row.id} />
+                <input type="hidden" name="status" value="CONFIRMED" />
+                <button
+                  type="submit"
+                  disabled={isStatusPending}
+                  className="h-8 rounded bg-accent px-3 text-xs font-semibold text-white transition hover:bg-accentDeep disabled:opacity-50"
+                >
+                  確認して発注予定へ
+                </button>
+              </form>
+              <form action={statusAction}>
+                <input type="hidden" name="orderRequestId" value={row.id} />
+                <input type="hidden" name="status" value="SKIPPED" />
+                <button
+                  type="submit"
+                  disabled={isStatusPending}
+                  className="h-8 rounded border border-line bg-white px-3 text-xs font-semibold text-muted transition hover:border-muted disabled:opacity-50"
+                >
+                  見送り
+                </button>
+              </form>
+            </div>
+          ) : null}
           {row.status === "ORDERED" ? (
             <div className="grid gap-0.5 text-xs text-muted">
               {row.orderRecordId ? <span>発注記録: {formatOrderRecordId(row.orderRecordId)}</span> : null}

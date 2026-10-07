@@ -6,6 +6,8 @@ import { requireAdminUser } from "@/lib/auth/admin";
 import { type ActiveClinicContext, requireActiveClinic } from "@/lib/db/clinic";
 import { prisma } from "@/lib/db/prisma";
 import { findActiveStaffOperatorByIdForClinic } from "@/lib/db/staff-operators";
+import { lockOrderRequestProduct } from "@/lib/orders/locks";
+import { syncOrderSuggestion } from "@/lib/orders/suggestions";
 
 const stockItemIdSchema = z.string().min(1);
 const productIdSchema = z.string().min(1);
@@ -165,31 +167,29 @@ export async function createStockItemForContext(context: ActiveClinicContext, in
     throw new Error("対象の商品が見つかりません。");
   }
 
-  const existingStockItem = await prisma.stockItem.findUnique({
-    where: {
-      clinicId_productId: {
+  await prisma.$transaction(async (tx) => {
+    await lockOrderRequestProduct(tx, context.clinicId, input.productId);
+    const existingStockItem = await tx.stockItem.findUnique({
+      where: { clinicId_productId: { clinicId: context.clinicId, productId: input.productId } },
+      select: { id: true },
+    });
+    if (existingStockItem) throw new Error("このクリニックの在庫行は既に作成されています。");
+    await tx.stockItem.create({
+      data: {
         clinicId: context.clinicId,
         productId: input.productId,
+        quantity: input.quantity,
+        minStock: input.minStock,
+        location: input.location,
+        isUsed: true,
       },
-    },
-    select: {
-      id: true,
-    },
-  });
-
-  if (existingStockItem) {
-    throw new Error("このクリニックの在庫行は既に作成されています。");
-  }
-
-  await prisma.stockItem.create({
-    data: {
+    });
+    await syncOrderSuggestion(tx, {
       clinicId: context.clinicId,
+      organizationId: context.organizationId,
       productId: input.productId,
-      quantity: input.quantity,
-      minStock: input.minStock,
-      location: input.location,
-      isUsed: true,
-    },
+      actorUserId: context.userId,
+    });
   });
 
   return {
@@ -216,12 +216,18 @@ export async function adjustStockForContext(
   }
 
   const result = await prisma.$transaction(async (tx) => {
-    const stockItem = await tx.stockItem.findFirst({
+    const initialStockItem = await tx.stockItem.findFirst({
       where: {
         id: input.stockItemId,
         clinicId: context.clinicId,
         isUsed: true,
       },
+      select: { productId: true },
+    });
+    if (!initialStockItem) throw new Error("対象の在庫が見つかりません。");
+    await lockOrderRequestProduct(tx, context.clinicId, initialStockItem.productId);
+    const stockItem = await tx.stockItem.findFirst({
+      where: { id: input.stockItemId, clinicId: context.clinicId, isUsed: true },
       select: {
         id: true,
         productId: true,
@@ -281,6 +287,12 @@ export async function adjustStockForContext(
         performedByStaffId: staffOperator?.id ?? null,
       },
     });
+    await syncOrderSuggestion(tx, {
+      clinicId: context.clinicId,
+      organizationId: context.organizationId,
+      productId: stockItem.productId,
+      actorUserId: context.userId,
+    });
 
     return {
       productName: stockItem.product.name,
@@ -317,12 +329,18 @@ async function quickMove(stockItemId: string, delta: number, staffOperatorId: st
   }
 
   const result = await prisma.$transaction(async (tx) => {
-    const stockItem = await tx.stockItem.findFirst({
+    const initialStockItem = await tx.stockItem.findFirst({
       where: {
         id: parsedStockItemId,
         clinicId: context.clinicId,
         isUsed: true,
       },
+      select: { productId: true },
+    });
+    if (!initialStockItem) throw new Error("対象の在庫が見つかりません。");
+    await lockOrderRequestProduct(tx, context.clinicId, initialStockItem.productId);
+    const stockItem = await tx.stockItem.findFirst({
+      where: { id: parsedStockItemId, clinicId: context.clinicId, isUsed: true },
       select: {
         id: true,
         productId: true,
@@ -394,6 +412,12 @@ async function quickMove(stockItemId: string, delta: number, staffOperatorId: st
         userId: context.userId,
         performedByStaffId: staffOperator.id,
       },
+    });
+    await syncOrderSuggestion(tx, {
+      clinicId: context.clinicId,
+      organizationId: context.organizationId,
+      productId: stockItem.productId,
+      actorUserId: context.userId,
     });
 
     return {

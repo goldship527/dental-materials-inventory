@@ -5,6 +5,8 @@ import { z } from "zod";
 import { auditActions, writeAuditLog } from "@/lib/audit/audit-log";
 import { type ActiveClinicContext, requireActiveClinic } from "@/lib/db/clinic";
 import { prisma } from "@/lib/db/prisma";
+import { lockNamedTransactionResource, lockOrderRequestProduct, lockStockItem } from "@/lib/orders/locks";
+import { syncOrderSuggestion } from "@/lib/orders/suggestions";
 
 const movementIdSchema = z.string().min(1);
 
@@ -48,7 +50,13 @@ export async function revertStockMovementForContext(options: {
 }) {
   const { context, movementId } = options;
   const result = await prisma.$transaction(async (tx) => {
-    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`stock-movement:${movementId}`}))`;
+    const initialMovement = await tx.stockMovement.findFirst({
+      where: { id: movementId, clinicId: context.clinicId },
+      select: { productId: true },
+    });
+    if (!initialMovement) throw new Error("取り消し対象の履歴が見つかりません。");
+    await lockOrderRequestProduct(tx, context.clinicId, initialMovement.productId);
+    await lockNamedTransactionResource(tx, `stock-movement:${movementId}`);
 
     const movement = await tx.stockMovement.findFirst({
       where: {
@@ -95,7 +103,7 @@ export async function revertStockMovementForContext(options: {
       throw new Error("取り消し操作の履歴は、さらに取り消すことはできません。");
     }
 
-    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`stock-item:${context.clinicId}:${movement.productId}`}))`;
+    await lockStockItem(tx, context.clinicId, movement.productId);
 
     const updateResult = await tx.stockItem.updateMany({
       where: {
@@ -207,6 +215,13 @@ export async function revertStockMovementForContext(options: {
         revertedAt,
         revertedById: context.userId,
       },
+    });
+
+    await syncOrderSuggestion(tx, {
+      clinicId: context.clinicId,
+      organizationId: context.organizationId,
+      productId: movement.productId,
+      actorUserId: context.userId,
     });
 
     return {

@@ -13,6 +13,7 @@ export type AdminOverviewClinicRow = {
   totalQuantity: number;
   shortageCount: number;
   zeroStockCount: number;
+  suggestedOrderRequestCount: number;
   draftOrderRequestCount: number;
   confirmedOrderRequestCount: number;
   orderedRequestCount: number;
@@ -26,6 +27,7 @@ export type AdminOverviewSummary = {
   totalQuantity: number;
   shortageCount: number;
   zeroStockCount: number;
+  suggestedOrderRequestCount: number;
   draftOrderRequestCount: number;
   confirmedOrderRequestCount: number;
   attentionStockLotCount: number;
@@ -92,6 +94,7 @@ async function getClinicOverviewRow(clinic: {
     totalQuantity,
     shortageCount,
     zeroStockCount,
+    suggestedOrderRequestCount: orderStatusCounts.SUGGESTED,
     draftOrderRequestCount: orderStatusCounts.DRAFT,
     confirmedOrderRequestCount: orderStatusCounts.CONFIRMED,
     orderedRequestCount: orderStatusCounts.ORDERED,
@@ -136,6 +139,7 @@ export async function getAdminOverview(organizationId: string): Promise<AdminOve
       totalQuantity: rows.reduce((total, row) => total + row.totalQuantity, 0),
       shortageCount: rows.reduce((total, row) => total + row.shortageCount, 0),
       zeroStockCount: rows.reduce((total, row) => total + row.zeroStockCount, 0),
+      suggestedOrderRequestCount: rows.reduce((total, row) => total + row.suggestedOrderRequestCount, 0),
       draftOrderRequestCount: rows.reduce((total, row) => total + row.draftOrderRequestCount, 0),
       confirmedOrderRequestCount: rows.reduce((total, row) => total + row.confirmedOrderRequestCount, 0),
       attentionStockLotCount: rows.reduce((total, row) => total + row.attentionStockLotCount, 0),

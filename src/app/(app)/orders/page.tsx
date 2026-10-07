@@ -14,12 +14,16 @@ import { OrderRequestTableRow } from "./order-request-row";
 import { OrdersPrintButton } from "./print-button";
 import { SupplierOrderRecordPanel } from "./supplier-order-record-panel";
 
-type OrderListFilterValue = "ALL" | "PLANNED" | "AWAITING_RECEIPT" | "RECEIVED" | "SKIPPED";
+type OrderListFilterValue = "ALL" | "SUGGESTED" | "PLANNED" | "AWAITING_RECEIPT" | "RECEIVED" | "SKIPPED";
 type OrderStatusFilterValue = Exclude<OrderListFilterValue, "ALL">;
 
 const defaultOrderListFilter: OrderListFilterValue = "PLANNED";
 
 const statusFilters: { label: string; value: OrderListFilterValue }[] = [
+  {
+    label: "確認待ち",
+    value: "SUGGESTED",
+  },
   {
     label: "すべて",
     value: "ALL",
@@ -41,7 +45,7 @@ const statusFilters: { label: string; value: OrderListFilterValue }[] = [
     value: "SKIPPED",
   },
 ];
-const orderRequestStatusRank = Object.fromEntries(["CONFIRMED", "DRAFT", "ORDERED", "SKIPPED"].map((status, index) => [status, index])) as Record<
+const orderRequestStatusRank = Object.fromEntries(["SUGGESTED", "CONFIRMED", "DRAFT", "ORDERED", "SKIPPED"].map((status, index) => [status, index])) as Record<
   OrderRequestStatusValue,
   number
 >;
@@ -76,6 +80,9 @@ function buildOrdersPrintHref(supplierId: string | null | undefined) {
 }
 
 function getSupplierStatusChipClass(status: OrderStatusFilterValue) {
+  if (status === "SUGGESTED") {
+    return "border-blue-200 bg-blue-50 text-blue-700";
+  }
   if (status === "SKIPPED") {
     return "border-line bg-subtle text-muted";
   }
@@ -122,6 +129,10 @@ function getStatusFilterClass(status: OrderListFilterValue, isCurrent: boolean) 
   }
 
   const toneClassByStatus: Record<OrderStatusFilterValue, { current: string; idle: string }> = {
+    SUGGESTED: {
+      current: "border-blue-300 bg-blue-100 text-blue-800 shadow-sm ring-2 ring-blue-200 focus-visible:ring-blue-300",
+      idle: "border-blue-200 bg-white/75 text-blue-700 hover:border-blue-300 hover:bg-blue-50 focus-visible:ring-blue-300",
+    },
     PLANNED: {
       current: "border-accent bg-teal-100 text-accentDeep shadow-sm ring-2 ring-accent/25 focus-visible:ring-accent/50",
       idle: "border-teal-100 bg-white/75 text-accent hover:border-accent hover:bg-teal-50 focus-visible:ring-accent/30",
@@ -163,6 +174,8 @@ function matchesOrderListFilter(row: OrderRequestRow, filter: OrderListFilterVal
   if (filter === "PLANNED") {
     return printableOrderRequestStatuses.includes(row.status);
   }
+
+  if (filter === "SUGGESTED") return row.status === "SUGGESTED";
 
   if (filter === "AWAITING_RECEIPT") {
     return row.status === "ORDERED" && !row.receivedAt;
@@ -266,6 +279,11 @@ export default async function OrdersPage({ searchParams }: PageProps) {
   });
   const filteredRows = queryFilteredRows.filter((row) => matchesOrderListFilter(row, selectedStatus));
   const counts = [
+    {
+      status: "SUGGESTED" as const,
+      label: "確認待ち",
+      count: queryFilteredRows.filter((row) => row.status === "SUGGESTED").length,
+    },
     {
       status: "PLANNED" as const,
       label: "発注予定",
@@ -442,11 +460,20 @@ export default async function OrdersPage({ searchParams }: PageProps) {
               const supplierRows = group.rows;
               const supplierLeadTime =
                 supplierKey === orderPrintUnassignedSupplierId ? undefined : supplierLeadTimes[supplierKey];
+              const suggestedRows = sortRowsByStatusFlow(supplierRows.filter((row) => row.status === "SUGGESTED"));
               const activeRows = sortRowsByStatusFlow(supplierRows.filter((row) => printableOrderRequestStatuses.includes(row.status)));
               const awaitingReceiptRows = sortRowsByStatusFlow(supplierRows.filter((row) => row.status === "ORDERED" && !row.receivedAt));
               const receivedRows = sortRowsByStatusFlow(supplierRows.filter((row) => row.status === "ORDERED" && row.receivedAt));
               const skippedRows = sortRowsByStatusFlow(supplierRows.filter((row) => row.status === "SKIPPED"));
               const rowBlocks = [
+                {
+                  key: "suggested",
+                  title: "確認待ち",
+                  description: "在庫変動から自動計算・スタッフ確認待ち",
+                  rows: suggestedRows,
+                  className: "border-blue-200",
+                  headerClassName: "bg-blue-50/80",
+                },
                 {
                   key: "active",
                   title: "発注予定",
@@ -483,6 +510,11 @@ export default async function OrdersPage({ searchParams }: PageProps) {
               const hasUnassignedSupplier = supplierRows.some((row) => !row.supplierId);
               const supplierStatusCounts = [
                 {
+                  status: "SUGGESTED" as const,
+                  label: "確認待ち",
+                  count: supplierRows.filter((row) => row.status === "SUGGESTED").length,
+                },
+                {
                   status: "PLANNED" as const,
                   label: "発注予定",
                   count: supplierRows.filter((row) => printableOrderRequestStatuses.includes(row.status)).length,
@@ -505,7 +537,7 @@ export default async function OrdersPage({ searchParams }: PageProps) {
               ]
                 .filter((item) => item.count > 0);
               const primaryStatusCounts = supplierStatusCounts.filter((item) =>
-                item.status === "PLANNED" || item.status === "AWAITING_RECEIPT",
+                item.status === "SUGGESTED" || item.status === "PLANNED" || item.status === "AWAITING_RECEIPT",
               );
 
               return (

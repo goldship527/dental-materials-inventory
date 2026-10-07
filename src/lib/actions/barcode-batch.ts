@@ -11,6 +11,7 @@ import { prisma } from "@/lib/db/prisma";
 import { findActiveStaffOperatorByIdForClinic, findActiveStaffOperatorForClinic } from "@/lib/db/staff-operators";
 import { applyOrderReceiptLine } from "@/lib/actions/orders";
 import { applyStockOutLine } from "@/lib/actions/barcode-stock";
+import { lockOrderRequestProducts } from "@/lib/orders/locks";
 
 const barcodeSchema = z
   .string()
@@ -424,6 +425,11 @@ export async function batchOrderReceiveForContext(
   let processedCount = 0;
 
   await prisma.$transaction(async (tx) => {
+    const initialTargets = await tx.orderRequest.findMany({
+      where: { id: { in: lines.map((line) => line.orderRequestId) }, clinicId: context.clinicId },
+      select: { productId: true },
+    });
+    await lockOrderRequestProducts(tx, context.clinicId, initialTargets.map(({ productId }) => productId));
     for (const line of lines) {
       try {
         await applyOrderReceiptLine(tx, {
@@ -492,6 +498,7 @@ export async function batchStockOutForContext(
   let processedCount = 0;
 
   await prisma.$transaction(async (tx) => {
+    await lockOrderRequestProducts(tx, context.clinicId, lines.map((line) => line.productId));
     for (const line of lines) {
       try {
         await applyStockOutLine(tx, {

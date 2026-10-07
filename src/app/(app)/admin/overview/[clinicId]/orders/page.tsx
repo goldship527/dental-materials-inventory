@@ -15,10 +15,11 @@ type PageProps = {
   }>;
 };
 
-type AdminOrderFilterValue = "" | "PLANNED" | "AWAITING_RECEIPT" | "RECEIVED" | "SKIPPED";
+type AdminOrderFilterValue = "" | "SUGGESTED" | "PLANNED" | "AWAITING_RECEIPT" | "RECEIVED" | "SKIPPED";
 
 const statusFilters: { label: string; value: AdminOrderFilterValue }[] = [
   { label: "すべて", value: "" },
+  { label: "確認待ち", value: "SUGGESTED" },
   { label: "発注予定", value: "PLANNED" },
   { label: "納品待ち", value: "AWAITING_RECEIPT" },
   { label: "納品済み", value: "RECEIVED" },
@@ -54,6 +55,8 @@ function matchesOrderFilter(row: OrderRequestRow, filter: AdminOrderFilterValue)
     return printableOrderRequestStatuses.includes(row.status);
   }
 
+  if (filter === "SUGGESTED") return row.status === "SUGGESTED";
+
   if (filter === "AWAITING_RECEIPT") {
     return row.status === "ORDERED" && !row.receivedAt;
   }
@@ -70,6 +73,7 @@ function getAdminOrderStatusLabel(row: OrderRequestRow) {
     return row.receivedAt ? "納品済み" : "納品待ち";
   }
 
+  if (row.status === "SUGGESTED") return "確認待ち";
   return row.status === "SKIPPED" ? "見送り" : "発注予定";
 }
 

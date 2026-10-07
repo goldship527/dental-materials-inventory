@@ -6,6 +6,12 @@ import { z } from "zod";
 import { auditActions, writeAuditLog } from "@/lib/audit/audit-log";
 import { type ActiveClinicContext, requireActiveClinic } from "@/lib/db/clinic";
 import { prisma } from "@/lib/db/prisma";
+import {
+  lockNamedTransactionResource,
+  lockOrderRequestProducts,
+  lockStockItem,
+} from "@/lib/orders/locks";
+import { syncOrderSuggestionsInSeparateTransactions } from "@/lib/orders/suggestions";
 
 const idSchema = z.string().min(1);
 const quantitySchema = z.coerce.number().int().min(0).max(999999);
@@ -377,9 +383,21 @@ export async function commitStocktakeSessionForContext(options: {
   revalidate?: boolean;
 }) {
   const { context, sessionId } = options;
+  let committedProductIds: string[] = [];
 
   await prisma.$transaction(async (tx) => {
-    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`stocktake-session:${sessionId}`}))`;
+    const initialSession = await tx.stocktakeSession.findFirst({
+      where: { id: sessionId, clinicId: context.clinicId, status: "IN_PROGRESS" },
+      select: {
+        items: {
+          where: { status: "COUNTED", countedQuantity: { not: null } },
+          select: { productId: true },
+        },
+      },
+    });
+    if (!initialSession) throw new Error("入力中の棚卸セッションが見つかりません。");
+    await lockOrderRequestProducts(tx, context.clinicId, initialSession.items.map(({ productId }) => productId));
+    await lockNamedTransactionResource(tx, `stocktake-session:${sessionId}`);
 
     const session = await tx.stocktakeSession.findFirst({
       where: {
@@ -405,6 +423,7 @@ export async function commitStocktakeSessionForContext(options: {
               },
             },
           },
+          orderBy: { productId: "asc" },
         },
       },
     });
@@ -418,7 +437,7 @@ export async function commitStocktakeSessionForContext(options: {
         continue;
       }
 
-      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`stock-item:${context.clinicId}:${item.productId}`}))`;
+      await lockStockItem(tx, context.clinicId, item.productId);
 
       const updateResult = await tx.stockItem.updateMany({
         where: {
@@ -461,6 +480,8 @@ export async function commitStocktakeSessionForContext(options: {
       });
     }
 
+    committedProductIds = session.items.map((item) => item.productId);
+
     await tx.stocktakeSession.update({
       where: {
         id: session.id,
@@ -471,6 +492,12 @@ export async function commitStocktakeSessionForContext(options: {
         committedByUserId: context.userId,
       },
     });
+  });
+
+  await syncOrderSuggestionsInSeparateTransactions(prisma, {
+    organizationId: context.organizationId,
+    actorUserId: context.userId,
+    scopes: committedProductIds.map((productId) => ({ clinicId: context.clinicId, productId })),
   });
 
   if (options.revalidate ?? true) {

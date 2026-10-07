@@ -9,6 +9,8 @@ import { isAllowedBarcodeStockReason } from "@/lib/barcode/stock-reasons";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { prisma } from "@/lib/db/prisma";
 import { findActiveStaffOperatorByIdForClinic } from "@/lib/db/staff-operators";
+import { lockOrderRequestProduct } from "@/lib/orders/locks";
+import { syncOrderSuggestion } from "@/lib/orders/suggestions";
 
 const movementTypeSchema = z.enum(["IN", "OUT"]);
 const quantitySchema = z.coerce
@@ -282,6 +284,8 @@ async function applyBarcodeStockMoveLine(
     throw new Error("読み取り結果の商品と操作対象の商品が一致しません。もう一度読み取ってください。");
   }
 
+  await lockOrderRequestProduct(tx, input.context.clinicId, match.productId);
+
   const staffOperator = await findActiveStaffOperatorByIdForClinic({
     organizationId: input.context.organizationId,
     clinicId: input.context.clinicId,
@@ -389,6 +393,12 @@ async function applyBarcodeStockMoveLine(
       performedByStaffId: staffOperator.id,
       memo,
     },
+  });
+  await syncOrderSuggestion(tx, {
+    clinicId: input.context.clinicId,
+    organizationId: input.context.organizationId,
+    productId: stockItem.productId,
+    actorUserId: input.context.userId,
   });
 
   return {

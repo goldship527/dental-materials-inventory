@@ -32,6 +32,7 @@ export default async function HomePage({ searchParams }: PageProps) {
   const canUseAdminMode = isAdminRole(session.user.role);
   const summary = await getDashboardSummary(context.clinicId, context.organizationId);
   const plannedOrderRequestCount = summary.orderRequestStatusCounts.DRAFT + summary.orderRequestStatusCounts.CONFIRMED;
+  const suggestedOrderRequestCount = summary.orderRequestStatusCounts.SUGGESTED;
   const pendingReceiveCount = summary.orderRequestStatusCounts.ORDERED;
   const operationItems = [
     {
@@ -50,6 +51,13 @@ export default async function HomePage({ searchParams }: PageProps) {
     },
   ];
   const attentionItems = [
+    {
+      title: "確認待ち",
+      href: "/orders?status=SUGGESTED",
+      value: `${suggestedOrderRequestCount} 件`,
+      note: "在庫変動から自動計算された発注候補",
+      isWarning: suggestedOrderRequestCount > 0,
+    },
     {
       title: "在庫0",
       href: "/shortage",

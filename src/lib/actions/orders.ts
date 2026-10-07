@@ -10,13 +10,20 @@ import { orderSendMethodValues } from "@/lib/orders/send-method";
 import { OrderBusinessError, toOrderActionError } from "@/lib/orders/action-error";
 import { printableOrderRequestStatuses } from "@/lib/orders/status";
 import { orderRequestStatusLabels, type OrderRequestStatusValue } from "@/lib/orders/status";
+import {
+  lockOrderReceipt,
+  lockOrderRequestProduct,
+  lockOrderRequestProducts,
+  lockStockItem,
+} from "@/lib/orders/locks";
+import { clearOrderSuggestionSuppression, syncOrderSuggestion } from "@/lib/orders/suggestions";
 
 const orderRequestIdSchema = z.string().min(1);
 const orderRequestIdsSchema = z.array(orderRequestIdSchema).min(1);
 const stockItemIdSchema = z.string().min(1);
 const supplierIdSchema = z.string().min(1);
 const requestedQuantitySchema = z.coerce.number().int().min(1).max(9999);
-const orderRequestStatusSchema = z.enum(["DRAFT", "CONFIRMED", "SKIPPED", "ORDERED"]);
+const orderRequestStatusSchema = z.enum(["SUGGESTED", "DRAFT", "CONFIRMED", "SKIPPED", "ORDERED"]);
 const orderSendMethodSchema = z.enum(orderSendMethodValues, {
   message: "送付方法を選択してください。",
 });
@@ -149,10 +156,6 @@ function buildReceiptLotData(input: {
   };
 }
 
-async function lockTransactionKey(tx: Prisma.TransactionClient, key: string) {
-  await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${key}))`;
-}
-
 async function incrementReceiptStockLot(
   tx: Prisma.TransactionClient,
   input: {
@@ -250,7 +253,7 @@ export async function createOrderRequestWithStateAction(
     const stockItemId = stockItemIdSchema.parse(formData.get("stockItemId"));
 
     const result = await prisma.$transaction(async (tx) => {
-      const stockItem = await tx.stockItem.findFirst({
+      const initialStockItem = await tx.stockItem.findFirst({
         where: {
           id: stockItemId,
           clinicId: context.clinicId,
@@ -258,6 +261,22 @@ export async function createOrderRequestWithStateAction(
           product: {
             isActive: true,
           },
+        },
+        select: { productId: true },
+      });
+
+      if (!initialStockItem) {
+        throw new OrderBusinessError("対象の在庫が見つかりません。");
+      }
+
+      await lockOrderRequestProduct(tx, context.clinicId, initialStockItem.productId);
+
+      const stockItem = await tx.stockItem.findFirst({
+        where: {
+          id: stockItemId,
+          clinicId: context.clinicId,
+          isUsed: true,
+          product: { isActive: true },
         },
         select: {
           quantity: true,
@@ -277,19 +296,17 @@ export async function createOrderRequestWithStateAction(
         throw new OrderBusinessError("対象の在庫が見つかりません。");
       }
 
-      await lockTransactionKey(tx, `order-request:${context.clinicId}:${stockItem.product.id}`);
-
       const activeRequest = await tx.orderRequest.findFirst({
         where: {
           clinicId: context.clinicId,
           productId: stockItem.product.id,
           status: {
-            in: printableOrderRequestStatuses,
+            in: ["SUGGESTED", ...printableOrderRequestStatuses],
           },
         },
       });
 
-      if (activeRequest) {
+      if (activeRequest && activeRequest.status !== "SUGGESTED") {
         return {
           productName: stockItem.product.name,
           alreadyExists: true,
@@ -297,7 +314,14 @@ export async function createOrderRequestWithStateAction(
       }
 
       const minStock = stockItem.minStock ?? stockItem.product.defaultMinStock;
-      const requestedQuantity = Math.max(1, minStock - stockItem.quantity);
+      const requestedQuantity = activeRequest?.requestedQuantity ?? Math.max(1, minStock - stockItem.quantity);
+
+      if (activeRequest?.status === "SUGGESTED") {
+        await tx.orderRequest.update({
+          where: { id: activeRequest.id },
+          data: { status: "CONFIRMED", createdByUserId: context.userId },
+        });
+      } else {
       const skippedRequest = await tx.orderRequest.findFirst({
         where: {
           clinicId: context.clinicId,
@@ -334,6 +358,15 @@ export async function createOrderRequestWithStateAction(
           },
         });
       }
+      }
+
+      await clearOrderSuggestionSuppression(tx, context.clinicId, stockItem.product.id);
+      await syncOrderSuggestion(tx, {
+        clinicId: context.clinicId,
+        organizationId: context.organizationId,
+        productId: stockItem.product.id,
+        actorUserId: context.userId,
+      });
 
       return {
         productName: stockItem.product.name,
@@ -384,9 +417,20 @@ export async function updateOrderRequestQuantityForContext(
     requestedQuantity: number;
     revalidate?: boolean;
   },
-) {
+  ) {
   const request = await prisma.$transaction(async (tx) => {
-    await lockTransactionKey(tx, `order-receipt:${input.orderRequestId}`);
+    const initialTarget = await tx.orderRequest.findFirst({
+      where: { id: input.orderRequestId, clinicId: context.clinicId },
+      select: { productId: true },
+    });
+    if (!initialTarget) throw new OrderBusinessError("対象の発注候補が見つかりません。");
+    await lockOrderRequestProduct(tx, context.clinicId, initialTarget.productId);
+    await lockOrderReceipt(tx, input.orderRequestId);
+    const currentTarget = await tx.orderRequest.findFirst({
+      where: { id: input.orderRequestId, clinicId: context.clinicId },
+      select: { status: true },
+    });
+    if (!currentTarget) throw new OrderBusinessError("対象の発注候補が見つかりません。");
 
     const updated = await tx.orderRequest.updateMany({
       where: {
@@ -395,7 +439,7 @@ export async function updateOrderRequestQuantityForContext(
         OR: [
           {
             status: {
-              in: ["DRAFT", "CONFIRMED"],
+              in: ["SUGGESTED", "DRAFT", "CONFIRMED"],
             },
           },
           {
@@ -406,12 +450,21 @@ export async function updateOrderRequestQuantityForContext(
       },
       data: {
         requestedQuantity: input.requestedQuantity,
+        ...(currentTarget.status === "SUGGESTED" ? { status: "CONFIRMED" as const } : {}),
       },
     });
 
     if (updated.count === 0) {
       throw new OrderBusinessError("状態が変わりました。一覧を更新してください。");
     }
+
+    await clearOrderSuggestionSuppression(tx, context.clinicId, initialTarget.productId);
+    await syncOrderSuggestion(tx, {
+      clinicId: context.clinicId,
+      organizationId: context.organizationId,
+      productId: initialTarget.productId,
+      actorUserId: context.userId,
+    });
 
     return tx.orderRequest.findUniqueOrThrow({
       where: {
@@ -526,8 +579,8 @@ export async function updateOrderRequestStatusForContext(
       throw new OrderBusinessError("対象の発注候補が見つかりません。");
     }
 
-    await lockTransactionKey(tx, `order-request:${context.clinicId}:${initialTarget.productId}`);
-    await lockTransactionKey(tx, `order-receipt:${input.orderRequestId}`);
+    await lockOrderRequestProduct(tx, context.clinicId, initialTarget.productId);
+    await lockOrderReceipt(tx, input.orderRequestId);
 
     const target = await tx.orderRequest.findFirst({
       where: {
@@ -684,6 +737,17 @@ export async function updateOrderRequestStatusForContext(
       },
     });
 
+    const suppressAutomaticSuggestion =
+      input.status === "SKIPPED" && ["SUGGESTED", "DRAFT", "CONFIRMED"].includes(target.status);
+    if (suppressAutomaticSuggestion) {
+      await tx.stockItem.updateMany({
+        where: { clinicId: context.clinicId, productId: target.productId },
+        data: { autoOrderSuppressedAt: new Date() },
+      });
+    } else if (input.status === "CONFIRMED" && target.status === "SUGGESTED") {
+      await clearOrderSuggestionSuppression(tx, context.clinicId, target.productId);
+    }
+
     if (input.status !== "ORDERED" && target.orderRecordId) {
       const remainingCount = await tx.orderRequest.count({
         where: {
@@ -699,6 +763,13 @@ export async function updateOrderRequestStatusForContext(
         });
       }
     }
+
+    await syncOrderSuggestion(tx, {
+      clinicId: context.clinicId,
+      organizationId: context.organizationId,
+      productId: target.productId,
+      actorUserId: context.userId,
+    });
 
     return updatedRequest;
   });
@@ -722,74 +793,44 @@ export async function updateOrderRequestSupplierForContext(
     revalidate?: boolean;
   },
 ) {
-  const target = await prisma.orderRequest.findFirst({
-    where: {
-      id: input.orderRequestId,
-      clinicId: context.clinicId,
-    },
-    include: {
-      product: {
-        select: {
-          id: true,
-          name: true,
-          organizationId: true,
-          primarySupplierId: true,
-          productSuppliers: {
-            where: {
-              supplierId: input.supplierId,
-              isActive: true,
-            },
-            select: {
-              supplierId: true,
+  const result = await prisma.$transaction(async (tx) => {
+    const initialTarget = await tx.orderRequest.findFirst({
+      where: { id: input.orderRequestId, clinicId: context.clinicId },
+      select: { productId: true },
+    });
+    if (!initialTarget) throw new OrderBusinessError("対象の発注候補が見つかりません。");
+    await lockOrderRequestProduct(tx, context.clinicId, initialTarget.productId);
+    const target = await tx.orderRequest.findFirst({
+      where: { id: input.orderRequestId, clinicId: context.clinicId },
+      include: {
+        product: {
+          select: {
+            id: true, name: true, organizationId: true, primarySupplierId: true,
+            productSuppliers: {
+              where: { supplierId: input.supplierId, isActive: true },
+              select: { supplierId: true },
             },
           },
         },
       },
-    },
-  });
-
-  if (!target) {
-    throw new OrderBusinessError("対象の発注候補が見つかりません。");
-  }
-
-  if (!printableOrderRequestStatuses.includes(target.status)) {
-    throw new OrderBusinessError("発注先を変更できるのは、発注予定の候補だけです。");
-  }
-
-  if (target.product.organizationId !== context.organizationId) {
-    throw new OrderBusinessError("対象の商品が見つかりません。");
-  }
-
-  const supplier = await prisma.supplier.findFirst({
-    where: {
-      id: input.supplierId,
-      organizationId: context.organizationId,
-    },
-    select: {
-      id: true,
-      name: true,
-    },
-  });
-
-  if (!supplier) {
-    throw new OrderBusinessError("対象の発注先が見つかりません。");
-  }
-
-  const canUseSupplier =
-    target.product.primarySupplierId === supplier.id ||
-    target.product.productSuppliers.some((productSupplier) => productSupplier.supplierId === supplier.id);
-
-  if (!canUseSupplier) {
-    throw new OrderBusinessError("この商品に登録されていない発注先は選択できません。");
-  }
-
-  await prisma.orderRequest.update({
-    where: {
-      id: target.id,
-    },
-    data: {
-      supplierId: supplier.id,
-    },
+    });
+    if (!target) throw new OrderBusinessError("対象の発注候補が見つかりません。");
+    if (!(target.status === "SUGGESTED" || printableOrderRequestStatuses.includes(target.status))) {
+      throw new OrderBusinessError("発注先を変更できるのは、確認待ちまたは発注予定の候補だけです。");
+    }
+    if (target.product.organizationId !== context.organizationId) {
+      throw new OrderBusinessError("対象の商品が見つかりません。");
+    }
+    const supplier = await tx.supplier.findFirst({
+      where: { id: input.supplierId, organizationId: context.organizationId },
+      select: { id: true, name: true },
+    });
+    if (!supplier) throw new OrderBusinessError("対象の発注先が見つかりません。");
+    const canUseSupplier = target.product.primarySupplierId === supplier.id ||
+      target.product.productSuppliers.some(({ supplierId }) => supplierId === supplier.id);
+    if (!canUseSupplier) throw new OrderBusinessError("この商品に登録されていない発注先は選択できません。");
+    await tx.orderRequest.update({ where: { id: target.id }, data: { supplierId: supplier.id } });
+    return { productName: target.product.name, supplierName: supplier.name };
   });
 
   if (input.revalidate ?? true) {
@@ -797,8 +838,8 @@ export async function updateOrderRequestSupplierForContext(
   }
 
   return {
-    productName: target.product.name,
-    supplierName: supplier.name,
+    productName: result.productName,
+    supplierName: result.supplierName,
   };
 }
 
@@ -857,7 +898,13 @@ export async function applyOrderReceiptLine(
     receivedExpiryDate: input.receivedExpiryDate ?? null,
   });
 
-  await lockTransactionKey(tx, `order-receipt:${input.orderRequestId}`);
+  const initialTarget = await tx.orderRequest.findFirst({
+    where: { id: input.orderRequestId, clinicId: input.context.clinicId },
+    select: { productId: true },
+  });
+  if (!initialTarget) throw new OrderBusinessError("対象の発注候補が見つかりません。");
+  await lockOrderRequestProduct(tx, input.context.clinicId, initialTarget.productId);
+  await lockOrderReceipt(tx, input.orderRequestId);
   const receivedByStaff = await resolveActiveStaffOperatorForContext(input.context, input.receivedByStaffId, tx);
 
   const target = await tx.orderRequest.findFirst({
@@ -904,6 +951,7 @@ export async function applyOrderReceiptLine(
   let afterQuantity: number | null = null;
 
   if (input.applyToStock) {
+    await lockStockItem(tx, input.context.clinicId, target.productId);
     const stockItem = await tx.stockItem.findFirst({
       where: {
         clinicId: input.context.clinicId,
@@ -1004,6 +1052,13 @@ export async function applyOrderReceiptLine(
     });
   }
 
+  await syncOrderSuggestion(tx, {
+    clinicId: input.context.clinicId,
+    organizationId: input.context.organizationId,
+    productId: target.productId,
+    actorUserId: input.context.userId,
+  });
+
   return {
     productName: target.product.name,
     afterQuantity,
@@ -1076,7 +1131,13 @@ export async function revertOrderReceiptForContext(
   },
 ) {
   const result = await prisma.$transaction(async (tx) => {
-    await lockTransactionKey(tx, `order-receipt:${input.orderRequestId}`);
+    const initialTarget = await tx.orderRequest.findFirst({
+      where: { id: input.orderRequestId, clinicId: context.clinicId },
+      select: { productId: true },
+    });
+    if (!initialTarget) throw new OrderBusinessError("対象の発注候補が見つかりません。");
+    await lockOrderRequestProduct(tx, context.clinicId, initialTarget.productId);
+    await lockOrderReceipt(tx, input.orderRequestId);
 
     const target = await tx.orderRequest.findFirst({
       where: {
@@ -1124,7 +1185,7 @@ export async function revertOrderReceiptForContext(
     });
 
     for (const backorder of backorderIds) {
-      await lockTransactionKey(tx, `order-receipt:${backorder.id}`);
+      await lockOrderReceipt(tx, backorder.id);
     }
 
     const backorders =
@@ -1176,7 +1237,7 @@ export async function revertOrderReceiptForContext(
     });
 
     if (receiptMovement) {
-      await lockTransactionKey(tx, `stock-item:${context.clinicId}:${target.productId}`);
+      await lockStockItem(tx, context.clinicId, target.productId);
 
       const stockItem = await tx.stockItem.findFirst({
         where: {
@@ -1288,6 +1349,13 @@ export async function revertOrderReceiptForContext(
       },
     });
 
+    await syncOrderSuggestion(tx, {
+      clinicId: context.clinicId,
+      organizationId: context.organizationId,
+      productId: target.productId,
+      actorUserId: context.userId,
+    });
+
     return {
       productName: target.product.name,
       afterQuantity,
@@ -1334,9 +1402,12 @@ export async function markOrderRequestsOrderedForContext(
   const orderedByStaff = await resolveActiveStaffOperatorForContext(context, input.orderedByStaffId);
 
   await prisma.$transaction(async (tx) => {
-    for (const orderRequestId of [...orderRequestIds].sort()) {
-      await lockTransactionKey(tx, `order-request-ordered:${context.clinicId}:${orderRequestId}`);
-    }
+    const initialTargets = await tx.orderRequest.findMany({
+      where: { id: { in: orderRequestIds }, clinicId: context.clinicId },
+      select: { id: true, productId: true },
+    });
+    await lockOrderRequestProducts(tx, context.clinicId, initialTargets.map(({ productId }) => productId));
+    for (const orderRequestId of [...orderRequestIds].sort()) await lockOrderReceipt(tx, orderRequestId);
 
     const targets = await tx.orderRequest.findMany({
       where: {
@@ -1350,6 +1421,7 @@ export async function markOrderRequestsOrderedForContext(
       },
       select: {
         id: true,
+        productId: true,
         supplierId: true,
       },
     });
@@ -1401,6 +1473,15 @@ export async function markOrderRequestsOrderedForContext(
         supplierResponseMemo: input.supplierResponseMemo,
       },
     });
+
+    for (const productId of [...new Set(targets.map((target) => target.productId))].sort()) {
+      await syncOrderSuggestion(tx, {
+        clinicId: context.clinicId,
+        organizationId: context.organizationId,
+        productId,
+        actorUserId: context.userId,
+      });
+    }
   });
 
   if (input.revalidate ?? true) {

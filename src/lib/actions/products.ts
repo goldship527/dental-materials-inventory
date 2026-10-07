@@ -6,6 +6,8 @@ import { z } from "zod";
 import { auditActions, writeAuditLog } from "@/lib/audit/audit-log";
 import { requireAdminUser } from "@/lib/auth/admin";
 import { prisma } from "@/lib/db/prisma";
+import { lockOrderRequestScopes } from "@/lib/orders/locks";
+import { syncOrderSuggestion } from "@/lib/orders/suggestions";
 import { normalizeStockUsageMode } from "@/lib/stock/usage-mode";
 
 const nullableTextSchema = z
@@ -327,6 +329,11 @@ export async function updateProductMasterWithStateAction(
     }
 
     await prisma.$transaction(async (tx) => {
+      const affectedStockItems = await tx.stockItem.findMany({
+        where: { productId: input.productId, clinic: { organizationId: context.organizationId } },
+        select: { clinicId: true, productId: true },
+      });
+      await lockOrderRequestScopes(tx, affectedStockItems);
       await tx.product.update({
         where: {
           id: input.productId,
@@ -357,6 +364,15 @@ export async function updateProductMasterWithStateAction(
         primaryStandardPrice: input.standardPrice,
         alternatives,
       });
+
+      for (const stockItem of affectedStockItems) {
+        await syncOrderSuggestion(tx, {
+          clinicId: stockItem.clinicId,
+          organizationId: context.organizationId,
+          productId: input.productId,
+          actorUserId: context.userId,
+        });
+      }
     });
 
     await writeAuditLog({
