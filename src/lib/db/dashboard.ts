@@ -19,6 +19,7 @@ export type DashboardSummary = {
   favoriteCardCount: number;
   draftOrderRequestCount: number;
   orderRequestStatusCounts: {
+    SUGGESTED: number;
     DRAFT: number;
     CONFIRMED: number;
     SKIPPED: number;
@@ -110,6 +111,7 @@ export async function getDashboardSummary(clinicId: string, organizationId?: str
     fallbackOnError(
       getOrderRequestStatusCounts(clinicId),
       {
+        SUGGESTED: 0,
         DRAFT: 0,
         CONFIRMED: 0,
         SKIPPED: 0,

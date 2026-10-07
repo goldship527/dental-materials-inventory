@@ -1,5 +1,10 @@
 import type { Prisma } from "@prisma/client";
 import { z } from "zod";
+import { cardStockUnit } from "@/lib/stock/card-stock-unit";
+import { lockOrderRequestProduct } from "@/lib/orders/locks";
+import { syncOrderSuggestion } from "@/lib/orders/suggestions";
+
+export { cardStockUnit } from "@/lib/stock/card-stock-unit";
 
 export type StockOutCard = {
   stockItemId: string;
@@ -28,11 +33,6 @@ export const cardIssueSchema = z.object({
 export type CardIssueInput = z.infer<typeof cardIssueSchema>;
 
 export class CardIssueError extends Error {}
-
-export function cardStockUnit(value: string | null) {
-  const unit = value?.normalize("NFKC").trim();
-  return unit && !["つ", "未設定", "不明", "?", "？", "-"].includes(unit) ? unit : null;
-}
 
 export function cardIssueBlockReason(card: Pick<StockOutCard, "orderUnit" | "quantity" | "stockUsageMode">) {
   if (!cardStockUnit(card.orderUnit)) return "単位の確認が必要です";
@@ -64,6 +64,12 @@ export async function issueFromCard(
   if (!staff) throw new CardIssueError("このクリニックで有効な作業スタッフを選択してください。");
   const scope = {id: input.stockItemId, clinicId: context.clinicId, isUsed: true,
     product: {organizationId: context.organizationId, isActive: true}};
+  const initialStock = await tx.stockItem.findFirst({
+    where: scope,
+    select: {productId: true},
+  });
+  if (!initialStock) throw new CardIssueError("対象の在庫が見つかりません。一覧を更新してください。");
+  await lockOrderRequestProduct(tx, context.clinicId, initialStock.productId);
   const stock = await tx.stockItem.findFirst({
     where: scope,
     select: {id: true, productId: true, quantity: true, updatedAt: true,
@@ -91,5 +97,11 @@ export async function issueFromCard(
     reason: `カード出庫: ${input.quantity}${unit}（在庫と同じ単位・換算なし）`,
     sourceType: "QUICK_CARD", userId: context.userId, performedByStaffId: staff.id,
   }});
+  await syncOrderSuggestion(tx, {
+    clinicId: context.clinicId,
+    organizationId: context.organizationId,
+    productId: stock.productId,
+    actorUserId: context.userId,
+  });
   return {productId: stock.productId, productName: stock.product.name, afterQuantity, unit};
 }

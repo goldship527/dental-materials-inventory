@@ -362,6 +362,7 @@ model StockItem {
   inUseQuantity     Int      @default(0)
   discardedQuantity Int      @default(0)
   minStock          Int?
+  autoOrderSuppressedAt DateTime?
   location          String?
   isUsed            Boolean  @default(true)
   updatedAt         DateTime @updatedAt
@@ -528,6 +529,7 @@ model FavoriteProductCard {
 }
 
 enum OrderRequestStatus {
+  SUGGESTED
   DRAFT
   CONFIRMED
   SKIPPED

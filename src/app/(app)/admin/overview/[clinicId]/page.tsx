@@ -110,6 +110,12 @@ export default async function AdminOverviewClinicDetailPage({ params, searchPara
   const plannedOrderRequestCount = detail.orderStatusCounts.DRAFT + detail.orderStatusCounts.CONFIRMED;
   const summaryItems = [
     {
+      label: "確認待ち",
+      value: numberText(detail.orderStatusCounts.SUGGESTED),
+      note: "在庫変動から自動計算された候補",
+      isWarning: detail.orderStatusCounts.SUGGESTED > 0,
+    },
+    {
       label: "在庫行",
       value: numberText(detail.summary.stockItemCount),
       note: `総在庫 ${detail.summary.totalQuantity.toLocaleString("ja-JP")}`,
@@ -190,7 +196,7 @@ export default async function AdminOverviewClinicDetailPage({ params, searchPara
             href={`/admin/overview/${clinicId}/orders`}
           >
             <p className="text-sm font-semibold text-accent">発注候補を見る</p>
-            <p className="mt-2 text-sm leading-6 text-muted">発注予定、納品待ち、納品済み、見送りの候補を読み取り専用で確認します。</p>
+            <p className="mt-2 text-sm leading-6 text-muted">確認待ち、発注予定、納品待ち、納品済み、見送りの候補を読み取り専用で確認します。</p>
           </a>
           <a
             className="rounded border border-line bg-white p-4 shadow-panel transition hover:border-accent"

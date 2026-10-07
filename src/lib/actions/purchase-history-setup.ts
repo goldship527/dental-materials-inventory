@@ -10,6 +10,7 @@ import {
   type PurchaseHistorySetupInput,
 } from "@/lib/purchase-history/setup-items";
 import { isPurchaseHistoryImportSource, productImportSources } from "@/lib/products/import-source";
+import { syncOrderSuggestionsInSeparateTransactions } from "@/lib/orders/suggestions";
 
 export type { PurchaseHistorySetupInput };
 
@@ -90,7 +91,16 @@ export async function updatePurchaseHistorySetupForContext(
     };
   }
 
+  let affectedStockItems: { clinicId: string; productId: string }[] = [];
+
   await prisma.$transaction(async (tx) => {
+    affectedStockItems = await tx.stockItem.findMany({
+      where: {
+        productId: { in: uniqueItems.map((item) => item.productId) },
+        clinic: { organizationId: context.organizationId },
+      },
+      select: { clinicId: true, productId: true },
+    });
     const products = await tx.product.findMany({
       where: {
         organizationId: context.organizationId,
@@ -142,6 +152,12 @@ export async function updatePurchaseHistorySetupForContext(
         },
       },
     });
+  });
+
+  await syncOrderSuggestionsInSeparateTransactions(prisma, {
+    organizationId: context.organizationId,
+    actorUserId: context.userId,
+    scopes: affectedStockItems,
   });
 
   return {

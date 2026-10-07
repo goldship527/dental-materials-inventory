@@ -30,6 +30,8 @@ function buildRow(overrides: Partial<OrderRequestRow>): OrderRequestRow {
     quantity: 0,
     minStock: 2,
     shortageCount: 2,
+    pendingOrderedQuantity: 0,
+    plannedQuantity: 0,
     requestedQuantity: 2,
     status: "DRAFT",
     memo: null,

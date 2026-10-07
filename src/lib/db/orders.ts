@@ -29,6 +29,8 @@ export type OrderRequestRow = {
   quantity: number;
   minStock: number;
   shortageCount: number;
+  pendingOrderedQuantity: number;
+  plannedQuantity: number;
   requestedQuantity: number;
   status: OrderRequestStatusValue;
   memo: string | null;
@@ -132,6 +134,13 @@ export async function getOrderRequestRows(clinicId: string): Promise<OrderReques
     const stockItem = request.product.stockItems[0];
     const quantity = stockItem?.quantity ?? 0;
     const minStock = stockItem?.minStock ?? request.product.defaultMinStock;
+    const productRequests = requests.filter((candidate) => candidate.productId === request.productId);
+    const pendingOrderedQuantity = productRequests
+      .filter((candidate) => candidate.status === "ORDERED" && !candidate.receivedAt)
+      .reduce((sum, candidate) => sum + candidate.requestedQuantity, 0);
+    const plannedQuantity = productRequests
+      .filter((candidate) => printableOrderRequestStatuses.includes(candidate.status))
+      .reduce((sum, candidate) => sum + candidate.requestedQuantity, 0);
     const supplierOptions: OrderRequestSupplierOption[] = request.product.productSuppliers.map((productSupplier) => ({
       supplierId: productSupplier.supplier.id,
       supplierName: productSupplier.supplier.name,
@@ -187,6 +196,8 @@ export async function getOrderRequestRows(clinicId: string): Promise<OrderReques
       quantity,
       minStock,
       shortageCount: Math.max(0, minStock - quantity),
+      pendingOrderedQuantity,
+      plannedQuantity,
       requestedQuantity: request.requestedQuantity,
       status: request.status,
       memo: request.memo,

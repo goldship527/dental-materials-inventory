@@ -25,6 +25,10 @@ export default async function AdminOverviewPage() {
     overview.summary.draftOrderRequestCount + overview.summary.confirmedOrderRequestCount;
   const summaryItems = [
     {
+      label: "確認待ち",
+      value: `${overview.summary.suggestedOrderRequestCount} 件`,
+    },
+    {
       label: "対象クリニック",
       value: numberText(overview.summary.clinicCount),
       note: "同一組織内の有効クリニック",
@@ -119,6 +123,9 @@ export default async function AdminOverviewPage() {
                     在庫0
                   </th>
                   <th scope="col" className="whitespace-nowrap px-4 py-3 text-right">
+                    確認待ち
+                  </th>
+                  <th scope="col" className="whitespace-nowrap px-4 py-3 text-right">
                     発注予定
                   </th>
                   <th scope="col" className="whitespace-nowrap px-4 py-3 text-right">
@@ -150,6 +157,15 @@ export default async function AdminOverviewPage() {
                     <td className="whitespace-nowrap px-4 py-4 text-right">{numberText(row.stockItemCount)}</td>
                     <td className="whitespace-nowrap px-4 py-4 text-right">
                       {row.totalQuantity.toLocaleString("ja-JP")}
+                    </td>
+                    <td
+                      className={
+                        row.suggestedOrderRequestCount > 0
+                          ? "whitespace-nowrap px-4 py-4 text-right font-semibold text-warning"
+                          : "whitespace-nowrap px-4 py-4 text-right"
+                      }
+                    >
+                      {numberText(row.suggestedOrderRequestCount)}
                     </td>
                     <td
                       className={

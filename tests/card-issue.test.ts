@@ -18,6 +18,7 @@ function fakeTransaction(options: {staffMissing?: boolean; stockMissing?: boolea
   const state = {quantity: options.quantity ?? 10, timestamp: options.timestamp ?? 1000, movements: [] as Record<string, unknown>[]};
   const calls: Record<string, any>[] = [];
   const tx = {
+    async $executeRaw() { return 1; },
     staffOperator: {async findFirst(query: any) {
       calls.push({staff: query});
       assert.deepEqual(query.where, {id: input.staffOperatorId, organizationId: context.organizationId, isActive: true,
@@ -27,6 +28,11 @@ function fakeTransaction(options: {staffMissing?: boolean; stockMissing?: boolea
     stockItem: {
       async findFirst(query: any) {
         calls.push({read: query});
+        if (query.select?.autoOrderSuppressedAt) {
+          return options.stockMissing ? null : {id: input.stockItemId, quantity: state.quantity, minStock: 5,
+            isUsed: true, autoOrderSuppressedAt: null, product: {isActive: true, defaultMinStock: 5,
+              orderUnit: options.unit === undefined ? "箱" : options.unit, stockUsageMode: options.mode ?? "NONE"}};
+        }
         assert.deepEqual(query.where, {id: input.stockItemId, clinicId: context.clinicId, isUsed: true,
           product: {organizationId: context.organizationId, isActive: true}});
         return options.stockMissing ? null : {id: input.stockItemId, productId: card.productId, quantity: state.quantity,
@@ -49,6 +55,15 @@ function fakeTransaction(options: {staffMissing?: boolean; stockMissing?: boolea
       state.movements.push(query.data);
       return query.data;
     }},
+    orderRequest: {
+      async groupBy() { return []; },
+      async findMany() { return []; },
+      async deleteMany() { return {count: 0}; },
+      async update() { throw new Error("unexpected suggestion update"); },
+      async create() { throw new Error("unexpected suggestion create"); },
+    },
+    auditLog: {async create() { return {}; }},
+    product: {async findUniqueOrThrow() { return {primarySupplierId: null}; }},
   } as unknown as Prisma.TransactionClient;
   return {state, calls, tx};
 }
