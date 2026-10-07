@@ -79,12 +79,13 @@ function toActionError(error: unknown): OrderActionState {
 async function resolveActiveStaffOperatorForContext(
   context: ActiveClinicContext,
   staffOperatorId: string,
+  db: Prisma.TransactionClient | typeof prisma = prisma,
 ) {
   const staffOperator = await findActiveStaffOperatorByIdForClinic({
     organizationId: context.organizationId,
     clinicId: context.clinicId,
     staffOperatorId: staffOperatorIdSchema.parse(staffOperatorId),
-  });
+  }, db);
 
   if (!staffOperator) {
     throw new Error("このクリニックで有効な作業スタッフを選択してください。");
@@ -784,7 +785,7 @@ export async function applyOrderReceiptLine(
     createShortfallBackorder?: boolean;
   },
 ) {
-  const receivedByStaff = await resolveActiveStaffOperatorForContext(input.context, input.receivedByStaffId);
+  const receivedByStaff = await resolveActiveStaffOperatorForContext(input.context, input.receivedByStaffId, tx);
   const lotData = buildReceiptLotData({
     receivedLotNumber: input.receivedLotNumber ?? null,
     receivedExpiryDateText: input.receivedExpiryDateText ?? null,
