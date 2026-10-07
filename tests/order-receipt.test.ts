@@ -128,6 +128,7 @@ async function main() {
 
     assert.equal(shortfallBackorder.supplierId, request.supplierId);
     assert.equal(shortfallBackorder.createdByUserId, user.id);
+    assert.equal(shortfallBackorder.backorderOfId, request.id);
 
     const stockItem = await prisma.stockItem.findFirstOrThrow({
       where: {
@@ -211,6 +212,14 @@ async function main() {
     assert.equal(revertedRequest.receivedExpiryDate, null);
     assert.equal(revertedRequest.receivedByUserId, null);
     assert.equal(revertedRequest.receivedByStaffId, null);
+    assert.equal(
+      await prisma.orderRequest.count({
+        where: {
+          backorderOfId: request.id,
+        },
+      }),
+      0,
+    );
 
     const stockItemAfterRevert = await prisma.stockItem.findFirstOrThrow({
       where: {

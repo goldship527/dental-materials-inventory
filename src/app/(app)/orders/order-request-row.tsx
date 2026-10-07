@@ -14,6 +14,7 @@ import type { OrderRequestRow } from "@/lib/db/orders";
 import type { StaffOperatorOption } from "@/lib/db/staff-operators";
 import { orderSendMethodLabels, orderSendMethodValues } from "@/lib/orders/send-method";
 import {
+  canChangeOrderRequestQuantity,
   orderRequestStatuses,
   orderRequestStatusLabels,
   printableOrderRequestStatuses,
@@ -131,6 +132,7 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
       : supplierState.message
         ? supplierState
         : quantityState;
+  const canChangeQuantity = canChangeOrderRequestQuantity(row.status, row.receivedAt);
   const canChangeSupplier = printableOrderRequestStatuses.includes(row.status) && row.supplierOptions.length > 0;
   const { hasStaffOperators, selectedStaffOperator, selectedStaffOperatorId } = useWorkStaffSelection({
     clinicId,
@@ -261,14 +263,16 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
             <span className="text-[10px] font-semibold">発注</span>
             <span className="text-xl font-bold tabular-nums print:text-[12px]">{row.requestedQuantity}</span>
           </div>
-          <button
-            type="button"
-            onClick={() => togglePanel("quantity")}
-            className="inline-flex h-8 w-fit items-center rounded border border-line bg-white/75 px-3 text-xs font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent print:hidden"
-          >
-            {activePanel === "quantity" ? "閉じる" : "数量変更"}
-          </button>
-          {activePanel === "quantity" ? (
+          {canChangeQuantity ? (
+            <button
+              type="button"
+              onClick={() => togglePanel("quantity")}
+              className="inline-flex h-8 w-fit items-center rounded border border-line bg-white/75 px-3 text-xs font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent print:hidden"
+            >
+              {activePanel === "quantity" ? "閉じる" : "数量変更"}
+            </button>
+          ) : null}
+          {canChangeQuantity && activePanel === "quantity" ? (
             <form action={quantityAction} className="grid gap-1.5 rounded border border-line bg-subtle/60 p-2">
               <input type="hidden" name="orderRequestId" value={row.id} />
               <div className="flex items-center gap-2">

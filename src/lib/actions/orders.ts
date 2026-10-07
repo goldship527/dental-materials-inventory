@@ -7,6 +7,7 @@ import { requireActiveClinic } from "@/lib/db/clinic";
 import { prisma } from "@/lib/db/prisma";
 import { findActiveStaffOperatorByIdForClinic } from "@/lib/db/staff-operators";
 import { orderSendMethodValues } from "@/lib/orders/send-method";
+import { OrderBusinessError, toOrderActionError } from "@/lib/orders/action-error";
 import { printableOrderRequestStatuses } from "@/lib/orders/status";
 import { orderRequestStatusLabels, type OrderRequestStatusValue } from "@/lib/orders/status";
 
@@ -55,27 +56,6 @@ function revalidateOrderPages() {
   revalidatePath("/movements");
 }
 
-function toActionError(error: unknown): OrderActionState {
-  if (error instanceof z.ZodError) {
-    return {
-      status: "error",
-      message: error.issues[0]?.message ?? "入力内容を確認してください。",
-    };
-  }
-
-  if (error instanceof Error) {
-    return {
-      status: "error",
-      message: error.message,
-    };
-  }
-
-  return {
-    status: "error",
-    message: "発注候補を更新できませんでした。",
-  };
-}
-
 async function resolveActiveStaffOperatorForContext(
   context: ActiveClinicContext,
   staffOperatorId: string,
@@ -88,7 +68,7 @@ async function resolveActiveStaffOperatorForContext(
   }, db);
 
   if (!staffOperator) {
-    throw new Error("このクリニックで有効な作業スタッフを選択してください。");
+    throw new OrderBusinessError("このクリニックで有効な作業スタッフを選択してください。");
   }
 
   return staffOperator;
@@ -104,7 +84,7 @@ function parseReceivedExpiryDateText(value: string | null | undefined) {
     const day = Number(dayText);
 
     if (month < 1 || month > 12) {
-      throw new Error("有効期限の日付を確認してください。");
+      throw new OrderBusinessError("有効期限の日付を確認してください。");
     }
 
     const resolvedDay = day === 0 ? new Date(Date.UTC(year, month, 0)).getUTCDate() : day;
@@ -115,7 +95,7 @@ function parseReceivedExpiryDateText(value: string | null | undefined) {
       parsedDate.getUTCMonth() !== month - 1 ||
       parsedDate.getUTCDate() !== resolvedDay
     ) {
-      throw new Error("有効期限の日付を確認してください。");
+      throw new OrderBusinessError("有効期限の日付を確認してください。");
     }
 
     return parsedDate;
@@ -136,7 +116,7 @@ function parseReceivedExpiryDateText(value: string | null | undefined) {
     parsedDate.getUTCMonth() !== month - 1 ||
     parsedDate.getUTCDate() !== day
   ) {
-    throw new Error("有効期限の日付を確認してください。");
+    throw new OrderBusinessError("有効期限の日付を確認してください。");
   }
 
   return parsedDate;
@@ -245,7 +225,7 @@ async function decrementReceiptStockLot(
   });
 
   if (!lot || lot.quantity < input.quantity) {
-    throw new Error("指定ロットの在庫が納品確認数より少ないため、納品確認を取り消せません。");
+    throw new OrderBusinessError("指定ロットの在庫が納品確認数より少ないため、納品確認を取り消せません。");
   }
 
   await tx.stockLot.update({
@@ -294,7 +274,7 @@ export async function createOrderRequestWithStateAction(
       });
 
       if (!stockItem) {
-        throw new Error("対象の在庫が見つかりません。");
+        throw new OrderBusinessError("対象の在庫が見つかりません。");
       }
 
       await lockTransactionKey(tx, `order-request:${context.clinicId}:${stockItem.product.id}`);
@@ -370,7 +350,7 @@ export async function createOrderRequestWithStateAction(
         : `${result.productName} を発注予定へ追加しました。`,
     };
   } catch (error) {
-    return toActionError(error);
+    return toOrderActionError(error);
   }
 }
 
@@ -383,13 +363,59 @@ export async function updateOrderRequestQuantityWithStateAction(
     const orderRequestId = orderRequestIdSchema.parse(formData.get("orderRequestId"));
     const requestedQuantity = requestedQuantitySchema.parse(formData.get("requestedQuantity"));
 
-    const request = await prisma.orderRequest.update({
+    const request = await updateOrderRequestQuantityForContext(context, {
+      orderRequestId,
+      requestedQuantity,
+    });
+
+    return {
+      status: "success",
+      message: `${request.product.name} の発注数量を ${requestedQuantity} に更新しました。`,
+    };
+  } catch (error) {
+    return toOrderActionError(error);
+  }
+}
+
+export async function updateOrderRequestQuantityForContext(
+  context: ActiveClinicContext,
+  input: {
+    orderRequestId: string;
+    requestedQuantity: number;
+    revalidate?: boolean;
+  },
+) {
+  const request = await prisma.$transaction(async (tx) => {
+    await lockTransactionKey(tx, `order-receipt:${input.orderRequestId}`);
+
+    const updated = await tx.orderRequest.updateMany({
       where: {
-        id: orderRequestId,
+        id: input.orderRequestId,
         clinicId: context.clinicId,
+        OR: [
+          {
+            status: {
+              in: ["DRAFT", "CONFIRMED"],
+            },
+          },
+          {
+            status: "ORDERED",
+            receivedAt: null,
+          },
+        ],
       },
       data: {
-        requestedQuantity,
+        requestedQuantity: input.requestedQuantity,
+      },
+    });
+
+    if (updated.count === 0) {
+      throw new OrderBusinessError("状態が変わりました。一覧を更新してください。");
+    }
+
+    return tx.orderRequest.findUniqueOrThrow({
+      where: {
+        id: input.orderRequestId,
       },
       include: {
         product: {
@@ -399,16 +425,13 @@ export async function updateOrderRequestQuantityWithStateAction(
         },
       },
     });
+  });
 
+  if (input.revalidate ?? true) {
     revalidateOrderPages();
-
-    return {
-      status: "success",
-      message: `${request.product.name} の発注数量を ${requestedQuantity} に更新しました。`,
-    };
-  } catch (error) {
-    return toActionError(error);
   }
+
+  return request;
 }
 
 export async function updateOrderRequestStatusWithStateAction(
@@ -448,7 +471,7 @@ export async function updateOrderRequestStatusWithStateAction(
       message: `${request.productName} を${label}にしました。`,
     };
   } catch (error) {
-    return toActionError(error);
+    return toOrderActionError(error);
   }
 }
 
@@ -471,7 +494,7 @@ export async function updateOrderRequestSupplierWithStateAction(
       message: `${result.productName} の発注先を ${result.supplierName} に変更しました。`,
     };
   } catch (error) {
-    return toActionError(error);
+    return toOrderActionError(error);
   }
 }
 
@@ -488,51 +511,94 @@ export async function updateOrderRequestStatusForContext(
     revalidate?: boolean;
   },
 ) {
-  const target = await prisma.orderRequest.findFirst({
-    where: {
-      id: input.orderRequestId,
-      clinicId: context.clinicId,
-    },
-    select: {
-      id: true,
-      supplierId: true,
-      orderRecordId: true,
-      orderedAt: true,
-      orderedMethod: true,
-      orderedMemo: true,
-      supplierResponseMemo: true,
-      orderRecord: {
-        select: {
-          orderedByStaffId: true,
-        },
-      },
-      receivedAt: true,
-      status: true,
-    },
-  });
-
-  if (!target) {
-    throw new Error("対象の発注候補が見つかりません。");
-  }
-
-  if (target.receivedAt && input.status !== "ORDERED") {
-    throw new Error("納品確認済みの発注候補は、納品確認を取り消すまで状態を戻せません。");
-  }
-
-  if (input.status === "ORDERED" && target.status !== "ORDERED" && !input.orderedMethod) {
-    throw new Error("発注を記録する場合は、送付方法を選択してください。");
-  }
-
-  const orderedByStaff =
-    input.status === "ORDERED" && input.orderedByStaffId
-      ? await resolveActiveStaffOperatorForContext(context, input.orderedByStaffId)
-      : null;
-
-  if (input.status === "ORDERED" && target.status !== "ORDERED" && !orderedByStaff) {
-    throw new Error("発注済みにする場合は、作業スタッフを選択してください。");
-  }
-
   const request = await prisma.$transaction(async (tx) => {
+    const initialTarget = await tx.orderRequest.findFirst({
+      where: {
+        id: input.orderRequestId,
+        clinicId: context.clinicId,
+      },
+      select: {
+        productId: true,
+      },
+    });
+
+    if (!initialTarget) {
+      throw new OrderBusinessError("対象の発注候補が見つかりません。");
+    }
+
+    await lockTransactionKey(tx, `order-request:${context.clinicId}:${initialTarget.productId}`);
+    await lockTransactionKey(tx, `order-receipt:${input.orderRequestId}`);
+
+    const target = await tx.orderRequest.findFirst({
+      where: {
+        id: input.orderRequestId,
+        clinicId: context.clinicId,
+      },
+      select: {
+        id: true,
+        productId: true,
+        supplierId: true,
+        orderRecordId: true,
+        orderedAt: true,
+        orderedMethod: true,
+        orderedMemo: true,
+        supplierResponseMemo: true,
+        orderRecord: {
+          select: {
+            orderedByStaffId: true,
+          },
+        },
+        receivedAt: true,
+        status: true,
+      },
+    });
+
+    if (!target) {
+      throw new OrderBusinessError("対象の発注候補が見つかりません。");
+    }
+
+    if (target.receivedAt && input.status !== "ORDERED") {
+      throw new OrderBusinessError("納品確認済みの発注候補は、納品確認を取り消すまで状態を戻せません。");
+    }
+
+    if (input.status === "ORDERED" && target.status !== "ORDERED" && !input.orderedMethod) {
+      throw new OrderBusinessError("発注を記録する場合は、送付方法を選択してください。");
+    }
+
+    const orderedByStaff =
+      input.status === "ORDERED" && input.orderedByStaffId
+        ? await resolveActiveStaffOperatorForContext(context, input.orderedByStaffId, tx)
+        : null;
+
+    if (input.status === "ORDERED" && target.status !== "ORDERED" && !orderedByStaff) {
+      throw new OrderBusinessError("発注済みにする場合は、作業スタッフを選択してください。");
+    }
+
+    if (
+      printableOrderRequestStatuses.includes(input.status) &&
+      (target.status === "ORDERED" || target.status === "SKIPPED")
+    ) {
+      const duplicateDraft = await tx.orderRequest.findFirst({
+        where: {
+          clinicId: context.clinicId,
+          productId: target.productId,
+          id: {
+            not: target.id,
+          },
+          status: {
+            in: printableOrderRequestStatuses,
+          },
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      if (duplicateDraft) {
+        throw new OrderBusinessError("同じ商品の発注予定がすでにあります。");
+      }
+    }
+
     const orderedAt =
       input.status === "ORDERED" ? (target.status === "ORDERED" ? target.orderedAt ?? new Date() : new Date()) : null;
     const orderedMethod = input.status === "ORDERED" ? input.orderedMethod ?? target.orderedMethod ?? null : null;
@@ -550,7 +616,7 @@ export async function updateOrderRequestStatusForContext(
         : null;
 
     if (input.status === "ORDERED" && !orderedMethod) {
-      throw new Error("発注を記録する場合は、送付方法を選択してください。");
+      throw new OrderBusinessError("発注を記録する場合は、送付方法を選択してください。");
     }
 
     let orderRecordId: string | null = null;
@@ -683,15 +749,15 @@ export async function updateOrderRequestSupplierForContext(
   });
 
   if (!target) {
-    throw new Error("対象の発注候補が見つかりません。");
+    throw new OrderBusinessError("対象の発注候補が見つかりません。");
   }
 
   if (!printableOrderRequestStatuses.includes(target.status)) {
-    throw new Error("発注先を変更できるのは、発注予定の候補だけです。");
+    throw new OrderBusinessError("発注先を変更できるのは、発注予定の候補だけです。");
   }
 
   if (target.product.organizationId !== context.organizationId) {
-    throw new Error("対象の商品が見つかりません。");
+    throw new OrderBusinessError("対象の商品が見つかりません。");
   }
 
   const supplier = await prisma.supplier.findFirst({
@@ -706,7 +772,7 @@ export async function updateOrderRequestSupplierForContext(
   });
 
   if (!supplier) {
-    throw new Error("対象の発注先が見つかりません。");
+    throw new OrderBusinessError("対象の発注先が見つかりません。");
   }
 
   const canUseSupplier =
@@ -714,7 +780,7 @@ export async function updateOrderRequestSupplierForContext(
     target.product.productSuppliers.some((productSupplier) => productSupplier.supplierId === supplier.id);
 
   if (!canUseSupplier) {
-    throw new Error("この商品に登録されていない発注先は選択できません。");
+    throw new OrderBusinessError("この商品に登録されていない発注先は選択できません。");
   }
 
   await prisma.orderRequest.update({
@@ -766,7 +832,7 @@ export async function receiveOrderRequestWithStateAction(
       message: `${result.productName} の納品を確認しました。${result.afterQuantity == null ? "" : `現在庫は ${result.afterQuantity} です。`}`,
     };
   } catch (error) {
-    return toActionError(error);
+    return toOrderActionError(error);
   }
 }
 
@@ -785,7 +851,6 @@ export async function applyOrderReceiptLine(
     createShortfallBackorder?: boolean;
   },
 ) {
-  const receivedByStaff = await resolveActiveStaffOperatorForContext(input.context, input.receivedByStaffId, tx);
   const lotData = buildReceiptLotData({
     receivedLotNumber: input.receivedLotNumber ?? null,
     receivedExpiryDateText: input.receivedExpiryDateText ?? null,
@@ -793,6 +858,7 @@ export async function applyOrderReceiptLine(
   });
 
   await lockTransactionKey(tx, `order-receipt:${input.orderRequestId}`);
+  const receivedByStaff = await resolveActiveStaffOperatorForContext(input.context, input.receivedByStaffId, tx);
 
   const target = await tx.orderRequest.findFirst({
     where: {
@@ -820,19 +886,19 @@ export async function applyOrderReceiptLine(
   });
 
   if (!target) {
-    throw new Error("対象の発注候補が見つかりません。");
+    throw new OrderBusinessError("対象の発注候補が見つかりません。");
   }
 
   if (target.status !== "ORDERED") {
-    throw new Error("納品確認できるのは、納品待ちの候補だけです。");
+    throw new OrderBusinessError("納品確認できるのは、納品待ちの候補だけです。");
   }
 
   if (target.receivedAt) {
-    throw new Error("この発注候補はすでに納品確認済みです。");
+    throw new OrderBusinessError("この発注候補はすでに納品確認済みです。");
   }
 
   if (input.receivedQuantity > target.requestedQuantity) {
-    throw new Error("納品数量は発注数量以下で入力してください。");
+    throw new OrderBusinessError("納品数量は発注数量以下で入力してください。");
   }
 
   let afterQuantity: number | null = null;
@@ -851,7 +917,7 @@ export async function applyOrderReceiptLine(
     });
 
     if (!stockItem) {
-      throw new Error("対象商品の在庫行が見つかりません。在庫一覧で在庫行を確認してください。");
+      throw new OrderBusinessError("対象商品の在庫行が見つかりません。在庫一覧で在庫行を確認してください。");
     }
 
     const updatedStockItem = await tx.stockItem.update({
@@ -932,6 +998,7 @@ export async function applyOrderReceiptLine(
         orderedMemo: target.orderedMemo,
         supplierResponseMemo: target.supplierResponseMemo,
         createdByUserId: input.context.userId,
+        backorderOfId: target.id,
         memo: `元発注 ${target.id} の不足分 ${shortfall} を繰越`,
       },
     });
@@ -997,7 +1064,7 @@ export async function revertOrderReceiptWithStateAction(
       message: `${result.productName} の納品確認を取り消しました。${result.afterQuantity == null ? "" : `現在庫は ${result.afterQuantity} です。`}`,
     };
   } catch (error) {
-    return toActionError(error);
+    return toOrderActionError(error);
   }
 }
 
@@ -1019,6 +1086,7 @@ export async function revertOrderReceiptForContext(
       select: {
         id: true,
         productId: true,
+        requestedQuantity: true,
         status: true,
         receivedQuantity: true,
         receivedAt: true,
@@ -1031,15 +1099,61 @@ export async function revertOrderReceiptForContext(
     });
 
     if (!target) {
-      throw new Error("対象の発注候補が見つかりません。");
+      throw new OrderBusinessError("対象の発注候補が見つかりません。");
     }
 
     if (target.status !== "ORDERED") {
-      throw new Error("納品確認を取り消せるのは、納品済みの候補だけです。");
+      throw new OrderBusinessError("納品確認を取り消せるのは、納品済みの候補だけです。");
     }
 
     if (!target.receivedAt || target.receivedQuantity == null) {
-      throw new Error("この発注候補はまだ納品確認されていません。");
+      throw new OrderBusinessError("この発注候補はまだ納品確認されていません。");
+    }
+
+    const backorderIds = await tx.orderRequest.findMany({
+      where: {
+        clinicId: context.clinicId,
+        backorderOfId: target.id,
+      },
+      select: {
+        id: true,
+      },
+      orderBy: {
+        id: "asc",
+      },
+    });
+
+    for (const backorder of backorderIds) {
+      await lockTransactionKey(tx, `order-receipt:${backorder.id}`);
+    }
+
+    const backorders =
+      backorderIds.length > 0
+        ? await tx.orderRequest.findMany({
+            where: {
+              id: {
+                in: backorderIds.map((backorder) => backorder.id),
+              },
+              clinicId: context.clinicId,
+              backorderOfId: target.id,
+            },
+            select: {
+              id: true,
+              receivedAt: true,
+            },
+          })
+        : [];
+
+    if (backorders.some((backorder) => backorder.receivedAt !== null)) {
+      throw new OrderBusinessError(
+        "不足分の納品が確認済みのため取り消せません。先に不足分の納品確認を取り消してください。",
+      );
+    }
+
+    if (target.receivedQuantity < target.requestedQuantity && backorders.length === 0) {
+      throw new OrderBusinessError(
+        "不足分の発注を特定できないため取り消せません。管理者に連絡してください。",
+      );
     }
 
     let afterQuantity: number | null = null;
@@ -1077,11 +1191,11 @@ export async function revertOrderReceiptForContext(
       });
 
       if (!stockItem) {
-        throw new Error("対象商品の在庫行が見つかりません。在庫一覧で在庫行を確認してください。");
+        throw new OrderBusinessError("対象商品の在庫行が見つかりません。在庫一覧で在庫行を確認してください。");
       }
 
       if (stockItem.quantity < target.receivedQuantity) {
-        throw new Error("現在庫が納品確認数より少ないため、在庫反映済みの納品確認を取り消せません。");
+        throw new OrderBusinessError("現在庫が納品確認数より少ないため、在庫反映済みの納品確認を取り消せません。");
       }
 
       const updatedStockItem = await tx.stockItem.update({
@@ -1141,6 +1255,19 @@ export async function revertOrderReceiptForContext(
         data: {
           revertedAt: new Date(),
           revertedById: context.userId,
+        },
+      });
+    }
+
+    if (backorders.length > 0) {
+      await tx.orderRequest.deleteMany({
+        where: {
+          id: {
+            in: backorders.map((backorder) => backorder.id),
+          },
+          clinicId: context.clinicId,
+          backorderOfId: target.id,
+          receivedAt: null,
         },
       });
     }
@@ -1228,13 +1355,13 @@ export async function markOrderRequestsOrderedForContext(
     });
 
     if (targets.length === 0) {
-      throw new Error("発注を記録できる発注予定の候補が見つかりません。");
+      throw new OrderBusinessError("発注を記録できる発注予定の候補が見つかりません。");
     }
 
     const supplierIds = new Set(targets.map((target) => target.supplierId ?? ""));
 
     if (supplierIds.size > 1) {
-      throw new Error("発注記録は発注先ごとに作成してください。");
+      throw new OrderBusinessError("発注記録は発注先ごとに作成してください。");
     }
 
     const orderedAt = new Date();
