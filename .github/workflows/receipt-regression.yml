@@ -16,7 +16,7 @@ jobs:
         env:
           POSTGRES_USER: ci_receipt
           POSTGRES_DB: receipt_regression
-          POSTGRES_HOST_AUTH_METHOD: trust
+          POSTGRES_PASSWORD: ${{ github.run_id }}
         ports:
           - 5432:5432
         options: >-
@@ -36,16 +36,19 @@ jobs:
           corepack enable
           corepack pnpm install --frozen-lockfile
       - name: Configure isolated test database
+        env:
+          CI_DB_PASSWORD: ${{ github.run_id }}
         run: |
           node - <<'NODE'
           const fs = require('node:fs');
           const url = new URL('postgresql://');
           url.username = 'ci_receipt';
+          url.password = process.env.CI_DB_PASSWORD;
           url.hostname = '127.0.0.1';
           url.port = '5432';
           url.pathname = '/receipt_regression';
           fs.writeFileSync('.env', `DATABASE_URL=${url.toString()}\n`);
-          if (process.env.DATABASE_URL || url.hostname !== '127.0.0.1' || url.pathname !== '/receipt_regression') {
+          if (!process.env.CI_DB_PASSWORD || process.env.DATABASE_URL || url.hostname !== '127.0.0.1' || url.pathname !== '/receipt_regression') {
             throw new Error('Test database isolation check failed');
           }
           console.log('Isolated local CI database confirmed');
