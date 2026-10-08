@@ -17,16 +17,16 @@ import { SupplierOrderRecordPanel } from "./supplier-order-record-panel";
 type OrderListFilterValue = "ALL" | "SUGGESTED" | "PLANNED" | "AWAITING_RECEIPT" | "RECEIVED" | "SKIPPED";
 type OrderStatusFilterValue = Exclude<OrderListFilterValue, "ALL">;
 
-const defaultOrderListFilter: OrderListFilterValue = "PLANNED";
+const defaultOrderListFilter: OrderListFilterValue = "ALL";
 
 const statusFilters: { label: string; value: OrderListFilterValue }[] = [
   {
-    label: "確認待ち",
-    value: "SUGGESTED",
-  },
-  {
     label: "すべて",
     value: "ALL",
+  },
+  {
+    label: "確認待ち",
+    value: "SUGGESTED",
   },
   {
     label: "発注予定",

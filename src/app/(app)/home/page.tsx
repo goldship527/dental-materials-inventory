@@ -74,7 +74,7 @@ export default async function HomePage({ searchParams }: PageProps) {
     },
     {
       title: "納品待ち",
-      href: "/orders?status=ORDERED",
+      href: "/orders?status=AWAITING_RECEIPT",
       value: `${pendingReceiveCount} 件`,
       note: "受領確認を待っている発注",
       isWarning: pendingReceiveCount > 0,
