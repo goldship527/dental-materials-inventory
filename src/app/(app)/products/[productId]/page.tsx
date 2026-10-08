@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/ui/page-header";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { AppNav } from "@/components/domain/app-nav";
@@ -133,7 +134,7 @@ function getStockStatus(currentQuantity: number, minStock: number, hasStockItem:
       label: stockStatus.label,
       description: "最低在庫を下回っています",
       badgeClass: stockStatus.badgeClassName,
-      panelClass: "border-line bg-markSoft",
+      panelClass: "border-line border-l-4 border-l-ink bg-markSoft",
     };
   }
 
@@ -142,7 +143,7 @@ function getStockStatus(currentQuantity: number, minStock: number, hasStockItem:
       label: stockStatus.label,
       description: "補充判断が必要",
       badgeClass: stockStatus.badgeClassName,
-      panelClass: "border-line bg-markSoft",
+      panelClass: "border-line border-l-4 border-l-ink bg-markSoft",
     };
   }
 
@@ -199,14 +200,14 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
   const photoUrl = buildProductPhotoUrl(product);
 
   return (
-    <main className="min-h-screen bg-surface px-4 py-5 text-ink sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-surface px-3 pt-3 pb-6 text-ink lg:px-6">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-4">
         <AppNav current="products" />
 
-        <header className="flex flex-col gap-3 border-b border-line pb-4 md:flex-row md:items-end md:justify-between">
+        <PageHeader title={product.name}>
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-            <h1 className="mt-2 text-xl font-semibold">{product.name}</h1>
+
           </div>
           <div className="flex flex-wrap gap-3 text-sm font-semibold">
             {canManageProducts ? (
@@ -218,10 +219,10 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
               商品マスタへ戻る
             </a>
           </div>
-        </header>
+        </PageHeader>
 
         {paramsValue.adminDenied ? (
-          <section className="rounded border border-line bg-markSoft px-4 py-3 text-sm font-semibold text-ink shadow-sheet">
+          <section className="rounded border border-line border-l-4 border-l-ink bg-markSoft px-4 py-3 text-sm font-semibold text-ink shadow-sheet">
             商品マスタの編集は管理者専用です。必要な場合は管理者に依頼してください。
           </section>
         ) : null}
@@ -365,7 +366,7 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
         ) : null}
 
         {product.pendingOrders.totalQuantity > 0 ? (
-          <section className="rounded border border-line bg-markSoft p-4 shadow-sheet">
+          <section className="rounded border border-line border-l-4 border-l-ink bg-markSoft p-4 shadow-sheet">
             <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
               <div>
                 <h2 className="text-lg font-semibold text-ink">未納の発注があります</h2>

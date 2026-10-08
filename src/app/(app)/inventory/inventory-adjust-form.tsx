@@ -71,7 +71,7 @@ export function InventoryAdjustForm({ stockItemId, quantity, stockUpdatedAt, cli
           有効な作業スタッフがありません。先に管理画面でスタッフを登録してください。
         </p>
       ) : !hasSelectedStaffOperator ? (
-        <p className="rounded bg-markSoft px-3 py-2 text-xs font-semibold text-ink">
+        <p className="rounded border border-line border-l-4 border-l-ink bg-markSoft px-3 py-2 text-xs font-semibold text-ink">
           画面上部で作業スタッフを選択してください。
         </p>
       ) : null}

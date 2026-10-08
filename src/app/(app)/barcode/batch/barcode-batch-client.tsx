@@ -58,10 +58,10 @@ function getLineTone(status: BatchLineStatus) {
   }
 
   if (status === "unknown" || status === "multiple-products") {
-    return "border-line bg-markSoft";
+    return "border-line border-l-4 border-l-ink bg-markSoft";
   }
 
-  return "border-line bg-markSoft";
+  return "border-line border-l-4 border-l-ink bg-markSoft";
 }
 
 function clampQuantity(value: number) {
@@ -708,7 +708,7 @@ export function BarcodeBatchClient({ clinicId, initialMode, fixedMode, staffOper
           </section>
 
           {mode === "OUT" && invalidStockOutLines.length > 0 ? (
-            <section className="rounded border border-line bg-markSoft p-4">
+            <section className="rounded border border-line border-l-4 border-l-ink bg-markSoft p-4">
               <p className="text-sm font-semibold text-ink">
                 在庫不足行があります。通常は確定できません。
               </p>

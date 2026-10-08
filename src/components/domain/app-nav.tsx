@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
 import { ClinicSwitcher } from "@/components/domain/clinic-switcher";
+import { AppNavMoreMenu } from "@/components/domain/app-nav-more-menu";
 import { WorkStaffSelector } from "@/components/domain/work-staff-selector";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { isAdminRole } from "@/lib/auth/roles";
@@ -141,22 +142,12 @@ const helpNavItems = [
 function NavLink({
   item,
   current,
-  compact = false,
-  utility = false,
 }: {
   item: NavItem;
   current: NavItemId;
-  compact?: boolean;
-  utility?: boolean;
 }) {
   const isCurrent = item.id === current;
-  const baseClassName = utility
-    ? compact
-      ? "inline-flex h-9 shrink-0 items-center whitespace-nowrap rounded px-2 text-xs font-semibold"
-      : "inline-flex h-11 shrink-0 items-center whitespace-nowrap rounded px-3 text-sm font-semibold sm:h-9"
-    : compact
-      ? "inline-flex h-9 shrink-0 items-center whitespace-nowrap rounded px-2 text-xs font-semibold"
-      : "inline-flex h-12 shrink-0 items-center whitespace-nowrap rounded px-3 text-sm font-semibold";
+  const baseClassName = "inline-flex h-14 shrink-0 items-center whitespace-nowrap rounded-t px-3 text-base";
 
   return (
     <a
@@ -164,10 +155,8 @@ function NavLink({
       aria-current={isCurrent ? "page" : undefined}
       className={
         isCurrent
-          ? `${baseClassName} border border-accent/30 bg-tint text-accent`
-          : utility
-            ? `${baseClassName} border border-line bg-panel/80 text-muted transition hover:border-accent hover:bg-panel hover:text-accent`
-            : `${baseClassName} border border-transparent text-muted transition hover:border-line hover:bg-panel/80 hover:text-ink`
+          ? `${baseClassName} bg-surface font-semibold text-accent`
+          : `${baseClassName} font-medium text-white/[.82] transition hover:bg-white/10 hover:text-white`
       }
     >
       {item.label}
@@ -179,20 +168,18 @@ function NavGroup({
   ariaLabel,
   current,
   items,
-  compact = false,
 }: {
   ariaLabel: string;
   current: NavItemId;
   items: readonly NavItem[];
-  compact?: boolean;
 }) {
   return (
     <div
       aria-label={ariaLabel}
-      className="flex min-w-0 gap-2 overflow-x-auto pb-1 sm:gap-1 lg:pb-0"
+      className="flex min-w-0 flex-1 gap-1 overflow-x-auto"
     >
       {items.filter(item => isWorkflowLinkVisible(item.href)).map((item) => (
-        <NavLink key={item.id} item={item} current={current} compact={compact} />
+        <NavLink key={item.id} item={item} current={current} />
       ))}
     </div>
   );
@@ -232,90 +219,54 @@ export async function AppNav({ current }: AppNavProps) {
         })
       : [];
   const modeItems = isAdminMode ? adminNavItems : workNavItems;
-  const topRowClassName = isAdminMode
-    ? "flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between lg:gap-4"
-    : "flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between lg:gap-4";
-  const actionGroupClassName = isAdminMode
-    ? "flex min-w-0 gap-2 overflow-x-auto pb-1 sm:gap-1 lg:shrink-0 lg:justify-end lg:overflow-visible lg:pb-0"
-    : "flex min-w-0 gap-2 overflow-x-auto pb-1 sm:gap-1 lg:shrink-0 lg:justify-end lg:overflow-visible lg:pb-0";
-  const shouldShowContextRow = Boolean(activeClinicContext);
-  const shouldShowContextControls =
-    shouldShowWorkStaffSelector || clinicSelection?.canSelectClinic;
-  const utilityButtonClassName = isAdminMode
-    ? "inline-flex h-9 shrink-0 items-center whitespace-nowrap rounded border border-line bg-panel/80 px-2 text-xs font-semibold text-muted transition hover:border-accent hover:bg-panel hover:text-accent"
-    : "inline-flex h-11 shrink-0 items-center whitespace-nowrap rounded border border-line bg-panel/80 px-3 text-sm font-semibold text-muted transition hover:border-accent hover:bg-panel hover:text-accent sm:h-9";
-  const logoutButtonClassName = isAdminMode
-    ? "inline-flex h-9 shrink-0 items-center justify-center whitespace-nowrap rounded btn-secondary btn-danger px-2 text-xs font-semibold transition disabled:cursor-not-allowed"
-    : "inline-flex h-11 shrink-0 items-center justify-center whitespace-nowrap rounded btn-secondary btn-danger px-3 text-sm font-semibold transition disabled:cursor-not-allowed sm:h-9";
+  const menuItemClassName = "flex min-h-11 w-full items-center rounded px-3 text-sm font-semibold text-ink hover:bg-tint hover:text-accent";
 
   return (
     <nav
       aria-label="アプリ内メニュー"
-      className="sticky top-0 z-30 border-b border-line bg-surface/90 px-3 py-2 backdrop-blur print:hidden sm:px-4 lg:px-6"
+      className="sticky top-0 z-30 -mx-3 -mt-3 bg-accent px-3 print:hidden lg:-mx-6 lg:px-6"
     >
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-2">
-        <div className={topRowClassName}>
+      <div className="mx-auto flex w-full max-w-7xl flex-col sm:h-14 sm:flex-row sm:items-center">
+        {activeClinicContext ? (
+          <p className="order-1 truncate pt-2 text-sm font-semibold text-white sm:order-2 sm:max-w-40 sm:pt-0 lg:max-w-52">
+            {activeClinicContext.clinicName}
+          </p>
+        ) : null}
+        <div className="order-3 min-w-0 sm:order-1 sm:flex sm:min-w-0 sm:flex-1">
           <NavGroup
             ariaLabel={isAdminMode ? "管理モードメニュー" : "通常業務メニュー"}
             current={current}
             items={modeItems}
-            compact={isAdminMode}
           />
-
-          <div className={actionGroupClassName}>
+        </div>
+        <div className="order-2 ml-auto flex shrink-0 items-center gap-2 sm:order-3">
+          {shouldShowWorkStaffSelector && activeClinicContext ? (
+            <WorkStaffSelector clinicId={activeClinicContext.clinicId} staffOperators={staffOperators} />
+          ) : null}
+          <AppNavMoreMenu>
             {isAdminMode ? (
-              <a
-                href="/home"
-                className={utilityButtonClassName}
-              >
-                通常業務へ
-              </a>
+              <a href="/home" className={menuItemClassName}>通常業務へ</a>
             ) : canUseAdminMode ? (
-              <a
-                href="/admin/overview"
-                className={utilityButtonClassName}
-              >
-                管理
-              </a>
+              <a href="/admin/overview" className={menuItemClassName}>管理</a>
             ) : null}
-
             {helpNavItems.map((item) => (
-              <NavLink key={item.id} item={item} current={current} compact={isAdminMode} utility />
+              <a key={item.id} href={item.href} aria-current={item.id === current ? "page" : undefined} className={menuItemClassName}>
+                {item.label}
+              </a>
             ))}
-
-            <form action="/logout" method="post" className="shrink-0">
-              <SubmitButton
-                pendingLabel="ログアウト中"
-                className={logoutButtonClassName}
-              >
+            {clinicSelection?.canSelectClinic ? (
+              <div className="border-t border-line p-2">
+                <ClinicSwitcher activeClinicId={clinicSelection.activeClinicId} clinics={clinicSelection.clinics} />
+              </div>
+            ) : null}
+            <div role="separator" className="my-1 border-t border-line" />
+            <form action="/logout" method="post">
+              <SubmitButton pendingLabel="ログアウト中" className={`${menuItemClassName} text-danger`}>
                 ログアウト
               </SubmitButton>
             </form>
-          </div>
+          </AppNavMoreMenu>
         </div>
-
-        {shouldShowContextRow && activeClinicContext ? (
-          <div className="flex flex-col gap-2 border-t border-line/70 py-2 md:flex-row md:items-center md:justify-between">
-            <div className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-1">
-              <p className="truncate text-lg font-semibold text-accent">{activeClinicContext.clinicName}</p>
-              {session?.user?.name ? (
-                <p className="truncate text-sm text-muted">{session.user.name} としてログイン中</p>
-              ) : null}
-            </div>
-
-            {shouldShowContextControls ? (
-              <div className="flex min-w-0 gap-2 overflow-x-auto pb-1 sm:gap-2 md:justify-end md:overflow-visible md:pb-0">
-                {shouldShowWorkStaffSelector ? (
-                  <WorkStaffSelector clinicId={activeClinicContext.clinicId} staffOperators={staffOperators} />
-                ) : null}
-
-                {clinicSelection?.canSelectClinic ? (
-                  <ClinicSwitcher activeClinicId={clinicSelection.activeClinicId} clinics={clinicSelection.clinics} />
-                ) : null}
-              </div>
-            ) : null}
-          </div>
-        ) : null}
       </div>
     </nav>
   );

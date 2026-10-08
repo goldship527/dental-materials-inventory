@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/ui/page-header";
 import { redirect } from "next/navigation";
 import { barcodeUiEnabled } from "@/lib/workflow-features";
 import { auth } from "@/auth";
@@ -54,14 +55,14 @@ export default async function BarcodeStockPage({ searchParams }: PageProps) {
   const status = selectedProduct ? getStockStatus(selectedProduct.quantity, selectedProduct.minStock) : null;
 
   return (
-    <main className="min-h-screen bg-surface px-4 py-6 text-ink sm:px-6 lg:px-8">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
+    <main className="min-h-screen bg-surface px-3 pt-3 pb-6 text-ink lg:px-6">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-3">
         <AppNav current="barcode" />
 
-        <header className="flex flex-col gap-4 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
+        <PageHeader title={"バーコード出入庫"}>
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-            <h1 className="mt-2 text-xl font-semibold">バーコード出入庫</h1>
+
           </div>
           <div className="flex shrink-0 flex-wrap gap-3">
             <a
@@ -95,7 +96,7 @@ export default async function BarcodeStockPage({ searchParams }: PageProps) {
               ホームへ戻る
             </a>
           </div>
-        </header>
+        </PageHeader>
 
 
         <BarcodeSearchForm
@@ -110,14 +111,14 @@ export default async function BarcodeStockPage({ searchParams }: PageProps) {
         />
 
           {!barcode ? (
-            <section className="rounded border border-line bg-panel p-5 text-sm text-muted shadow-sheet">
+            <section className="rounded border border-line bg-panel p-3 text-sm text-muted shadow-sheet">
               <p className="font-semibold text-ink">商品バーコードを読み取ってください。</p>
               <p className="mt-2">商品が1件に特定できたら、入出庫区分、数量、理由を確認して確定します。</p>
             </section>
           ) : null}
 
           {barcode && results.length === 0 ? (
-            <section className="rounded border border-line bg-markSoft p-5 text-sm text-ink shadow-sheet">
+            <section className="rounded border border-line border-l-4 border-l-ink bg-markSoft p-3 text-sm text-ink shadow-sheet">
               <p className="font-semibold">商品が見つかりませんでした。</p>
               <a className="mt-4 inline-flex h-11 items-center rounded btn-secondary px-4 font-semibold" href={`/barcode?barcode=${encodeURIComponent(barcode)}`}>
                 商品検索へ
@@ -126,7 +127,7 @@ export default async function BarcodeStockPage({ searchParams }: PageProps) {
           ) : null}
 
           {barcode && results.length > 1 ? (
-            <section className="rounded border border-line bg-markSoft p-5 text-sm text-ink shadow-sheet">
+            <section className="rounded border border-line border-l-4 border-l-ink bg-markSoft p-3 text-sm text-ink shadow-sheet">
               <p className="font-semibold">複数の商品に一致しました。</p>
               <div className="mt-4 grid gap-3 md:grid-cols-2">
                 {results.map((row) => (
@@ -144,8 +145,8 @@ export default async function BarcodeStockPage({ searchParams }: PageProps) {
           ) : null}
 
           {selectedProduct && status ? (
-            <section className="grid gap-6 lg:grid-cols-[1fr_1fr]">
-              <article className="rounded border border-line bg-panel p-5 shadow-sheet">
+            <section className="grid gap-4 lg:grid-cols-[1fr_1fr]">
+              <article className="rounded border border-line bg-panel p-3 shadow-sheet">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div>
                     <p className="text-sm font-semibold text-muted">読み取り結果</p>

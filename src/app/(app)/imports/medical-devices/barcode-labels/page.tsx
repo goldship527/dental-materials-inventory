@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/ui/page-header";
 import { redirect } from "next/navigation";
 import { barcodeUiEnabled } from "@/lib/workflow-features";
 import { auth } from "@/auth";
@@ -65,7 +66,7 @@ export default async function MedicalDeviceBarcodeLabelsPage({ searchParams }: P
   });
 
   return (
-    <main className="min-h-screen bg-surface px-6 py-8 text-ink print:bg-panel print:px-0 print:py-0">
+    <main className="min-h-screen bg-surface px-3 pt-3 pb-6 text-ink print:bg-panel print:px-0 print:py-0">
       <style>{`
         @page {
           size: A4 portrait;
@@ -88,10 +89,10 @@ export default async function MedicalDeviceBarcodeLabelsPage({ searchParams }: P
           <AppNav current="imports" />
         </div>
 
-        <header className="flex flex-col gap-3 border-b border-line pb-5 md:flex-row md:items-end md:justify-between print:hidden">
+        <PageHeader title={"バーコードテスト印刷"} className="print:hidden">
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-            <h1 className="mt-2 text-xl font-semibold">バーコードテスト印刷</h1>
+
             <p className="mt-2 text-sm text-muted">
               画面表示または印刷したJANバーコードをスキャナーで読み取り、`/barcode` の検索確認に使います。
             </p>
@@ -105,7 +106,7 @@ export default async function MedicalDeviceBarcodeLabelsPage({ searchParams }: P
             </a>
             <BarcodePrintButton />
           </div>
-        </header>
+        </PageHeader>
 
 
         <section className="rounded border border-line bg-panel p-4 text-sm text-muted shadow-sheet print:hidden">

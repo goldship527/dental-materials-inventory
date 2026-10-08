@@ -87,7 +87,7 @@ function ManualBlockView({ block, query }: { block: ManualBlock; query: string }
       );
     case "callout":
       return (
-        <aside className="my-5 rounded border border-lineStrong bg-markSoft px-4 py-3">
+        <aside className="my-5 rounded border border-lineStrong border-l-4 border-l-ink bg-markSoft px-4 py-3">
           <p className="text-sm font-semibold text-ink">{block.label}</p>
           <ul className="mt-2 list-disc space-y-1.5 pl-6 text-base leading-8 text-ink">
             {block.items.map((item, index) => (

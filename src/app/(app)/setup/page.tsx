@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/ui/page-header";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { AppNav } from "@/components/domain/app-nav";
@@ -75,10 +76,10 @@ export default async function SetupPage() {
   return (
     <>
       <AppNav current="setup" />
-      <main className="mx-auto grid w-full max-w-7xl gap-6 px-4 py-8 text-ink sm:px-6 lg:px-8">
-        <header className="flex flex-col gap-4 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
+      <main className="mx-auto grid w-full max-w-7xl gap-3 px-3 pt-3 pb-6 text-ink lg:px-6">
+        <PageHeader title={"初期設定チェック"}>
           <div>
-            <h1 className="text-xl font-semibold tracking-normal">初期設定チェック</h1>
+
             <p className="mt-2 text-sm leading-6 text-muted">
               {barcodeUiEnabled ? "商品、発注先、バーコード、最低在庫の登録状況をまとめて確認できます。" : "商品、発注先、最低在庫の登録状況をまとめて確認できます。"}
             </p>
@@ -90,11 +91,11 @@ export default async function SetupPage() {
               {completedStepCount} / {steps.length} 項目
             </p>
           </div>
-        </header>
+        </PageHeader>
 
         <section className="grid gap-4 md:grid-cols-4">
           {summaryCards.filter(card => barcodeUiEnabled || card.label !== "バーコード").map((card) => (
-            <div key={card.label} className="rounded border border-line bg-panel p-5 shadow-sheet">
+            <div key={card.label} className="rounded border border-line bg-panel p-3 shadow-sheet">
               <p className="text-sm font-semibold text-muted">{card.label}</p>
               <p className="mt-2 text-2xl font-semibold">{card.value}</p>
               <p className="mt-2 text-sm leading-6 text-muted">{card.note}</p>
@@ -133,7 +134,7 @@ export default async function SetupPage() {
           </div>
         </section>
 
-        <section className="rounded border border-line bg-panel p-5 shadow-sheet">
+        <section className="rounded border border-line bg-panel p-3 shadow-sheet">
           <h2 className="text-lg font-semibold">おすすめの進め方</h2>
           <div className="mt-4 grid gap-3 text-sm leading-6 text-muted md:grid-cols-3">
             <p>まず商品マスタを一括取り込みし、商品名とカテゴリの土台を作ります。</p>

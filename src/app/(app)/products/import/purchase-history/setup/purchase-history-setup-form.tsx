@@ -48,7 +48,7 @@ export function PurchaseHistorySetupForm({ products, categories }: PurchaseHisto
       <form action={action} className="grid gap-5">
         <input type="hidden" name="items" value={itemsJson} />
 
-        <div className="rounded border border-line bg-markSoft px-4 py-3 text-sm leading-6 text-ink">
+        <div className="rounded border border-line border-l-4 border-l-ink bg-markSoft px-4 py-3 text-sm leading-6 text-ink">
           ここではカテゴリと最低在庫だけをまとめて更新します。在庫数、保管場所、購入金額は変更しません。
         </div>
 
@@ -66,13 +66,13 @@ export function PurchaseHistorySetupForm({ products, categories }: PurchaseHisto
 
         <div className="overflow-x-auto rounded border border-line">
           <table className="w-full min-w-[980px] border-collapse text-left text-sm">
-            <thead className="bg-subtle text-label text-muted">
+            <thead className="bg-tint text-label text-accent">
               <tr>
-                <th className="border-b border-line px-3 py-2">商品</th>
-                <th className="border-b border-line px-3 py-2">メーカー・規格</th>
-                <th className="border-b border-line px-3 py-2">カテゴリ</th>
-                <th className="border-b border-line px-3 py-2">最低在庫</th>
-                <th className="border-b border-line px-3 py-2">詳細</th>
+                <th className="border-b border-accent px-3 py-2">商品</th>
+                <th className="border-b border-accent px-3 py-2">メーカー・規格</th>
+                <th className="border-b border-accent px-3 py-2">カテゴリ</th>
+                <th className="border-b border-accent px-3 py-2">最低在庫</th>
+                <th className="border-b border-accent px-3 py-2">詳細</th>
               </tr>
             </thead>
             <tbody>

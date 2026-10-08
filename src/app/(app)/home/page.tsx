@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/ui/page-header";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { AppNav } from "@/components/domain/app-nav";
@@ -179,21 +180,16 @@ export default async function HomePage({ searchParams }: PageProps) {
   ];
 
   return (
-    <main className="min-h-screen bg-surface px-4 py-6 text-ink print:bg-panel print:px-0 print:py-0 sm:px-6 lg:px-8">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
+    <main className="min-h-screen bg-surface px-3 pt-3 pb-6 text-ink print:bg-panel print:px-0 print:py-0 lg:px-6">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-3">
         <div className="print:hidden">
           <AppNav current="home" />
         </div>
 
-        <header className="flex flex-col gap-4 border-b border-line pb-5 print:border-none md:flex-row md:items-end md:justify-between">
-          <div>
-            <h1 className="text-xl font-semibold tracking-normal">ホーム</h1>
-            <p className="mt-2 text-sm leading-6 text-muted">今日の作業を選んでください。</p>
-          </div>
-        </header>
+        <PageHeader title="ホーム" description="今日の作業を選んでください。" className="print:border-none" />
 
         {params.adminDenied ? (
-          <section className="rounded border border-line bg-markSoft px-4 py-3 text-sm font-semibold text-ink shadow-sheet">
+          <section className="rounded border border-line border-l-4 border-l-ink bg-markSoft px-3 py-3 text-sm font-semibold text-ink shadow-sheet">
             管理者専用の画面です。必要な場合は管理者に依頼してください。
           </section>
         ) : null}
@@ -205,16 +201,16 @@ export default async function HomePage({ searchParams }: PageProps) {
               href={item.href}
               className={
                 item.tone === "out"
-                  ? "min-h-40 rounded border-2 border-accent btn-secondary p-6 transition"
-                  : "min-h-40 rounded border-2 border-muted btn-secondary p-6 transition"
+                  ? "min-h-22 rounded border-2 border-accent btn-secondary p-3 transition"
+                  : "min-h-22 rounded border-2 border-muted btn-secondary p-3 transition"
               }
             >
               <div className="flex items-start justify-between gap-4">
                 <p
                   className={
                     item.tone === "out"
-                      ? "text-2xl font-semibold text-accent"
-                      : "text-2xl font-semibold text-ink"
+                      ? "text-xl font-semibold text-accent"
+                      : "text-xl font-semibold text-ink"
                   }
                 >
                   {item.title}
@@ -229,21 +225,22 @@ export default async function HomePage({ searchParams }: PageProps) {
                   {item.badge}
                 </span>
               </div>
-              <p className="mt-4 max-w-2xl text-sm leading-6 text-muted">{item.description}</p>
+              <p className="mt-2 max-w-2xl text-sm leading-5 text-muted">{item.description}</p>
             </a>
           ))}
         </section>
 
         <section className="grid gap-3">
           <h2 className="text-lg font-semibold">今日の注意</h2>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          <div className="grid grid-cols-2 overflow-hidden rounded border border-line bg-panel sm:grid-cols-4">
             {attentionItems.map((item) => (
               <a
                 key={item.title}
-                className="rounded btn-secondary px-4 py-3 transition"
+                className="flex min-h-13 items-center border-b border-r border-line px-3 py-2 transition hover:bg-tint"
                 href={item.href}
+                title={item.note}
               >
-                <div className="flex items-center justify-between gap-3">
+                <div className="flex w-full items-center justify-between gap-2">
                   <p className="text-sm font-semibold text-muted">{item.title}</p>
                   <p
                     className={
@@ -257,13 +254,14 @@ export default async function HomePage({ searchParams }: PageProps) {
                     {item.value}
                   </p>
                 </div>
-                <p className="mt-2 text-xs leading-5 text-muted">{item.note}</p>
+                <span className="sr-only">{item.note}</span>
               </a>
             ))}
           </div>
         </section>
 
-        <section className="rounded border border-line bg-panel p-5 shadow-sheet">
+        <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
+          <section className="rounded border border-line bg-panel p-3 shadow-sheet">
           <div className="flex items-center justify-between gap-3">
             <p className="text-sm font-semibold text-muted">直近の在庫更新</p>
             <a className="text-sm font-semibold text-accent hover:underline" href="/movements">
@@ -271,21 +269,23 @@ export default async function HomePage({ searchParams }: PageProps) {
             </a>
           </div>
           {summary.latestMovements.length > 0 ? (
-            <div className="mt-3 divide-y divide-line">
-              {summary.latestMovements.map((movement) => (
-                <div key={movement.id} className="grid gap-2 py-2.5 text-sm sm:grid-cols-[1fr_auto] sm:items-center">
-                  <p className="font-semibold text-ink">
-                    {movement.productName}{" "}
-                    <span className="font-normal text-muted">
-                      {movement.beforeQuantity} → {movement.afterQuantity}
-                    </span>
-                  </p>
-                  <p className="text-muted">
-                    {movement.movementType} / {movementDateFormatter.format(movement.createdAt)}
-                  </p>
-                </div>
-              ))}
-            </div>
+            <table className="mt-3 w-full table-fixed border-collapse text-sm" aria-label="直近の在庫更新">
+              <tbody className="divide-y divide-line">
+                {summary.latestMovements.map((movement) => (
+                  <tr key={movement.id}>
+                    <td className="break-words py-2.5 pr-2 font-semibold text-ink">
+                      {movement.productName}{" "}
+                      <span className="font-normal text-muted">
+                        {movement.beforeQuantity} → {movement.afterQuantity}
+                      </span>
+                    </td>
+                    <td className="break-words py-2.5 text-right text-muted">
+                      {movement.movementType} / {movementDateFormatter.format(movement.createdAt)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           ) : (
             <p className="mt-2 text-base text-muted">まだ在庫更新はありません。</p>
           )}
@@ -293,15 +293,16 @@ export default async function HomePage({ searchParams }: PageProps) {
 
         <section className="grid gap-3 print:hidden">
           <h2 className="text-lg font-semibold">確認メニュー</h2>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="overflow-hidden rounded border border-line bg-panel">
             {menuItems.filter(item => isWorkflowLinkVisible(item.href)).map((item) => (
               <a
                 key={item.href}
                 href={item.href}
-                className="min-h-32 rounded btn-secondary p-5 transition"
+                className="flex min-h-12 items-center justify-between gap-3 border-b border-line px-3 py-2 transition hover:bg-tint"
+                title={item.description}
               >
-                <div className="flex items-start justify-between gap-4">
-                  <p className="text-lg font-semibold">{item.title}</p>
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-sm font-semibold">{item.title}</p>
                   {item.badge ? (
                     <span
                       className={
@@ -314,24 +315,26 @@ export default async function HomePage({ searchParams }: PageProps) {
                     </span>
                   ) : null}
                 </div>
-                <p className="mt-3 text-sm leading-6 text-muted">{item.description}</p>
+                <span className="sr-only">{item.description}</span>
               </a>
             ))}
           </div>
         </section>
+        </div>
 
         {canUseAdminMode ? (
           <section className="grid gap-3 print:hidden">
             <h2 className="text-lg font-semibold">管理メニュー</h2>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="overflow-hidden rounded border border-line bg-panel">
               {adminMenuItems.filter(item => isWorkflowLinkVisible(item.href)).map((item) => (
                 <a
                   key={item.href}
                   href={item.href}
-                  className="min-h-32 rounded btn-secondary p-5 transition"
+                  className="flex min-h-12 items-center justify-between gap-3 border-b border-line px-3 py-2 transition hover:bg-tint"
+                  title={item.description}
                 >
-                  <div className="flex items-start justify-between gap-4">
-                    <p className="text-lg font-semibold">{item.title}</p>
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-sm font-semibold">{item.title}</p>
                     {item.badge ? (
                       <span
                         className={
@@ -344,7 +347,7 @@ export default async function HomePage({ searchParams }: PageProps) {
                       </span>
                     ) : null}
                   </div>
-                  <p className="mt-3 text-sm leading-6 text-muted">{item.description}</p>
+                  <span className="sr-only">{item.description}</span>
                 </a>
               ))}
             </div>

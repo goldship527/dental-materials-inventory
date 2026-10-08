@@ -21,7 +21,7 @@ export default async function BarcodeOutPage() {
   });
 
   return (
-    <main className="min-h-screen bg-surface px-4 py-6 text-ink sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-surface px-3 pt-3 pb-6 text-ink lg:px-6">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-5">
         <AppNav current="barcodeOut" />
 

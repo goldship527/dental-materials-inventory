@@ -56,7 +56,7 @@ export default async function AdminOverviewPage() {
   return (
     <>
       <AppNav current="overview" />
-      <main className="mx-auto grid w-full max-w-7xl gap-6 px-4 py-8 sm:px-6 lg:px-8">
+      <main className="mx-auto grid w-full max-w-7xl gap-3 px-3 pt-3 pb-6 lg:px-6">
         <header className="grid gap-2">
           <p className="text-sm font-semibold text-accent">管理</p>
           <h1 className="text-xl font-bold tracking-normal text-ink">本部ダッシュボード</h1>
@@ -76,7 +76,7 @@ export default async function AdminOverviewPage() {
 
         <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {summaryItems.map((item) => (
-            <div key={item.label} className="rounded border border-line bg-panel p-5 shadow-sheet">
+            <div key={item.label} className="rounded border border-line bg-panel p-3 shadow-sheet">
               <p className="text-sm font-semibold text-muted">{item.label}</p>
               <p
                 className={
@@ -105,36 +105,36 @@ export default async function AdminOverviewPage() {
 
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-line text-sm">
-              <thead className="bg-subtle text-left text-label font-semibold uppercase tracking-normal text-muted">
+              <thead className="bg-tint text-left text-label font-semibold uppercase tracking-normal text-accent">
                 <tr>
-                  <th scope="col" className="min-w-56 px-5 py-3">
+                  <th scope="col" className="border-b border-accent min-w-56 px-5 py-3">
                     クリニック
                   </th>
-                  <th scope="col" className="whitespace-nowrap px-4 py-3 text-right">
+                  <th scope="col" className="border-b border-accent whitespace-nowrap px-4 py-3 text-right">
                     商品
                   </th>
-                  <th scope="col" className="whitespace-nowrap px-4 py-3 text-right">
+                  <th scope="col" className="border-b border-accent whitespace-nowrap px-4 py-3 text-right">
                     総在庫
                   </th>
-                  <th scope="col" className="whitespace-nowrap px-4 py-3 text-right">
+                  <th scope="col" className="border-b border-accent whitespace-nowrap px-4 py-3 text-right">
                     不足
                   </th>
-                  <th scope="col" className="whitespace-nowrap px-4 py-3 text-right">
+                  <th scope="col" className="border-b border-accent whitespace-nowrap px-4 py-3 text-right">
                     在庫0
                   </th>
-                  <th scope="col" className="whitespace-nowrap px-4 py-3 text-right">
+                  <th scope="col" className="border-b border-accent whitespace-nowrap px-4 py-3 text-right">
                     確認待ち
                   </th>
-                  <th scope="col" className="whitespace-nowrap px-4 py-3 text-right">
+                  <th scope="col" className="border-b border-accent whitespace-nowrap px-4 py-3 text-right">
                     発注予定
                   </th>
-                  <th scope="col" className="whitespace-nowrap px-4 py-3 text-right">
+                  <th scope="col" className="border-b border-accent whitespace-nowrap px-4 py-3 text-right">
                     発注記録あり
                   </th>
-                  <th scope="col" className="whitespace-nowrap px-4 py-3 text-right">
+                  <th scope="col" className="border-b border-accent whitespace-nowrap px-4 py-3 text-right">
                     期限ロット
                   </th>
-                  <th scope="col" className="whitespace-nowrap px-5 py-3">
+                  <th scope="col" className="border-b border-accent whitespace-nowrap px-5 py-3">
                     最終入出庫
                   </th>
                 </tr>

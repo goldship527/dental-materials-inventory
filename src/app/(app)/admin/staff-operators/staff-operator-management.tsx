@@ -133,13 +133,13 @@ export function StaffOperatorManagement({ operators, clinics }: StaffOperatorMan
 
         <div className="mt-4 max-w-full overflow-x-auto">
           <table className="min-w-[900px] border-separate border-spacing-0 text-left text-sm">
-            <thead>
-              <tr className="text-muted">
-                <th className="border-b border-line px-3 py-2 font-semibold">担当者</th>
-                <th className="border-b border-line px-3 py-2 font-semibold">クリニック</th>
-                <th className="border-b border-line px-3 py-2 font-semibold">状態</th>
-                <th className="border-b border-line px-3 py-2 font-semibold">更新日</th>
-                <th className="border-b border-line px-3 py-2 font-semibold">操作</th>
+            <thead className="bg-tint text-accent">
+              <tr className="text-accent">
+                <th className="border-b border-accent px-3 py-2 font-semibold">担当者</th>
+                <th className="border-b border-accent px-3 py-2 font-semibold">クリニック</th>
+                <th className="border-b border-accent px-3 py-2 font-semibold">状態</th>
+                <th className="border-b border-accent px-3 py-2 font-semibold">更新日</th>
+                <th className="border-b border-accent px-3 py-2 font-semibold">操作</th>
               </tr>
             </thead>
             <tbody>

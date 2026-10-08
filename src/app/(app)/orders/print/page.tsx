@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/ui/page-header";
 import { AppNav } from "@/components/domain/app-nav";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { getOrderRequestRows } from "@/lib/db/orders";
@@ -68,16 +69,16 @@ export default async function OrdersPrintPage({ searchParams }: PageProps) {
   const issuedAtLabel = formatDateTime(issuedAt);
 
   return (
-    <main className="min-h-screen bg-surface px-4 py-6 text-ink print:bg-panel print:p-0">
+    <main className="min-h-screen bg-surface px-3 pt-3 pb-6 text-ink print:bg-panel print:p-0">
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 print:max-w-none print:gap-4">
         <div className="print:hidden">
           <AppNav current="orders" />
         </div>
 
-        <header className="flex flex-col gap-4 border-b border-line pb-5 md:flex-row md:items-end md:justify-between print:border-ink print:pb-3">
+        <PageHeader title={"発注書下書き"} className="print:border-b print:border-ink print:pb-3">
           <div>
             <p className="text-sm font-semibold text-accent print:text-ink">{context.clinicName}</p>
-            <h1 className="mt-2 text-xl font-semibold print:text-2xl">発注書下書き</h1>
+
             <p className="mt-2 text-sm text-muted print:text-xs print:text-ink">
               発行日時: {issuedAtLabel} / 外部送信済みではありません
             </p>
@@ -88,7 +89,7 @@ export default async function OrdersPrintPage({ searchParams }: PageProps) {
             </a>
             <OrdersPrintButton />
           </div>
-        </header>
+        </PageHeader>
 
         <section className="rounded border border-line bg-panel p-4 text-sm shadow-sheet print:hidden">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -195,7 +196,7 @@ export default async function OrdersPrintPage({ searchParams }: PageProps) {
                     <p className="text-xs font-semibold text-muted print:text-ink">発注先</p>
                     <h2 className="mt-1 text-lg font-semibold print:text-base">{group.supplierName}</h2>
                     {getMissingSupplierLabels(group).length > 0 ? (
-                      <p className="mt-2 rounded bg-markSoft px-3 py-2 text-xs font-semibold text-ink print:border print:border-ink print:bg-panel print:px-2 print:py-1 print:text-ink">
+                      <p className="mt-2 rounded border border-line border-l-4 border-l-ink bg-markSoft px-3 py-2 text-xs font-semibold text-ink print:border print:border-ink print:bg-panel print:px-2 print:py-1 print:text-ink">
                         未設定: {getMissingSupplierLabels(group).join("、")}
                       </p>
                     ) : null}
@@ -244,27 +245,27 @@ export default async function OrdersPrintPage({ searchParams }: PageProps) {
 
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[980px] border-collapse text-left text-sm print:min-w-0 print:text-xs">
-                    <thead className="bg-subtle text-label text-muted print:bg-panel print:text-label print:text-ink">
+                    <thead className="bg-tint text-label text-accent print:bg-panel print:text-label print:text-ink">
                       <tr>
-                        <th className="border-b border-line px-4 py-3 print:border print:border-ink print:px-2 print:py-1.5">
+                        <th className="border-b border-accent px-4 py-3 print:border print:border-ink print:px-2 print:py-1.5">
                           商品
                         </th>
-                        <th className="border-b border-line px-4 py-3 print:border print:border-ink print:px-2 print:py-1.5">
+                        <th className="border-b border-accent px-4 py-3 print:border print:border-ink print:px-2 print:py-1.5">
                           商品コード
                         </th>
-                        <th className="border-b border-line px-4 py-3 print:border print:border-ink print:px-2 print:py-1.5">
+                        <th className="border-b border-accent px-4 py-3 print:border print:border-ink print:px-2 print:py-1.5">
                           カテゴリ
                         </th>
-                        <th className="border-b border-line px-4 py-3 text-right print:border print:border-ink print:px-2 print:py-1.5">
+                        <th className="border-b border-accent px-4 py-3 text-right print:border print:border-ink print:px-2 print:py-1.5">
                           現在庫
                         </th>
-                        <th className="border-b border-line px-4 py-3 text-right print:border print:border-ink print:px-2 print:py-1.5">
+                        <th className="border-b border-accent px-4 py-3 text-right print:border print:border-ink print:px-2 print:py-1.5">
                           最低在庫
                         </th>
-                        <th className="border-b border-line px-4 py-3 text-right print:border print:border-ink print:px-2 print:py-1.5">
+                        <th className="border-b border-accent px-4 py-3 text-right print:border print:border-ink print:px-2 print:py-1.5">
                           発注数
                         </th>
-                        <th className="border-b border-line px-4 py-3 print:border print:border-ink print:px-2 print:py-1.5">
+                        <th className="border-b border-accent px-4 py-3 print:border print:border-ink print:px-2 print:py-1.5">
                           状態・備考
                         </th>
                       </tr>

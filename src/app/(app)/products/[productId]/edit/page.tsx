@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/ui/page-header";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { AppNav } from "@/components/domain/app-nav";
@@ -44,17 +45,17 @@ export default async function ProductEditPage({ params, searchParams }: PageProp
   return (
     <>
       <AppNav current="products" />
-      <main className="min-h-screen bg-surface px-4 py-8 text-ink sm:px-6">
+      <main className="min-h-screen bg-surface px-3 pt-3 pb-6 text-ink">
         <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
-          <header className="flex flex-col gap-3 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
+          <PageHeader title={"商品マスタ編集"}>
             <div>
               <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-              <h1 className="mt-2 text-xl font-semibold">商品マスタ編集</h1>
+
             </div>
             <a className="text-sm font-semibold text-accent hover:underline" href={`/products/${product.id}`}>
               商品詳細へ戻る
             </a>
-          </header>
+          </PageHeader>
 
           <ProductEditForm product={product} suppliers={suppliers} />
           <PhotoManagement

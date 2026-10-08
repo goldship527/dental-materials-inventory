@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/ui/page-header";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { AppNav } from "@/components/domain/app-nav";
@@ -32,14 +33,14 @@ export default async function SupplierEditPage({ params }: PageProps) {
   }
 
   return (
-    <main className="min-h-screen bg-surface px-6 py-8 text-ink">
+    <main className="min-h-screen bg-surface px-3 pt-3 pb-6 text-ink">
       <div className="mx-auto flex w-full max-w-4xl flex-col gap-6">
         <AppNav current="suppliers" />
 
-        <header className="flex flex-col gap-3 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
+        <PageHeader title={"発注先マスタ編集"}>
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-            <h1 className="mt-2 text-xl font-semibold">発注先マスタ編集</h1>
+
             <p className="mt-2 text-sm text-muted">
               発注候補や商品マスタに表示される発注先名を編集します。
             </p>
@@ -47,7 +48,7 @@ export default async function SupplierEditPage({ params }: PageProps) {
           <a className="text-sm font-semibold text-accent hover:underline" href={`/suppliers/${supplier.id}`}>
             発注先詳細へ戻る
           </a>
-        </header>
+        </PageHeader>
 
 
         <SupplierEditForm supplier={supplier} />

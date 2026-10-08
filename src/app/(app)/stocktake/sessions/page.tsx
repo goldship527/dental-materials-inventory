@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/ui/page-header";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { AppNav } from "@/components/domain/app-nav";
@@ -71,14 +72,14 @@ export default async function StocktakeSessionsPage() {
   const { inProgressSession, historySessions } = await getStocktakeSessionIndex(context.clinicId);
 
   return (
-    <main className="min-h-screen bg-surface px-4 py-6 text-ink sm:px-6 lg:px-8">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
+    <main className="min-h-screen bg-surface px-3 pt-3 pb-6 text-ink lg:px-6">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-3">
         <AppNav current="stocktake" />
 
-        <header className="flex flex-col gap-4 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
+        <PageHeader title={"棚卸セッション"}>
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-            <h1 className="mt-2 text-xl font-semibold">棚卸セッション</h1>
+
           </div>
           <a
             className="inline-flex h-11 items-center justify-center rounded btn-primary px-5 text-sm font-semibold transition"
@@ -86,7 +87,7 @@ export default async function StocktakeSessionsPage() {
           >
             新規開始
           </a>
-        </header>
+        </PageHeader>
 
 
         <section className="rounded border border-line bg-panel shadow-sheet">
@@ -97,15 +98,15 @@ export default async function StocktakeSessionsPage() {
           </div>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[920px] border-collapse text-left text-sm">
-              <thead className="bg-subtle text-label text-muted">
+              <thead className="bg-tint text-label text-accent">
                 <tr>
-                  <th className="border-b border-line px-4 py-3">状態</th>
-                  <th className="border-b border-line px-4 py-3">開始</th>
-                  <th className="border-b border-line px-4 py-3">開始者</th>
-                  <th className="border-b border-line px-4 py-3 text-right">商品数</th>
-                  <th className="border-b border-line px-4 py-3">進捗</th>
-                  <th className="border-b border-line px-4 py-3">最終更新</th>
-                  <th className="border-b border-line px-4 py-3 text-right">操作</th>
+                  <th className="border-b border-accent px-4 py-3">状態</th>
+                  <th className="border-b border-accent px-4 py-3">開始</th>
+                  <th className="border-b border-accent px-4 py-3">開始者</th>
+                  <th className="border-b border-accent px-4 py-3 text-right">商品数</th>
+                  <th className="border-b border-accent px-4 py-3">進捗</th>
+                  <th className="border-b border-accent px-4 py-3">最終更新</th>
+                  <th className="border-b border-accent px-4 py-3 text-right">操作</th>
                 </tr>
               </thead>
               <tbody>
@@ -129,15 +130,15 @@ export default async function StocktakeSessionsPage() {
           </div>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[920px] border-collapse text-left text-sm">
-              <thead className="bg-subtle text-label text-muted">
+              <thead className="bg-tint text-label text-accent">
                 <tr>
-                  <th className="border-b border-line px-4 py-3">状態</th>
-                  <th className="border-b border-line px-4 py-3">開始</th>
-                  <th className="border-b border-line px-4 py-3">開始者</th>
-                  <th className="border-b border-line px-4 py-3 text-right">商品数</th>
-                  <th className="border-b border-line px-4 py-3">内訳</th>
-                  <th className="border-b border-line px-4 py-3">最終更新</th>
-                  <th className="border-b border-line px-4 py-3 text-right">操作</th>
+                  <th className="border-b border-accent px-4 py-3">状態</th>
+                  <th className="border-b border-accent px-4 py-3">開始</th>
+                  <th className="border-b border-accent px-4 py-3">開始者</th>
+                  <th className="border-b border-accent px-4 py-3 text-right">商品数</th>
+                  <th className="border-b border-accent px-4 py-3">内訳</th>
+                  <th className="border-b border-accent px-4 py-3">最終更新</th>
+                  <th className="border-b border-accent px-4 py-3 text-right">操作</th>
                 </tr>
               </thead>
               <tbody>

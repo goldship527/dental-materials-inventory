@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/ui/page-header";
 import { redirect } from "next/navigation";
 import { barcodeUiEnabled } from "@/lib/workflow-features";
 import { auth } from "@/auth";
@@ -65,14 +66,14 @@ export default async function UnresolvedBarcodeScansPage() {
   const logs = await getUnresolvedBarcodeScanLogRows(context.clinicId);
 
   return (
-    <main className="min-h-screen bg-surface px-6 py-8 text-ink">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
+    <main className="min-h-screen bg-surface px-3 pt-3 pb-6 text-ink">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-3">
         <AppNav current="barcode" />
 
-        <header className="flex flex-col gap-3 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
+        <PageHeader title={"未対応バーコード整理"}>
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-            <h1 className="mt-2 text-xl font-semibold">未対応バーコード整理</h1>
+
           </div>
           <div className="flex flex-wrap gap-3 text-sm font-semibold">
             <a className="text-accent hover:underline" href="/barcode/scans">
@@ -82,7 +83,7 @@ export default async function UnresolvedBarcodeScansPage() {
               バーコード検索へ
             </a>
           </div>
-        </header>
+        </PageHeader>
 
 
         <section className="grid gap-3 rounded border border-line bg-panel px-4 py-3 text-sm text-muted shadow-sheet md:grid-cols-[1fr_auto] md:items-center">
@@ -97,14 +98,14 @@ export default async function UnresolvedBarcodeScansPage() {
         <section className="overflow-hidden rounded border border-line bg-panel shadow-sheet">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1240px] border-collapse text-left text-sm">
-              <thead className="bg-subtle text-label text-muted">
+              <thead className="bg-tint text-label text-accent">
                 <tr>
-                  <th className="border-b border-line px-4 py-3">保存日時</th>
-                  <th className="border-b border-line px-4 py-3">判定</th>
-                  <th className="border-b border-line px-4 py-3">読み取り値</th>
-                  <th className="border-b border-line px-4 py-3">抽出コード</th>
-                  <th className="border-b border-line px-4 py-3">対象情報</th>
-                  <th className="border-b border-line px-4 py-3">整理</th>
+                  <th className="border-b border-accent px-4 py-3">保存日時</th>
+                  <th className="border-b border-accent px-4 py-3">判定</th>
+                  <th className="border-b border-accent px-4 py-3">読み取り値</th>
+                  <th className="border-b border-accent px-4 py-3">抽出コード</th>
+                  <th className="border-b border-accent px-4 py-3">対象情報</th>
+                  <th className="border-b border-accent px-4 py-3">整理</th>
                 </tr>
               </thead>
               <tbody>

@@ -12,7 +12,7 @@ export default async function StockOutPage() {
     getActiveStaffOperatorOptionsForClinic({organizationId: context.organizationId, clinicId: context.clinicId}),
   ]);
   return (
-    <main className="min-h-screen bg-surface px-4 py-4 text-ink sm:px-6">
+    <main className="min-h-screen bg-surface px-3 pt-3 pb-6 text-ink">
       <div className="mx-auto flex max-w-7xl flex-col gap-4">
         <AppNav current="barcodeOut" />
         <header>

@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/ui/page-header";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { AppNav } from "@/components/domain/app-nav";
@@ -46,14 +47,14 @@ export default async function StockAnomaliesPage() {
   const totalTodayQuantity = anomalies.reduce((total, row) => total + row.todayQuantity, 0);
 
   return (
-    <main className="min-h-screen bg-surface px-4 py-6 text-ink sm:px-6 lg:px-8">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
+    <main className="min-h-screen bg-surface px-3 pt-3 pb-6 text-ink lg:px-6">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-3">
         <AppNav current="movements" />
 
-        <header className="flex flex-col gap-4 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
+        <PageHeader title={"異常出庫検知"}>
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-            <h1 className="mt-2 text-xl font-semibold">異常出庫検知</h1>
+
             <p className="mt-2 text-sm text-muted">
               直近24時間の出庫数が、過去30日の通常ペースより多い商品を表示します。
             </p>
@@ -80,22 +81,22 @@ export default async function StockAnomaliesPage() {
               ホームへ戻る
             </a>
           </div>
-        </header>
+        </PageHeader>
 
         <section className="grid gap-4 md:grid-cols-3">
-          <div className="rounded border border-line bg-panel p-5 shadow-sheet">
+          <div className="rounded border border-line bg-panel p-3 shadow-sheet">
             <p className="text-sm font-semibold text-muted">検知件数</p>
             <p className={anomalies.length > 0 ? "mt-2 text-2xl font-semibold text-ink" : "mt-2 text-2xl font-semibold"}>
               {anomalies.length}
             </p>
             <p className="mt-2 text-sm text-muted">表示のみ。出庫の取消や在庫数の変更は行いません。</p>
           </div>
-          <div className="rounded border border-line bg-panel p-5 shadow-sheet">
+          <div className="rounded border border-line bg-panel p-3 shadow-sheet">
             <p className="text-sm font-semibold text-muted">直近24時間の出庫数</p>
             <p className="mt-2 text-2xl font-semibold">{formatNumber(totalTodayQuantity)}</p>
             <p className="mt-2 text-sm text-muted">検知された商品の合計です。</p>
           </div>
-          <div className="rounded border border-line bg-panel p-5 shadow-sheet">
+          <div className="rounded border border-line bg-panel p-3 shadow-sheet">
             <p className="text-sm font-semibold text-muted">現在の閾値</p>
             <p className="mt-2 text-2xl font-semibold">{formatNumber(settings.anomalyOutThreshold)}倍</p>
             <p className="mt-2 text-sm text-muted">過去30日の平均に対する倍率です。</p>
@@ -109,16 +110,16 @@ export default async function StockAnomaliesPage() {
           {anomalies.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[1120px] border-collapse text-left text-sm">
-                <thead className="bg-subtle text-label text-muted">
+                <thead className="bg-tint text-label text-accent">
                   <tr>
-                    <th className="border-b border-line px-4 py-3">商品</th>
-                    <th className="border-b border-line px-4 py-3">カテゴリ</th>
-                    <th className="border-b border-line px-4 py-3 text-right">直近24時間</th>
-                    <th className="border-b border-line px-4 py-3 text-right">通常平均/日</th>
-                    <th className="border-b border-line px-4 py-3 text-right">倍率</th>
-                    <th className="border-b border-line px-4 py-3">操作者</th>
-                    <th className="border-b border-line px-4 py-3">最終出庫</th>
-                    <th className="border-b border-line px-4 py-3">確認</th>
+                    <th className="border-b border-accent px-4 py-3">商品</th>
+                    <th className="border-b border-accent px-4 py-3">カテゴリ</th>
+                    <th className="border-b border-accent px-4 py-3 text-right">直近24時間</th>
+                    <th className="border-b border-accent px-4 py-3 text-right">通常平均/日</th>
+                    <th className="border-b border-accent px-4 py-3 text-right">倍率</th>
+                    <th className="border-b border-accent px-4 py-3">操作者</th>
+                    <th className="border-b border-accent px-4 py-3">最終出庫</th>
+                    <th className="border-b border-accent px-4 py-3">確認</th>
                   </tr>
                 </thead>
                 <tbody>

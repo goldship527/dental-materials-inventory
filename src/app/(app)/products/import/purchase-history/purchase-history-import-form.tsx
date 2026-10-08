@@ -213,7 +213,7 @@ export function PurchaseHistoryImportForm() {
           </label>
         </div>
 
-        <div className="rounded border border-line bg-markSoft px-4 py-3 text-sm leading-6 text-ink">
+        <div className="rounded border border-line border-l-4 border-l-ink bg-markSoft px-4 py-3 text-sm leading-6 text-ink">
           取り込む前に、患者名や個人情報が含まれていないか確認してください。購入金額や単価が含まれるため、必要なファイルだけを使ってください。
         </div>
 
@@ -275,19 +275,19 @@ export function PurchaseHistoryImportForm() {
 
           <div className="overflow-x-auto rounded border border-line">
             <table className="w-full min-w-[1400px] border-collapse text-left text-sm">
-              <thead className="bg-subtle text-label text-muted">
+              <thead className="bg-tint text-label text-accent">
                 <tr>
-                  <th className="border-b border-line px-3 py-2">行</th>
-                  <th className="border-b border-line px-3 py-2">状態</th>
-                  <th className="border-b border-line px-3 py-2">照合理由</th>
-                  <th className="border-b border-line px-3 py-2">商品名</th>
-                  <th className="border-b border-line px-3 py-2">一致/候補</th>
-                  <th className="border-b border-line px-3 py-2">今回の扱い</th>
-                  <th className="border-b border-line px-3 py-2">発注先品番</th>
-                  <th className="border-b border-line px-3 py-2">購入回数</th>
-                  <th className="border-b border-line px-3 py-2">合計数量</th>
-                  <th className="border-b border-line px-3 py-2">最終購入日</th>
-                  <th className="border-b border-line px-3 py-2">メッセージ</th>
+                  <th className="border-b border-accent px-3 py-2">行</th>
+                  <th className="border-b border-accent px-3 py-2">状態</th>
+                  <th className="border-b border-accent px-3 py-2">照合理由</th>
+                  <th className="border-b border-accent px-3 py-2">商品名</th>
+                  <th className="border-b border-accent px-3 py-2">一致/候補</th>
+                  <th className="border-b border-accent px-3 py-2">今回の扱い</th>
+                  <th className="border-b border-accent px-3 py-2">発注先品番</th>
+                  <th className="border-b border-accent px-3 py-2">購入回数</th>
+                  <th className="border-b border-accent px-3 py-2">合計数量</th>
+                  <th className="border-b border-accent px-3 py-2">最終購入日</th>
+                  <th className="border-b border-accent px-3 py-2">メッセージ</th>
                 </tr>
               </thead>
               <tbody>

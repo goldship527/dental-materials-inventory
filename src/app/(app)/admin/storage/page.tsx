@@ -8,7 +8,7 @@ function statusClassName(status: ProductPhotoStorageDiagnosticItem["status"]) {
   }
 
   if (status === "warning") {
-    return "border-line bg-markSoft text-ink";
+    return "border-line border-l-4 border-l-ink bg-markSoft text-ink";
   }
 
   return "border-line bg-panel text-danger";
@@ -34,7 +34,7 @@ export default async function AdminStoragePage() {
   return (
     <>
       <AppNav current="storage" />
-      <main className="mx-auto grid w-full max-w-7xl gap-6 px-4 py-8 sm:px-6 lg:px-8">
+      <main className="mx-auto grid w-full max-w-7xl gap-3 px-3 pt-3 pb-6 lg:px-6">
         <header className="grid gap-2">
           <p className="text-sm font-semibold text-accent">管理</p>
           <h1 className="text-xl font-bold tracking-tight text-ink">ストレージ診断</h1>
@@ -43,7 +43,7 @@ export default async function AdminStoragePage() {
           </p>
         </header>
 
-        <section className="grid gap-4 rounded border border-line bg-panel p-5 shadow-sheet">
+        <section className="grid gap-4 rounded border border-line bg-panel p-3 shadow-sheet">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="text-lg font-semibold text-ink">商品写真ストレージ</h2>
@@ -79,7 +79,7 @@ export default async function AdminStoragePage() {
           </div>
         </section>
 
-        <section className="grid gap-3 rounded border border-line bg-panel p-5 shadow-sheet">
+        <section className="grid gap-3 rounded border border-line bg-panel p-3 shadow-sheet">
           <h2 className="text-lg font-semibold text-ink">Vercelで確認する値</h2>
           <p className="text-sm leading-6 text-muted">
             Production環境に、SUPABASE_URL、SUPABASE_SERVICE_ROLE_KEY、SUPABASE_STORAGE_BUCKET

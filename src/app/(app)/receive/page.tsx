@@ -15,7 +15,7 @@ export default async function ReceivePage() {
     requestedQuantity: row.requestedQuantity, orderUnit: row.orderUnit,
     orderedAt: row.orderedAt?.toISOString() ?? null,
   }));
-  return <main className="min-h-screen bg-surface px-4 py-4 text-ink sm:px-6">
+  return <main className="min-h-screen bg-surface px-3 pt-3 pb-6 text-ink">
     <div className="mx-auto flex max-w-7xl flex-col gap-4">
       <AppNav current="barcodeReceive" />
       <header><h1 className="text-xl font-semibold">納品する</h1><p className="mt-1">届いた商品を発注日から選んで確認します。</p></header>

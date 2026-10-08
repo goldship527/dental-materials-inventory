@@ -64,7 +64,7 @@ function getStatusBadgeClass(row: OrderRequestRow) {
   }
 
   if (row.status === "ORDERED") {
-    return "border-line bg-markSoft text-ink";
+    return "border-line border-l-4 border-l-ink bg-markSoft text-ink";
   }
 
   if (row.status === "CONFIRMED") {
@@ -430,7 +430,7 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
                 {activePanel === "receipt" ? "閉じる" : "納品確認"}
               </button>
               {activePanel === "receipt" ? (
-                <form action={receiptAction} className="grid gap-1.5 rounded border border-line bg-markSoft p-2">
+                <form action={receiptAction} className="grid gap-1.5 rounded border border-line border-l-4 border-l-ink bg-markSoft p-2">
                   <input type="hidden" name="orderRequestId" value={row.id} />
                   <input type="hidden" name="staffOperatorId" value={selectedStaffOperatorId} />
                   <p className="text-xs font-semibold text-muted">

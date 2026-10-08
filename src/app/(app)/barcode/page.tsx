@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/ui/page-header";
 import { redirect } from "next/navigation";
 import { barcodeUiEnabled } from "@/lib/workflow-features";
 import { auth } from "@/auth";
@@ -61,14 +62,14 @@ export default async function BarcodePage({ searchParams }: PageProps) {
   );
 
   return (
-    <main className="min-h-screen bg-surface px-4 py-6 text-ink sm:px-6 lg:px-8">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
+    <main className="min-h-screen bg-surface px-3 pt-3 pb-6 text-ink lg:px-6">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-3">
         <AppNav current="barcode" />
 
-        <header className="flex flex-col gap-4 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
+        <PageHeader title={"バーコード検索"}>
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-            <h1 className="mt-2 text-xl font-semibold">バーコード検索</h1>
+
           </div>
           <div className="flex shrink-0 flex-wrap gap-3">
             <a className="inline-flex h-11 items-center justify-center rounded btn-primary px-4 text-sm font-semibold transition" href="/barcode/batch?mode=receive">
@@ -92,7 +93,7 @@ export default async function BarcodePage({ searchParams }: PageProps) {
               ホームへ戻る
             </a>
           </div>
-        </header>
+        </PageHeader>
 
 
         <BarcodeSearchForm defaultBarcode={barcode} />
@@ -104,7 +105,7 @@ export default async function BarcodePage({ searchParams }: PageProps) {
         ) : null}
 
         {!hasSearched ? (
-          <section className="rounded border border-line bg-panel p-5 text-sm text-muted shadow-sheet">
+          <section className="rounded border border-line bg-panel p-3 text-sm text-muted shadow-sheet">
             バーコードを読み取ってください。
           </section>
         ) : null}
@@ -244,7 +245,7 @@ export default async function BarcodePage({ searchParams }: PageProps) {
               </div>
             ) : sampleMatches.length > 0 ? (
               <div className="grid gap-4 px-4 py-6">
-                <div className="rounded border border-line bg-markSoft p-4 text-sm text-muted">
+                <div className="rounded border border-line border-l-4 border-l-ink bg-markSoft p-4 text-sm text-muted">
                   <p className="font-semibold text-ink">商品マスタには未登録ですが、取込サンプルに一致しました。</p>
                 </div>
                 <div className="grid gap-3">

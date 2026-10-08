@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/ui/page-header";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { AppNav } from "@/components/domain/app-nav";
@@ -46,14 +47,14 @@ export default async function StocktakeSessionPage({ params }: PageProps) {
   }
 
   return (
-    <main className="min-h-screen bg-surface px-6 py-8 text-ink">
+    <main className="min-h-screen bg-surface px-3 pt-3 pb-6 text-ink">
       <div className="mx-auto flex max-w-7xl flex-col gap-6">
         <AppNav current="stocktake" />
 
-        <header className="flex flex-col gap-3 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
+        <PageHeader title={"棚卸セッション入力"}>
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-            <h1 className="mt-2 text-xl font-semibold">棚卸セッション入力</h1>
+
             <p className="mt-2 text-sm text-muted">
               1商品ずつ実在庫を入力します。入力内容は明細ごとに保存され、確定までは在庫数を変更しません。
             </p>
@@ -61,7 +62,7 @@ export default async function StocktakeSessionPage({ params }: PageProps) {
           <a className="text-sm font-semibold text-accent hover:underline" href="/stocktake/sessions">
             セッション一覧へ戻る
           </a>
-        </header>
+        </PageHeader>
 
 
         <section className="grid gap-3 rounded border border-line bg-panel p-4 text-sm shadow-sheet md:grid-cols-4">

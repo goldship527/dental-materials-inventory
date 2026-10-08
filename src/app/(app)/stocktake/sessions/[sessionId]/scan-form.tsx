@@ -561,16 +561,16 @@ export function StocktakeSessionScanForm({ session }: StocktakeSessionScanFormPr
         </div>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[1180px] border-collapse text-left text-sm">
-            <thead className="bg-subtle text-label text-muted">
+            <thead className="bg-tint text-label text-accent">
               <tr>
-                <th className="border-b border-line px-4 py-3">商品</th>
-                <th className="border-b border-line px-4 py-3">保管場所</th>
-                <th className="border-b border-line px-4 py-3 text-right">システム在庫</th>
-                <th className="border-b border-line px-4 py-3 text-right">実在庫</th>
-                <th className="border-b border-line px-4 py-3 text-right">差異</th>
-                <th className="border-b border-line px-4 py-3">メモ</th>
-                <th className="border-b border-line px-4 py-3">状態</th>
-                <th className="border-b border-line px-4 py-3">操作</th>
+                <th className="border-b border-accent px-4 py-3">商品</th>
+                <th className="border-b border-accent px-4 py-3">保管場所</th>
+                <th className="border-b border-accent px-4 py-3 text-right">システム在庫</th>
+                <th className="border-b border-accent px-4 py-3 text-right">実在庫</th>
+                <th className="border-b border-accent px-4 py-3 text-right">差異</th>
+                <th className="border-b border-accent px-4 py-3">メモ</th>
+                <th className="border-b border-accent px-4 py-3">状態</th>
+                <th className="border-b border-accent px-4 py-3">操作</th>
               </tr>
             </thead>
             <tbody>
@@ -599,7 +599,7 @@ export function StocktakeSessionScanForm({ session }: StocktakeSessionScanFormPr
       </section>
 
       {isCommitModalOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-accent/30 px-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 px-4">
           <section className="w-full max-w-md rounded border border-line bg-panel p-5 shadow-sheet">
             <h2 className="text-lg font-semibold">棚卸セッションを確定しますか？</h2>
             <dl className="mt-4 grid gap-3 rounded bg-subtle p-4 text-sm">

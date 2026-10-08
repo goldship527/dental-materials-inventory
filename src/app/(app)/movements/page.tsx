@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/ui/page-header";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { AppNav } from "@/components/domain/app-nav";
@@ -155,19 +156,19 @@ export default async function MovementsPage({ searchParams }: PageProps) {
       : "条件に一致する入出庫履歴はありません。検索語や絞り込みを見直してください。";
 
   return (
-    <main className="min-h-screen bg-surface px-4 py-6 text-ink sm:px-6 lg:px-8">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
+    <main className="min-h-screen bg-surface px-3 pt-3 pb-6 text-ink lg:px-6">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-3">
         <AppNav current="movements" />
 
-        <header className="flex flex-col gap-4 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
+        <PageHeader title={"入出庫履歴"}>
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-            <h1 className="mt-2 text-xl font-semibold">入出庫履歴</h1>
+
           </div>
           <a className="inline-flex h-11 shrink-0 items-center justify-center rounded btn-secondary px-4 text-sm font-semibold transition" href="/home">
             ホームへ戻る
           </a>
-        </header>
+        </PageHeader>
 
 
         <MovementFilterForm
@@ -190,19 +191,19 @@ export default async function MovementsPage({ searchParams }: PageProps) {
         <section className="rounded border border-line bg-panel shadow-sheet">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1120px] border-collapse text-left text-sm">
-              <thead className="bg-subtle text-label text-muted">
+              <thead className="bg-tint text-label text-accent">
                 <tr>
-                  <th className="border-b border-line px-3 py-3">日時</th>
-                  <th className="border-b border-line px-3 py-3">商品</th>
-                  <th className="w-20 border-b border-line px-3 py-3">区分</th>
-                  <th className="border-b border-line px-3 py-3 text-right">増減</th>
-                  <th className="border-b border-line px-3 py-3 text-right">変更前</th>
-                  <th className="border-b border-line px-3 py-3 text-right">変更後</th>
-                  <th className="border-b border-line px-3 py-3">理由メモ</th>
-                  <th className="border-b border-line px-3 py-3">操作元</th>
-                  <th className="border-b border-line px-3 py-3">操作者</th>
-                  <th className="border-b border-line px-3 py-3">実作業者</th>
-                  <th className="border-b border-line px-3 py-3">取り消し</th>
+                  <th className="border-b border-accent px-3 py-3">日時</th>
+                  <th className="border-b border-accent px-3 py-3">商品</th>
+                  <th className="w-20 border-b border-accent px-3 py-3">区分</th>
+                  <th className="border-b border-accent px-3 py-3 text-right">増減</th>
+                  <th className="border-b border-accent px-3 py-3 text-right">変更前</th>
+                  <th className="border-b border-accent px-3 py-3 text-right">変更後</th>
+                  <th className="border-b border-accent px-3 py-3">理由メモ</th>
+                  <th className="border-b border-accent px-3 py-3">操作元</th>
+                  <th className="border-b border-accent px-3 py-3">操作者</th>
+                  <th className="border-b border-accent px-3 py-3">実作業者</th>
+                  <th className="border-b border-accent px-3 py-3">取り消し</th>
                 </tr>
               </thead>
               <tbody>

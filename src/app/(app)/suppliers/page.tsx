@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/ui/page-header";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { AppNav } from "@/components/domain/app-nav";
@@ -51,14 +52,14 @@ export default async function SuppliersPage({ searchParams }: PageProps) {
     .join(" / ");
 
   return (
-    <main className="min-h-screen bg-surface px-4 py-6 text-ink sm:px-6 lg:px-8">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
+    <main className="min-h-screen bg-surface px-3 pt-3 pb-6 text-ink lg:px-6">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-3">
         <AppNav current="suppliers" />
 
-        <header className="flex flex-col gap-4 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
+        <PageHeader title={"発注先マスタ"}>
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-            <h1 className="mt-2 text-xl font-semibold">発注先マスタ</h1>
+
           </div>
           <div className="grid w-full grid-cols-1 gap-3 sm:flex sm:w-auto sm:shrink-0 sm:flex-wrap">
             {canManageSuppliers ? (
@@ -81,7 +82,7 @@ export default async function SuppliersPage({ searchParams }: PageProps) {
               ホームへ戻る
             </a>
           </div>
-        </header>
+        </PageHeader>
 
 
         <SupplierFilterForm
@@ -106,7 +107,7 @@ export default async function SuppliersPage({ searchParams }: PageProps) {
               const plannedOrderRequestCount = row.orderRequestCounts.DRAFT + row.orderRequestCounts.CONFIRMED;
 
               return (
-                <article key={row.id} className="rounded border border-line bg-panel p-5 shadow-sheet">
+                <article key={row.id} className="rounded border border-line bg-panel p-3 shadow-sheet">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div>
                       <a className="text-lg font-semibold text-accent hover:underline" href={`/suppliers/${row.id}`}>
