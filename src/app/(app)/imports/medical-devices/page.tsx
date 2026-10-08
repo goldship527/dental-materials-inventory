@@ -1,8 +1,9 @@
+import { PageHeader } from "@/components/ui/page-header";
 import { redirect } from "next/navigation";
 import { barcodeUiEnabled } from "@/lib/workflow-features";
 import { auth } from "@/auth";
 import { Ean13Barcode } from "@/components/domain/ean13-barcode";
-import { AppNav } from "@/components/domain/app-nav";
+import { PageShell } from "@/components/ui/page-shell";
 import { requireAdminUser } from "@/lib/auth/admin";
 import { prisma } from "@/lib/db/prisma";
 import { requireActiveClinic } from "@/lib/db/clinic";
@@ -60,13 +61,11 @@ export default async function MedicalDeviceImportPreviewPage({ searchParams }: P
 
   if (cacheResult.status === "missing") {
     return (
-      <>
-        <AppNav current="imports" />
-        <main className="mx-auto grid w-full max-w-7xl gap-6 px-4 py-8 text-ink sm:px-6 lg:px-8">
-          <header className="border-b border-line pb-5">
-            <h1 className="text-xl font-semibold">医療機器データ取り込みプレビュー</h1>
-          </header>
-          <section className="rounded border border-line bg-panel p-5 text-sm text-muted shadow-sheet">
+      <PageShell current="imports" mainClassName="mx-auto grid w-full max-w-7xl gap-3 px-3 pt-3 pb-6 lg:px-6">
+          <PageHeader title={"医療機器データ取り込みプレビュー"}>
+
+          </PageHeader>
+          <section className="rounded border border-line bg-panel p-3 text-sm text-muted shadow-sheet">
             <p className="font-semibold text-ink">ローカルキャッシュがまだありません。</p>
             <p className="mt-2">
               サンプルXLSを読み取る場合は、ローカル環境で{" "}
@@ -74,8 +73,7 @@ export default async function MedicalDeviceImportPreviewPage({ searchParams }: P
               <code className="rounded bg-subtle px-1 py-0.5">{cacheResult.cachePath}</code> を作成してください。
             </p>
           </section>
-        </main>
-      </>
+      </PageShell>
     );
   }
 
@@ -143,17 +141,15 @@ export default async function MedicalDeviceImportPreviewPage({ searchParams }: P
   }
 
   return (
-    <>
-      <AppNav current="imports" />
-      <main className="mx-auto grid w-full max-w-7xl gap-6 px-4 py-8 text-ink sm:px-6 lg:px-8">
-        <header className="border-b border-line pb-5">
+    <PageShell current="imports" mainClassName="mx-auto grid w-full max-w-7xl gap-3 px-3 pt-3 pb-6 lg:px-6">
+        <PageHeader title={"医療機器データ取り込みプレビュー"}>
           <div>
-            <h1 className="text-xl font-semibold">医療機器データ取り込みプレビュー</h1>
+
             <p className="mt-2 text-sm text-muted">
               取込サンプルを表示しています。
             </p>
           </div>
-        </header>
+        </PageHeader>
 
 
         <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -192,14 +188,14 @@ export default async function MedicalDeviceImportPreviewPage({ searchParams }: P
         <section className="overflow-hidden rounded border border-line bg-panel shadow-sheet">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-line text-sm">
-              <thead className="bg-subtle text-left text-label font-semibold text-muted">
+              <thead className="bg-tint text-left text-label font-semibold text-accent">
                 <tr>
-                  <th className="px-3 py-3">JAN</th>
-                  <th className="px-3 py-3">バーコード</th>
-                  <th className="px-3 py-3">製品</th>
-                  <th className="px-3 py-3">分類</th>
-                  <th className="px-3 py-3">既存照合</th>
-                  <th className="px-3 py-3">元データ</th>
+                  <th className="border-b border-accent px-3 py-3">JAN</th>
+                  <th className="border-b border-accent px-3 py-3">バーコード</th>
+                  <th className="border-b border-accent px-3 py-3">製品</th>
+                  <th className="border-b border-accent px-3 py-3">分類</th>
+                  <th className="border-b border-accent px-3 py-3">既存照合</th>
+                  <th className="border-b border-accent px-3 py-3">元データ</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-line">
@@ -250,7 +246,6 @@ export default async function MedicalDeviceImportPreviewPage({ searchParams }: P
           </div>
           {visible.length === 0 ? <p className="p-6 text-center text-sm text-muted">条件に合うデータがありません。</p> : null}
         </section>
-      </main>
-    </>
+    </PageShell>
   );
 }

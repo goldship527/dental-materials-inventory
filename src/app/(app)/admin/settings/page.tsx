@@ -1,4 +1,4 @@
-import { AppNav } from "@/components/domain/app-nav";
+import { PageShell } from "@/components/ui/page-shell";
 import { requireAdminUser } from "@/lib/auth/admin";
 import { getOrganizationSettings } from "@/lib/db/organization-settings";
 import { OrganizationSettingsForm } from "./organization-settings-form";
@@ -8,9 +8,7 @@ export default async function AdminSettingsPage() {
   const settings = await getOrganizationSettings(context.organizationId);
 
   return (
-    <>
-      <AppNav current="settings" />
-      <main className="mx-auto grid w-full max-w-7xl gap-6 px-4 py-8 sm:px-6 lg:px-8">
+    <PageShell current="settings" mainClassName="mx-auto grid w-full max-w-7xl gap-3 px-3 pt-3 pb-6 lg:px-6">
         <header className="grid gap-2">
           <p className="text-sm font-semibold text-accent">管理</p>
           <h1 className="text-xl font-bold tracking-tight text-ink">組織設定</h1>
@@ -20,7 +18,6 @@ export default async function AdminSettingsPage() {
         </header>
 
         <OrganizationSettingsForm anomalyOutThreshold={settings.anomalyOutThreshold} />
-      </main>
-    </>
+    </PageShell>
   );
 }

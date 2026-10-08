@@ -1,6 +1,7 @@
+import { PageHeader } from "@/components/ui/page-header";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { AppNav } from "@/components/domain/app-nav";
+import { PageShell } from "@/components/ui/page-shell";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import {
   getStockLotRows,
@@ -130,14 +131,12 @@ export default async function StockLotsPage({ searchParams }: PageProps) {
   );
 
   return (
-    <main className="min-h-screen bg-surface px-4 py-6 text-ink sm:px-6 lg:px-8">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
-        <AppNav current="inventory" />
+    <PageShell current="inventory" mainClassName="px-3 pt-3 pb-6 lg:px-6">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-3">
 
-        <header className="flex flex-col gap-4 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
+        <PageHeader title={"期限ロット一覧"}>
           <div>
-            <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-            <h1 className="mt-2 text-xl font-semibold">期限ロット一覧</h1>
+
             <p className="mt-2 text-sm text-muted">在庫に保存されたロット番号と有効期限を、期限切れ・期限間近から確認します。</p>
           </div>
           <div className="flex flex-wrap gap-2 text-sm font-semibold">
@@ -154,31 +153,31 @@ export default async function StockLotsPage({ searchParams }: PageProps) {
               ホームへ戻る
             </a>
           </div>
-        </header>
+        </PageHeader>
 
         <section className="grid gap-4 md:grid-cols-4">
-          <div className="rounded border border-line bg-panel p-5 shadow-sheet">
+          <div className="rounded border border-line bg-panel p-3 shadow-sheet">
             <p className="text-sm font-semibold text-muted">要確認</p>
             <p className={counts.attention > 0 ? "mt-2 text-2xl font-semibold text-ink" : "mt-2 text-2xl font-semibold"}>
               {counts.attention}
             </p>
             <p className="mt-2 text-sm text-muted">期限切れ + 30日以内</p>
           </div>
-          <div className="rounded border border-line bg-panel p-5 shadow-sheet">
+          <div className="rounded border border-line bg-panel p-3 shadow-sheet">
             <p className="text-sm font-semibold text-muted">期限切れ</p>
             <p className={counts.expired > 0 ? "mt-2 text-2xl font-semibold text-danger" : "mt-2 text-2xl font-semibold"}>
               {counts.expired}
             </p>
             <p className="mt-2 text-sm text-muted">使用前に確認</p>
           </div>
-          <div className="rounded border border-line bg-panel p-5 shadow-sheet">
+          <div className="rounded border border-line bg-panel p-3 shadow-sheet">
             <p className="text-sm font-semibold text-muted">30日以内</p>
             <p className={counts.expiring > 0 ? "mt-2 text-2xl font-semibold text-ink" : "mt-2 text-2xl font-semibold"}>
               {counts.expiring}
             </p>
             <p className="mt-2 text-sm text-muted">期限が近いロット</p>
           </div>
-          <div className="rounded border border-line bg-panel p-5 shadow-sheet">
+          <div className="rounded border border-line bg-panel p-3 shadow-sheet">
             <p className="text-sm font-semibold text-muted">ロット別在庫</p>
             <p className="mt-2 text-2xl font-semibold">{counts.all}</p>
             <p className="mt-2 text-sm text-muted">数量が1以上のロット</p>
@@ -235,14 +234,14 @@ export default async function StockLotsPage({ searchParams }: PageProps) {
           {filteredRows.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[980px] border-collapse text-left text-sm">
-                <thead className="bg-subtle text-label text-muted">
+                <thead className="bg-tint text-label text-accent">
                   <tr>
-                    <th className="border-b border-line px-4 py-3">商品</th>
-                    <th className="border-b border-line px-4 py-3">ロット番号</th>
-                    <th className="border-b border-line px-4 py-3">有効期限</th>
-                    <th className="border-b border-line px-4 py-3">状態</th>
-                    <th className="border-b border-line px-4 py-3 text-right">数量</th>
-                    <th className="border-b border-line px-4 py-3">更新日時</th>
+                    <th className="border-b border-accent px-4 py-3">商品</th>
+                    <th className="border-b border-accent px-4 py-3">ロット番号</th>
+                    <th className="border-b border-accent px-4 py-3">有効期限</th>
+                    <th className="border-b border-accent px-4 py-3">状態</th>
+                    <th className="border-b border-accent px-4 py-3 text-right">数量</th>
+                    <th className="border-b border-accent px-4 py-3">更新日時</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -280,6 +279,6 @@ export default async function StockLotsPage({ searchParams }: PageProps) {
           )}
         </section>
       </div>
-    </main>
+    </PageShell>
   );
 }

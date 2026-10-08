@@ -1,6 +1,7 @@
+import { PageHeader } from "@/components/ui/page-header";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { AppNav } from "@/components/domain/app-nav";
+import { PageShell } from "@/components/ui/page-shell";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { getStocktakeSessionDetail, getStocktakeSessionStatusLabel } from "@/lib/db/stocktake-sessions";
 
@@ -92,14 +93,12 @@ export default async function StocktakeSessionHistoryPage({ params, searchParams
   const visibleRows = rowsByTab[currentTab];
 
   return (
-    <main className="min-h-screen bg-surface px-6 py-8 text-ink">
+    <PageShell current="stocktake" mainClassName="px-3 pt-3 pb-6">
       <div className="mx-auto flex max-w-7xl flex-col gap-6">
-        <AppNav current="stocktake" />
 
-        <header className="flex flex-col gap-3 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
+        <PageHeader title={"棚卸セッション履歴"}>
           <div>
-            <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-            <h1 className="mt-2 text-xl font-semibold">棚卸セッション履歴</h1>
+
             <p className="mt-2 text-sm text-muted">
               確定済み・破棄済みセッションの入力内容と、確定時に作成された在庫履歴を確認します。
             </p>
@@ -107,7 +106,7 @@ export default async function StocktakeSessionHistoryPage({ params, searchParams
           <a className="text-sm font-semibold text-accent hover:underline" href="/stocktake/sessions">
             セッション一覧へ戻る
           </a>
-        </header>
+        </PageHeader>
 
 
         <section className="grid gap-3 rounded border border-line bg-panel p-4 text-sm shadow-sheet md:grid-cols-3">
@@ -159,16 +158,16 @@ export default async function StocktakeSessionHistoryPage({ params, searchParams
           </div>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1080px] border-collapse text-left text-sm">
-              <thead className="bg-subtle text-label text-muted">
+              <thead className="bg-tint text-label text-accent">
                 <tr>
-                  <th className="border-b border-line px-4 py-3">商品</th>
-                  <th className="border-b border-line px-4 py-3">保管場所</th>
-                  <th className="border-b border-line px-4 py-3 text-right">期待</th>
-                  <th className="border-b border-line px-4 py-3 text-right">実数</th>
-                  <th className="border-b border-line px-4 py-3 text-right">差異</th>
-                  <th className="border-b border-line px-4 py-3">入力者</th>
-                  <th className="border-b border-line px-4 py-3">メモ</th>
-                  <th className="border-b border-line px-4 py-3">関連履歴</th>
+                  <th className="border-b border-accent px-4 py-3">商品</th>
+                  <th className="border-b border-accent px-4 py-3">保管場所</th>
+                  <th className="border-b border-accent px-4 py-3 text-right">期待</th>
+                  <th className="border-b border-accent px-4 py-3 text-right">実数</th>
+                  <th className="border-b border-accent px-4 py-3 text-right">差異</th>
+                  <th className="border-b border-accent px-4 py-3">入力者</th>
+                  <th className="border-b border-accent px-4 py-3">メモ</th>
+                  <th className="border-b border-accent px-4 py-3">関連履歴</th>
                 </tr>
               </thead>
               <tbody>
@@ -219,6 +218,6 @@ export default async function StocktakeSessionHistoryPage({ params, searchParams
           </div>
         </section>
       </div>
-    </main>
+    </PageShell>
   );
 }

@@ -37,7 +37,7 @@ export function RevertMovementButton({
       ) : null}
 
       {isModalOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-accent/30 px-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 px-4">
           <section className="w-full max-w-md rounded border border-line bg-panel p-5 shadow-sheet">
             <h2 className="text-lg font-semibold">この操作を取り消しますか？</h2>
             <div className="mt-4 rounded bg-subtle p-4 text-sm">

@@ -1,5 +1,6 @@
+import { PageHeader } from "@/components/ui/page-header";
 import { notFound } from "next/navigation";
-import { AppNav } from "@/components/domain/app-nav";
+import { PageShell } from "@/components/ui/page-shell";
 import { requireAdminUser } from "@/lib/auth/admin";
 import { getAdminOverviewClinicDetail } from "@/lib/db/admin-overview";
 import {
@@ -85,13 +86,11 @@ export default async function AdminOverviewClinicMovementsPage({ params, searchP
     .join(" / ");
 
   return (
-    <>
-      <AppNav current="overview" />
-      <main className="mx-auto grid w-full max-w-7xl gap-6 px-4 py-8 sm:px-6 lg:px-8">
-        <header className="flex flex-col gap-4 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
+    <PageShell current="overview" mainClassName="mx-auto grid w-full max-w-7xl gap-3 px-3 pt-3 pb-6 lg:px-6">
+        <PageHeader title={detail.clinic.name}>
           <div>
             <p className="text-sm font-semibold text-accent">本部ダッシュボード / 入出庫履歴</p>
-            <h1 className="mt-2 text-xl font-semibold text-ink">{detail.clinic.name}</h1>
+
             <p className="mt-2 max-w-3xl text-sm leading-6 text-muted">
               この画面は読み取り専用です。最近の入庫、出庫、調整履歴を確認できます。
             </p>
@@ -102,7 +101,7 @@ export default async function AdminOverviewClinicMovementsPage({ params, searchP
           >
             クリニック詳細へ戻る
           </a>
-        </header>
+        </PageHeader>
 
         <section className="rounded border border-line bg-panel p-4 shadow-sheet">
           <form
@@ -178,18 +177,18 @@ export default async function AdminOverviewClinicMovementsPage({ params, searchP
         <section className="overflow-hidden rounded border border-line bg-panel shadow-sheet">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1280px] border-collapse text-left text-sm">
-              <thead className="bg-subtle text-label text-muted">
+              <thead className="bg-tint text-label text-accent">
                 <tr>
-                  <th className="border-b border-line px-4 py-3">日時</th>
-                  <th className="border-b border-line px-4 py-3">商品</th>
-                  <th className="border-b border-line px-4 py-3">区分</th>
-                  <th className="border-b border-line px-4 py-3 text-right">増減</th>
-                  <th className="border-b border-line px-4 py-3 text-right">変更前</th>
-                  <th className="border-b border-line px-4 py-3 text-right">変更後</th>
-                  <th className="border-b border-line px-4 py-3">理由</th>
-                  <th className="border-b border-line px-4 py-3">操作元</th>
-                  <th className="border-b border-line px-4 py-3">操作者</th>
-                  <th className="border-b border-line px-4 py-3">実作業者</th>
+                  <th className="border-b border-accent px-4 py-3">日時</th>
+                  <th className="border-b border-accent px-4 py-3">商品</th>
+                  <th className="border-b border-accent px-4 py-3">区分</th>
+                  <th className="border-b border-accent px-4 py-3 text-right">増減</th>
+                  <th className="border-b border-accent px-4 py-3 text-right">変更前</th>
+                  <th className="border-b border-accent px-4 py-3 text-right">変更後</th>
+                  <th className="border-b border-accent px-4 py-3">理由</th>
+                  <th className="border-b border-accent px-4 py-3">操作元</th>
+                  <th className="border-b border-accent px-4 py-3">操作者</th>
+                  <th className="border-b border-accent px-4 py-3">実作業者</th>
                 </tr>
               </thead>
               <tbody>
@@ -247,7 +246,6 @@ export default async function AdminOverviewClinicMovementsPage({ params, searchP
             </table>
           </div>
         </section>
-      </main>
-    </>
+    </PageShell>
   );
 }

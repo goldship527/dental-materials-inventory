@@ -1,6 +1,7 @@
+import { PageHeader } from "@/components/ui/page-header";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { AppNav } from "@/components/domain/app-nav";
+import { PageShell } from "@/components/ui/page-shell";
 import { requireAdminUser } from "@/lib/auth/admin";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { getProductSupplierOptions } from "@/lib/db/products";
@@ -20,23 +21,18 @@ export default async function ProductNewPage() {
   const suppliers = await getProductSupplierOptions(context.organizationId);
 
   return (
-    <main className="min-h-screen bg-surface px-6 py-8 text-ink">
+    <PageShell current="products" mainClassName="px-3 pt-3 pb-6">
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
-        <AppNav current="products" />
 
-        <header className="flex flex-col gap-3 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
-          <div>
-            <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-            <h1 className="mt-2 text-xl font-semibold">商品マスタ新規作成</h1>
-          </div>
+        <PageHeader title={"商品マスタ新規作成"}>
           <a className="text-sm font-semibold text-accent hover:underline" href="/products">
             商品マスタ一覧へ戻る
           </a>
-        </header>
+        </PageHeader>
 
 
         <ProductCreateForm suppliers={suppliers} />
       </div>
-    </main>
+    </PageShell>
   );
 }

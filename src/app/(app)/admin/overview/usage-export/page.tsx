@@ -1,4 +1,5 @@
-import { AppNav } from "@/components/domain/app-nav";
+import { PageHeader } from "@/components/ui/page-header";
+import { PageShell } from "@/components/ui/page-shell";
 import { requireAdminUser } from "@/lib/auth/admin";
 import { getDefaultAdminUsageExportDateRange } from "@/lib/db/admin-usage-export";
 
@@ -7,13 +8,11 @@ export default async function AdminUsageExportPage() {
   const defaults = getDefaultAdminUsageExportDateRange();
 
   return (
-    <>
-      <AppNav current="overview" />
-      <main className="mx-auto grid w-full max-w-5xl gap-6 px-4 py-8 sm:px-6 lg:px-8">
-        <header className="flex flex-col gap-4 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
+    <PageShell current="overview" mainClassName="mx-auto grid w-full max-w-5xl gap-3 px-3 pt-3 pb-6 lg:px-6">
+        <PageHeader title={"使用個数CSV出力"}>
           <div>
             <p className="text-sm font-semibold text-accent">本部ダッシュボード / CSV出力</p>
-            <h1 className="mt-2 text-xl font-semibold text-ink">使用個数CSV出力</h1>
+
             <p className="mt-2 max-w-3xl text-sm leading-6 text-muted">
               指定期間の出庫数を、法人合計とクリニック別の商品単位でCSV出力します。
             </p>
@@ -24,9 +23,9 @@ export default async function AdminUsageExportPage() {
           >
             本部ダッシュボードへ戻る
           </a>
-        </header>
+        </PageHeader>
 
-        <section className="rounded border border-line bg-panel p-5 shadow-sheet">
+        <section className="rounded border border-line bg-panel p-3 shadow-sheet">
           <form className="grid gap-4 md:grid-cols-[1fr_1fr_auto]" action="/admin/overview/usage-export/download">
             <label className="grid gap-2 text-sm font-semibold text-muted">
               開始日
@@ -58,7 +57,7 @@ export default async function AdminUsageExportPage() {
         </section>
 
         <section className="grid gap-4 md:grid-cols-2">
-          <div className="rounded border border-line bg-panel p-5 shadow-sheet">
+          <div className="rounded border border-line bg-panel p-3 shadow-sheet">
             <h2 className="text-lg font-semibold text-ink">出力内容</h2>
             <ul className="mt-3 grid gap-2 text-sm leading-6 text-muted">
               <li>法人合計とクリニック別を同じCSVに出力します。</li>
@@ -66,7 +65,7 @@ export default async function AdminUsageExportPage() {
               <li>出庫数合計、出庫回数、最終出庫日時を含めます。</li>
             </ul>
           </div>
-          <div className="rounded border border-line bg-panel p-5 shadow-sheet">
+          <div className="rounded border border-line bg-panel p-3 shadow-sheet">
             <h2 className="text-lg font-semibold text-ink">集計ルール</h2>
             <ul className="mt-3 grid gap-2 text-sm leading-6 text-muted">
               <li>`movementType = OUT` の履歴を使用個数として集計します。</li>
@@ -75,7 +74,6 @@ export default async function AdminUsageExportPage() {
             </ul>
           </div>
         </section>
-      </main>
-    </>
+    </PageShell>
   );
 }

@@ -1,6 +1,7 @@
+import { PageHeader } from "@/components/ui/page-header";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { AppNav } from "@/components/domain/app-nav";
+import { PageShell } from "@/components/ui/page-shell";
 import { getDormantStockRows, normalizeDormantDays } from "@/lib/db/dormant-stock";
 import { requireActiveClinic } from "@/lib/db/clinic";
 
@@ -81,14 +82,12 @@ export default async function DormantStockPage({ searchParams }: PageProps) {
   const totalAmount = filteredRows.reduce((total, row) => total + (row.stagnantAmount ?? 0), 0);
 
   return (
-    <main className="min-h-screen bg-surface px-4 py-6 text-ink sm:px-6 lg:px-8">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
-        <AppNav current="dormant" />
+    <PageShell current="dormant" mainClassName="px-3 pt-3 pb-6 lg:px-6">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-3">
 
-        <header className="flex flex-col gap-4 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
+        <PageHeader title={"長期在庫レポート"}>
           <div>
-            <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-            <h1 className="mt-2 text-xl font-semibold">長期在庫レポート</h1>
+
             <p className="mt-2 text-sm text-muted">
               過去{selectedDays}日以内に出庫がなく、現在庫が1以上ある商品を表示します。
             </p>
@@ -107,22 +106,22 @@ export default async function DormantStockPage({ searchParams }: PageProps) {
               ホームへ戻る
             </a>
           </div>
-        </header>
+        </PageHeader>
 
         <section className="grid gap-4 md:grid-cols-3">
-          <div className="rounded border border-line bg-panel p-5 shadow-sheet">
+          <div className="rounded border border-line bg-panel p-3 shadow-sheet">
             <p className="text-sm font-semibold text-muted">対象商品</p>
             <p className={filteredRows.length > 0 ? "mt-2 text-2xl font-semibold text-ink" : "mt-2 text-2xl font-semibold"}>
               {filteredRows.length}
             </p>
             <p className="mt-2 text-sm text-muted">表示中の長期在庫候補</p>
           </div>
-          <div className="rounded border border-line bg-panel p-5 shadow-sheet">
+          <div className="rounded border border-line bg-panel p-3 shadow-sheet">
             <p className="text-sm font-semibold text-muted">対象数量</p>
             <p className="mt-2 text-2xl font-semibold">{totalQuantity}</p>
             <p className="mt-2 text-sm text-muted">現在庫の合計</p>
           </div>
-          <div className="rounded border border-line bg-panel p-5 shadow-sheet">
+          <div className="rounded border border-line bg-panel p-3 shadow-sheet">
             <p className="text-sm font-semibold text-muted">滞留金額</p>
             <p className="mt-2 text-2xl font-semibold">{formatAmount(totalAmount)}</p>
             <p className="mt-2 text-sm text-muted">標準価格がある商品の概算</p>
@@ -180,16 +179,16 @@ export default async function DormantStockPage({ searchParams }: PageProps) {
           {filteredRows.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[1080px] border-collapse text-left text-sm">
-                <thead className="bg-subtle text-label text-muted">
+                <thead className="bg-tint text-label text-accent">
                   <tr>
-                    <th className="border-b border-line px-4 py-3">商品</th>
-                    <th className="border-b border-line px-4 py-3">カテゴリ</th>
-                    <th className="border-b border-line px-4 py-3 text-right">現在庫</th>
-                    <th className="border-b border-line px-4 py-3 text-right">最低在庫</th>
-                    <th className="border-b border-line px-4 py-3">保管場所</th>
-                    <th className="border-b border-line px-4 py-3">最終出庫日</th>
-                    <th className="border-b border-line px-4 py-3 text-right">滞留日数</th>
-                    <th className="border-b border-line px-4 py-3 text-right">滞留金額</th>
+                    <th className="border-b border-accent px-4 py-3">商品</th>
+                    <th className="border-b border-accent px-4 py-3">カテゴリ</th>
+                    <th className="border-b border-accent px-4 py-3 text-right">現在庫</th>
+                    <th className="border-b border-accent px-4 py-3 text-right">最低在庫</th>
+                    <th className="border-b border-accent px-4 py-3">保管場所</th>
+                    <th className="border-b border-accent px-4 py-3">最終出庫日</th>
+                    <th className="border-b border-accent px-4 py-3 text-right">滞留日数</th>
+                    <th className="border-b border-accent px-4 py-3 text-right">滞留金額</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -222,6 +221,6 @@ export default async function DormantStockPage({ searchParams }: PageProps) {
           )}
         </section>
       </div>
-    </main>
+    </PageShell>
   );
 }

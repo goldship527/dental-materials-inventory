@@ -32,6 +32,9 @@ const config: Config = {
         xl: ["22px", "28px"],
         display: ["48px", "52px"],
       },
+      spacing: {
+        22: "88px",
+      },
       boxShadow: {
         raise: "inset 0 1px 0 rgb(255 255 255 / .22), 0 3px 0 var(--c-ai-edge), 0 4px 6px rgb(0 0 0 / .18)",
         "raise-light": "inset 0 1px 0 rgb(255 255 255 / 1), 0 2px 0 var(--c-control-edge), 0 3px 4px rgb(0 0 0 / .08)",

@@ -1,4 +1,4 @@
-import { AppNav } from "@/components/domain/app-nav";
+import { PageShell } from "@/components/ui/page-shell";
 import { requireAdminUser } from "@/lib/auth/admin";
 import { prisma } from "@/lib/db/prisma";
 import { UserManagement } from "./user-management";
@@ -32,9 +32,7 @@ export default async function AdminUsersPage() {
   });
 
   return (
-    <>
-      <AppNav current="admin" />
-      <main className="mx-auto grid w-full max-w-7xl gap-6 px-4 py-8 sm:px-6 lg:px-8">
+    <PageShell current="admin" mainClassName="mx-auto grid w-full max-w-7xl gap-3 px-3 pt-3 pb-6 lg:px-6">
         <header className="grid gap-2">
           <p className="text-sm font-semibold text-accent">管理</p>
           <h1 className="text-xl font-bold tracking-tight text-ink">ログインアカウント管理</h1>
@@ -47,7 +45,6 @@ export default async function AdminUsersPage() {
         <div className="min-w-0">
           <UserManagement users={users} currentUserId={context.userId} />
         </div>
-      </main>
-    </>
+    </PageShell>
   );
 }

@@ -1,6 +1,7 @@
+import { PageHeader } from "@/components/ui/page-header";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { AppNav } from "@/components/domain/app-nav";
+import { PageShell } from "@/components/ui/page-shell";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { getOrderRequestRows, type OrderRequestRow } from "@/lib/db/orders";
 import { getActiveStaffOperatorOptionsForClinic, type StaffOperatorOption } from "@/lib/db/staff-operators";
@@ -88,7 +89,7 @@ function getSupplierStatusChipClass(status: OrderStatusFilterValue) {
   }
 
   if (status === "AWAITING_RECEIPT") {
-    return "border-line bg-markSoft text-ink";
+    return "border-line border-l-4 border-l-ink bg-markSoft text-ink";
   }
 
   if (status === "RECEIVED") {
@@ -108,7 +109,7 @@ function getStatusCardClass(status: OrderStatusFilterValue) {
   }
 
   if (status === "AWAITING_RECEIPT") {
-    return "border-line bg-markSoft text-ink";
+    return "border-line border-l-4 border-l-ink bg-markSoft text-ink";
   }
 
   if (status === "RECEIVED") {
@@ -180,21 +181,21 @@ function OrderRequestRowsTable({
           <col className="w-[14%]" />
           <col className="w-[22%]" />
         </colgroup>
-        <thead className="bg-subtle text-label text-muted print:bg-panel print:text-label print:text-ink">
+        <thead className="bg-tint text-label text-accent print:bg-panel print:text-label print:text-ink">
           <tr>
-            <th className="border-b border-line px-4 py-3 print:border print:border-ink print:px-2 print:py-1.5">
+            <th className="border-b border-accent px-4 py-3 print:border print:border-ink print:px-2 print:py-1.5">
               商品
             </th>
-            <th className="border-b border-line px-4 py-3 print:border print:border-ink print:px-2 print:py-1.5">
+            <th className="border-b border-accent px-4 py-3 print:border print:border-ink print:px-2 print:py-1.5">
               在庫状況
             </th>
-            <th className="border-b border-line px-4 py-3 print:border print:border-ink print:px-2 print:py-1.5">
+            <th className="border-b border-accent px-4 py-3 print:border print:border-ink print:px-2 print:py-1.5">
               発注先
             </th>
-            <th className="border-b border-line px-4 py-3 print:border print:border-ink print:px-2 print:py-1.5">
+            <th className="border-b border-accent px-4 py-3 print:border print:border-ink print:px-2 print:py-1.5">
               発注量
             </th>
-            <th className="border-b border-line px-4 py-3 print:hidden">状態・操作</th>
+            <th className="border-b border-accent px-4 py-3 print:hidden">状態・操作</th>
             <th className="hidden border border-ink px-2 py-1.5 print:table-cell">状態</th>
             <th className="hidden border border-ink px-2 py-1.5 print:table-cell">備考</th>
             <th className="hidden border border-ink px-2 py-1.5 print:table-cell">確認</th>
@@ -314,14 +315,12 @@ export default async function OrdersPage({ searchParams }: PageProps) {
       : "条件に一致する発注候補はありません。検索語や状態フィルタを見直してください。";
 
   return (
-    <main className="min-h-screen bg-surface px-4 py-5 text-ink print:bg-panel print:p-0 sm:px-6 lg:px-8">
+    <PageShell current="orders" mainClassName="px-3 pt-3 pb-6 print:bg-panel print:p-0 lg:px-6" shellClassName="print:bg-panel">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 print:max-w-none print:gap-3">
-        <AppNav current="orders" />
 
-        <header className="flex flex-col gap-3 border-b border-line pb-4 md:flex-row md:items-end md:justify-between print:border-ink print:pb-3">
+        <PageHeader title={"発注"} className="print:border-b print:border-ink print:pb-3">
           <div>
-            <p className="text-sm font-semibold text-accent print:text-ink">{context.clinicName}</p>
-            <h1 className="mt-2 text-xl font-semibold print:text-2xl">発注</h1>
+
             <p className="mt-2 text-sm text-muted print:text-xs print:text-ink">
               <span className="hidden print:inline">この一覧は発注前の確認用で、外部発注送信済みではありません。</span>
               発行日時: {generatedAt}
@@ -345,7 +344,7 @@ export default async function OrdersPage({ searchParams }: PageProps) {
             </a>
             <OrdersPrintButton />
           </div>
-        </header>
+        </PageHeader>
 
 
         <section className="hidden grid-cols-4 gap-2 text-xs print:grid">
@@ -593,6 +592,6 @@ export default async function OrdersPage({ searchParams }: PageProps) {
           発注数量、発注先、状態、備考を確認してください。
         </p>
       </div>
-    </main>
+    </PageShell>
   );
 }

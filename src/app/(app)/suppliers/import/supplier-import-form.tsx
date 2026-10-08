@@ -123,7 +123,7 @@ export function SupplierImportForm() {
           </label>
         </div>
 
-        <div className="rounded border border-line bg-markSoft px-4 py-3 text-sm text-ink">
+        <div className="rounded border border-line border-l-4 border-l-ink bg-markSoft px-4 py-3 text-sm text-ink">
           実在患者情報、秘密情報、パスワード、APIキーは取り込みデータに入れないでください。発注先情報だけを扱います。
         </div>
 
@@ -180,16 +180,16 @@ export function SupplierImportForm() {
 
           <div className="overflow-x-auto rounded border border-line">
             <table className="w-full min-w-[1040px] border-collapse text-left text-sm">
-              <thead className="bg-subtle text-label text-muted">
+              <thead className="bg-tint text-label text-accent">
                 <tr>
-                  <th className="border-b border-line px-3 py-2">行</th>
-                  <th className="border-b border-line px-3 py-2">状態</th>
-                  <th className="border-b border-line px-3 py-2">発注先名</th>
-                  <th className="border-b border-line px-3 py-2">電話</th>
-                  <th className="border-b border-line px-3 py-2">FAX</th>
-                  <th className="border-b border-line px-3 py-2">メール</th>
-                  <th className="border-b border-line px-3 py-2">担当者</th>
-                  <th className="border-b border-line px-3 py-2">メッセージ</th>
+                  <th className="border-b border-accent px-3 py-2">行</th>
+                  <th className="border-b border-accent px-3 py-2">状態</th>
+                  <th className="border-b border-accent px-3 py-2">発注先名</th>
+                  <th className="border-b border-accent px-3 py-2">電話</th>
+                  <th className="border-b border-accent px-3 py-2">FAX</th>
+                  <th className="border-b border-accent px-3 py-2">メール</th>
+                  <th className="border-b border-accent px-3 py-2">担当者</th>
+                  <th className="border-b border-accent px-3 py-2">メッセージ</th>
                 </tr>
               </thead>
               <tbody>

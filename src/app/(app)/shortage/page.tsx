@@ -1,6 +1,7 @@
+import { PageHeader } from "@/components/ui/page-header";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { AppNav } from "@/components/domain/app-nav";
+import { PageShell } from "@/components/ui/page-shell";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { getActiveOrderRequestProductIds } from "@/lib/db/orders";
 import { getPendingOrderDetailsByProduct } from "@/lib/db/pending-orders";
@@ -180,14 +181,12 @@ export default async function ShortagePage({ searchParams }: PageProps) {
   );
 
   return (
-    <main className="min-h-screen bg-surface px-4 py-6 text-ink print:bg-panel print:p-0 sm:px-6 lg:px-8">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 print:max-w-none print:gap-3">
-        <AppNav current="shortage" />
+    <PageShell current="shortage" mainClassName="px-3 pt-3 pb-6 print:bg-panel print:p-0 lg:px-6" shellClassName="print:bg-panel">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-3 print:max-w-none print:gap-3">
 
-        <header className="flex flex-col gap-4 border-b border-line pb-5 md:flex-row md:items-end md:justify-between print:border-ink print:pb-3">
+        <PageHeader title={"不足在庫一覧"} className="print:border-b print:border-ink print:pb-3">
           <div>
-            <p className="text-sm font-semibold text-accent print:text-ink">{context.clinicName}</p>
-            <h1 className="mt-2 text-xl font-semibold print:text-2xl">不足在庫一覧</h1>
+
             <p className="mt-2 text-sm text-muted print:text-xs print:text-ink">
               発行日時: {generatedAt}
             </p>
@@ -198,7 +197,7 @@ export default async function ShortagePage({ searchParams }: PageProps) {
             </a>
             <PrintButton />
           </div>
-        </header>
+        </PageHeader>
 
 
         <form className="grid gap-3 rounded border border-line bg-panel p-4 shadow-sheet md:grid-cols-[1fr_auto_auto] print:hidden">
@@ -269,27 +268,27 @@ export default async function ShortagePage({ searchParams }: PageProps) {
             </div>
           ) : null}
           <table className="w-full border-collapse text-left text-sm print:text-xs">
-            <thead className="bg-subtle text-label text-muted print:bg-panel print:text-label print:text-ink">
+            <thead className="bg-tint text-label text-accent print:bg-panel print:text-label print:text-ink">
               <tr>
-                <th className="border-b border-line px-4 py-3 print:border print:border-ink print:px-2 print:py-1.5">
+                <th className="border-b border-accent px-4 py-3 print:border print:border-ink print:px-2 print:py-1.5">
                   商品名
                 </th>
-                <th className="border-b border-line px-4 py-3 text-right print:border print:border-ink print:px-2 print:py-1.5">
+                <th className="border-b border-accent px-4 py-3 text-right print:border print:border-ink print:px-2 print:py-1.5">
                   現在庫
                 </th>
-                <th className="border-b border-line px-4 py-3 text-right print:border print:border-ink print:px-2 print:py-1.5">
+                <th className="border-b border-accent px-4 py-3 text-right print:border print:border-ink print:px-2 print:py-1.5">
                   最低在庫
                 </th>
-                <th className="border-b border-line px-4 py-3 text-right print:border print:border-ink print:px-2 print:py-1.5">
+                <th className="border-b border-accent px-4 py-3 text-right print:border print:border-ink print:px-2 print:py-1.5">
                   不足数
                 </th>
-                <th className="border-b border-line px-4 py-3 print:border print:border-ink print:px-2 print:py-1.5">
+                <th className="border-b border-accent px-4 py-3 print:border print:border-ink print:px-2 print:py-1.5">
                   発注先
                 </th>
-                <th className="border-b border-line px-4 py-3 text-right print:border print:border-ink print:px-2 print:py-1.5">
+                <th className="border-b border-accent px-4 py-3 text-right print:border print:border-ink print:px-2 print:py-1.5">
                   納品待ち
                 </th>
-                <th className="border-b border-line px-4 py-3 print:hidden">発注候補</th>
+                <th className="border-b border-accent px-4 py-3 print:hidden">発注候補</th>
                 <th className="hidden border border-ink px-2 py-1.5 print:table-cell">確認</th>
               </tr>
             </thead>
@@ -310,6 +309,6 @@ export default async function ShortagePage({ searchParams }: PageProps) {
           在庫棚と照合してください。
         </p>
       </div>
-    </main>
+    </PageShell>
   );
 }

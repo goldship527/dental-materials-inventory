@@ -1,6 +1,7 @@
+import { PageHeader } from "@/components/ui/page-header";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { AppNav } from "@/components/domain/app-nav";
+import { PageShell } from "@/components/ui/page-shell";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { prisma } from "@/lib/db/prisma";
 import { getActiveStaffOperatorOptionsForClinic } from "@/lib/db/staff-operators";
@@ -113,20 +114,18 @@ export default async function QuickPage({ searchParams }: PageProps) {
   });
 
   return (
-    <main className="min-h-screen bg-surface px-4 py-5 text-ink sm:px-6 lg:px-8">
+    <PageShell current="quick" mainClassName="px-3 pt-3 pb-6 lg:px-6">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-5">
-        <AppNav current="quick" />
 
-        <header className="flex flex-col gap-3 border-b border-line pb-4 md:flex-row md:items-end md:justify-between">
+        <PageHeader title={"クイック出庫"}>
           <div>
-            <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-            <h1 className="mt-2 text-xl font-semibold">クイック出庫</h1>
+
             <p className="mt-2 text-sm text-muted">よく使う材料をワンタップで出庫・戻しできます。</p>
           </div>
           <a className="inline-flex h-11 shrink-0 items-center justify-center rounded btn-secondary px-4 text-sm font-semibold transition" href="/home">
             ホームへ戻る
           </a>
-        </header>
+        </PageHeader>
 
         <section className="rounded border border-accent/25 bg-panel p-4 shadow-sheet">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -232,6 +231,6 @@ export default async function QuickPage({ searchParams }: PageProps) {
           </div>
         </section>
       </div>
-    </main>
+    </PageShell>
   );
 }

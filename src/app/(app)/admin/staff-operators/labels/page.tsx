@@ -1,4 +1,5 @@
-import { AppNav } from "@/components/domain/app-nav";
+import { PageHeader } from "@/components/ui/page-header";
+import { PageShell } from "@/components/ui/page-shell";
 import { redirect } from "next/navigation";
 import { barcodeUiEnabled } from "@/lib/workflow-features";
 import { Code128Barcode } from "@/components/domain/code128-barcode";
@@ -34,7 +35,7 @@ export default async function StaffOperatorLabelsPage({ searchParams }: PageProp
   );
 
   return (
-    <main className="min-h-screen bg-surface px-6 py-8 text-ink print:bg-panel print:px-0 print:py-0">
+    <PageShell current="staffOperators" mainClassName="px-3 pt-3 pb-6 print:bg-panel print:px-0 print:py-0" shellClassName="print:bg-panel">
       <style>{`
         @page {
           size: A4 portrait;
@@ -53,14 +54,11 @@ export default async function StaffOperatorLabelsPage({ searchParams }: PageProp
         }
       `}</style>
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 print:max-w-none print:gap-0">
-        <div className="print:hidden">
-          <AppNav current="staffOperators" />
-        </div>
 
-        <header className="flex flex-col gap-3 border-b border-line pb-5 md:flex-row md:items-end md:justify-between print:hidden">
+        <PageHeader title={"担当者バーコード印刷"} className="print:hidden">
           <div>
             <p className="text-sm font-semibold text-accent">管理</p>
-            <h1 className="mt-2 text-xl font-semibold">担当者バーコード印刷</h1>
+
             <p className="mt-2 text-sm text-muted">
               必要な場合だけ、担当者の内部バーコードをCode 128形式で印刷します。クリニックごとに絞り込んで印刷できます。
             </p>
@@ -74,7 +72,7 @@ export default async function StaffOperatorLabelsPage({ searchParams }: PageProp
             </a>
             <BarcodePrintButton />
           </div>
-        </header>
+        </PageHeader>
 
         <section className="rounded border border-line bg-panel p-4 text-sm text-muted shadow-sheet print:hidden">
           <div className="grid gap-3">
@@ -118,6 +116,6 @@ export default async function StaffOperatorLabelsPage({ searchParams }: PageProp
 
         {activeOperators.length === 0 ? <p className="rounded bg-panel p-6 text-center text-sm text-muted">印刷できる有効な担当者がありません。</p> : null}
       </div>
-    </main>
+    </PageShell>
   );
 }

@@ -27,7 +27,7 @@ export function ShortageOrderButton({ stockItemId, isAlreadyAdded, pendingQuanti
         {hasPendingOrder ? "納品待ちあり" : isAlreadyAdded ? "追加済み" : isPending ? "追加中" : "候補へ追加"}
       </button>
       {hasPendingOrder ? (
-        <p className="rounded bg-markSoft px-2 py-1 text-xs font-semibold text-ink">
+        <p className="rounded border border-line border-l-4 border-l-ink bg-markSoft px-2 py-1 text-xs font-semibold text-ink">
           発注済 {pendingQuantity}個があります
         </p>
       ) : null}

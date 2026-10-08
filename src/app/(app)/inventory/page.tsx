@@ -1,6 +1,7 @@
+import { PageHeader } from "@/components/ui/page-header";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { AppNav } from "@/components/domain/app-nav";
+import { PageShell } from "@/components/ui/page-shell";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { getActiveStaffOperatorOptionsForClinic } from "@/lib/db/staff-operators";
 import { getCategories, getStockPage } from "@/lib/db/stock";
@@ -78,19 +79,14 @@ export default async function InventoryPage({ searchParams }: PageProps) {
   const nextHref = buildInventoryPageHref({ q: query, category, shortageOnly }, stockPage.page + 1);
 
   return (
-    <main className="min-h-screen bg-surface px-4 py-6 text-ink sm:px-6 lg:px-8">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
-        <AppNav current="inventory" />
+    <PageShell current="inventory" mainClassName="px-3 pt-3 pb-6 lg:px-6">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-3">
 
-        <header className="flex flex-col gap-4 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
-          <div>
-            <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-            <h1 className="mt-2 text-xl font-semibold">在庫一覧</h1>
-          </div>
+        <PageHeader title={"在庫一覧"}>
           <a className="inline-flex h-11 shrink-0 items-center justify-center rounded btn-secondary px-4 text-sm font-semibold transition" href="/home">
             ホームへ戻る
           </a>
-        </header>
+        </PageHeader>
 
 
         <InventoryFilterForm
@@ -133,15 +129,15 @@ export default async function InventoryPage({ searchParams }: PageProps) {
           </div>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1240px] border-collapse text-left text-sm">
-              <thead className="bg-subtle text-label text-muted">
+              <thead className="bg-tint text-label text-accent">
                 <tr>
-                  <th className="border-b border-line px-4 py-3">商品</th>
-                  <th className="border-b border-line px-4 py-3">カテゴリ</th>
-                  <th className="border-b border-line px-4 py-3 text-right">現在庫</th>
-                  <th className="border-b border-line px-4 py-3 text-right">最低在庫</th>
-                  <th className="border-b border-line px-4 py-3">ステータス</th>
-                  <th className="border-b border-line px-4 py-3">保管場所</th>
-                  <th className="border-b border-line px-4 py-3">数量編集</th>
+                  <th className="border-b border-accent px-4 py-3">商品</th>
+                  <th className="border-b border-accent px-4 py-3">カテゴリ</th>
+                  <th className="border-b border-accent px-4 py-3 text-right">現在庫</th>
+                  <th className="border-b border-accent px-4 py-3 text-right">最低在庫</th>
+                  <th className="border-b border-accent px-4 py-3">ステータス</th>
+                  <th className="border-b border-accent px-4 py-3">保管場所</th>
+                  <th className="border-b border-accent px-4 py-3">数量編集</th>
                 </tr>
               </thead>
               <tbody>
@@ -187,6 +183,6 @@ export default async function InventoryPage({ searchParams }: PageProps) {
           </div>
         </section>
       </div>
-    </main>
+    </PageShell>
   );
 }

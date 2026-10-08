@@ -1,5 +1,6 @@
+import { PageHeader } from "@/components/ui/page-header";
 import { notFound } from "next/navigation";
-import { AppNav } from "@/components/domain/app-nav";
+import { PageShell } from "@/components/ui/page-shell";
 import { requireAdminUser } from "@/lib/auth/admin";
 import { getAdminOverviewClinicDetail } from "@/lib/db/admin-overview";
 import type { StockLotRow } from "@/lib/db/stock-lots";
@@ -141,13 +142,11 @@ export default async function AdminOverviewClinicDetailPage({ params, searchPara
   ];
 
   return (
-    <>
-      <AppNav current="overview" />
-      <main className="mx-auto grid w-full max-w-7xl gap-6 px-4 py-8 sm:px-6 lg:px-8">
-        <header className="flex flex-col gap-4 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
+    <PageShell current="overview" mainClassName="mx-auto grid w-full max-w-7xl gap-3 px-3 pt-3 pb-6 lg:px-6">
+        <PageHeader title={detail.clinic.name}>
           <div>
             <p className="text-sm font-semibold text-accent">本部ダッシュボード / クリニック詳細</p>
-            <h1 className="mt-2 text-xl font-semibold text-ink">{detail.clinic.name}</h1>
+
             <p className="mt-2 max-w-3xl text-sm leading-6 text-muted">
               この画面は読み取り専用です。クリニック別の在庫、不足、発注候補、期限ロットを確認できます。
             </p>
@@ -163,11 +162,11 @@ export default async function AdminOverviewClinicDetailPage({ params, searchPara
           >
             本部ダッシュボードへ戻る
           </a>
-        </header>
+        </PageHeader>
 
         <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {summaryItems.map((item) => (
-            <div key={item.label} className="rounded border border-line bg-panel p-5 shadow-sheet">
+            <div key={item.label} className="rounded border border-line bg-panel p-3 shadow-sheet">
               <p className="text-sm font-semibold text-muted">{item.label}</p>
               <p
                 className={
@@ -267,16 +266,16 @@ export default async function AdminOverviewClinicDetailPage({ params, searchPara
           </div>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1120px] border-collapse text-left text-sm">
-              <thead className="bg-subtle text-label text-muted">
+              <thead className="bg-tint text-label text-accent">
                 <tr>
-                  <th className="border-b border-line px-4 py-3">商品</th>
-                  <th className="border-b border-line px-4 py-3">カテゴリ</th>
-                  <th className="border-b border-line px-4 py-3">発注先</th>
-                  <th className="border-b border-line px-4 py-3 text-right">現在庫</th>
-                  <th className="border-b border-line px-4 py-3 text-right">最低在庫</th>
-                  <th className="border-b border-line px-4 py-3 text-right">不足数</th>
-                  <th className="border-b border-line px-4 py-3">ステータス</th>
-                  <th className="border-b border-line px-4 py-3">保管場所</th>
+                  <th className="border-b border-accent px-4 py-3">商品</th>
+                  <th className="border-b border-accent px-4 py-3">カテゴリ</th>
+                  <th className="border-b border-accent px-4 py-3">発注先</th>
+                  <th className="border-b border-accent px-4 py-3 text-right">現在庫</th>
+                  <th className="border-b border-accent px-4 py-3 text-right">最低在庫</th>
+                  <th className="border-b border-accent px-4 py-3 text-right">不足数</th>
+                  <th className="border-b border-accent px-4 py-3">ステータス</th>
+                  <th className="border-b border-accent px-4 py-3">保管場所</th>
                 </tr>
               </thead>
               <tbody>
@@ -330,14 +329,14 @@ export default async function AdminOverviewClinicDetailPage({ params, searchPara
           </div>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[900px] border-collapse text-left text-sm">
-              <thead className="bg-subtle text-label text-muted">
+              <thead className="bg-tint text-label text-accent">
                 <tr>
-                  <th className="border-b border-line px-4 py-3">商品</th>
-                  <th className="border-b border-line px-4 py-3">ロット番号</th>
-                  <th className="border-b border-line px-4 py-3">有効期限</th>
-                  <th className="border-b border-line px-4 py-3">残日数</th>
-                  <th className="border-b border-line px-4 py-3 text-right">数量</th>
-                  <th className="border-b border-line px-4 py-3">状態</th>
+                  <th className="border-b border-accent px-4 py-3">商品</th>
+                  <th className="border-b border-accent px-4 py-3">ロット番号</th>
+                  <th className="border-b border-accent px-4 py-3">有効期限</th>
+                  <th className="border-b border-accent px-4 py-3">残日数</th>
+                  <th className="border-b border-accent px-4 py-3 text-right">数量</th>
+                  <th className="border-b border-accent px-4 py-3">状態</th>
                 </tr>
               </thead>
               <tbody>
@@ -369,7 +368,6 @@ export default async function AdminOverviewClinicDetailPage({ params, searchPara
             </table>
           </div>
         </section>
-      </main>
-    </>
+    </PageShell>
   );
 }

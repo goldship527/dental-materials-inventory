@@ -1,4 +1,4 @@
-import { AppNav } from "@/components/domain/app-nav";
+import { PageShell } from "@/components/ui/page-shell";
 import { requireAdminUser } from "@/lib/auth/admin";
 import { getRecentAuditLogs } from "@/lib/db/audit-logs";
 
@@ -29,9 +29,7 @@ export default async function AdminAuditLogsPage() {
   const logs = await getRecentAuditLogs(context.organizationId, 100);
 
   return (
-    <>
-      <AppNav current="auditLogs" />
-      <main className="mx-auto grid w-full max-w-7xl gap-6 px-4 py-8 sm:px-6 lg:px-8">
+    <PageShell current="auditLogs" mainClassName="mx-auto grid w-full max-w-7xl gap-3 px-3 pt-3 pb-6 lg:px-6">
         <header className="grid gap-2">
           <p className="text-sm font-semibold text-accent">管理</p>
           <h1 className="text-xl font-bold tracking-tight text-ink">監査ログ</h1>
@@ -43,14 +41,14 @@ export default async function AdminAuditLogsPage() {
         <section className="overflow-hidden rounded border border-line bg-panel shadow-sheet">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[960px] border-collapse text-left text-sm">
-              <thead className="bg-subtle text-label text-muted">
+              <thead className="bg-tint text-label text-accent">
                 <tr>
-                  <th className="border-b border-line px-4 py-3">日時</th>
-                  <th className="border-b border-line px-4 py-3">操作</th>
-                  <th className="border-b border-line px-4 py-3">対象</th>
-                  <th className="border-b border-line px-4 py-3">対象ID</th>
-                  <th className="border-b border-line px-4 py-3">実行者</th>
-                  <th className="border-b border-line px-4 py-3">詳細</th>
+                  <th className="border-b border-accent px-4 py-3">日時</th>
+                  <th className="border-b border-accent px-4 py-3">操作</th>
+                  <th className="border-b border-accent px-4 py-3">対象</th>
+                  <th className="border-b border-accent px-4 py-3">対象ID</th>
+                  <th className="border-b border-accent px-4 py-3">実行者</th>
+                  <th className="border-b border-accent px-4 py-3">詳細</th>
                 </tr>
               </thead>
               <tbody>
@@ -76,7 +74,6 @@ export default async function AdminAuditLogsPage() {
             </table>
           </div>
         </section>
-      </main>
-    </>
+    </PageShell>
   );
 }

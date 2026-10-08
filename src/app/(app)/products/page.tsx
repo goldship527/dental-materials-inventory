@@ -1,6 +1,7 @@
+import { PageHeader } from "@/components/ui/page-header";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { AppNav } from "@/components/domain/app-nav";
+import { PageShell } from "@/components/ui/page-shell";
 import { isAdminRole } from "@/lib/auth/roles";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { getProductCategories, getProductMasterPage, getPurchaseHistoryProductSummary } from "@/lib/db/products";
@@ -144,15 +145,10 @@ export default async function ProductsPage({ searchParams }: PageProps) {
     .join(" / ");
 
   return (
-    <main className="min-h-screen bg-surface px-4 py-6 text-ink sm:px-6 lg:px-8">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
-        <AppNav current="products" />
+    <PageShell current="products" mainClassName="px-3 pt-3 pb-6 lg:px-6">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-3">
 
-        <header className="flex flex-col gap-4 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
-          <div>
-            <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-            <h1 className="mt-2 text-xl font-semibold">商品マスタ</h1>
-          </div>
+        <PageHeader title={"商品マスタ"}>
           <div className="grid w-full grid-cols-1 gap-3 sm:flex sm:w-auto sm:shrink-0 sm:flex-wrap">
             {canManageProducts && !attachBarcode ? (
               <>
@@ -177,10 +173,10 @@ export default async function ProductsPage({ searchParams }: PageProps) {
               ホームへ戻る
             </a>
           </div>
-        </header>
+        </PageHeader>
 
         {params.adminDenied ? (
-          <section className="rounded border border-line bg-markSoft px-4 py-3 text-sm font-semibold text-ink shadow-sheet">
+          <section className="rounded border border-line border-l-4 border-l-ink bg-markSoft px-4 py-3 text-sm font-semibold text-ink shadow-sheet">
             商品マスタの作成・編集は管理者専用です。必要な場合は管理者に依頼してください。
           </section>
         ) : null}
@@ -225,7 +221,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
         ) : null}
 
         {attachBarcode ? (
-          <section className="rounded border border-line bg-markSoft p-4 text-sm text-ink shadow-sheet">
+          <section className="rounded border border-line border-l-4 border-l-ink bg-markSoft p-4 text-sm text-ink shadow-sheet">
             <p className="font-semibold">紐づける商品を選択中</p>
             <p className="mt-2">
               読み取ったバーコード <span className="font-mono text-ink">{attachBarcode}</span>{" "}
@@ -268,21 +264,21 @@ export default async function ProductsPage({ searchParams }: PageProps) {
           </div>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1440px] border-collapse text-left text-sm">
-              <thead className="bg-subtle text-label text-muted">
+              <thead className="bg-tint text-label text-accent">
                 <tr>
-                  <th className="border-b border-line px-4 py-3">商品</th>
-                  <th className="border-b border-line px-4 py-3 text-right">現在庫</th>
-                  <th className="border-b border-line px-4 py-3 text-right">納品待ち</th>
-                  <th className="border-b border-line px-4 py-3 text-right">最低在庫</th>
-                  <th className="border-b border-line px-4 py-3">保管場所</th>
-                  <th className="border-b border-line px-4 py-3">カテゴリ</th>
-                  <th className="border-b border-line px-4 py-3">主発注先</th>
-                  <th className="border-b border-line px-4 py-3">発注単位</th>
-                  <th className="border-b border-line px-4 py-3 text-right">標準価格</th>
-                  <th className="border-b border-line px-4 py-3">メーカー</th>
-                  <th className="border-b border-line px-4 py-3">規格</th>
-                  <th className="border-b border-line px-4 py-3">バーコード</th>
-                  {canManageProducts && attachBarcode ? <th className="border-b border-line px-4 py-3">紐づけ</th> : null}
+                  <th className="border-b border-accent px-4 py-3">商品</th>
+                  <th className="border-b border-accent px-4 py-3 text-right">現在庫</th>
+                  <th className="border-b border-accent px-4 py-3 text-right">納品待ち</th>
+                  <th className="border-b border-accent px-4 py-3 text-right">最低在庫</th>
+                  <th className="border-b border-accent px-4 py-3">保管場所</th>
+                  <th className="border-b border-accent px-4 py-3">カテゴリ</th>
+                  <th className="border-b border-accent px-4 py-3">主発注先</th>
+                  <th className="border-b border-accent px-4 py-3">発注単位</th>
+                  <th className="border-b border-accent px-4 py-3 text-right">標準価格</th>
+                  <th className="border-b border-accent px-4 py-3">メーカー</th>
+                  <th className="border-b border-accent px-4 py-3">規格</th>
+                  <th className="border-b border-accent px-4 py-3">バーコード</th>
+                  {canManageProducts && attachBarcode ? <th className="border-b border-accent px-4 py-3">紐づけ</th> : null}
                 </tr>
               </thead>
               <tbody>
@@ -397,6 +393,6 @@ export default async function ProductsPage({ searchParams }: PageProps) {
           </div>
         </section>
       </div>
-    </main>
+    </PageShell>
   );
 }

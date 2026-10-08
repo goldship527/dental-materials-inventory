@@ -162,7 +162,7 @@ export function BarcodeManagement({ productId, barcodes, defaultNewBarcode = "" 
       </div>
 
       {defaultNewBarcode ? (
-        <p className="mt-4 rounded border border-line bg-markSoft px-3 py-2 text-xs text-ink">
+        <p className="mt-4 rounded border border-line border-l-4 border-l-ink bg-markSoft px-3 py-2 text-xs text-ink">
           未登録バーコード <span className="font-mono text-ink">{defaultNewBarcode}</span>{" "}
           を追加します。
         </p>

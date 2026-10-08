@@ -1,6 +1,7 @@
+import { PageHeader } from "@/components/ui/page-header";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { AppNav } from "@/components/domain/app-nav";
+import { PageShell } from "@/components/ui/page-shell";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { startStocktakeSessionAction } from "@/lib/actions/stocktake-sessions";
 import { requireActiveClinic } from "@/lib/db/clinic";
@@ -27,23 +28,18 @@ export default async function NewStocktakeSessionPage() {
   const summary = await getStocktakeStartSummary(context.clinicId);
 
   return (
-    <main className="min-h-screen bg-surface px-6 py-8 text-ink">
+    <PageShell current="stocktake" mainClassName="px-3 pt-3 pb-6">
       <div className="mx-auto flex max-w-4xl flex-col gap-6">
-        <AppNav current="stocktake" />
 
-        <header className="flex flex-col gap-3 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
-          <div>
-            <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-            <h1 className="mt-2 text-xl font-semibold">棚卸セッション開始</h1>
-          </div>
+        <PageHeader title={"棚卸セッション開始"}>
           <a className="text-sm font-semibold text-accent hover:underline" href="/stocktake/sessions">
             セッション一覧へ戻る
           </a>
-        </header>
+        </PageHeader>
 
 
         {summary.inProgressSession ? (
-          <section className="rounded border border-line bg-panel p-5 shadow-sheet">
+          <section className="rounded border border-line bg-panel p-3 shadow-sheet">
             <h2 className="text-lg font-semibold">入力中のセッションがあります</h2>
             <p className="mt-2 text-sm text-muted">
               {formatDateTime(summary.inProgressSession.startedAt)} に開始した棚卸があります。
@@ -56,7 +52,7 @@ export default async function NewStocktakeSessionPage() {
             </a>
           </section>
         ) : (
-          <form action={startStocktakeSessionAction} className="rounded border border-line bg-panel p-5 shadow-sheet">
+          <form action={startStocktakeSessionAction} className="rounded border border-line bg-panel p-3 shadow-sheet">
             <h2 className="text-lg font-semibold">新しい棚卸を開始</h2>
             <dl className="mt-5 grid gap-3 rounded bg-subtle p-4 text-sm sm:grid-cols-2">
               <div>
@@ -99,6 +95,6 @@ export default async function NewStocktakeSessionPage() {
           </form>
         )}
       </div>
-    </main>
+    </PageShell>
   );
 }

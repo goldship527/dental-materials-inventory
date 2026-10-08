@@ -1,5 +1,6 @@
+import { PageHeader } from "@/components/ui/page-header";
 import { notFound } from "next/navigation";
-import { AppNav } from "@/components/domain/app-nav";
+import { PageShell } from "@/components/ui/page-shell";
 import { requireAdminUser } from "@/lib/auth/admin";
 import { getAdminOverviewClinicDetail } from "@/lib/db/admin-overview";
 
@@ -46,13 +47,11 @@ export default async function AdminOverviewClinicShortagePage({ params, searchPa
   });
 
   return (
-    <>
-      <AppNav current="overview" />
-      <main className="mx-auto grid w-full max-w-7xl gap-6 px-4 py-8 sm:px-6 lg:px-8">
-        <header className="flex flex-col gap-4 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
+    <PageShell current="overview" mainClassName="mx-auto grid w-full max-w-7xl gap-3 px-3 pt-3 pb-6 lg:px-6">
+        <PageHeader title={detail.clinic.name}>
           <div>
             <p className="text-sm font-semibold text-accent">本部ダッシュボード / 不足在庫</p>
-            <h1 className="mt-2 text-xl font-semibold text-ink">{detail.clinic.name}</h1>
+
             <p className="mt-2 max-w-3xl text-sm leading-6 text-muted">
               この画面は読み取り専用です。不足している商品だけを本部向けに確認します。
             </p>
@@ -63,22 +62,22 @@ export default async function AdminOverviewClinicShortagePage({ params, searchPa
           >
             クリニック詳細へ戻る
           </a>
-        </header>
+        </PageHeader>
 
         <section className="grid gap-4 sm:grid-cols-3">
-          <div className="rounded border border-line bg-panel p-5 shadow-sheet">
+          <div className="rounded border border-line bg-panel p-3 shadow-sheet">
             <p className="text-sm font-semibold text-muted">不足在庫</p>
             <p className="mt-2 text-2xl font-semibold text-ink">{numberText(shortageRows.length)}</p>
             <p className="mt-2 text-sm text-muted">最低在庫を下回る商品</p>
           </div>
-          <div className="rounded border border-line bg-panel p-5 shadow-sheet">
+          <div className="rounded border border-line bg-panel p-3 shadow-sheet">
             <p className="text-sm font-semibold text-muted">在庫0</p>
             <p className="mt-2 text-2xl font-semibold text-ink">
               {numberText(shortageRows.filter((row) => row.quantity === 0).length)}
             </p>
             <p className="mt-2 text-sm text-muted">手元在庫がない商品</p>
           </div>
-          <div className="rounded border border-line bg-panel p-5 shadow-sheet">
+          <div className="rounded border border-line bg-panel p-3 shadow-sheet">
             <p className="text-sm font-semibold text-muted">不足数合計</p>
             <p className="mt-2 text-2xl font-semibold text-ink">
               {shortageRows.reduce((total, row) => total + row.shortageCount, 0).toLocaleString("ja-JP")}
@@ -118,15 +117,15 @@ export default async function AdminOverviewClinicShortagePage({ params, searchPa
           </div>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1040px] border-collapse text-left text-sm">
-              <thead className="bg-subtle text-label text-muted">
+              <thead className="bg-tint text-label text-accent">
                 <tr>
-                  <th className="border-b border-line px-4 py-3">商品</th>
-                  <th className="border-b border-line px-4 py-3">カテゴリ</th>
-                  <th className="border-b border-line px-4 py-3">発注先</th>
-                  <th className="border-b border-line px-4 py-3 text-right">現在庫</th>
-                  <th className="border-b border-line px-4 py-3 text-right">最低在庫</th>
-                  <th className="border-b border-line px-4 py-3 text-right">不足数</th>
-                  <th className="border-b border-line px-4 py-3">保管場所</th>
+                  <th className="border-b border-accent px-4 py-3">商品</th>
+                  <th className="border-b border-accent px-4 py-3">カテゴリ</th>
+                  <th className="border-b border-accent px-4 py-3">発注先</th>
+                  <th className="border-b border-accent px-4 py-3 text-right">現在庫</th>
+                  <th className="border-b border-accent px-4 py-3 text-right">最低在庫</th>
+                  <th className="border-b border-accent px-4 py-3 text-right">不足数</th>
+                  <th className="border-b border-accent px-4 py-3">保管場所</th>
                 </tr>
               </thead>
               <tbody>
@@ -161,7 +160,6 @@ export default async function AdminOverviewClinicShortagePage({ params, searchPa
             </table>
           </div>
         </section>
-      </main>
-    </>
+    </PageShell>
   );
 }

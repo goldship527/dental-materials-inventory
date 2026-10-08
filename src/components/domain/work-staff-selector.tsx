@@ -15,13 +15,13 @@ export function WorkStaffSelector({ clinicId, staffOperators }: WorkStaffSelecto
   });
 
   return (
-    <label className="flex min-w-[12rem] shrink-0 items-center gap-2 whitespace-nowrap text-label font-semibold text-muted">
-      作業スタッフ
+    <label className="flex shrink-0 items-center gap-2 whitespace-nowrap text-label font-semibold text-white">
+      担当
       <select
         value={selectedStaffOperatorId}
         onChange={(event) => selectStaffOperator(event.target.value)}
         disabled={!hasStaffOperators}
-        className="h-12 w-44 rounded border border-muted bg-panel px-3 text-base font-semibold text-ink  transition    disabled:cursor-not-allowed disabled:bg-subtle disabled:text-muted"
+        className="h-12 w-36 rounded border border-line bg-panel px-3 text-base font-semibold text-ink transition disabled:cursor-not-allowed disabled:bg-subtle disabled:text-muted"
       >
         <option value="">{hasStaffOperators ? "選択" : "未登録"}</option>
         {staffOperators.map((staffOperator) => (
