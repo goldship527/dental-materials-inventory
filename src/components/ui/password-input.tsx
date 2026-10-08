@@ -16,7 +16,7 @@ export function PasswordInput({ className, ...props }: PasswordInputProps) {
       />
       <button
         type="button"
-        className="absolute right-2 top-1/2 h-8 -translate-y-1/2 rounded border border-line bg-white px-3 text-xs font-semibold text-muted transition hover:border-accent hover:text-accent"
+        className="absolute right-2 top-1/2 h-8 -translate-y-1/2 rounded btn-secondary px-3 text-xs font-semibold transition"
         onClick={() => setIsVisible((current) => !current)}
         aria-label={isVisible ? "パスワードを隠す" : "パスワードを表示"}
       >

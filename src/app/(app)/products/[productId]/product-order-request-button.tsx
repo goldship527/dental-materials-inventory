@@ -25,7 +25,7 @@ export function ProductOrderRequestButton({
       <button
         type="submit"
         disabled={isDisabled}
-        className="rounded bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-muted"
+        className="rounded btn-primary px-4 py-2 text-sm font-semibold transition disabled:cursor-not-allowed"
       >
         {hasPendingOrder
           ? "納品待ちあり"
@@ -39,11 +39,11 @@ export function ProductOrderRequestButton({
         <p
           className={
             state.status === "success"
-              ? "rounded bg-emerald-50 px-3 py-2 text-xs font-semibold text-accent"
-              : "rounded bg-red-50 px-3 py-2 text-xs font-semibold text-danger"
+              ? "rounded bg-panel px-3 py-2 text-xs font-semibold text-accent"
+              : "rounded bg-panel px-3 py-2 text-xs font-semibold text-danger"
           }
         >
-          {state.message}
+          {state.status === "success" ? "✓ " : state.message.startsWith("エラー") ? "" : "エラー: "}{state.message}
         </p>
       ) : null}
     </form>

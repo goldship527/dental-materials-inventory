@@ -84,7 +84,7 @@ export default async function SupplierDetailPage({ params }: PageProps) {
         <header className="flex flex-col gap-3 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-            <h1 className="mt-2 text-3xl font-semibold">{supplier.name}</h1>
+            <h1 className="mt-2 text-xl font-semibold">{supplier.name}</h1>
           </div>
           <div className="flex flex-wrap gap-3 text-sm font-semibold">
             {canManageSuppliers ? (
@@ -101,14 +101,14 @@ export default async function SupplierDetailPage({ params }: PageProps) {
 
         <section className="flex flex-wrap gap-2">
           <a
-            className="rounded border border-line bg-white px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+            className="rounded btn-secondary px-4 py-2 text-sm font-semibold transition"
             href={productsHref}
           >
             商品マスタで確認
           </a>
           {supplier.shortageProductCount > 0 ? (
             <a
-              className="rounded bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-800"
+              className="rounded btn-primary px-4 py-2 text-sm font-semibold transition"
               href={shortageHref}
             >
               不足一覧で確認
@@ -116,7 +116,7 @@ export default async function SupplierDetailPage({ params }: PageProps) {
           ) : null}
           {orderRequestTotal > 0 ? (
             <a
-              className="rounded bg-ink px-4 py-2 text-sm font-semibold text-white transition hover:bg-gray-700"
+              className="rounded btn-primary px-4 py-2 text-sm font-semibold transition"
               href={ordersHref}
             >
               発注候補で確認
@@ -125,36 +125,36 @@ export default async function SupplierDetailPage({ params }: PageProps) {
         </section>
 
         <section className="grid gap-4 md:grid-cols-4">
-          <div className="rounded border border-line bg-white p-5 shadow-panel">
+          <div className="rounded border border-line bg-panel p-5 shadow-sheet">
             <p className="text-sm font-semibold text-muted">取扱商品</p>
-            <p className="mt-2 text-3xl font-semibold">{supplier.productCount}</p>
+            <p className="mt-2 text-2xl font-semibold">{supplier.productCount}</p>
             <p className="mt-2 text-sm text-muted">使用中の商品</p>
           </div>
-          <div className="rounded border border-line bg-white p-5 shadow-panel">
+          <div className="rounded border border-line bg-panel p-5 shadow-sheet">
             <p className="text-sm font-semibold text-muted">不足あり</p>
-            <p className={supplier.shortageProductCount > 0 ? "mt-2 text-3xl font-semibold text-danger" : "mt-2 text-3xl font-semibold"}>
+            <p className={supplier.shortageProductCount > 0 ? "mt-2 text-2xl font-semibold text-danger" : "mt-2 text-2xl font-semibold"}>
               {supplier.shortageProductCount}
             </p>
             <p className="mt-2 text-sm text-muted">最低在庫未満</p>
           </div>
-          <div className="rounded border border-line bg-white p-5 shadow-panel">
+          <div className="rounded border border-line bg-panel p-5 shadow-sheet">
             <p className="text-sm font-semibold text-muted">発注候補</p>
-            <p className="mt-2 text-3xl font-semibold">{orderRequestTotal}</p>
+            <p className="mt-2 text-2xl font-semibold">{orderRequestTotal}</p>
             <p className="mt-2 text-sm text-muted">この発注先の候補</p>
           </div>
-          <div className="rounded border border-line bg-white p-5 shadow-panel">
+          <div className="rounded border border-line bg-panel p-5 shadow-sheet">
             <p className="text-sm font-semibold text-muted">発注予定</p>
-            <p className="mt-2 text-3xl font-semibold">{plannedOrderRequestCount}</p>
+            <p className="mt-2 text-2xl font-semibold">{plannedOrderRequestCount}</p>
             <p className="mt-2 text-sm text-muted">これから発注する候補</p>
           </div>
         </section>
 
-        <section className="rounded border border-line bg-white p-5 shadow-panel">
+        <section className="rounded border border-line bg-panel p-5 shadow-sheet">
           <h2 className="text-lg font-semibold">主なカテゴリ</h2>
           <div className="mt-3 flex flex-wrap gap-2">
             {supplier.categories.length > 0 ? (
               supplier.categories.map((category) => (
-                <span key={category} className="rounded bg-gray-50 px-3 py-1 text-xs font-semibold text-muted">
+                <span key={category} className="rounded bg-subtle px-3 py-1 text-xs font-semibold text-muted">
                   {category}
                 </span>
               ))
@@ -164,7 +164,7 @@ export default async function SupplierDetailPage({ params }: PageProps) {
           </div>
         </section>
 
-        <section className="rounded border border-line bg-white p-5 shadow-panel">
+        <section className="rounded border border-line bg-panel p-5 shadow-sheet">
           <h2 className="text-lg font-semibold">連絡先</h2>
           <div className="mt-4 grid gap-4 text-sm md:grid-cols-2">
             <div>
@@ -195,13 +195,13 @@ export default async function SupplierDetailPage({ params }: PageProps) {
         </section>
 
         <section className="grid gap-4 lg:grid-cols-[1.2fr_1fr]">
-          <div className="overflow-hidden rounded border border-line bg-white shadow-panel">
+          <div className="overflow-hidden rounded border border-line bg-panel shadow-sheet">
             <div className="border-b border-line px-4 py-3">
               <h2 className="text-lg font-semibold">取扱商品</h2>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full min-w-[760px] border-collapse text-left text-sm">
-                <thead className="bg-gray-50 text-xs text-muted">
+                <thead className="bg-subtle text-label text-muted">
                   <tr>
                     <th className="border-b border-line px-4 py-3">商品</th>
                     <th className="border-b border-line px-4 py-3">カテゴリ</th>
@@ -241,7 +241,7 @@ export default async function SupplierDetailPage({ params }: PageProps) {
           </div>
 
           <div className="flex flex-col gap-4">
-            <section className="rounded border border-line bg-white p-5 shadow-panel">
+            <section className="rounded border border-line bg-panel p-5 shadow-sheet">
               <h2 className="text-lg font-semibold">不足商品</h2>
               <div className="mt-4 divide-y divide-line">
                 {shortageProducts.length > 0 ? (
@@ -264,7 +264,7 @@ export default async function SupplierDetailPage({ params }: PageProps) {
               </div>
             </section>
 
-            <section className="rounded border border-line bg-white p-5 shadow-panel">
+            <section className="rounded border border-line bg-panel p-5 shadow-sheet">
               <h2 className="text-lg font-semibold">発注候補</h2>
               <div className="mt-4 divide-y divide-line">
                 {supplier.orderRequests.length > 0 ? (
@@ -306,7 +306,7 @@ export default async function SupplierDetailPage({ params }: PageProps) {
                         <p className="text-muted">先方対応メモ: {request.supplierResponseMemo}</p>
                       ) : null}
                       {request.receivedAt ? (
-                        <p className="font-semibold text-blue-800">
+                        <p className="font-semibold text-accent">
                           納品確認済み {dateTimeFormatter.format(request.receivedAt)} / 数量 {request.receivedQuantity ?? "-"}
                         </p>
                       ) : null}

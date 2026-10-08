@@ -59,7 +59,7 @@ export default async function AdminOverviewPage() {
       <main className="mx-auto grid w-full max-w-7xl gap-6 px-4 py-8 sm:px-6 lg:px-8">
         <header className="grid gap-2">
           <p className="text-sm font-semibold text-accent">管理</p>
-          <h1 className="text-2xl font-bold tracking-normal text-ink">本部ダッシュボード</h1>
+          <h1 className="text-xl font-bold tracking-normal text-ink">本部ダッシュボード</h1>
           <p className="max-w-3xl text-sm leading-6 text-muted">
             クリニック別の不足、発注候補、期限ロットを読み取り専用で確認します。
           </p>
@@ -67,7 +67,7 @@ export default async function AdminOverviewPage() {
 
         <section className="flex flex-wrap gap-3">
           <a
-            className="inline-flex h-11 items-center justify-center rounded border border-line bg-white px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+            className="inline-flex h-11 items-center justify-center rounded btn-secondary px-4 text-sm font-semibold transition"
             href="/admin/overview/usage-export"
           >
             使用個数CSV出力
@@ -76,13 +76,13 @@ export default async function AdminOverviewPage() {
 
         <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {summaryItems.map((item) => (
-            <div key={item.label} className="rounded border border-line bg-white p-5 shadow-panel">
+            <div key={item.label} className="rounded border border-line bg-panel p-5 shadow-sheet">
               <p className="text-sm font-semibold text-muted">{item.label}</p>
               <p
                 className={
                   item.isWarning
-                    ? "mt-2 text-3xl font-semibold text-warning"
-                    : "mt-2 text-3xl font-semibold text-ink"
+                    ? "mt-2 text-2xl font-semibold text-ink"
+                    : "mt-2 text-2xl font-semibold text-ink"
                 }
               >
                 {item.value}
@@ -92,7 +92,7 @@ export default async function AdminOverviewPage() {
           ))}
         </section>
 
-        <section className="rounded border border-line bg-white shadow-panel">
+        <section className="rounded border border-line bg-panel shadow-sheet">
           <div className="flex flex-col gap-2 border-b border-line px-5 py-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <h2 className="text-lg font-semibold text-ink">クリニック別状況</h2>
@@ -100,12 +100,12 @@ export default async function AdminOverviewPage() {
                 最終入出庫: {formatDateTime(overview.summary.latestMovementAt)}
               </p>
             </div>
-            <span className="w-fit rounded bg-gray-50 px-3 py-1 text-xs font-semibold text-muted">読み取り専用</span>
+            <span className="w-fit rounded bg-subtle px-3 py-1 text-xs font-semibold text-muted">読み取り専用</span>
           </div>
 
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-line text-sm">
-              <thead className="bg-gray-50 text-left text-xs font-semibold uppercase tracking-normal text-muted">
+              <thead className="bg-subtle text-left text-label font-semibold uppercase tracking-normal text-muted">
                 <tr>
                   <th scope="col" className="min-w-56 px-5 py-3">
                     クリニック
@@ -139,7 +139,7 @@ export default async function AdminOverviewPage() {
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-line bg-white">
+              <tbody className="divide-y divide-line bg-panel">
                 {overview.rows.map((row) => {
                   const rowPlannedOrderRequestCount = row.draftOrderRequestCount + row.confirmedOrderRequestCount;
 
@@ -161,7 +161,7 @@ export default async function AdminOverviewPage() {
                     <td
                       className={
                         row.suggestedOrderRequestCount > 0
-                          ? "whitespace-nowrap px-4 py-4 text-right font-semibold text-warning"
+                          ? "whitespace-nowrap px-4 py-4 text-right font-semibold text-ink"
                           : "whitespace-nowrap px-4 py-4 text-right"
                       }
                     >
@@ -170,7 +170,7 @@ export default async function AdminOverviewPage() {
                     <td
                       className={
                         row.shortageCount > 0
-                          ? "whitespace-nowrap px-4 py-4 text-right font-semibold text-warning"
+                          ? "whitespace-nowrap px-4 py-4 text-right font-semibold text-ink"
                           : "whitespace-nowrap px-4 py-4 text-right"
                       }
                     >
@@ -179,7 +179,7 @@ export default async function AdminOverviewPage() {
                     <td
                       className={
                         row.zeroStockCount > 0
-                          ? "whitespace-nowrap px-4 py-4 text-right font-semibold text-warning"
+                          ? "whitespace-nowrap px-4 py-4 text-right font-semibold text-ink"
                           : "whitespace-nowrap px-4 py-4 text-right"
                       }
                     >
@@ -188,7 +188,7 @@ export default async function AdminOverviewPage() {
                     <td
                       className={
                         rowPlannedOrderRequestCount > 0
-                          ? "whitespace-nowrap px-4 py-4 text-right font-semibold text-warning"
+                          ? "whitespace-nowrap px-4 py-4 text-right font-semibold text-ink"
                           : "whitespace-nowrap px-4 py-4 text-right"
                       }
                     >
@@ -200,7 +200,7 @@ export default async function AdminOverviewPage() {
                     <td
                       className={
                         row.attentionStockLotCount > 0
-                          ? "whitespace-nowrap px-4 py-4 text-right font-semibold text-warning"
+                          ? "whitespace-nowrap px-4 py-4 text-right font-semibold text-ink"
                           : "whitespace-nowrap px-4 py-4 text-right"
                       }
                     >

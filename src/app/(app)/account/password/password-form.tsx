@@ -10,7 +10,7 @@ export function PasswordForm() {
   const [state, formAction, isPending] = useActionState(changePasswordAction, initialState);
 
   return (
-    <form action={formAction} className="grid gap-5 rounded border border-line bg-white p-5 shadow-panel">
+    <form action={formAction} className="grid gap-5 rounded border border-line bg-panel p-5 shadow-sheet">
       <div className="grid gap-2">
         <label className="text-sm font-semibold text-muted" htmlFor="currentPassword">
           現在のパスワード
@@ -20,7 +20,7 @@ export function PasswordForm() {
           name="currentPassword"
           autoComplete="current-password"
           required
-          className="h-12 rounded border border-line px-4 text-base outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+          className="h-12 rounded border border-line px-4 text-base    "
         />
       </div>
 
@@ -35,7 +35,7 @@ export function PasswordForm() {
           required
           minLength={8}
           pattern="[\x21-\x7E]+"
-          className="h-12 rounded border border-line px-4 text-base outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+          className="h-12 rounded border border-line px-4 text-base    "
         />
         <p className="text-xs text-muted">8文字以上。半角英数字と記号が使えます。</p>
       </div>
@@ -51,7 +51,7 @@ export function PasswordForm() {
           required
           minLength={8}
           pattern="[\x21-\x7E]+"
-          className="h-12 rounded border border-line px-4 text-base outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+          className="h-12 rounded border border-line px-4 text-base    "
         />
       </div>
 
@@ -59,18 +59,18 @@ export function PasswordForm() {
         <div
           className={
             state.status === "success"
-              ? "rounded border border-accent/20 bg-emerald-50 px-4 py-3 text-sm text-accent"
-              : "rounded border border-danger/20 bg-red-50 px-4 py-3 text-sm text-danger"
+              ? "rounded border border-accent/20 bg-panel px-4 py-3 text-sm text-accent"
+              : "rounded border border-danger/20 bg-panel px-4 py-3 text-sm text-danger"
           }
         >
-          {state.message}
+          {state.status === "success" ? "✓ " : state.message.startsWith("エラー") ? "" : "エラー: "}{state.message}
         </div>
       ) : null}
 
       <button
         type="submit"
         disabled={isPending}
-        className="h-12 rounded bg-accent px-5 text-sm font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-60"
+        className="h-12 rounded btn-primary px-5 text-sm font-semibold transition disabled:cursor-not-allowed"
       >
         {isPending ? "変更中" : "パスワードを変更"}
       </button>

@@ -120,44 +120,44 @@ export default async function QuickPage({ searchParams }: PageProps) {
         <header className="flex flex-col gap-3 border-b border-line pb-4 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-            <h1 className="mt-2 text-3xl font-semibold">クイック出庫</h1>
+            <h1 className="mt-2 text-xl font-semibold">クイック出庫</h1>
             <p className="mt-2 text-sm text-muted">よく使う材料をワンタップで出庫・戻しできます。</p>
           </div>
-          <a className="inline-flex h-11 shrink-0 items-center justify-center rounded border border-line bg-white/75 px-4 text-sm font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent" href="/home">
+          <a className="inline-flex h-11 shrink-0 items-center justify-center rounded btn-secondary px-4 text-sm font-semibold transition" href="/home">
             ホームへ戻る
           </a>
         </header>
 
-        <section className="rounded border border-accent/25 bg-white p-4 shadow-panel">
+        <section className="rounded border border-accent/25 bg-panel p-4 shadow-sheet">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="text-sm font-semibold text-accent">バーコード作業</p>
-              <h2 className="mt-1 text-xl font-semibold">連続スキャンまたは1件ずつ出入庫</h2>
+              <h2 className="mt-1 text-lg font-semibold">連続スキャンまたは1件ずつ出入庫</h2>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-muted">
                 バーコードがある材料は、連続スキャン画面でまとめて処理できます。
               </p>
             </div>
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
               <a
-                className="inline-flex h-11 items-center justify-center rounded bg-ink px-4 text-sm font-semibold text-white transition hover:bg-gray-700"
+                className="inline-flex h-11 items-center justify-center rounded btn-primary px-4 text-sm font-semibold transition"
                 href="/barcode/batch"
               >
                 連続出庫
               </a>
               <a
-                className="inline-flex h-11 items-center justify-center rounded border border-accent bg-white px-4 text-sm font-semibold text-accent transition hover:bg-teal-50"
+                className="inline-flex h-11 items-center justify-center rounded btn-secondary px-4 text-sm font-semibold transition"
                 href="/barcode/batch?mode=receive"
               >
                 納品
               </a>
               <a
-                className="inline-flex h-11 items-center justify-center rounded bg-accent px-4 text-sm font-semibold text-white transition hover:bg-teal-800"
+                className="inline-flex h-11 items-center justify-center rounded btn-primary px-4 text-sm font-semibold transition"
                 href="/barcode/stock"
               >
                 1件ずつ出入庫
               </a>
               <a
-                className="inline-flex h-11 items-center justify-center rounded border border-line bg-white px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+                className="inline-flex h-11 items-center justify-center rounded btn-secondary px-4 text-sm font-semibold transition"
                 href="/barcode"
               >
                 バーコード管理
@@ -166,7 +166,7 @@ export default async function QuickPage({ searchParams }: PageProps) {
           </div>
         </section>
 
-        <section className="rounded border border-line/90 bg-panel/95 p-3 shadow-panel">
+        <section className="rounded border border-line/90 bg-panel/95 p-3 shadow-sheet">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="text-sm font-semibold text-muted">カテゴリ</p>
@@ -180,8 +180,8 @@ export default async function QuickPage({ searchParams }: PageProps) {
                 aria-current={selectedTab === "" ? "page" : undefined}
                 className={
                   selectedTab === ""
-                    ? "inline-flex min-h-10 items-center rounded border border-accent bg-accent px-3 py-2 text-sm font-semibold text-white shadow-sm"
-                    : "inline-flex min-h-10 items-center rounded border border-line bg-white/70 px-3 py-2 text-sm font-semibold text-muted transition hover:border-accent/50 hover:bg-subtle hover:text-ink"
+                    ? "inline-flex min-h-10 items-center rounded border chip-selected px-3 py-2 text-sm font-semibold"
+                    : "inline-flex min-h-10 items-center rounded btn-secondary px-3 py-2 text-sm font-semibold transition"
                 }
               >
                 すべて {cards.length}
@@ -196,8 +196,8 @@ export default async function QuickPage({ searchParams }: PageProps) {
                     aria-current={isCurrent ? "page" : undefined}
                     className={
                       isCurrent
-                        ? "inline-flex min-h-10 items-center rounded border border-accent bg-accent px-3 py-2 text-sm font-semibold text-white shadow-sm"
-                        : "inline-flex min-h-10 items-center rounded border border-line bg-white/70 px-3 py-2 text-sm font-semibold text-muted transition hover:border-accent/50 hover:bg-subtle hover:text-ink"
+                        ? "inline-flex min-h-10 items-center rounded border chip-selected px-3 py-2 text-sm font-semibold"
+                        : "inline-flex min-h-10 items-center rounded btn-secondary px-3 py-2 text-sm font-semibold transition"
                     }
                   >
                     {tab.category} {tab.count}
@@ -210,7 +210,7 @@ export default async function QuickPage({ searchParams }: PageProps) {
 
         <QuickCardGrid cards={visibleCards} clinicId={context.clinicId} staffOperators={staffOperators} />
 
-        <section className="rounded border border-line/90 bg-panel/95 p-4 shadow-panel">
+        <section className="rounded border border-line/90 bg-panel/95 p-4 shadow-sheet">
           <h2 className="text-base font-semibold">直近のクイック出庫操作</h2>
           <div className="mt-3 divide-y divide-line">
             {recentMovements.length > 0 ? (

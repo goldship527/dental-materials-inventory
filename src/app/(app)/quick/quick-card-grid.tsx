@@ -22,7 +22,7 @@ export function QuickCardGrid({ cards, clinicId, staffOperators }: QuickCardGrid
 
   return (
     <>
-      <section className="rounded border border-line/90 bg-panel/95 p-3 shadow-panel">
+      <section className="rounded border border-line/90 bg-panel/95 p-3 shadow-sheet">
         <div className="grid gap-3 md:grid-cols-[minmax(220px,360px)_1fr] md:items-center">
           <div>
             <p className="text-sm font-semibold text-muted">作業スタッフ</p>

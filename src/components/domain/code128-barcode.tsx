@@ -23,7 +23,7 @@ export function Code128Barcode({ value, height = 64, moduleWidth = 2, showText =
         width={width}
         height={height}
         viewBox={`0 0 ${width} ${height}`}
-        className="bg-white"
+        className="bg-panel"
       >
         <rect width={width} height={height} fill="white" />
         {bars.map((bar) => (

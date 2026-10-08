@@ -50,7 +50,7 @@ function SessionRow({ row, isHistory = false }: { row: StocktakeSessionListRow; 
       <td className="border-b border-line px-4 py-3">{formatDateTime(row.updatedAt)}</td>
       <td className="border-b border-line px-4 py-3 text-right">
         <a
-          className="inline-flex h-9 items-center rounded bg-ink px-4 text-xs font-semibold text-white transition hover:bg-gray-700"
+          className="inline-flex h-9 items-center rounded btn-primary px-4 text-xs font-semibold transition"
           href={href}
         >
           {isHistory ? "詳細" : "入力"}
@@ -78,10 +78,10 @@ export default async function StocktakeSessionsPage() {
         <header className="flex flex-col gap-4 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-            <h1 className="mt-2 text-3xl font-semibold">棚卸セッション</h1>
+            <h1 className="mt-2 text-xl font-semibold">棚卸セッション</h1>
           </div>
           <a
-            className="inline-flex h-11 items-center justify-center rounded bg-accent px-5 text-sm font-semibold text-white transition hover:bg-teal-800"
+            className="inline-flex h-11 items-center justify-center rounded btn-primary px-5 text-sm font-semibold transition"
             href="/stocktake/sessions/new"
           >
             新規開始
@@ -89,7 +89,7 @@ export default async function StocktakeSessionsPage() {
         </header>
 
 
-        <section className="rounded border border-line bg-white shadow-panel">
+        <section className="rounded border border-line bg-panel shadow-sheet">
           <div className="flex flex-col gap-2 border-b border-line px-4 py-3 md:flex-row md:items-center md:justify-between">
             <div>
               <h2 className="text-lg font-semibold">進行中</h2>
@@ -97,7 +97,7 @@ export default async function StocktakeSessionsPage() {
           </div>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[920px] border-collapse text-left text-sm">
-              <thead className="bg-gray-50 text-xs text-muted">
+              <thead className="bg-subtle text-label text-muted">
                 <tr>
                   <th className="border-b border-line px-4 py-3">状態</th>
                   <th className="border-b border-line px-4 py-3">開始</th>
@@ -123,13 +123,13 @@ export default async function StocktakeSessionsPage() {
           </div>
         </section>
 
-        <section className="rounded border border-line bg-white shadow-panel">
+        <section className="rounded border border-line bg-panel shadow-sheet">
           <div className="border-b border-line px-4 py-3">
             <h2 className="text-lg font-semibold">履歴</h2>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[920px] border-collapse text-left text-sm">
-              <thead className="bg-gray-50 text-xs text-muted">
+              <thead className="bg-subtle text-label text-muted">
                 <tr>
                   <th className="border-b border-line px-4 py-3">状態</th>
                   <th className="border-b border-line px-4 py-3">開始</th>

@@ -18,7 +18,7 @@ function ClinicSwitchButton({ isSubmitting }: { isSubmitting: boolean }) {
     <button
       type="submit"
       disabled={isPending}
-      className="inline-flex h-11 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded border border-line bg-white/80 px-3 text-sm font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent disabled:cursor-wait disabled:border-accent/40 disabled:bg-teal-50 disabled:text-accent sm:h-9"
+      className="inline-flex h-11 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded btn-secondary px-3 text-sm font-semibold transition disabled:cursor-wait sm:h-9"
     >
       {isPending ? (
         <span className="h-3 w-3 animate-spin rounded-full border-2 border-accent/30 border-t-accent" aria-hidden="true" />
@@ -56,7 +56,7 @@ export function ClinicSwitcher({ activeClinicId, clinics }: ClinicSwitcherProps)
         defaultValue={activeClinicId}
         disabled={isSubmitting}
         aria-busy={isSubmitting}
-        className="h-11 w-48 max-w-[58vw] rounded border border-line bg-white px-3 text-sm font-semibold text-ink shadow-sm disabled:cursor-wait disabled:border-accent/40 disabled:bg-teal-50 disabled:text-accent sm:h-9"
+        className="h-11 w-48 max-w-[58vw] rounded border border-line bg-panel px-3 text-sm font-semibold text-ink  disabled:cursor-wait disabled:border-accent/40 disabled:bg-subtle disabled:text-accent sm:h-9"
         onChange={(event) => {
           setIsSubmitting(true);
           event.currentTarget.form?.requestSubmit();

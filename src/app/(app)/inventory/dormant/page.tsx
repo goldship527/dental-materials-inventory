@@ -88,20 +88,20 @@ export default async function DormantStockPage({ searchParams }: PageProps) {
         <header className="flex flex-col gap-4 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-            <h1 className="mt-2 text-3xl font-semibold">長期在庫レポート</h1>
+            <h1 className="mt-2 text-xl font-semibold">長期在庫レポート</h1>
             <p className="mt-2 text-sm text-muted">
               過去{selectedDays}日以内に出庫がなく、現在庫が1以上ある商品を表示します。
             </p>
           </div>
           <div className="flex flex-wrap gap-2 text-sm font-semibold">
             <a
-              className="inline-flex h-11 items-center rounded border border-line px-4 text-muted transition hover:border-accent hover:text-accent"
+              className="inline-flex h-11 items-center rounded btn-secondary px-4 transition"
               href="/inventory"
             >
               在庫一覧へ
             </a>
             <a
-              className="inline-flex h-11 items-center rounded border border-line px-4 text-muted transition hover:border-accent hover:text-accent"
+              className="inline-flex h-11 items-center rounded btn-secondary px-4 transition"
               href="/home"
             >
               ホームへ戻る
@@ -110,32 +110,32 @@ export default async function DormantStockPage({ searchParams }: PageProps) {
         </header>
 
         <section className="grid gap-4 md:grid-cols-3">
-          <div className="rounded border border-line bg-white p-5 shadow-panel">
+          <div className="rounded border border-line bg-panel p-5 shadow-sheet">
             <p className="text-sm font-semibold text-muted">対象商品</p>
-            <p className={filteredRows.length > 0 ? "mt-2 text-3xl font-semibold text-warning" : "mt-2 text-3xl font-semibold"}>
+            <p className={filteredRows.length > 0 ? "mt-2 text-2xl font-semibold text-ink" : "mt-2 text-2xl font-semibold"}>
               {filteredRows.length}
             </p>
             <p className="mt-2 text-sm text-muted">表示中の長期在庫候補</p>
           </div>
-          <div className="rounded border border-line bg-white p-5 shadow-panel">
+          <div className="rounded border border-line bg-panel p-5 shadow-sheet">
             <p className="text-sm font-semibold text-muted">対象数量</p>
-            <p className="mt-2 text-3xl font-semibold">{totalQuantity}</p>
+            <p className="mt-2 text-2xl font-semibold">{totalQuantity}</p>
             <p className="mt-2 text-sm text-muted">現在庫の合計</p>
           </div>
-          <div className="rounded border border-line bg-white p-5 shadow-panel">
+          <div className="rounded border border-line bg-panel p-5 shadow-sheet">
             <p className="text-sm font-semibold text-muted">滞留金額</p>
-            <p className="mt-2 text-3xl font-semibold">{formatAmount(totalAmount)}</p>
+            <p className="mt-2 text-2xl font-semibold">{formatAmount(totalAmount)}</p>
             <p className="mt-2 text-sm text-muted">標準価格がある商品の概算</p>
           </div>
         </section>
 
-        <section className="rounded border border-line bg-white p-4 shadow-panel">
+        <section className="rounded border border-line bg-panel p-4 shadow-sheet">
           <form className="grid gap-3 lg:grid-cols-[1fr_auto]" action="/inventory/dormant">
             <input type="hidden" name="days" value={selectedDays} />
             <label className="grid gap-2 text-sm font-semibold text-muted">
               検索
               <input
-                className="h-11 rounded border border-line bg-white px-3 text-base font-normal text-ink outline-none transition placeholder:text-muted focus:border-accent"
+                className="h-11 rounded border border-line bg-panel px-3 text-base font-normal text-ink  transition placeholder:text-muted "
                 defaultValue={query}
                 name="q"
                 placeholder="商品名、商品コード、カテゴリ、保管場所"
@@ -143,7 +143,7 @@ export default async function DormantStockPage({ searchParams }: PageProps) {
               />
             </label>
             <button
-              className="h-11 self-end rounded bg-accent px-5 text-sm font-semibold text-white transition hover:bg-teal-800"
+              className="h-11 self-end rounded btn-primary px-5 text-sm font-semibold transition"
               type="submit"
             >
               絞り込む
@@ -160,8 +160,8 @@ export default async function DormantStockPage({ searchParams }: PageProps) {
                   aria-current={isCurrent ? "page" : undefined}
                   className={
                     isCurrent
-                      ? "inline-flex h-10 shrink-0 items-center rounded border border-accent/30 bg-teal-50 px-3 text-sm font-semibold text-accent"
-                      : "inline-flex h-10 shrink-0 items-center rounded border border-line px-3 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+                      ? "inline-flex h-10 shrink-0 items-center rounded btn-secondary border-accent/30 px-3 text-sm font-semibold"
+                      : "inline-flex h-10 shrink-0 items-center rounded btn-secondary px-3 text-sm font-semibold transition"
                   }
                   href={buildDaysHref(days, query)}
                 >
@@ -172,7 +172,7 @@ export default async function DormantStockPage({ searchParams }: PageProps) {
           </div>
         </section>
 
-        <section className="overflow-hidden rounded border border-line bg-white shadow-panel">
+        <section className="overflow-hidden rounded border border-line bg-panel shadow-sheet">
           <div className="border-b border-line px-4 py-3 text-sm text-muted">
             表示 {filteredRows.length} 件 / 対象 {rows.length} 件
             {query ? `（検索: ${query}）` : ""}
@@ -180,7 +180,7 @@ export default async function DormantStockPage({ searchParams }: PageProps) {
           {filteredRows.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[1080px] border-collapse text-left text-sm">
-                <thead className="bg-gray-50 text-xs text-muted">
+                <thead className="bg-subtle text-label text-muted">
                   <tr>
                     <th className="border-b border-line px-4 py-3">商品</th>
                     <th className="border-b border-line px-4 py-3">カテゴリ</th>

@@ -18,17 +18,17 @@ export default async function AccountPasswordPage() {
           <header className="flex flex-col gap-3 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="text-sm font-semibold text-accent">{session.user.email}</p>
-              <h1 className="mt-2 text-3xl font-semibold">パスワード変更</h1>
+              <h1 className="mt-2 text-xl font-semibold">パスワード変更</h1>
             </div>
             <div className="flex flex-wrap gap-2">
               <a
-                className="inline-flex min-h-11 items-center rounded border border-line bg-white px-4 text-sm font-semibold text-accent transition hover:border-accent"
+                className="inline-flex min-h-11 items-center rounded btn-secondary px-4 text-sm font-semibold transition"
                 href="/account/notifications"
               >
                 通知設定
               </a>
               <a
-                className="inline-flex min-h-11 items-center rounded border border-line bg-white px-4 text-sm font-semibold text-accent transition hover:border-accent"
+                className="inline-flex min-h-11 items-center rounded btn-secondary px-4 text-sm font-semibold transition"
                 href="/home"
               >
                 ホームへ戻る

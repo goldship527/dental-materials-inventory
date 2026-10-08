@@ -33,7 +33,7 @@ export default async function ProductImportPage() {
         <header className="flex flex-col gap-3 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-            <h1 className="mt-2 text-3xl font-semibold">商品マスタ一括取り込み</h1>
+            <h1 className="mt-2 text-xl font-semibold">商品マスタ一括取り込み</h1>
           </div>
           <div className="flex flex-wrap gap-3">
             <a className="text-sm font-semibold text-accent hover:underline" href="/products/import/purchase-history">
@@ -47,11 +47,11 @@ export default async function ProductImportPage() {
 
         <ProductImportForm />
 
-        <section className="rounded border border-line bg-white p-5 shadow-panel">
+        <section className="rounded border border-line bg-panel p-5 shadow-sheet">
           <h2 className="text-lg font-semibold">取り込み履歴</h2>
           <div className="mt-4 overflow-x-auto">
             <table className="w-full min-w-[760px] border-collapse text-left text-sm">
-              <thead className="bg-gray-50 text-xs text-muted">
+              <thead className="bg-subtle text-label text-muted">
                 <tr>
                   <th className="border-b border-line px-3 py-2">日時</th>
                   <th className="border-b border-line px-3 py-2">方式</th>

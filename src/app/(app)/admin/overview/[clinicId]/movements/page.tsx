@@ -43,14 +43,14 @@ function formatSignedQuantity(quantity: number) {
 
 function getMovementBadgeClass(movementType: string) {
   if (movementType === "IN") {
-    return "bg-emerald-50 text-accent";
+    return "bg-panel text-accent";
   }
 
   if (movementType === "OUT") {
-    return "bg-red-50 text-danger";
+    return "bg-panel text-danger";
   }
 
-  return "bg-gray-100 text-muted";
+  return "bg-subtle text-muted";
 }
 
 export default async function AdminOverviewClinicMovementsPage({ params, searchParams }: PageProps) {
@@ -91,33 +91,33 @@ export default async function AdminOverviewClinicMovementsPage({ params, searchP
         <header className="flex flex-col gap-4 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-sm font-semibold text-accent">本部ダッシュボード / 入出庫履歴</p>
-            <h1 className="mt-2 text-3xl font-semibold text-ink">{detail.clinic.name}</h1>
+            <h1 className="mt-2 text-xl font-semibold text-ink">{detail.clinic.name}</h1>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-muted">
               この画面は読み取り専用です。最近の入庫、出庫、調整履歴を確認できます。
             </p>
           </div>
           <a
-            className="inline-flex h-11 shrink-0 items-center justify-center rounded border border-line px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+            className="inline-flex h-11 shrink-0 items-center justify-center rounded btn-secondary px-4 text-sm font-semibold transition"
             href={`/admin/overview/${clinicId}`}
           >
             クリニック詳細へ戻る
           </a>
         </header>
 
-        <section className="rounded border border-line bg-white p-4 shadow-panel">
+        <section className="rounded border border-line bg-panel p-4 shadow-sheet">
           <form
             className="grid gap-3 lg:grid-cols-[1fr_160px_220px_160px_160px_auto]"
             action={`/admin/overview/${clinicId}/movements`}
           >
             <input
-              className="h-11 rounded border border-line bg-white px-3 text-base text-ink outline-none transition placeholder:text-muted focus:border-accent"
+              className="h-11 rounded border border-line bg-panel px-3 text-base text-ink  transition placeholder:text-muted "
               defaultValue={filters.query}
               name="q"
               placeholder="商品名、カテゴリ、理由、操作者"
               type="search"
             />
             <select
-              className="h-11 rounded border border-line bg-white px-3 text-base text-ink outline-none transition focus:border-accent"
+              className="h-11 rounded border border-line bg-panel px-3 text-base text-ink  transition "
               defaultValue={filters.movementType}
               name="type"
             >
@@ -129,7 +129,7 @@ export default async function AdminOverviewClinicMovementsPage({ params, searchP
               ))}
             </select>
             <select
-              className="h-11 rounded border border-line bg-white px-3 text-base text-ink outline-none transition focus:border-accent"
+              className="h-11 rounded border border-line bg-panel px-3 text-base text-ink  transition "
               defaultValue={filters.sourceType}
               name="source"
             >
@@ -141,19 +141,19 @@ export default async function AdminOverviewClinicMovementsPage({ params, searchP
               ))}
             </select>
             <input
-              className="h-11 rounded border border-line bg-white px-3 text-base text-ink outline-none transition focus:border-accent"
+              className="h-11 rounded border border-line bg-panel px-3 text-base text-ink  transition "
               defaultValue={filters.startDate}
               name="startDate"
               type="date"
             />
             <input
-              className="h-11 rounded border border-line bg-white px-3 text-base text-ink outline-none transition focus:border-accent"
+              className="h-11 rounded border border-line bg-panel px-3 text-base text-ink  transition "
               defaultValue={filters.endDate}
               name="endDate"
               type="date"
             />
             <button
-              className="h-11 rounded bg-accent px-5 text-sm font-semibold text-white transition hover:bg-teal-800"
+              className="h-11 rounded btn-primary px-5 text-sm font-semibold transition"
               type="submit"
             >
               表示
@@ -161,7 +161,7 @@ export default async function AdminOverviewClinicMovementsPage({ params, searchP
           </form>
           <div className="mt-3">
             <a
-              className="inline-flex h-9 items-center rounded border border-line px-3 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+              className="inline-flex h-9 items-center rounded btn-secondary px-3 text-sm font-semibold transition"
               href={`/admin/overview/${clinicId}/movements`}
             >
               条件をクリア
@@ -169,16 +169,16 @@ export default async function AdminOverviewClinicMovementsPage({ params, searchP
           </div>
         </section>
 
-        <section className="rounded border border-line bg-white px-5 py-4 text-sm text-muted shadow-panel">
+        <section className="rounded border border-line bg-panel px-5 py-4 text-sm text-muted shadow-sheet">
           表示 {movements.length} 件 / 条件一致 {movementCount} 件
           {filterLabel ? `（${filterLabel}）` : ""}
           {movementCount > movements.length ? " / 画面表示は最新100件までです。" : ""}
         </section>
 
-        <section className="overflow-hidden rounded border border-line bg-white shadow-panel">
+        <section className="overflow-hidden rounded border border-line bg-panel shadow-sheet">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1280px] border-collapse text-left text-sm">
-              <thead className="bg-gray-50 text-xs text-muted">
+              <thead className="bg-subtle text-label text-muted">
                 <tr>
                   <th className="border-b border-line px-4 py-3">日時</th>
                   <th className="border-b border-line px-4 py-3">商品</th>

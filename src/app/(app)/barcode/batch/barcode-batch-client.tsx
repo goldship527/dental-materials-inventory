@@ -54,14 +54,14 @@ function createLineId() {
 
 function getLineTone(status: BatchLineStatus) {
   if (readyStatuses.has(status)) {
-    return "border-line bg-white";
+    return "border-line bg-panel";
   }
 
   if (status === "unknown" || status === "multiple-products") {
-    return "border-warning/30 bg-yellow-50";
+    return "border-line bg-markSoft";
   }
 
-  return "border-orange-200 bg-orange-50";
+  return "border-line bg-markSoft";
 }
 
 function clampQuantity(value: number) {
@@ -414,7 +414,7 @@ export function BarcodeBatchClient({ clinicId, initialMode, fixedMode, staffOper
 
   return (
     <div className="grid gap-3">
-      <section className="sticky top-0 z-10 rounded border border-line bg-white/95 px-3 py-2.5 shadow-panel backdrop-blur">
+      <section className="sticky top-0 z-10 rounded border border-line bg-panel/95 px-3 py-2.5 shadow-sheet backdrop-blur">
         <div
           className={
             isFixedMode
@@ -425,14 +425,14 @@ export function BarcodeBatchClient({ clinicId, initialMode, fixedMode, staffOper
           {!isFixedMode ? (
             <div>
               <p className="text-xs font-semibold text-muted">モード</p>
-              <div className="mt-1 grid grid-cols-2 gap-1 rounded border border-line bg-gray-50 p-1">
+              <div className="mt-1 grid grid-cols-2 gap-1 rounded border border-line bg-subtle p-1">
                 <button
                   type="button"
                   onClick={() => changeMode("OUT")}
                   className={
                     mode === "OUT"
-                      ? "h-8 rounded bg-ink px-3 text-sm font-semibold text-white"
-                      : "h-8 rounded px-3 text-sm font-semibold text-muted transition hover:bg-white hover:text-accent"
+                      ? "h-8 rounded btn-primary px-3 text-sm font-semibold"
+                      : "h-8 rounded btn-secondary px-3 text-sm font-semibold transition"
                   }
                 >
                   出庫
@@ -442,8 +442,8 @@ export function BarcodeBatchClient({ clinicId, initialMode, fixedMode, staffOper
                   onClick={() => changeMode("IN")}
                   className={
                     mode === "IN"
-                      ? "h-8 rounded bg-accent px-3 text-sm font-semibold text-white"
-                      : "h-8 rounded px-3 text-sm font-semibold text-muted transition hover:bg-white hover:text-accent"
+                      ? "h-8 rounded btn-primary px-3 text-sm font-semibold"
+                      : "h-8 rounded btn-secondary px-3 text-sm font-semibold transition"
                   }
                 >
                   納品
@@ -454,7 +454,7 @@ export function BarcodeBatchClient({ clinicId, initialMode, fixedMode, staffOper
 
           <form onSubmit={handleScanSubmit} className="grid gap-1">
             <div className="flex min-h-5 items-center justify-between gap-3">
-              <label className="text-xs font-semibold text-muted" htmlFor="batch-barcode-input">
+              <label className="text-label font-semibold text-muted" htmlFor="batch-barcode-input">
                 {mode === "IN" ? "納品バーコード / スタッフバーコード" : "商品バーコード / スタッフバーコード"}
               </label>
               <p className="truncate text-xs font-semibold text-ink">
@@ -469,12 +469,12 @@ export function BarcodeBatchClient({ clinicId, initialMode, fixedMode, staffOper
                 onChange={(event) => setBarcode(event.target.value)}
                 autoFocus
                 placeholder="スキャナーで読み取り"
-                className="h-10 rounded border border-line px-3 font-mono text-base font-semibold text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                className="h-10 rounded border border-line px-3 font-mono text-base font-semibold text-ink    "
               />
               <button
                 type="submit"
                 disabled={isPending}
-                className="inline-flex h-10 items-center rounded bg-accent px-4 text-xs font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex h-10 items-center rounded btn-primary px-4 text-xs font-semibold transition disabled:cursor-not-allowed"
               >
                 {isPending ? "読み取り中" : "追加"}
               </button>
@@ -482,18 +482,18 @@ export function BarcodeBatchClient({ clinicId, initialMode, fixedMode, staffOper
           </form>
 
           <div className="flex flex-wrap gap-1.5 lg:justify-end">
-            <div className="min-w-36 rounded border border-blue-100 bg-blue-50 px-2.5 py-1">
-              <span className="text-[11px] font-semibold text-blue-900">作業スタッフ</span>
+            <div className="min-w-36 rounded border border-line bg-tint px-2.5 py-1">
+              <span className="text-xs font-semibold text-accent">作業スタッフ</span>
               <span className="ml-2 text-sm font-semibold text-ink">
                 {selectedStaffOperator ? selectedStaffOperator.displayName : hasStaffOperators ? "未選択" : "未登録"}
               </span>
             </div>
-            <div className="rounded border border-line bg-gray-50 px-2.5 py-1">
-              <span className="text-[11px] font-semibold text-muted">対象</span>
+            <div className="rounded border border-line bg-subtle px-2.5 py-1">
+              <span className="text-xs font-semibold text-muted">対象</span>
               <span className="ml-2 text-sm font-semibold text-ink">{readyLines.length}件 / {totalQuantity}</span>
             </div>
-            <div className="rounded border border-line bg-gray-50 px-2.5 py-1">
-              <span className="text-[11px] font-semibold text-muted">確認</span>
+            <div className="rounded border border-line bg-subtle px-2.5 py-1">
+              <span className="text-xs font-semibold text-muted">確認</span>
               <span className="ml-2 text-sm font-semibold text-ink">{blockedLines}件</span>
             </div>
           </div>
@@ -501,7 +501,7 @@ export function BarcodeBatchClient({ clinicId, initialMode, fixedMode, staffOper
       </section>
 
       <div className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_320px] xl:items-start">
-        <section className="rounded border border-line bg-white shadow-panel">
+        <section className="rounded border border-line bg-panel shadow-sheet">
           <div className="grid gap-3 border-b border-line px-4 py-3 md:grid-cols-[1fr_auto] md:items-center">
             <div>
               <p className="text-sm font-semibold text-muted">
@@ -517,7 +517,7 @@ export function BarcodeBatchClient({ clinicId, initialMode, fixedMode, staffOper
               type="button"
               onClick={clearLines}
               disabled={lines.length === 0 || isPending}
-              className="h-9 rounded border border-line px-3 text-xs font-semibold text-muted transition hover:border-danger hover:text-danger disabled:cursor-not-allowed disabled:opacity-50"
+              className="h-9 rounded btn-secondary btn-danger px-3 text-xs font-semibold transition disabled:cursor-not-allowed"
             >
               クリア
             </button>
@@ -543,7 +543,7 @@ export function BarcodeBatchClient({ clinicId, initialMode, fixedMode, staffOper
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="text-base font-semibold text-ink">{line.productName ?? "確認必要"}</p>
-                      <span className="rounded bg-gray-100 px-2 py-1 text-xs font-semibold text-muted">
+                      <span className="rounded bg-subtle px-2 py-1 text-xs font-semibold text-muted">
                         {line.status === "receivable"
                           ? "納品OK"
                           : line.status === "stock-out-ready"
@@ -551,7 +551,7 @@ export function BarcodeBatchClient({ clinicId, initialMode, fixedMode, staffOper
                             : "確認必要"}
                       </span>
                       {line.status === "receivable" ? (
-                        <span className="rounded bg-gray-100 px-2 py-1 text-xs font-semibold text-muted">
+                        <span className="rounded bg-subtle px-2 py-1 text-xs font-semibold text-muted">
                           {line.requestedQuantity !== null && line.quantity === line.requestedQuantity
                             ? "満数"
                             : "数量変更"}
@@ -569,16 +569,16 @@ export function BarcodeBatchClient({ clinicId, initialMode, fixedMode, staffOper
                         ロット {line.lotNumber ?? "-"} / 有効期限 {line.expiryDateText ?? "-"}
                       </p>
                     ) : null}
-                    <p className={readyStatuses.has(line.status) ? "mt-1 text-xs text-muted" : "mt-1 text-xs font-semibold text-warning"}>
+                    <p className={readyStatuses.has(line.status) ? "mt-1 text-xs text-muted" : "mt-1 text-xs font-semibold text-ink"}>
                       {line.message}
                     </p>
                     {isReceiveOver ? (
-                      <p className="mt-2 rounded bg-red-50 px-3 py-2 text-xs font-semibold text-danger">
+                      <p className="mt-2 rounded bg-panel px-3 py-2 text-xs font-semibold text-danger">
                         納品数量が発注数量を超えています。
                       </p>
                     ) : null}
                     {isStockOutOver ? (
-                      <p className="mt-2 rounded bg-red-50 px-3 py-2 text-xs font-semibold text-danger">
+                      <p className="mt-2 rounded bg-panel px-3 py-2 text-xs font-semibold text-danger">
                         現在庫を超える数量です。
                       </p>
                     ) : null}
@@ -589,7 +589,7 @@ export function BarcodeBatchClient({ clinicId, initialMode, fixedMode, staffOper
                       type="button"
                       onClick={() => updateLineQuantity(line.id, line.quantity - 1)}
                       disabled={!readyStatuses.has(line.status) || isReceiveLocked}
-                      className="h-9 rounded border border-line text-base font-semibold text-muted transition hover:border-accent hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
+                      className="h-9 rounded btn-secondary text-base font-semibold transition disabled:cursor-not-allowed"
                       aria-label="数量を減らす"
                     >
                       -
@@ -602,13 +602,13 @@ export function BarcodeBatchClient({ clinicId, initialMode, fixedMode, staffOper
                       value={line.quantity}
                       onChange={(event) => updateLineQuantity(line.id, Number(event.target.value))}
                       disabled={!readyStatuses.has(line.status) || isReceiveLocked}
-                      className="h-9 rounded border border-line px-2 text-center text-base font-semibold outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 disabled:bg-gray-100 disabled:text-muted"
+                      className="h-9 rounded border border-line px-2 text-center text-base font-semibold     disabled:bg-subtle disabled:text-muted"
                     />
                     <button
                       type="button"
                       onClick={() => updateLineQuantity(line.id, line.quantity + 1)}
                       disabled={!readyStatuses.has(line.status) || isReceiveLocked}
-                      className="h-9 rounded border border-line text-base font-semibold text-muted transition hover:border-accent hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
+                      className="h-9 rounded btn-secondary text-base font-semibold transition disabled:cursor-not-allowed"
                       aria-label="数量を増やす"
                     >
                       +
@@ -622,7 +622,7 @@ export function BarcodeBatchClient({ clinicId, initialMode, fixedMode, staffOper
                               currentLines.map((l) => (l.id === line.id ? { ...l, isQuantityEdited: true } : l)),
                             )
                           }
-                          className="h-9 rounded border border-line px-3 text-xs font-semibold text-muted transition hover:border-accent hover:text-accent"
+                          className="h-9 rounded btn-secondary px-3 text-xs font-semibold transition"
                         >
                           数量変更
                         </button>
@@ -630,7 +630,7 @@ export function BarcodeBatchClient({ clinicId, initialMode, fixedMode, staffOper
                       <button
                         type="button"
                         onClick={() => removeLine(line.id)}
-                        className="h-9 rounded border border-line px-3 text-xs font-semibold text-muted transition hover:border-danger hover:text-danger"
+                        className="h-9 rounded btn-secondary btn-danger px-3 text-xs font-semibold transition"
                       >
                         削除
                       </button>
@@ -645,7 +645,7 @@ export function BarcodeBatchClient({ clinicId, initialMode, fixedMode, staffOper
 
         <aside className="grid gap-4 xl:sticky xl:top-32">
           {mode === "OUT" ? (
-            <section className="rounded border border-line bg-white p-4 shadow-panel">
+            <section className="rounded border border-line bg-panel p-4 shadow-sheet">
               <p className="text-sm font-semibold text-muted">一括出庫の理由</p>
               <div className="mt-3 grid grid-cols-2 gap-2">
                 {barcodeStockOutReasons.map((option) => (
@@ -653,8 +653,8 @@ export function BarcodeBatchClient({ clinicId, initialMode, fixedMode, staffOper
                     key={option}
                     className={
                       reason === option
-                        ? "inline-flex h-10 cursor-pointer items-center justify-center rounded bg-ink px-3 text-sm font-semibold text-white"
-                        : "inline-flex h-10 cursor-pointer items-center justify-center rounded border border-line bg-white px-3 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+                        ? "inline-flex h-10 cursor-pointer items-center justify-center rounded chip-selected px-3 text-sm font-semibold"
+                        : "inline-flex h-10 cursor-pointer items-center justify-center rounded btn-secondary px-3 text-sm font-semibold transition"
                     }
                   >
                     <input
@@ -676,24 +676,24 @@ export function BarcodeBatchClient({ clinicId, initialMode, fixedMode, staffOper
                   rows={3}
                   maxLength={160}
                   placeholder="任意"
-                  className="rounded border border-line px-3 py-2 text-sm font-normal text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                  className="rounded border border-line px-3 py-2 text-sm font-normal text-ink    "
                 />
               </label>
             </section>
           ) : null}
 
-          <section className="rounded border border-line bg-white p-4 shadow-panel">
+          <section className="rounded border border-line bg-panel p-4 shadow-sheet">
             <div className="grid grid-cols-3 gap-2 text-center">
-              <div className="rounded bg-gray-50 px-2 py-2">
-                <p className="text-[11px] font-semibold text-muted">対象</p>
+              <div className="rounded bg-subtle px-2 py-2">
+                <p className="text-xs font-semibold text-muted">対象</p>
                 <p className="text-lg font-semibold text-ink">{readyLines.length}</p>
               </div>
-              <div className="rounded bg-gray-50 px-2 py-2">
-                <p className="text-[11px] font-semibold text-muted">数量</p>
+              <div className="rounded bg-subtle px-2 py-2">
+                <p className="text-xs font-semibold text-muted">数量</p>
                 <p className="text-lg font-semibold text-ink">{totalQuantity}</p>
               </div>
-              <div className="rounded bg-gray-50 px-2 py-2">
-                <p className="text-[11px] font-semibold text-muted">確認</p>
+              <div className="rounded bg-subtle px-2 py-2">
+                <p className="text-xs font-semibold text-muted">確認</p>
                 <p className="text-lg font-semibold text-ink">{blockedLines}</p>
               </div>
             </div>
@@ -701,22 +701,22 @@ export function BarcodeBatchClient({ clinicId, initialMode, fixedMode, staffOper
               type="button"
               onClick={() => confirmBatch(false)}
               disabled={!canConfirm}
-              className="mt-4 h-11 w-full rounded bg-accent px-5 text-sm font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-60"
+              className="mt-4 h-11 w-full rounded btn-primary px-5 text-sm font-semibold transition disabled:cursor-not-allowed"
             >
               {isPending ? "確定中" : mode === "IN" ? "一括受領確定" : "一括出庫確定"}
             </button>
           </section>
 
           {mode === "OUT" && invalidStockOutLines.length > 0 ? (
-            <section className="rounded border border-yellow-200 bg-yellow-50 p-4">
-              <p className="text-sm font-semibold text-warning">
+            <section className="rounded border border-line bg-markSoft p-4">
+              <p className="text-sm font-semibold text-ink">
                 在庫不足行があります。通常は確定できません。
               </p>
               <button
                 type="button"
                 onClick={() => confirmBatch(true)}
                 disabled={!selectedStaffOperatorId || readyLines.length === invalidStockOutLines.length || isPending}
-                className="mt-3 h-10 w-full rounded border border-warning/30 bg-white px-4 text-sm font-semibold text-warning transition hover:border-warning disabled:cursor-not-allowed disabled:opacity-50"
+                className="mt-3 h-10 w-full rounded btn-secondary px-4 text-sm font-semibold transition disabled:cursor-not-allowed"
               >
                 不足行を除外して確定
               </button>
@@ -727,11 +727,11 @@ export function BarcodeBatchClient({ clinicId, initialMode, fixedMode, staffOper
             <section
               className={
                 result.status === "success"
-                  ? "rounded border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-accent"
-                  : "rounded border border-danger/30 bg-red-50 p-4 text-sm font-semibold text-danger"
+                  ? "rounded border border-line border-l-4 border-l-success bg-panel p-4 text-sm font-semibold text-success"
+                  : "rounded border border-line border-l-4 border-l-danger bg-panel p-4 text-sm font-semibold text-danger"
               }
             >
-              <p>{result.message}</p>
+              <p>{result.status === "success" ? "✓ " : result.message.startsWith("エラー") ? "" : "エラー: "}{result.message}</p>
               {result.skippedMessages && result.skippedMessages.length > 0 ? (
                 <ul className="mt-2 grid gap-1 text-xs font-normal">
                   {result.skippedMessages.map((message) => (

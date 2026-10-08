@@ -25,7 +25,7 @@ function valueOrEmpty(value: string | number | null) {
   return value === null ? "" : String(value);
 }
 
-const decisionFieldClass = "grid min-h-24 content-start gap-1 rounded border border-line bg-gray-50 p-3 text-sm font-semibold text-muted";
+const decisionFieldClass = "grid min-h-24 content-start gap-1 rounded border border-line bg-subtle p-3 text-sm font-semibold text-muted";
 
 export function ProductEditForm({ product, suppliers }: ProductEditFormProps) {
   const [state, formAction, isPending] = useActionState(updateProductMasterWithStateAction, initialState);
@@ -36,8 +36,8 @@ export function ProductEditForm({ product, suppliers }: ProductEditFormProps) {
     const hasError = Boolean(getFieldError(fieldName));
 
     return [
-      "rounded border px-3 text-ink outline-none focus:ring-2",
-      hasError ? "border-danger focus:border-danger focus:ring-danger/20" : "border-line focus:border-accent focus:ring-accent/20",
+      "rounded border px-3 text-ink  ",
+      hasError ? "border-danger  " : "border-line  ",
       className,
     ]
       .filter(Boolean)
@@ -53,7 +53,7 @@ export function ProductEditForm({ product, suppliers }: ProductEditFormProps) {
     <form action={formAction} noValidate className="grid gap-6">
       <input type="hidden" name="productId" value={product.id} />
 
-      <section className="rounded border border-line bg-white p-5 shadow-panel">
+      <section className="rounded border border-line bg-panel p-5 shadow-sheet">
         <h2 className="text-lg font-semibold">基本情報</h2>
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           <label className="grid gap-1 text-sm font-semibold text-muted md:col-span-2">
@@ -147,7 +147,7 @@ export function ProductEditForm({ product, suppliers }: ProductEditFormProps) {
         </div>
       </section>
 
-      <section className="rounded border border-line bg-white p-5 shadow-panel">
+      <section className="rounded border border-line bg-panel p-5 shadow-sheet">
         <h2 className="text-lg font-semibold">発注・在庫判断</h2>
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           <label className={decisionFieldClass}>
@@ -156,7 +156,7 @@ export function ProductEditForm({ product, suppliers }: ProductEditFormProps) {
               name="primarySupplierId"
               defaultValue={product.primarySupplierId ?? ""}
               aria-invalid={Boolean(getFieldError("primarySupplierId"))}
-              className={controlClass("primarySupplierId", "h-11 bg-white")}
+              className={controlClass("primarySupplierId", "h-11 bg-panel")}
             >
               <option value="">未設定</option>
               {suppliers.map((supplier) => (
@@ -219,7 +219,7 @@ export function ProductEditForm({ product, suppliers }: ProductEditFormProps) {
                     defaultMinStockInputRef.current.value = String(product.recommendedMinStock.recommended);
                   }
                 }}
-                className="mt-2 justify-self-start rounded border border-accent px-3 py-2 text-xs font-semibold text-accent transition hover:bg-teal-50"
+                className="mt-2 justify-self-start rounded btn-secondary px-3 py-2 text-xs font-semibold transition"
               >
                 推奨 {product.recommendedMinStock.recommended} を入力
               </button>
@@ -234,7 +234,7 @@ export function ProductEditForm({ product, suppliers }: ProductEditFormProps) {
               name="stockUsageMode"
               defaultValue={product.stockUsageMode}
               aria-invalid={Boolean(getFieldError("stockUsageMode"))}
-              className={controlClass("stockUsageMode", "h-11 bg-white")}
+              className={controlClass("stockUsageMode", "h-11 bg-panel")}
             >
               <option value="NONE">なし</option>
               <option value="IN_USE">あり</option>
@@ -254,13 +254,13 @@ export function ProductEditForm({ product, suppliers }: ProductEditFormProps) {
               const productSupplier = alternativeProductSuppliers[index];
 
               return (
-                <div key={index} className="grid gap-3 rounded border border-line bg-gray-50 p-4 md:grid-cols-2">
+                <div key={index} className="grid gap-3 rounded border border-line bg-subtle p-4 md:grid-cols-2">
                   <label className="grid gap-1 text-sm font-semibold text-muted md:col-span-2">
                     代替発注先 {index + 1}
                     <select
                       name="alternativeSupplierId"
                       defaultValue={productSupplier?.supplierId ?? ""}
-                      className="h-11 rounded border border-line bg-white px-3 text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                      className="h-11 rounded border border-line bg-panel px-3 text-ink    "
                     >
                       <option value="">未設定</option>
                       {suppliers.map((supplier) => (
@@ -276,7 +276,7 @@ export function ProductEditForm({ product, suppliers }: ProductEditFormProps) {
                       name="alternativeSupplierProductCode"
                       defaultValue={valueOrEmpty(productSupplier?.supplierProductCode ?? null)}
                       maxLength={100}
-                      className="h-11 rounded border border-line bg-white px-3 text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                      className="h-11 rounded border border-line bg-panel px-3 text-ink    "
                     />
                   </label>
                   <label className="grid gap-1 text-sm font-semibold text-muted">
@@ -285,7 +285,7 @@ export function ProductEditForm({ product, suppliers }: ProductEditFormProps) {
                       name="alternativeOrderUnit"
                       defaultValue={valueOrEmpty(productSupplier?.orderUnit ?? null)}
                       maxLength={100}
-                      className="h-11 rounded border border-line bg-white px-3 text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                      className="h-11 rounded border border-line bg-panel px-3 text-ink    "
                     />
                   </label>
                   <label className="grid gap-1 text-sm font-semibold text-muted">
@@ -298,7 +298,7 @@ export function ProductEditForm({ product, suppliers }: ProductEditFormProps) {
                       max="9999999"
                       step="1"
                       inputMode="numeric"
-                      className="h-11 rounded border border-line bg-white px-3 text-right text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                      className="h-11 rounded border border-line bg-panel px-3 text-right text-ink    "
                     />
                   </label>
                   <label className="grid gap-1 text-sm font-semibold text-muted">
@@ -307,7 +307,7 @@ export function ProductEditForm({ product, suppliers }: ProductEditFormProps) {
                       name="alternativeNotes"
                       defaultValue={valueOrEmpty(productSupplier?.notes ?? null)}
                       maxLength={500}
-                      className="h-11 rounded border border-line bg-white px-3 text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                      className="h-11 rounded border border-line bg-panel px-3 text-ink    "
                     />
                   </label>
                 </div>
@@ -317,7 +317,7 @@ export function ProductEditForm({ product, suppliers }: ProductEditFormProps) {
         </div>
       </section>
 
-      <section className="rounded border border-line bg-white p-5 shadow-panel">
+      <section className="rounded border border-line bg-panel p-5 shadow-sheet">
         <label className="grid gap-1 text-sm font-semibold text-muted">
           備考
           <textarea
@@ -336,11 +336,11 @@ export function ProductEditForm({ product, suppliers }: ProductEditFormProps) {
         <p
           className={
             state.status === "success"
-              ? "rounded border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm font-semibold text-accent"
-              : "rounded border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold text-danger"
+              ? "rounded border border-line border-l-4 border-l-success bg-panel px-4 py-3 text-sm font-semibold text-success"
+              : "rounded border border-line border-l-4 border-l-danger bg-panel px-4 py-3 text-sm font-semibold text-danger"
           }
         >
-          {state.message}
+          {state.status === "success" ? "✓ " : state.message.startsWith("エラー") ? "" : "エラー: "}{state.message}
         </p>
       ) : null}
 
@@ -348,12 +348,12 @@ export function ProductEditForm({ product, suppliers }: ProductEditFormProps) {
         <button
           type="submit"
           disabled={isPending}
-          className="rounded bg-ink px-5 py-3 text-sm font-semibold text-white transition hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded btn-primary px-5 py-3 text-sm font-semibold transition disabled:cursor-not-allowed"
         >
           {isPending ? "保存中" : "保存する"}
         </button>
         <a
-          className="rounded border border-line bg-white px-5 py-3 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+          className="rounded btn-secondary px-5 py-3 text-sm font-semibold transition"
           href={`/products/${product.id}`}
         >
           詳細へ戻る

@@ -8,14 +8,14 @@ import { barcodeUiEnabled } from "@/lib/workflow-features";
 
 function getStatusClassName(status: "done" | "todo" | "attention") {
   if (status === "done") {
-    return "bg-emerald-50 text-emerald-700";
+    return "bg-panel text-success";
   }
 
   if (status === "attention") {
-    return "bg-yellow-50 text-warning";
+    return "bg-markSoft text-ink";
   }
 
-  return "bg-gray-50 text-muted";
+  return "bg-subtle text-muted";
 }
 
 function getStatusLabel(status: "done" | "todo" | "attention") {
@@ -78,14 +78,14 @@ export default async function SetupPage() {
       <main className="mx-auto grid w-full max-w-7xl gap-6 px-4 py-8 text-ink sm:px-6 lg:px-8">
         <header className="flex flex-col gap-4 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
           <div>
-            <h1 className="text-2xl font-semibold tracking-normal">初期設定チェック</h1>
+            <h1 className="text-xl font-semibold tracking-normal">初期設定チェック</h1>
             <p className="mt-2 text-sm leading-6 text-muted">
               {barcodeUiEnabled ? "商品、発注先、バーコード、最低在庫の登録状況をまとめて確認できます。" : "商品、発注先、最低在庫の登録状況をまとめて確認できます。"}
             </p>
           </div>
-          <div className="rounded border border-line bg-white px-5 py-4 shadow-panel">
+          <div className="rounded border border-line bg-panel px-5 py-4 shadow-sheet">
             <p className="text-sm font-semibold text-muted">進捗</p>
-            <p className="mt-2 text-3xl font-semibold">{completionPercent}%</p>
+            <p className="mt-2 text-2xl font-semibold">{completionPercent}%</p>
             <p className="mt-1 text-sm text-muted">
               {completedStepCount} / {steps.length} 項目
             </p>
@@ -94,7 +94,7 @@ export default async function SetupPage() {
 
         <section className="grid gap-4 md:grid-cols-4">
           {summaryCards.filter(card => barcodeUiEnabled || card.label !== "バーコード").map((card) => (
-            <div key={card.label} className="rounded border border-line bg-white p-5 shadow-panel">
+            <div key={card.label} className="rounded border border-line bg-panel p-5 shadow-sheet">
               <p className="text-sm font-semibold text-muted">{card.label}</p>
               <p className="mt-2 text-2xl font-semibold">{card.value}</p>
               <p className="mt-2 text-sm leading-6 text-muted">{card.note}</p>
@@ -102,9 +102,9 @@ export default async function SetupPage() {
           ))}
         </section>
 
-        <section className="rounded border border-line bg-white shadow-panel">
+        <section className="rounded border border-line bg-panel shadow-sheet">
           <div className="border-b border-line px-5 py-4">
-            <h2 className="text-xl font-semibold">導入チェックリスト</h2>
+            <h2 className="text-lg font-semibold">導入チェックリスト</h2>
           </div>
           <div className="divide-y divide-line">
             {steps.map((step, index) => (
@@ -113,7 +113,7 @@ export default async function SetupPage() {
                   <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-line text-sm font-semibold">
                     {index + 1}
                   </span>
-                  <span className={`rounded px-3 py-1 text-xs font-semibold ${getStatusClassName(step.status)}`}>
+                  <span className={`rounded px-3 py-1 text-label font-semibold ${getStatusClassName(step.status)}`}>
                     {getStatusLabel(step.status)}
                   </span>
                 </div>
@@ -123,7 +123,7 @@ export default async function SetupPage() {
                   <p className="mt-2 text-sm font-semibold text-muted">{step.metric}</p>
                 </div>
                 <a
-                  className="inline-flex h-11 items-center justify-center rounded border border-line bg-white px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+                  className="inline-flex h-11 items-center justify-center rounded btn-secondary px-4 text-sm font-semibold transition"
                   href={step.href}
                 >
                   {step.actionLabel}
@@ -133,8 +133,8 @@ export default async function SetupPage() {
           </div>
         </section>
 
-        <section className="rounded border border-line bg-white p-5 shadow-panel">
-          <h2 className="text-xl font-semibold">おすすめの進め方</h2>
+        <section className="rounded border border-line bg-panel p-5 shadow-sheet">
+          <h2 className="text-lg font-semibold">おすすめの進め方</h2>
           <div className="mt-4 grid gap-3 text-sm leading-6 text-muted md:grid-cols-3">
             <p>まず商品マスタを一括取り込みし、商品名とカテゴリの土台を作ります。</p>
             <p>{barcodeUiEnabled ? "次に発注先、バーコード、最低在庫を整えると、不足一覧と発注候補が使いやすくなります。" : "次に発注先、在庫の単位、最低在庫を確認します。"}</p>

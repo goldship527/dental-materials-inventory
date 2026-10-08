@@ -24,14 +24,14 @@ const dateTimeFormatter = new Intl.DateTimeFormat("ja-JP", {
 
 function getMatchBadgeClass(matchType: string) {
   if (matchType === "PRODUCT_MULTI") {
-    return "bg-orange-50 text-orange-700";
+    return "bg-markSoft text-ink";
   }
 
   if (matchType === "SAMPLE") {
-    return "bg-yellow-50 text-warning";
+    return "bg-markSoft text-ink";
   }
 
-  return "bg-gray-100 text-muted";
+  return "bg-subtle text-muted";
 }
 
 function getAttachBarcode(log: BarcodeScanLogRow) {
@@ -72,7 +72,7 @@ export default async function UnresolvedBarcodeScansPage() {
         <header className="flex flex-col gap-3 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-            <h1 className="mt-2 text-3xl font-semibold">未対応バーコード整理</h1>
+            <h1 className="mt-2 text-xl font-semibold">未対応バーコード整理</h1>
           </div>
           <div className="flex flex-wrap gap-3 text-sm font-semibold">
             <a className="text-accent hover:underline" href="/barcode/scans">
@@ -85,7 +85,7 @@ export default async function UnresolvedBarcodeScansPage() {
         </header>
 
 
-        <section className="grid gap-3 rounded border border-line bg-white px-4 py-3 text-sm text-muted shadow-panel md:grid-cols-[1fr_auto] md:items-center">
+        <section className="grid gap-3 rounded border border-line bg-panel px-4 py-3 text-sm text-muted shadow-sheet md:grid-cols-[1fr_auto] md:items-center">
           <p>
             未対応 {logs.length} 件
           </p>
@@ -94,10 +94,10 @@ export default async function UnresolvedBarcodeScansPage() {
           </a>
         </section>
 
-        <section className="overflow-hidden rounded border border-line bg-white shadow-panel">
+        <section className="overflow-hidden rounded border border-line bg-panel shadow-sheet">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1240px] border-collapse text-left text-sm">
-              <thead className="bg-gray-50 text-xs text-muted">
+              <thead className="bg-subtle text-label text-muted">
                 <tr>
                   <th className="border-b border-line px-4 py-3">保存日時</th>
                   <th className="border-b border-line px-4 py-3">判定</th>
@@ -133,7 +133,7 @@ export default async function UnresolvedBarcodeScansPage() {
                             <span className={`w-fit rounded px-2 py-1 text-xs font-semibold ${getMatchBadgeClass(log.matchType)}`}>
                               {getBarcodeScanMatchTypeLabel(log.matchType)}
                             </span>
-                            <span className={`w-fit rounded px-2 py-1 text-xs font-semibold ${getBarcodeScanResolveStatusClass(log.resolveStatus)}`}>
+                            <span className={`w-fit rounded px-2 py-1 text-label font-semibold ${getBarcodeScanResolveStatusClass(log.resolveStatus)}`}>
                               {getBarcodeScanResolveStatusLabel(log.resolveStatus)}
                             </span>
                           </div>
@@ -173,7 +173,7 @@ export default async function UnresolvedBarcodeScansPage() {
                         <td className="border-b border-line px-4 py-3">
                           <div className="grid min-w-[180px] gap-2">
                             <a
-                              className="rounded border border-line bg-white px-3 py-2 text-center text-xs font-semibold text-muted transition hover:border-accent hover:text-accent"
+                              className="rounded btn-secondary px-3 py-2 text-center text-xs font-semibold transition"
                               href={`/products?attachBarcode=${encodeURIComponent(attachBarcode)}`}
                             >
                               紐づける

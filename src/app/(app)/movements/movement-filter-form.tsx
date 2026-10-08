@@ -82,7 +82,7 @@ export function MovementFilterForm({
   }
 
   return (
-    <section className="grid gap-3 rounded border border-line bg-white p-4 shadow-panel">
+    <section className="grid gap-3 rounded border border-line bg-panel p-4 shadow-sheet">
       <form className="grid gap-3 lg:grid-cols-[1fr_140px_170px_145px_145px_auto_auto_auto]">
         {defaultCategory ? <input type="hidden" name="category" value={defaultCategory} /> : null}
         <input
@@ -90,12 +90,12 @@ export function MovementFilterForm({
           name="q"
           defaultValue={defaultQuery}
           placeholder="商品名・コード・カテゴリ・理由メモ・操作者"
-          className="h-11 rounded border border-line px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+          className="h-11 rounded border border-line px-3 text-sm    "
         />
         <select
           name="type"
           defaultValue={defaultType}
-          className="h-11 rounded border border-line bg-white px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+          className="h-11 rounded border border-line bg-panel px-3 text-sm    "
         >
           {typeOptions.map((option) => (
             <option key={option.value} value={option.value}>
@@ -106,7 +106,7 @@ export function MovementFilterForm({
         <select
           name="source"
           defaultValue={defaultSource}
-          className="h-11 rounded border border-line bg-white px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+          className="h-11 rounded border border-line bg-panel px-3 text-sm    "
         >
           {sourceOptions.map((option) => (
             <option key={option.value} value={option.value}>
@@ -120,7 +120,7 @@ export function MovementFilterForm({
           defaultValue={defaultStartDate}
           aria-label="開始日"
           title="開始日"
-          className="h-11 rounded border border-line px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+          className="h-11 rounded border border-line px-3 text-sm    "
         />
         <input
           type="date"
@@ -128,22 +128,22 @@ export function MovementFilterForm({
           defaultValue={defaultEndDate}
           aria-label="終了日"
           title="終了日"
-          className="h-11 rounded border border-line px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+          className="h-11 rounded border border-line px-3 text-sm    "
         />
         <button
           type="submit"
-          className="h-11 rounded bg-accent px-5 text-sm font-semibold text-white transition hover:bg-teal-800"
+          className="h-11 rounded btn-primary px-5 text-sm font-semibold transition"
         >
           絞り込み
         </button>
         <a
-          className="flex h-11 items-center justify-center rounded border border-line px-5 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+          className="flex h-11 items-center justify-center rounded btn-secondary px-5 text-sm font-semibold transition"
           href="/movements"
         >
           クリア
         </a>
         <a
-          className="flex h-11 items-center justify-center rounded border border-accent/30 bg-teal-50 px-5 text-sm font-semibold text-accent transition hover:border-accent hover:bg-white"
+          className="flex h-11 items-center justify-center rounded btn-secondary border-accent/30 px-5 text-sm font-semibold transition"
           href={exportHref}
         >
           CSV出力
@@ -155,8 +155,8 @@ export function MovementFilterForm({
           aria-current={defaultCategory === "" ? "page" : undefined}
           className={
             defaultCategory === ""
-              ? "inline-flex min-h-9 items-center rounded border border-accent bg-accent px-3 py-1.5 text-sm font-semibold text-white"
-              : "inline-flex min-h-9 items-center rounded border border-line bg-white/75 px-3 py-1.5 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+              ? "inline-flex min-h-9 items-center rounded border chip-selected px-3 py-1.5 text-sm font-semibold"
+              : "inline-flex min-h-9 items-center rounded btn-secondary px-3 py-1.5 text-sm font-semibold transition"
           }
         >
           すべて
@@ -171,8 +171,8 @@ export function MovementFilterForm({
               aria-current={isCurrent ? "page" : undefined}
               className={
                 isCurrent
-                  ? "inline-flex min-h-9 items-center rounded border border-accent bg-accent px-3 py-1.5 text-sm font-semibold text-white"
-                  : "inline-flex min-h-9 items-center rounded border border-line bg-white/75 px-3 py-1.5 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+                  ? "inline-flex min-h-9 items-center rounded border chip-selected px-3 py-1.5 text-sm font-semibold"
+                  : "inline-flex min-h-9 items-center rounded btn-secondary px-3 py-1.5 text-sm font-semibold transition"
               }
             >
               {category}

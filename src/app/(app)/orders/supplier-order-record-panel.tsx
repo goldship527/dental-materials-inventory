@@ -35,7 +35,7 @@ export function SupplierOrderRecordPanel({
     <div className="grid gap-2 print:hidden">
       <div className="flex flex-wrap justify-end gap-2">
         <a
-          className="inline-flex min-h-9 items-center justify-center rounded border border-accent/30 bg-white px-3 py-1.5 text-xs font-semibold text-accent transition hover:bg-teal-50"
+          className="inline-flex min-h-9 items-center justify-center rounded btn-secondary border-accent/30 px-3 py-1.5 text-xs font-semibold transition"
           href={printHref}
         >
           このディーラーだけ印刷
@@ -43,14 +43,14 @@ export function SupplierOrderRecordPanel({
         <button
           type="button"
           onClick={() => setIsOpen((current) => !current)}
-          className="inline-flex min-h-9 items-center justify-center rounded bg-ink px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-slate-700"
+          className="inline-flex min-h-9 items-center justify-center rounded btn-primary px-3 py-1.5 text-xs font-semibold transition"
         >
           {isOpen ? "入力を閉じる" : "発注済みにする"}
         </button>
       </div>
 
       {isOpen ? (
-        <form action={markOrderRequestsOrderedAction} className="grid gap-2 rounded border border-line bg-white/90 p-3">
+        <form action={markOrderRequestsOrderedAction} className="grid gap-2 rounded border border-line bg-panel/90 p-3">
           {orderRequestIds.map((orderRequestId) => (
             <input key={orderRequestId} type="hidden" name="orderRequestId" value={orderRequestId} />
           ))}
@@ -62,17 +62,17 @@ export function SupplierOrderRecordPanel({
             発注スタッフ: {selectedStaffOperator ? selectedStaffOperator.displayName : "画面上部で選択してください"}
           </p>
           <div className="grid gap-2 lg:grid-cols-[auto_12rem_1fr_1fr_auto] lg:items-end">
-            <label className="flex h-9 items-center gap-2 whitespace-nowrap text-xs font-semibold text-muted">
-              <input type="checkbox" name="confirmOrdered" required className="h-4 w-4 accent-teal-700" />
+            <label className="flex h-9 items-center gap-2 whitespace-nowrap text-label font-semibold text-muted">
+              <input type="checkbox" name="confirmOrdered" required className="h-4 w-4 accent-accent" />
               送付済み確認
             </label>
-            <label className="grid gap-1 text-xs font-semibold text-muted">
+            <label className="grid gap-1 text-label font-semibold text-muted">
               送付方法
               <select
                 name="orderedMethod"
                 required
                 defaultValue=""
-                className="h-9 rounded border border-line bg-white px-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                className="h-9 rounded border border-line bg-panel px-2 text-sm    "
               >
                 <option value="" disabled>
                   選択してください
@@ -88,18 +88,18 @@ export function SupplierOrderRecordPanel({
               name="orderedMemo"
               placeholder="送付メモ（任意）"
               maxLength={300}
-              className="h-9 min-h-9 rounded border border-line bg-white px-2 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+              className="h-9 min-h-9 rounded border border-line bg-panel px-2 py-2 text-sm    "
             />
             <textarea
               name="supplierResponseMemo"
               placeholder="先方対応メモ（任意）"
               maxLength={300}
-              className="h-9 min-h-9 rounded border border-line bg-white px-2 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+              className="h-9 min-h-9 rounded border border-line bg-panel px-2 py-2 text-sm    "
             />
             <SubmitButton
               pendingLabel="移動中"
               disabled={!canSubmit}
-              className="h-9 rounded bg-ink px-3 text-xs font-semibold text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+              className="h-9 rounded btn-primary px-3 text-xs font-semibold transition disabled:cursor-not-allowed"
             >
               納品待ちへ移す
             </SubmitButton>
@@ -107,7 +107,7 @@ export function SupplierOrderRecordPanel({
           {!hasStaffOperators ? (
             <p className="text-xs font-semibold text-danger">有効な作業スタッフがありません。</p>
           ) : !canSubmit ? (
-            <p className="text-xs font-semibold text-warning">画面上部で作業スタッフを選択してください。</p>
+            <p className="text-xs font-semibold text-ink">画面上部で作業スタッフを選択してください。</p>
           ) : null}
         </form>
       ) : null}

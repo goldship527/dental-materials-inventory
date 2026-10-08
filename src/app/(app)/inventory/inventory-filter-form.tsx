@@ -28,8 +28,8 @@ function buildCategoryHref(category: string, query: string, shortageOnly: boolea
 
 function categoryButtonClass(isCurrent: boolean) {
   return isCurrent
-    ? "inline-flex min-h-10 items-center rounded border border-accent bg-accent px-3 py-2 text-sm font-semibold text-white shadow-sm"
-    : "inline-flex min-h-10 items-center rounded border border-line bg-white px-3 py-2 text-sm font-semibold text-muted transition hover:border-accent/50 hover:bg-subtle hover:text-ink";
+    ? "inline-flex min-h-10 items-center rounded border border-accent chip-selected px-3 py-2 text-sm font-semibold"
+    : "inline-flex min-h-10 items-center rounded btn-secondary px-3 py-2 text-sm font-semibold transition";
 }
 
 export function InventoryFilterForm({
@@ -39,14 +39,14 @@ export function InventoryFilterForm({
   defaultShortageOnly,
 }: InventoryFilterFormProps) {
   return (
-    <section className="rounded border border-line bg-white p-4 shadow-panel">
+    <section className="rounded border border-line bg-panel p-4 shadow-sheet">
       <form className="grid gap-3 md:grid-cols-[1fr_auto_auto]">
         <input
           type="search"
           name="q"
           defaultValue={defaultQuery}
           placeholder="商品名・商品コード"
-          className="h-11 rounded border border-line px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+          className="h-11 rounded border border-line px-3 text-sm    "
         />
         {defaultCategory ? <input type="hidden" name="category" value={defaultCategory} /> : null}
         <label className="flex h-11 items-center gap-2 rounded border border-line px-3 text-sm">
@@ -55,7 +55,7 @@ export function InventoryFilterForm({
         </label>
         <button
           type="submit"
-          className="h-11 rounded bg-accent px-5 text-sm font-semibold text-white transition hover:bg-teal-800"
+          className="h-11 rounded btn-primary px-5 text-sm font-semibold transition"
         >
           絞り込み
         </button>

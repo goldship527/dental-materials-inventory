@@ -34,16 +34,16 @@ export default async function AdminAuditLogsPage() {
       <main className="mx-auto grid w-full max-w-7xl gap-6 px-4 py-8 sm:px-6 lg:px-8">
         <header className="grid gap-2">
           <p className="text-sm font-semibold text-accent">管理</p>
-          <h1 className="text-2xl font-bold tracking-tight text-ink">監査ログ</h1>
+          <h1 className="text-xl font-bold tracking-tight text-ink">監査ログ</h1>
           <p className="max-w-3xl text-sm leading-6 text-muted">
             ログインアカウント管理、商品マスタ、発注先、棚卸確定、履歴取り消しなどの重要操作を直近100件まで表示します。
           </p>
         </header>
 
-        <section className="overflow-hidden rounded border border-line bg-white shadow-panel">
+        <section className="overflow-hidden rounded border border-line bg-panel shadow-sheet">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[960px] border-collapse text-left text-sm">
-              <thead className="bg-gray-50 text-xs text-muted">
+              <thead className="bg-subtle text-label text-muted">
                 <tr>
                   <th className="border-b border-line px-4 py-3">日時</th>
                   <th className="border-b border-line px-4 py-3">操作</th>

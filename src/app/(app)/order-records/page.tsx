@@ -84,20 +84,20 @@ export default async function OrderRecordsPage({ searchParams }: PageProps) {
         <header className="flex flex-col gap-4 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-            <h1 className="mt-2 text-3xl font-semibold">発注記録</h1>
+            <h1 className="mt-2 text-xl font-semibold">発注記録</h1>
             <p className="mt-2 text-sm text-muted">
               発注を記録したまとまりを、発注先・送付方法・納品状況とあわせて確認します。
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
             <a
-              className="inline-flex h-11 shrink-0 items-center justify-center rounded border border-line px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+              className="inline-flex h-11 shrink-0 items-center justify-center rounded btn-secondary px-4 text-sm font-semibold transition"
               href="/orders"
             >
               発注候補へ
             </a>
             <a
-              className="inline-flex h-11 shrink-0 items-center justify-center rounded border border-line px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+              className="inline-flex h-11 shrink-0 items-center justify-center rounded btn-secondary px-4 text-sm font-semibold transition"
               href="/home"
             >
               ホームへ戻る
@@ -106,55 +106,55 @@ export default async function OrderRecordsPage({ searchParams }: PageProps) {
         </header>
 
         <section className="grid gap-3 md:grid-cols-4">
-          <div className="rounded border border-line/90 bg-panel/95 p-4 shadow-panel">
+          <div className="rounded border border-line/90 bg-panel/95 p-4 shadow-sheet">
             <p className="text-sm font-semibold text-muted">発注記録</p>
-            <p className="mt-2 text-3xl font-bold tabular-nums">{filteredRows.length} 件</p>
+            <p className="mt-2 text-2xl font-bold tabular-nums">{filteredRows.length} 件</p>
           </div>
-          <div className="rounded border border-line/90 bg-panel/95 p-4 shadow-panel">
+          <div className="rounded border border-line/90 bg-panel/95 p-4 shadow-sheet">
             <p className="text-sm font-semibold text-muted">発注候補</p>
-            <p className="mt-2 text-3xl font-bold tabular-nums">{totalRequests} 件</p>
+            <p className="mt-2 text-2xl font-bold tabular-nums">{totalRequests} 件</p>
           </div>
-          <div className="rounded border border-line/90 bg-panel/95 p-4 shadow-panel">
+          <div className="rounded border border-line/90 bg-panel/95 p-4 shadow-sheet">
             <p className="text-sm font-semibold text-muted">納品確認済み</p>
-            <p className="mt-2 text-3xl font-bold tabular-nums">{totalReceivedRequests} 件</p>
+            <p className="mt-2 text-2xl font-bold tabular-nums">{totalReceivedRequests} 件</p>
           </div>
-          <div className="rounded border border-line/90 bg-panel/95 p-4 shadow-panel">
+          <div className="rounded border border-line/90 bg-panel/95 p-4 shadow-sheet">
             <p className="text-sm font-semibold text-muted">未納品</p>
-            <p className="mt-2 text-3xl font-bold tabular-nums">{Math.max(0, totalRequests - totalReceivedRequests)} 件</p>
+            <p className="mt-2 text-2xl font-bold tabular-nums">{Math.max(0, totalRequests - totalReceivedRequests)} 件</p>
           </div>
         </section>
 
-        <form className="grid gap-3 rounded border border-line/90 bg-panel/95 p-3 shadow-panel md:grid-cols-[1fr_auto_auto]">
+        <form className="grid gap-3 rounded border border-line/90 bg-panel/95 p-3 shadow-sheet md:grid-cols-[1fr_auto_auto]">
           <input
             type="search"
             name="q"
             defaultValue={query}
             placeholder="発注先・商品名・発注記録ID・メモ"
-            className="h-10 rounded border border-line bg-white/90 px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+            className="h-10 rounded border border-line bg-panel/90 px-3 text-sm    "
           />
           <button
             type="submit"
-            className="h-10 rounded bg-accent px-4 text-sm font-semibold text-white transition hover:bg-accentDeep"
+            className="h-10 rounded btn-primary px-4 text-sm font-semibold transition"
           >
             検索
           </button>
           <a
-            className="flex h-10 items-center justify-center rounded border border-line bg-white/75 px-4 text-sm font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent"
+            className="flex h-10 items-center justify-center rounded btn-secondary px-4 text-sm font-semibold transition"
             href="/order-records"
           >
             クリア
           </a>
         </form>
 
-        <section className="rounded border border-line bg-white px-4 py-3 text-sm text-muted shadow-panel">
+        <section className="rounded border border-line bg-panel px-4 py-3 text-sm text-muted shadow-sheet">
           表示 {filteredRows.length} 件 / 全 {rows.length} 件
           {query ? `（検索: ${query}）` : ""}
         </section>
 
-        <section className="overflow-hidden rounded border border-line bg-white shadow-panel">
+        <section className="overflow-hidden rounded border border-line bg-panel shadow-sheet">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1080px] border-collapse text-left text-sm">
-              <thead className="bg-gray-50 text-xs text-muted">
+              <thead className="bg-subtle text-label text-muted">
                 <tr>
                   <th className="border-b border-line px-4 py-3">発注日時</th>
                   <th className="border-b border-line px-4 py-3">発注記録</th>
@@ -194,7 +194,7 @@ export default async function OrderRecordsPage({ searchParams }: PageProps) {
                       <td className="border-b border-line px-4 py-3 text-right">{row.requestCount}</td>
                       <td className="border-b border-line px-4 py-3 text-right">{row.totalRequestedQuantity}</td>
                       <td className="border-b border-line px-4 py-3">
-                        <span className="rounded bg-gray-100 px-2 py-1 text-xs font-semibold text-muted">
+                        <span className="rounded bg-subtle px-2 py-1 text-xs font-semibold text-muted">
                           {getReceiptSummary(row.receivedRequestCount, row.requestCount)}
                         </span>
                         <p className="mt-1 text-xs text-muted">納品数量 {row.totalReceivedQuantity}</p>

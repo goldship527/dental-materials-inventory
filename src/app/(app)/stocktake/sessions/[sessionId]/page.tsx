@@ -53,7 +53,7 @@ export default async function StocktakeSessionPage({ params }: PageProps) {
         <header className="flex flex-col gap-3 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-            <h1 className="mt-2 text-3xl font-semibold">棚卸セッション入力</h1>
+            <h1 className="mt-2 text-xl font-semibold">棚卸セッション入力</h1>
             <p className="mt-2 text-sm text-muted">
               1商品ずつ実在庫を入力します。入力内容は明細ごとに保存され、確定までは在庫数を変更しません。
             </p>
@@ -64,7 +64,7 @@ export default async function StocktakeSessionPage({ params }: PageProps) {
         </header>
 
 
-        <section className="grid gap-3 rounded border border-line bg-white p-4 text-sm shadow-panel md:grid-cols-4">
+        <section className="grid gap-3 rounded border border-line bg-panel p-4 text-sm shadow-sheet md:grid-cols-4">
           <div>
             <p className="text-muted">状態</p>
             <p className="mt-1 font-semibold">{getStocktakeSessionStatusLabel(stocktakeSession.status)}</p>

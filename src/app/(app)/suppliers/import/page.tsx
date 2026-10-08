@@ -26,7 +26,7 @@ export default async function SupplierImportPage() {
         <header className="flex flex-col gap-3 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-            <h1 className="mt-2 text-3xl font-semibold">発注先マスタ一括取り込み</h1>
+            <h1 className="mt-2 text-xl font-semibold">発注先マスタ一括取り込み</h1>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-muted">
               CSVまたはExcel貼り付けで、発注先をまとめて新規追加します。同じ名前の発注先はスキップします。
             </p>

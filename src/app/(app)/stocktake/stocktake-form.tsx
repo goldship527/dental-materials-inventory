@@ -32,11 +32,11 @@ function StocktakeRow({ row }: StocktakeRowProps) {
           <p
             className={
               state.status === "success"
-                ? "mt-2 rounded bg-emerald-50 px-3 py-2 text-xs font-semibold text-accent"
-                : "mt-2 rounded bg-red-50 px-3 py-2 text-xs font-semibold text-danger"
+                ? "mt-2 rounded bg-panel px-3 py-2 text-xs font-semibold text-accent"
+                : "mt-2 rounded bg-panel px-3 py-2 text-xs font-semibold text-danger"
             }
           >
-            {state.message}
+            {state.status === "success" ? "✓ " : state.message.startsWith("エラー") ? "" : "エラー: "}{state.message}
           </p>
         ) : null}
       </td>
@@ -54,7 +54,7 @@ function StocktakeRow({ row }: StocktakeRowProps) {
             name="quantity"
             value={actualValue}
             onChange={(event) => setActualValue(event.target.value)}
-            className="h-10 w-28 rounded border border-line px-3 text-right outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+            className="h-10 w-28 rounded border border-line px-3 text-right    "
           />
         </form>
       </td>
@@ -75,7 +75,7 @@ function StocktakeRow({ row }: StocktakeRowProps) {
           type="submit"
           form={formId}
           disabled={isPending || difference === null || difference === 0}
-          className="h-10 rounded bg-ink px-4 text-xs font-semibold text-white transition hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-40"
+          className="h-10 rounded btn-primary px-4 text-xs font-semibold transition disabled:cursor-not-allowed"
         >
           {isPending ? "確定中" : "確定"}
         </button>
@@ -86,13 +86,13 @@ function StocktakeRow({ row }: StocktakeRowProps) {
 
 export function StocktakeForm({ rows }: StocktakeFormProps) {
   return (
-    <section className="overflow-hidden rounded border border-line bg-white shadow-panel">
+    <section className="overflow-hidden rounded border border-line bg-panel shadow-sheet">
       <div className="border-b border-line px-4 py-3 text-sm text-muted">
         実在庫を入力すると、システム在庫との差異が表示されます。
       </div>
       <div className="overflow-x-auto">
         <table className="w-full min-w-[980px] border-collapse text-left text-sm">
-          <thead className="bg-gray-50 text-xs text-muted">
+          <thead className="bg-subtle text-label text-muted">
             <tr>
               <th className="border-b border-line px-4 py-3">商品</th>
               <th className="border-b border-line px-4 py-3">保管場所</th>

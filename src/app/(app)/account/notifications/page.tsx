@@ -38,11 +38,11 @@ export default async function AccountNotificationsPage() {
           <header className="flex flex-col gap-3 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="text-sm font-semibold text-accent">{user.email}</p>
-              <h1 className="mt-2 text-3xl font-semibold">通知設定</h1>
+              <h1 className="mt-2 text-xl font-semibold">通知設定</h1>
               <p className="mt-2 text-sm text-muted">朝の在庫ダイジェストの配信条件を設定します。</p>
             </div>
             <a
-              className="inline-flex min-h-11 items-center rounded border border-line bg-white px-4 text-sm font-semibold text-accent transition hover:border-accent"
+              className="inline-flex min-h-11 items-center rounded btn-secondary px-4 text-sm font-semibold transition"
               href="/home"
             >
               ホームへ戻る

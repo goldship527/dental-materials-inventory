@@ -54,7 +54,7 @@ export function getStockLotExpiryStatus(
     return {
       status: "undated",
       statusLabel: "期限未登録",
-      statusBadgeClassName: "bg-gray-100 text-muted",
+      statusBadgeClassName: "bg-subtle text-muted",
       daysUntilExpiry: null,
     };
   }
@@ -67,7 +67,7 @@ export function getStockLotExpiryStatus(
     return {
       status: "expired",
       statusLabel: "期限切れ",
-      statusBadgeClassName: "bg-red-50 text-danger",
+      statusBadgeClassName: "bg-panel text-danger",
       daysUntilExpiry,
     };
   }
@@ -76,7 +76,7 @@ export function getStockLotExpiryStatus(
     return {
       status: "expiring",
       statusLabel: `${expiringWithinDays}日以内`,
-      statusBadgeClassName: "bg-yellow-50 text-warning",
+      statusBadgeClassName: "bg-markSoft text-ink",
       daysUntilExpiry,
     };
   }
@@ -84,7 +84,7 @@ export function getStockLotExpiryStatus(
   return {
     status: "valid",
     statusLabel: "期限あり",
-    statusBadgeClassName: "bg-emerald-50 text-accent",
+    statusBadgeClassName: "bg-panel text-accent",
     daysUntilExpiry,
   };
 }

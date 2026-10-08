@@ -53,7 +53,7 @@ export default async function StockAnomaliesPage() {
         <header className="flex flex-col gap-4 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-            <h1 className="mt-2 text-3xl font-semibold">異常出庫検知</h1>
+            <h1 className="mt-2 text-xl font-semibold">異常出庫検知</h1>
             <p className="mt-2 text-sm text-muted">
               直近24時間の出庫数が、過去30日の通常ペースより多い商品を表示します。
             </p>
@@ -61,20 +61,20 @@ export default async function StockAnomaliesPage() {
           <div className="flex flex-wrap gap-2 text-sm font-semibold">
             {canManageSettings ? (
               <a
-                className="inline-flex h-11 items-center rounded border border-line px-4 text-muted transition hover:border-accent hover:text-accent"
+                className="inline-flex h-11 items-center rounded btn-secondary px-4 transition"
                 href="/admin/settings"
               >
                 閾値設定
               </a>
             ) : null}
             <a
-              className="inline-flex h-11 items-center rounded border border-line px-4 text-muted transition hover:border-accent hover:text-accent"
+              className="inline-flex h-11 items-center rounded btn-secondary px-4 transition"
               href="/movements"
             >
               入出庫履歴へ
             </a>
             <a
-              className="inline-flex h-11 items-center rounded border border-line px-4 text-muted transition hover:border-accent hover:text-accent"
+              className="inline-flex h-11 items-center rounded btn-secondary px-4 transition"
               href="/home"
             >
               ホームへ戻る
@@ -83,33 +83,33 @@ export default async function StockAnomaliesPage() {
         </header>
 
         <section className="grid gap-4 md:grid-cols-3">
-          <div className="rounded border border-line bg-white p-5 shadow-panel">
+          <div className="rounded border border-line bg-panel p-5 shadow-sheet">
             <p className="text-sm font-semibold text-muted">検知件数</p>
-            <p className={anomalies.length > 0 ? "mt-2 text-3xl font-semibold text-warning" : "mt-2 text-3xl font-semibold"}>
+            <p className={anomalies.length > 0 ? "mt-2 text-2xl font-semibold text-ink" : "mt-2 text-2xl font-semibold"}>
               {anomalies.length}
             </p>
             <p className="mt-2 text-sm text-muted">表示のみ。出庫の取消や在庫数の変更は行いません。</p>
           </div>
-          <div className="rounded border border-line bg-white p-5 shadow-panel">
+          <div className="rounded border border-line bg-panel p-5 shadow-sheet">
             <p className="text-sm font-semibold text-muted">直近24時間の出庫数</p>
-            <p className="mt-2 text-3xl font-semibold">{formatNumber(totalTodayQuantity)}</p>
+            <p className="mt-2 text-2xl font-semibold">{formatNumber(totalTodayQuantity)}</p>
             <p className="mt-2 text-sm text-muted">検知された商品の合計です。</p>
           </div>
-          <div className="rounded border border-line bg-white p-5 shadow-panel">
+          <div className="rounded border border-line bg-panel p-5 shadow-sheet">
             <p className="text-sm font-semibold text-muted">現在の閾値</p>
-            <p className="mt-2 text-3xl font-semibold">{formatNumber(settings.anomalyOutThreshold)}倍</p>
+            <p className="mt-2 text-2xl font-semibold">{formatNumber(settings.anomalyOutThreshold)}倍</p>
             <p className="mt-2 text-sm text-muted">過去30日の平均に対する倍率です。</p>
           </div>
         </section>
 
-        <section className="overflow-hidden rounded border border-line bg-white shadow-panel">
+        <section className="overflow-hidden rounded border border-line bg-panel shadow-sheet">
           <div className="border-b border-line px-4 py-3 text-sm text-muted">
             直近24時間 / 基準: 過去30日の日次平均 / baselineDaily 0.1未満は対象外
           </div>
           {anomalies.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[1120px] border-collapse text-left text-sm">
-                <thead className="bg-gray-50 text-xs text-muted">
+                <thead className="bg-subtle text-label text-muted">
                   <tr>
                     <th className="border-b border-line px-4 py-3">商品</th>
                     <th className="border-b border-line px-4 py-3">カテゴリ</th>
@@ -131,7 +131,7 @@ export default async function StockAnomaliesPage() {
                         <p className="mt-1 text-xs text-muted">{row.productCode ?? "商品コード未設定"}</p>
                       </td>
                       <td className="border-b border-line px-4 py-3">{row.category ?? "-"}</td>
-                      <td className="border-b border-line px-4 py-3 text-right text-lg font-semibold text-warning">
+                      <td className="border-b border-line px-4 py-3 text-right text-lg font-semibold text-ink">
                         {formatNumber(row.todayQuantity)}
                       </td>
                       <td className="border-b border-line px-4 py-3 text-right">{formatNumber(row.baselineDaily)}</td>

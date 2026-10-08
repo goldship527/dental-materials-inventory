@@ -16,7 +16,7 @@ export default async function StockOutPage() {
       <div className="mx-auto flex max-w-7xl flex-col gap-4">
         <AppNav current="barcodeOut" />
         <header>
-          <h1 className="text-2xl font-semibold">出庫する</h1>
+          <h1 className="text-xl font-semibold">出庫する</h1>
         </header>
         <StockOutCatalog key={context.clinicId} cards={cards} clinicId={context.clinicId} staffOperators={staffOperators} />
       </div>

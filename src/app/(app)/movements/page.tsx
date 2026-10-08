@@ -54,22 +54,22 @@ function formatLotExpiryDate(expiryDate: Date | null, expiryDateText: string | n
 
 function getMovementBadgeClass(movementType: string) {
   if (movementType === "IN") {
-    return "bg-emerald-50 text-accent";
+    return "bg-panel text-accent";
   }
 
   if (movementType === "OUT") {
-    return "bg-red-50 text-danger";
+    return "bg-panel text-danger";
   }
 
   if (movementType === "START_USE" || movementType === "END_USE") {
-    return "bg-blue-50 text-blue-700";
+    return "bg-tint text-accent";
   }
 
   if (movementType === "DISCARD") {
-    return "bg-amber-50 text-amber-700";
+    return "bg-markSoft text-ink";
   }
 
-  return "bg-gray-100 text-muted";
+  return "bg-subtle text-muted";
 }
 
 function buildMovementExportHref(filters: {
@@ -162,9 +162,9 @@ export default async function MovementsPage({ searchParams }: PageProps) {
         <header className="flex flex-col gap-4 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-            <h1 className="mt-2 text-3xl font-semibold">入出庫履歴</h1>
+            <h1 className="mt-2 text-xl font-semibold">入出庫履歴</h1>
           </div>
-          <a className="inline-flex h-11 shrink-0 items-center justify-center rounded border border-line px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent" href="/home">
+          <a className="inline-flex h-11 shrink-0 items-center justify-center rounded btn-secondary px-4 text-sm font-semibold transition" href="/home">
             ホームへ戻る
           </a>
         </header>
@@ -181,16 +181,16 @@ export default async function MovementsPage({ searchParams }: PageProps) {
           exportHref={exportHref}
         />
 
-        <section className="rounded border border-line bg-white px-4 py-3 text-sm text-muted shadow-panel">
+        <section className="rounded border border-line bg-panel px-4 py-3 text-sm text-muted shadow-sheet">
           表示 {movements.length} 件 / 条件一致 {movementCount} 件
           {filterLabel ? `（${filterLabel}）` : ""}
           {movementCount > movements.length ? " / 画面表示は最新100件までです" : ""}
         </section>
 
-        <section className="rounded border border-line bg-white shadow-panel">
+        <section className="rounded border border-line bg-panel shadow-sheet">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1120px] border-collapse text-left text-sm">
-              <thead className="bg-gray-50 text-xs text-muted">
+              <thead className="bg-subtle text-label text-muted">
                 <tr>
                   <th className="border-b border-line px-3 py-3">日時</th>
                   <th className="border-b border-line px-3 py-3">商品</th>

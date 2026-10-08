@@ -20,7 +20,7 @@ export function OrganizationSettingsForm({ anomalyOutThreshold }: OrganizationSe
   const [state, action, isPending] = useActionState(updateOrganizationSettingsAction, initialState);
 
   return (
-    <form action={action} className="grid gap-5 rounded border border-line bg-white p-5 shadow-panel">
+    <form action={action} className="grid gap-5 rounded border border-line bg-panel p-5 shadow-sheet">
       <div>
         <h2 className="text-lg font-semibold text-ink">異常出庫検知</h2>
         <p className="mt-1 text-sm leading-6 text-muted">
@@ -38,7 +38,7 @@ export function OrganizationSettingsForm({ anomalyOutThreshold }: OrganizationSe
           max={maxAnomalyOutThreshold}
           step="0.1"
           required
-          className="h-11 rounded border border-line px-3 text-right text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+          className="h-11 rounded border border-line px-3 text-right text-ink    "
         />
       </label>
 
@@ -51,11 +51,11 @@ export function OrganizationSettingsForm({ anomalyOutThreshold }: OrganizationSe
         <p
           className={
             state.status === "success"
-              ? "rounded border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm font-semibold text-accent"
-              : "rounded border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold text-danger"
+              ? "rounded border border-line border-l-4 border-l-success bg-panel px-4 py-3 text-sm font-semibold text-success"
+              : "rounded border border-line border-l-4 border-l-danger bg-panel px-4 py-3 text-sm font-semibold text-danger"
           }
         >
-          {state.message}
+          {state.status === "success" ? "✓ " : state.message.startsWith("エラー") ? "" : "エラー: "}{state.message}
         </p>
       ) : null}
 
@@ -63,7 +63,7 @@ export function OrganizationSettingsForm({ anomalyOutThreshold }: OrganizationSe
         <button
           type="submit"
           disabled={isPending}
-          className="rounded bg-ink px-5 py-3 text-sm font-semibold text-white transition hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded btn-primary px-5 py-3 text-sm font-semibold transition disabled:cursor-not-allowed"
         >
           {isPending ? "保存中" : "設定を保存"}
         </button>

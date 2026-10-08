@@ -42,15 +42,15 @@ const reviewDecisionLabels: Record<PurchaseHistoryReviewDecision, string> = {
 
 function rowClassName(status: PurchaseHistoryMatchStatus) {
   if (status === "ERROR") {
-    return "bg-red-50/60";
+    return "bg-panel";
   }
 
   if (status === "NEEDS_REVIEW") {
-    return "bg-orange-50/70";
+    return "bg-markSoft";
   }
 
   if (status === "CREATE") {
-    return "bg-green-50/40";
+    return "bg-panel";
   }
 
   return undefined;
@@ -62,7 +62,7 @@ function statusClassName(status: PurchaseHistoryMatchStatus) {
   }
 
   if (status === "NEEDS_REVIEW") {
-    return "text-warning";
+    return "text-ink";
   }
 
   if (status === "CREATE") {
@@ -161,7 +161,7 @@ export function PurchaseHistoryImportForm() {
   }
 
   return (
-    <section className="rounded border border-line bg-white p-5 shadow-panel">
+    <section className="rounded border border-line bg-panel p-5 shadow-sheet">
       <div className="mb-4 flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
         <div>
           <h2 className="text-lg font-semibold">購入履歴をプレビュー</h2>
@@ -172,7 +172,7 @@ export function PurchaseHistoryImportForm() {
         </div>
         <a
           href="/products/import"
-          className="inline-flex min-h-11 items-center justify-center rounded border border-line bg-white px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+          className="inline-flex min-h-11 items-center justify-center rounded btn-secondary px-4 py-2 text-sm font-semibold transition"
         >
           商品マスタ取り込みへ戻る
         </a>
@@ -190,7 +190,7 @@ export function PurchaseHistoryImportForm() {
               type="file"
               accept=".csv,text/csv"
               onChange={handleFileChange}
-              className="block w-full rounded border border-line bg-white px-3 py-2 text-sm text-ink file:mr-3 file:rounded file:border-0 file:bg-accent file:px-3 file:py-2 file:text-sm file:font-semibold file:text-white"
+              className="block w-full rounded border border-line bg-panel px-3 py-2 text-sm text-ink file:mr-3 file:rounded file:border-0 file:bg-accent file:px-3 file:py-2 file:text-sm file:font-semibold file:text-panel"
             />
             <span className="text-xs font-normal text-muted">
               推奨ヘッダー: purchaseDate, dealerName, dealerProductCode, supplierProductCode, productName
@@ -208,12 +208,12 @@ export function PurchaseHistoryImportForm() {
                 setSourceText(event.target.value);
               }}
               placeholder={"購入日\tディーラー名\tディーラー商品コード\t発注先品番\t商品名\tメーカー名\t規格\t購入数量\t単価\t金額"}
-              className="min-h-36 rounded border border-line px-3 py-2 text-sm font-normal text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+              className="min-h-36 rounded border border-line px-3 py-2 text-sm font-normal text-ink    "
             />
           </label>
         </div>
 
-        <div className="rounded border border-orange-200 bg-orange-50 px-4 py-3 text-sm leading-6 text-warning">
+        <div className="rounded border border-line bg-markSoft px-4 py-3 text-sm leading-6 text-ink">
           取り込む前に、患者名や個人情報が含まれていないか確認してください。購入金額や単価が含まれるため、必要なファイルだけを使ってください。
         </div>
 
@@ -221,7 +221,7 @@ export function PurchaseHistoryImportForm() {
           <button
             type="submit"
             disabled={isPreviewPending || sourceText.trim().length === 0}
-            className="rounded bg-ink px-5 py-3 text-sm font-semibold text-white transition hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded btn-primary px-5 py-3 text-sm font-semibold transition disabled:cursor-not-allowed"
           >
             {isPreviewPending ? "確認中" : "プレビュー"}
           </button>
@@ -235,13 +235,13 @@ export function PurchaseHistoryImportForm() {
         <div
           className={
             activeState.status === "success"
-              ? "mt-5 rounded border border-green-100 bg-green-50 px-4 py-3 text-sm font-semibold text-success"
-              : "mt-5 rounded border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold text-danger"
+              ? "mt-5 rounded border border-line bg-panel px-4 py-3 text-sm font-semibold text-success"
+              : "mt-5 rounded border border-line border-l-4 border-l-danger bg-panel px-4 py-3 text-sm font-semibold text-danger"
           }
         >
           <p>{activeState.message}</p>
           {confirmState.status === "success" ? (
-            <a className="mt-3 inline-flex rounded bg-white px-3 py-2 text-sm font-semibold text-accent transition hover:bg-teal-50" href="/products/import/purchase-history/setup">
+            <a className="mt-3 inline-flex rounded bg-panel px-3 py-2 text-sm font-semibold text-accent transition hover:bg-tint" href="/products/import/purchase-history/setup">
               登録した商品の設定をまとめて整える
             </a>
           ) : null}
@@ -265,7 +265,7 @@ export function PurchaseHistoryImportForm() {
             </div>
             <div className="rounded border border-line p-3">
               <p className="text-xs text-muted">確認必要</p>
-              <p className="mt-1 text-2xl font-semibold text-warning">{preview.summary.needsReviewRows}</p>
+              <p className="mt-1 text-2xl font-semibold text-ink">{preview.summary.needsReviewRows}</p>
             </div>
             <div className="rounded border border-line p-3">
               <p className="text-xs text-muted">エラー</p>
@@ -275,7 +275,7 @@ export function PurchaseHistoryImportForm() {
 
           <div className="overflow-x-auto rounded border border-line">
             <table className="w-full min-w-[1400px] border-collapse text-left text-sm">
-              <thead className="bg-gray-50 text-xs text-muted">
+              <thead className="bg-subtle text-label text-muted">
                 <tr>
                   <th className="border-b border-line px-3 py-2">行</th>
                   <th className="border-b border-line px-3 py-2">状態</th>
@@ -320,7 +320,7 @@ export function PurchaseHistoryImportForm() {
                                 [row.rowNumber]: decision as PurchaseHistoryReviewDecision,
                               }));
                             }}
-                            className="min-h-10 rounded border border-line bg-white px-2 py-1 text-sm text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                            className="min-h-10 rounded border border-line bg-panel px-2 py-1 text-sm text-ink    "
                           >
                             <option value="" disabled>
                               選択してください
@@ -332,7 +332,7 @@ export function PurchaseHistoryImportForm() {
                             ))}
                           </select>
                           {shouldShowMultipleSimilarExistingNote(row, reviewDecisions[row.rowNumber]) ? (
-                            <p className="text-xs leading-5 text-warning">
+                            <p className="text-xs leading-5 text-ink">
                               複数候補があるため、必要に応じて商品マスタから個別に確認してください。
                             </p>
                           ) : null}
@@ -364,7 +364,7 @@ export function PurchaseHistoryImportForm() {
             </p>
           ) : null}
 
-          <form action={confirmAction} className="rounded border border-line bg-gray-50 p-4">
+          <form action={confirmAction} className="rounded border border-line bg-subtle p-4">
             <input type="hidden" name="sourceText" value={sourceText} />
             <input type="hidden" name="sourceType" value={sourceType} />
             <input type="hidden" name="fileName" value={fileName} />
@@ -377,7 +377,7 @@ export function PurchaseHistoryImportForm() {
               <button
                 type="submit"
                 disabled={!canConfirm || isConfirmPending}
-                className="inline-flex min-h-11 items-center justify-center rounded bg-accent px-5 py-3 text-sm font-semibold text-white transition hover:bg-accentDeep disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex min-h-11 items-center justify-center rounded btn-primary px-5 py-3 text-sm font-semibold transition disabled:cursor-not-allowed"
               >
                 {isConfirmPending ? "登録中" : "登録予定の商品を追加"}
               </button>

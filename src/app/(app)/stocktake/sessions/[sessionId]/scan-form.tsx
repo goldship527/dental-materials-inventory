@@ -82,18 +82,18 @@ function getStatusLabel(status: string) {
 
 function getRowClass(row: StocktakeSessionItemRow, highlighted: boolean) {
   if (highlighted) {
-    return "bg-amber-50 align-top ring-2 ring-inset ring-amber-200";
+    return "bg-markSoft align-top";
   }
 
   if (row.status === "COUNTED") {
-    return "bg-emerald-50/70 align-top";
+    return "bg-panel align-top";
   }
 
   if (row.status === "SKIPPED") {
-    return "bg-gray-50 align-top text-muted";
+    return "bg-subtle align-top text-muted";
   }
 
-  return "align-top bg-white";
+  return "align-top bg-panel";
 }
 
 function getRowAccentClass(row: StocktakeSessionItemRow, highlighted: boolean) {
@@ -114,14 +114,14 @@ function getRowAccentClass(row: StocktakeSessionItemRow, highlighted: boolean) {
 
 function getStatusBadgeClass(status: string) {
   if (status === "COUNTED") {
-    return "bg-emerald-100 text-accent";
+    return "bg-panel text-accent";
   }
 
   if (status === "SKIPPED") {
-    return "bg-gray-200 text-muted";
+    return "bg-subtle text-muted";
   }
 
-  return "bg-white text-muted";
+  return "bg-panel text-muted";
 }
 
 function getAbcRankBadgeText(rank: string) {
@@ -134,18 +134,18 @@ function getAbcRankBadgeText(rank: string) {
 
 function getAbcRankBadgeClass(rank: string) {
   if (rank === "A") {
-    return "border-emerald-200 bg-emerald-50 text-accent";
+    return "border-line bg-panel text-accent";
   }
 
   if (rank === "B") {
-    return "border-sky-200 bg-sky-50 text-sky-700";
+    return "border-line bg-tint text-accent";
   }
 
   if (rank === "C") {
-    return "border-gray-200 bg-gray-50 text-muted";
+    return "border-line bg-subtle text-muted";
   }
 
-  return "border-line bg-white text-muted";
+  return "border-line bg-panel text-muted";
 }
 
 type StocktakeItemRowProps = {
@@ -276,7 +276,7 @@ function StocktakeItemRow({ sessionId, row, editable, highlighted, registerInput
             }
           }}
           disabled={!editable || isPending}
-          className="h-10 w-28 rounded border border-line px-3 text-right outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 disabled:bg-gray-50"
+          className="h-10 w-28 rounded border border-line px-3 text-right     disabled:bg-subtle"
         />
       </td>
       <td className="border-b border-line px-4 py-3 text-right">
@@ -291,14 +291,14 @@ function StocktakeItemRow({ sessionId, row, editable, highlighted, registerInput
           onBlur={save}
           disabled={!editable || isPending}
           placeholder="任意"
-          className="h-10 w-44 rounded border border-line px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 disabled:bg-gray-50"
+          className="h-10 w-44 rounded border border-line px-3 text-sm     disabled:bg-subtle"
         />
       </td>
       <td className="border-b border-line px-4 py-3 text-xs text-muted">
         <span className={`inline-flex rounded px-2 py-1 font-semibold ${getStatusBadgeClass(row.status)}`}>
           {getStatusLabel(row.status)}
         </span>
-        {highlighted ? <p className="mt-1 font-semibold text-amber-700">直近操作</p> : null}
+        {highlighted ? <p className="mt-1 font-semibold text-ink">直近操作</p> : null}
         <p className="mt-1">{formatDateTime(row.countedAt)}</p>
         {row.countedByUserName ? <p className="mt-1">{row.countedByUserName}</p> : null}
       </td>
@@ -307,7 +307,7 @@ function StocktakeItemRow({ sessionId, row, editable, highlighted, registerInput
           type="button"
           onClick={skip}
           disabled={!editable || isPending}
-          className="h-10 rounded border border-line px-4 text-xs font-semibold text-muted transition hover:border-accent hover:text-accent disabled:cursor-not-allowed disabled:opacity-40"
+          className="h-10 rounded btn-secondary px-4 text-xs font-semibold transition disabled:cursor-not-allowed"
         >
           {isPending ? "保存中" : "スキップ"}
         </button>
@@ -446,7 +446,7 @@ export function StocktakeSessionScanForm({ session }: StocktakeSessionScanFormPr
 
   return (
     <div className="flex flex-col gap-6">
-      {barcodeUiEnabled && <section className="sticky top-0 z-10 rounded border border-line bg-white p-4 shadow-panel">
+      {barcodeUiEnabled && <section className="sticky top-0 z-10 rounded border border-line bg-panel p-4 shadow-sheet">
         <form onSubmit={handleBarcodeSubmit} className="grid gap-3 md:grid-cols-[1fr_auto]">
           <label className="grid gap-2 text-sm font-semibold text-muted">
             スキャナー入力
@@ -458,23 +458,23 @@ export function StocktakeSessionScanForm({ session }: StocktakeSessionScanFormPr
               autoFocus
               autoComplete="off"
               spellCheck={false}
-              className="h-12 rounded border border-line px-4 font-mono text-base text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+              className="h-12 rounded border border-line px-4 font-mono text-base text-ink    "
             />
           </label>
           <button
             type="submit"
-            className="self-end h-12 rounded bg-accent px-5 text-sm font-semibold text-white transition hover:bg-teal-800"
+            className="self-end h-12 rounded btn-primary px-5 text-sm font-semibold transition"
           >
             商品へ移動
           </button>
         </form>
         {message ? (
-          <p className="mt-3 rounded bg-gray-50 px-3 py-2 text-sm font-semibold text-muted">{message}</p>
+          <p className="mt-3 rounded bg-subtle px-3 py-2 text-sm font-semibold text-muted">{message}</p>
         ) : null}
       </section>
 
       }
-      <section className="grid gap-3 rounded border border-line bg-white p-4 shadow-panel md:grid-cols-[1fr_240px]">
+      <section className="grid gap-3 rounded border border-line bg-panel p-4 shadow-sheet md:grid-cols-[1fr_240px]">
         <label className="grid gap-2 text-sm font-semibold text-muted">
           商品検索
           <input
@@ -482,7 +482,7 @@ export function StocktakeSessionScanForm({ session }: StocktakeSessionScanFormPr
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="商品名・商品コード・JANコード"
-            className="h-11 rounded border border-line px-3 text-sm text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+            className="h-11 rounded border border-line px-3 text-sm text-ink    "
           />
         </label>
         <label className="grid gap-2 text-sm font-semibold text-muted">
@@ -490,7 +490,7 @@ export function StocktakeSessionScanForm({ session }: StocktakeSessionScanFormPr
           <select
             value={category}
             onChange={(event) => setCategory(event.target.value)}
-            className="h-11 rounded border border-line px-3 text-sm text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+            className="h-11 rounded border border-line px-3 text-sm text-ink    "
           >
             <option value="">すべて</option>
             {categories.map((categoryName) => (
@@ -510,8 +510,8 @@ export function StocktakeSessionScanForm({ session }: StocktakeSessionScanFormPr
             onClick={() => setStatusTab(tab.id)}
             className={
               statusTab === tab.id
-                ? "rounded bg-ink px-4 py-2 text-sm font-semibold text-white"
-                : "rounded border border-line bg-white px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+                ? "rounded btn-primary px-4 py-2 text-sm font-semibold"
+                : "rounded btn-secondary px-4 py-2 text-sm font-semibold transition"
             }
           >
             {tab.label} {counts[tab.id]}
@@ -519,7 +519,7 @@ export function StocktakeSessionScanForm({ session }: StocktakeSessionScanFormPr
         ))}
       </div>
 
-      <section className="overflow-hidden rounded border border-line bg-white shadow-panel">
+      <section className="overflow-hidden rounded border border-line bg-panel shadow-sheet">
         <div className="flex flex-col gap-3 border-b border-line px-4 py-3 md:flex-row md:items-center md:justify-between">
           <div className="text-sm text-muted">
             表示 {filteredRows.length} 件 / 全 {rows.length} 件。数量欄を入力して離れると自動保存します。
@@ -533,7 +533,7 @@ export function StocktakeSessionScanForm({ session }: StocktakeSessionScanFormPr
                     setCommitError(null);
                     setIsCommitModalOpen(true);
                   }}
-                  className="h-10 rounded bg-ink px-4 text-xs font-semibold text-white transition hover:bg-gray-700"
+                  className="h-10 rounded btn-primary px-4 text-xs font-semibold transition"
                 >
                   確定する
                 </button>
@@ -551,7 +551,7 @@ export function StocktakeSessionScanForm({ session }: StocktakeSessionScanFormPr
                 <input type="hidden" name="sessionId" value={session.id} />
                 <SubmitButton
                   pendingLabel="破棄中"
-                  className="h-10 rounded border border-danger px-4 text-xs font-semibold text-danger transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="h-10 rounded btn-secondary btn-danger px-4 text-xs font-semibold transition disabled:cursor-not-allowed"
                 >
                   破棄する
                 </SubmitButton>
@@ -561,7 +561,7 @@ export function StocktakeSessionScanForm({ session }: StocktakeSessionScanFormPr
         </div>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[1180px] border-collapse text-left text-sm">
-            <thead className="bg-gray-50 text-xs text-muted">
+            <thead className="bg-subtle text-label text-muted">
               <tr>
                 <th className="border-b border-line px-4 py-3">商品</th>
                 <th className="border-b border-line px-4 py-3">保管場所</th>
@@ -599,10 +599,10 @@ export function StocktakeSessionScanForm({ session }: StocktakeSessionScanFormPr
       </section>
 
       {isCommitModalOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4">
-          <section className="w-full max-w-md rounded border border-line bg-white p-5 shadow-panel">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-accent/30 px-4">
+          <section className="w-full max-w-md rounded border border-line bg-panel p-5 shadow-sheet">
             <h2 className="text-lg font-semibold">棚卸セッションを確定しますか？</h2>
-            <dl className="mt-4 grid gap-3 rounded bg-gray-50 p-4 text-sm">
+            <dl className="mt-4 grid gap-3 rounded bg-subtle p-4 text-sm">
               <div className="flex items-center justify-between">
                 <dt className="text-muted">差異あり</dt>
                 <dd className="font-semibold">{commitSummary.diffCount} 件</dd>
@@ -620,7 +620,7 @@ export function StocktakeSessionScanForm({ session }: StocktakeSessionScanFormPr
               未入力の商品は在庫を変更しません。確定後、このセッションは編集できません。
             </p>
             {commitError ? (
-              <p className="mt-4 rounded border border-danger/30 bg-red-50 px-3 py-2 text-sm font-semibold text-danger">
+              <p className="mt-4 rounded border border-danger/30 bg-panel px-3 py-2 text-sm font-semibold text-danger">
                 {commitError}
               </p>
             ) : null}
@@ -629,7 +629,7 @@ export function StocktakeSessionScanForm({ session }: StocktakeSessionScanFormPr
                 type="button"
                 onClick={() => setIsCommitModalOpen(false)}
                 disabled={isCommitPending}
-                className="h-10 rounded border border-line px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+                className="h-10 rounded btn-secondary px-4 text-sm font-semibold transition"
               >
                 破棄しない
               </button>
@@ -637,7 +637,7 @@ export function StocktakeSessionScanForm({ session }: StocktakeSessionScanFormPr
                 type="button"
                 onClick={commitSession}
                 disabled={isCommitPending}
-                className="h-10 rounded bg-ink px-4 text-sm font-semibold text-white transition hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-60"
+                className="h-10 rounded btn-primary px-4 text-sm font-semibold transition disabled:cursor-not-allowed"
               >
                 {isCommitPending ? "確定中" : "確定する"}
               </button>

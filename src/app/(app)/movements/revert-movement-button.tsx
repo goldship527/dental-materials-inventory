@@ -27,20 +27,20 @@ export function RevertMovementButton({
         type="button"
         onClick={() => setIsModalOpen(true)}
         disabled={isPending}
-        className="h-9 rounded border border-danger px-3 text-xs font-semibold text-danger transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+        className="h-9 rounded btn-secondary btn-danger px-3 text-xs font-semibold transition disabled:cursor-not-allowed"
       >
         取り消す
       </button>
 
       {state.message ? (
-        <p className={state.status === "success" ? "text-xs text-accent" : "text-xs text-danger"}>{state.message}</p>
+        <p className={state.status === "success" ? "text-xs text-success" : "text-xs text-danger"}>{state.status === "success" ? "✓ " : state.message.startsWith("エラー") ? "" : "エラー: "}{state.message}</p>
       ) : null}
 
       {isModalOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4">
-          <section className="w-full max-w-md rounded border border-line bg-white p-5 shadow-panel">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-accent/30 px-4">
+          <section className="w-full max-w-md rounded border border-line bg-panel p-5 shadow-sheet">
             <h2 className="text-lg font-semibold">この操作を取り消しますか？</h2>
-            <div className="mt-4 rounded bg-gray-50 p-4 text-sm">
+            <div className="mt-4 rounded bg-subtle p-4 text-sm">
               <p className="font-semibold text-ink">{productName}</p>
               <p className="mt-2 text-muted">
                 在庫数を {afterQuantity} から {beforeQuantity} に戻し、逆向きの履歴を追加します。
@@ -53,7 +53,7 @@ export function RevertMovementButton({
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="h-10 rounded border border-line px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+                className="h-10 rounded btn-secondary px-4 text-sm font-semibold transition"
               >
                 やめる
               </button>
@@ -67,7 +67,7 @@ export function RevertMovementButton({
                 <button
                   type="submit"
                   disabled={isPending}
-                  className="h-10 rounded bg-ink px-4 text-sm font-semibold text-white transition hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="h-10 rounded btn-primary px-4 text-sm font-semibold transition disabled:cursor-not-allowed"
                 >
                   {isPending ? "取り消し中" : "取り消す"}
                 </button>

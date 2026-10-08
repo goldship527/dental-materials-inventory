@@ -23,12 +23,12 @@ export function QuickCard({ categoryLabel, row, selectedStaffOperatorId }: Quick
   });
 
   return (
-    <article className="grid gap-2 rounded border border-line/90 bg-panel p-3 shadow-panel transition hover:border-accent/40 hover:bg-white">
+    <article className="grid gap-2 rounded border border-line/90 bg-panel p-3 shadow-sheet transition hover:border-accent/40 hover:bg-panel">
       <div className="grid grid-cols-[56px_1fr] gap-3">
         {photoUrl ? (
           <img alt={`${row.name}の商品写真`} className="aspect-square rounded border border-line object-cover" src={photoUrl} />
         ) : (
-          <div className="grid aspect-square place-items-center rounded border border-dashed border-line bg-subtle text-[10px] font-semibold text-muted">
+          <div className="grid aspect-square place-items-center rounded border border-dashed border-line bg-subtle text-xs font-semibold text-muted">
             写真なし
           </div>
         )}
@@ -43,22 +43,22 @@ export function QuickCard({ categoryLabel, row, selectedStaffOperatorId }: Quick
       </div>
       <div className="grid grid-cols-3 gap-2 rounded bg-subtle/70 px-3 py-2">
         <div>
-          <p className="text-[11px] font-semibold text-muted">現在庫</p>
-          <p className="mt-0.5 text-3xl font-bold leading-none tabular-nums">{row.quantity}</p>
+          <p className="text-xs font-semibold text-muted">現在庫</p>
+          <p className="mt-0.5 text-2xl font-bold leading-none tabular-nums">{row.quantity}</p>
         </div>
         <div>
-          <p className="text-[11px] font-semibold text-muted">最低</p>
+          <p className="text-xs font-semibold text-muted">最低</p>
           <p className="mt-0.5 text-2xl font-bold leading-none tabular-nums">{row.minStock}</p>
         </div>
         <div>
-          <p className="text-[11px] font-semibold text-muted">保管</p>
+          <p className="text-xs font-semibold text-muted">保管</p>
           <p className="mt-0.5 line-clamp-2 text-sm font-semibold leading-4 text-ink">
             {row.location ?? "未設定"}
           </p>
         </div>
       </div>
       {row.stockStatus !== "ENOUGH" ? (
-        <span className={`inline-flex w-fit rounded px-2 py-1 text-xs font-semibold ${row.stockStatusClassName}`}>
+        <span className={`inline-flex w-fit rounded px-2 py-1 text-label font-semibold ${row.stockStatusClassName}`}>
           {row.stockStatusLabel}
         </span>
       ) : null}
@@ -70,7 +70,7 @@ export function QuickCard({ categoryLabel, row, selectedStaffOperatorId }: Quick
           <button
             type="submit"
             disabled={row.quantity <= 0 || !isStaffSelected || isPending}
-            className="h-11 w-full rounded border border-red-200 bg-red-50 text-2xl font-semibold text-danger transition hover:border-red-300 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-40"
+            className="h-11 w-full rounded btn-secondary btn-danger text-2xl font-semibold transition disabled:cursor-not-allowed"
           >
             {isPending && pendingDelta === "-1" ? "出庫中" : "-1"}
           </button>
@@ -82,7 +82,7 @@ export function QuickCard({ categoryLabel, row, selectedStaffOperatorId }: Quick
           <button
             type="submit"
             disabled={!isStaffSelected || isPending}
-            className="h-11 w-full rounded border border-line bg-white text-xl font-semibold text-accent transition hover:border-accent hover:bg-teal-50 disabled:cursor-not-allowed disabled:opacity-50"
+            className="h-11 w-full rounded btn-secondary text-lg font-semibold transition disabled:cursor-not-allowed"
           >
             {isPending && pendingDelta === "+1" ? "入庫中" : "+1"}
           </button>
@@ -92,11 +92,11 @@ export function QuickCard({ categoryLabel, row, selectedStaffOperatorId }: Quick
         <p
           className={
             state.status === "success"
-              ? "rounded bg-green-50 px-3 py-2 text-xs font-semibold text-success"
-              : "rounded bg-red-50 px-3 py-2 text-xs font-semibold text-danger"
+              ? "rounded bg-panel px-3 py-2 text-xs font-semibold text-success"
+              : "rounded bg-panel px-3 py-2 text-xs font-semibold text-danger"
           }
         >
-          {state.message}
+          {state.status === "success" ? "✓ " : state.message.startsWith("エラー") ? "" : "エラー: "}{state.message}
         </p>
       ) : null}
     </article>

@@ -30,7 +30,7 @@ function LoginFields({ defaultEmail, defaultPassword, errorMessage }: LoginField
           defaultValue={defaultEmail}
           disabled={pending}
           required
-          className="h-12 rounded border border-line bg-white px-4 text-base outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20 disabled:cursor-wait disabled:bg-gray-50 disabled:text-muted"
+          className="h-12 rounded border border-line bg-panel px-4 text-base  transition    disabled:cursor-wait disabled:bg-subtle disabled:text-muted"
         />
       </div>
 
@@ -46,18 +46,18 @@ function LoginFields({ defaultEmail, defaultPassword, errorMessage }: LoginField
           defaultValue={defaultPassword}
           disabled={pending}
           required
-          className="h-12 rounded border border-line bg-white px-4 text-base outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20 disabled:cursor-wait disabled:bg-gray-50 disabled:text-muted"
+          className="h-12 rounded border border-line bg-panel px-4 text-base  transition    disabled:cursor-wait disabled:bg-subtle disabled:text-muted"
         />
       </div>
 
       {errorMessage ? (
-        <p className="rounded border border-danger/30 bg-red-50 px-4 py-3 text-sm text-danger">
+        <p className="rounded border border-danger/30 bg-panel px-4 py-3 text-sm text-danger">
           {errorMessage}
         </p>
       ) : null}
 
       {pending ? (
-        <p className="rounded border border-accent/20 bg-teal-50 px-4 py-3 text-sm font-semibold text-accent" aria-live="polite">
+        <p className="rounded border border-accent/20 bg-tint px-4 py-3 text-sm font-semibold text-accent" aria-live="polite">
           ログイン中です。少しお待ちください。
         </p>
       ) : null}
@@ -66,11 +66,11 @@ function LoginFields({ defaultEmail, defaultPassword, errorMessage }: LoginField
         type="submit"
         disabled={pending}
         aria-busy={pending}
-        className="inline-flex h-12 items-center justify-center rounded bg-accent px-5 text-base font-semibold text-white transition hover:bg-teal-800 disabled:cursor-wait disabled:opacity-70"
+        className="inline-flex h-12 items-center justify-center rounded btn-primary px-5 text-base font-semibold transition disabled:cursor-wait"
       >
         {pending ? (
           <span
-            className="mr-2 inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"
+            className="mr-2 inline-block h-4 w-4 animate-spin rounded-full border-2 border-panel/40 border-t-white"
             aria-hidden="true"
           />
         ) : null}

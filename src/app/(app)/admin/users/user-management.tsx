@@ -53,11 +53,11 @@ function StatusMessage({ state }: { state: AdminUserActionState }) {
     <p
       className={
         state.status === "success"
-          ? "rounded border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm font-semibold text-accent"
-          : "rounded border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold text-danger"
+          ? "rounded border border-line border-l-4 border-l-success bg-panel px-4 py-3 text-sm font-semibold text-success"
+          : "rounded border border-line border-l-4 border-l-danger bg-panel px-4 py-3 text-sm font-semibold text-danger"
       }
     >
-      {state.message}
+      {state.status === "success" ? "✓ " : state.message.startsWith("エラー") ? "" : "エラー: "}{state.message}
     </p>
   );
 }
@@ -69,7 +69,7 @@ export function UserManagement({ users, currentUserId }: UserManagementProps) {
 
   return (
     <div className="grid min-w-0 gap-6">
-      <section className="min-w-0 rounded border border-line bg-white p-5 shadow-panel">
+      <section className="min-w-0 rounded border border-line bg-panel p-5 shadow-sheet">
         <h2 className="text-lg font-semibold">ログインアカウント追加</h2>
         <p className="mt-2 text-sm leading-6 text-muted">
           クリニック共通アカウントは「クリニック共通」で作成します。ADMIN権限は共通アカウントには付けず、管理者本人の個人アカウントにだけ付けます。
@@ -78,7 +78,7 @@ export function UserManagement({ users, currentUserId }: UserManagementProps) {
           <label className="grid gap-1 text-sm font-semibold text-muted">
             表示名
             <input
-              className="h-11 rounded border border-line px-3 text-base text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+              className="h-11 rounded border border-line px-3 text-base text-ink    "
               maxLength={100}
               name="name"
               required
@@ -87,7 +87,7 @@ export function UserManagement({ users, currentUserId }: UserManagementProps) {
           <label className="grid gap-1 text-sm font-semibold text-muted">
             メールアドレス
             <input
-              className="h-11 rounded border border-line px-3 text-base text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+              className="h-11 rounded border border-line px-3 text-base text-ink    "
               maxLength={255}
               name="email"
               required
@@ -98,7 +98,7 @@ export function UserManagement({ users, currentUserId }: UserManagementProps) {
             初期パスワード
             <input
               autoComplete="new-password"
-              className="h-11 rounded border border-line px-3 text-base text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+              className="h-11 rounded border border-line px-3 text-base text-ink    "
               minLength={8}
               name="password"
               pattern="[\x21-\x7E]+"
@@ -109,7 +109,7 @@ export function UserManagement({ users, currentUserId }: UserManagementProps) {
           <label className="grid gap-1 text-sm font-semibold text-muted">
             アカウント種別
             <select
-              className="h-11 rounded border border-line px-3 text-base text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+              className="h-11 rounded border border-line px-3 text-base text-ink    "
               defaultValue={userRoles.staff}
               name="role"
             >
@@ -122,7 +122,7 @@ export function UserManagement({ users, currentUserId }: UserManagementProps) {
           </label>
           <div className="md:col-span-2">
             <button
-              className="inline-flex min-h-11 items-center justify-center rounded bg-accent px-5 py-3 text-sm font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex min-h-11 items-center justify-center rounded btn-primary px-5 py-3 text-sm font-semibold transition disabled:cursor-not-allowed"
               disabled={isCreating}
               type="submit"
             >
@@ -135,7 +135,7 @@ export function UserManagement({ users, currentUserId }: UserManagementProps) {
         </div>
       </section>
 
-      <section className="min-w-0 rounded border border-line bg-white p-5 shadow-panel">
+      <section className="min-w-0 rounded border border-line bg-panel p-5 shadow-sheet">
         <div className="flex flex-col gap-2 border-b border-line pb-4 md:flex-row md:items-end md:justify-between">
           <div>
             <h2 className="text-lg font-semibold">ログインアカウント一覧</h2>
@@ -175,8 +175,8 @@ export function UserManagement({ users, currentUserId }: UserManagementProps) {
                       <span
                         className={
                           user.isActive
-                            ? "rounded bg-emerald-50 px-2 py-1 text-xs font-semibold text-accent"
-                            : "rounded bg-gray-100 px-2 py-1 text-xs font-semibold text-muted"
+                            ? "rounded bg-panel px-2 py-1 text-xs font-semibold text-accent"
+                            : "rounded bg-subtle px-2 py-1 text-xs font-semibold text-muted"
                         }
                       >
                         {user.isActive ? "有効" : "無効"}
@@ -192,7 +192,7 @@ export function UserManagement({ users, currentUserId }: UserManagementProps) {
                           <input
                             aria-label={`${user.name} の新しいパスワード`}
                             autoComplete="new-password"
-                            className="h-11 min-w-44 rounded border border-line px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                            className="h-11 min-w-44 rounded border border-line px-3 text-sm    "
                             disabled={!user.isActive}
                             minLength={8}
                             name="password"
@@ -202,7 +202,7 @@ export function UserManagement({ users, currentUserId }: UserManagementProps) {
                             type="password"
                           />
                           <button
-                            className="h-11 rounded border border-line bg-white px-3 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
+                            className="h-11 rounded btn-secondary px-3 text-sm font-semibold transition disabled:cursor-not-allowed"
                             disabled={!user.isActive || isResetting}
                             type="submit"
                           >
@@ -220,7 +220,7 @@ export function UserManagement({ users, currentUserId }: UserManagementProps) {
                           >
                             <input name="userId" type="hidden" value={user.id} />
                             <button
-                              className="h-11 rounded border border-line bg-white px-3 text-sm font-semibold text-muted transition hover:border-danger hover:text-danger disabled:cursor-not-allowed disabled:opacity-50"
+                              className="h-11 rounded btn-secondary btn-danger px-3 text-sm font-semibold transition disabled:cursor-not-allowed"
                               disabled={isSelf || isDeactivating}
                               type="submit"
                             >

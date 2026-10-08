@@ -67,18 +67,18 @@ export function getBarcodeScanResolveStatusLabel(resolveStatus: string) {
 
 export function getBarcodeScanResolveStatusClass(resolveStatus: string) {
   if (resolveStatus === "RESOLVED_LINKED") {
-    return "bg-green-50 text-success";
+    return "bg-panel text-success";
   }
 
   if (resolveStatus === "RESOLVED_PROMOTED") {
-    return "bg-teal-50 text-accent";
+    return "bg-tint text-accent";
   }
 
   if (resolveStatus === "RESOLVED_IGNORED") {
-    return "bg-gray-100 text-muted";
+    return "bg-subtle text-muted";
   }
 
-  return "bg-orange-50 text-warning";
+  return "bg-markSoft text-ink";
 }
 
 const barcodeScanLogRowInclude = {
