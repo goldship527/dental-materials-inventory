@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { AppNav } from "@/components/domain/app-nav";
+import { PageShell } from "@/components/ui/page-shell";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { getActiveStaffOperatorOptionsForClinic } from "@/lib/db/staff-operators";
 import { BarcodeBatchClient } from "../batch/barcode-batch-client";
@@ -21,9 +21,8 @@ export default async function BarcodeReceivePage() {
   });
 
   return (
-    <main className="min-h-screen bg-surface px-3 pt-3 pb-6 text-ink lg:px-6">
+    <PageShell current="barcodeReceive" mainClassName="px-3 pt-3 pb-6 lg:px-6">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-5">
-        <AppNav current="barcodeReceive" />
 
         <header className="flex flex-col gap-2 border-b border-line pb-4">
           <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
@@ -42,6 +41,6 @@ export default async function BarcodeReceivePage() {
           staffOperators={staffOperators}
         />
       </div>
-    </main>
+    </PageShell>
   );
 }

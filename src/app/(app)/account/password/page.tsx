@@ -1,7 +1,7 @@
 import { PageHeader } from "@/components/ui/page-header";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { AppNav } from "@/components/domain/app-nav";
+import { PageShell } from "@/components/ui/page-shell";
 import { PasswordForm } from "./password-form";
 
 export default async function AccountPasswordPage() {
@@ -12,9 +12,7 @@ export default async function AccountPasswordPage() {
   }
 
   return (
-    <>
-      <AppNav current="account" />
-      <main className="min-h-screen bg-surface px-3 pt-3 pb-6 text-ink lg:px-6">
+    <PageShell current="account" mainClassName="px-3 pt-3 pb-6 lg:px-6">
         <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
           <PageHeader title={"パスワード変更"}>
             <div>
@@ -39,7 +37,6 @@ export default async function AccountPasswordPage() {
 
           <PasswordForm />
         </div>
-      </main>
-    </>
+    </PageShell>
   );
 }

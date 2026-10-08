@@ -1,4 +1,4 @@
-import { AppNav } from "@/components/domain/app-nav";
+import { PageShell } from "@/components/ui/page-shell";
 import { requireAdminUser } from "@/lib/auth/admin";
 import { getAdminOverview } from "@/lib/db/admin-overview";
 
@@ -54,9 +54,7 @@ export default async function AdminOverviewPage() {
   ];
 
   return (
-    <>
-      <AppNav current="overview" />
-      <main className="mx-auto grid w-full max-w-7xl gap-3 px-3 pt-3 pb-6 lg:px-6">
+    <PageShell current="overview" mainClassName="mx-auto grid w-full max-w-7xl gap-3 px-3 pt-3 pb-6 lg:px-6">
         <header className="grid gap-2">
           <p className="text-sm font-semibold text-accent">管理</p>
           <h1 className="text-xl font-bold tracking-normal text-ink">本部ダッシュボード</h1>
@@ -221,7 +219,6 @@ export default async function AdminOverviewPage() {
             </table>
           </div>
         </section>
-      </main>
-    </>
+    </PageShell>
   );
 }

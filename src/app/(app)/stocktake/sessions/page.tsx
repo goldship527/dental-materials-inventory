@@ -1,7 +1,7 @@
 import { PageHeader } from "@/components/ui/page-header";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { AppNav } from "@/components/domain/app-nav";
+import { PageShell } from "@/components/ui/page-shell";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import {
   getStocktakeSessionIndex,
@@ -72,9 +72,8 @@ export default async function StocktakeSessionsPage() {
   const { inProgressSession, historySessions } = await getStocktakeSessionIndex(context.clinicId);
 
   return (
-    <main className="min-h-screen bg-surface px-3 pt-3 pb-6 text-ink lg:px-6">
+    <PageShell current="stocktake" mainClassName="px-3 pt-3 pb-6 lg:px-6">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-3">
-        <AppNav current="stocktake" />
 
         <PageHeader title={"棚卸セッション"}>
           <a
@@ -152,6 +151,6 @@ export default async function StocktakeSessionsPage() {
           </div>
         </section>
       </div>
-    </main>
+    </PageShell>
   );
 }

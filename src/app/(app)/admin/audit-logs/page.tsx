@@ -1,4 +1,4 @@
-import { AppNav } from "@/components/domain/app-nav";
+import { PageShell } from "@/components/ui/page-shell";
 import { requireAdminUser } from "@/lib/auth/admin";
 import { getRecentAuditLogs } from "@/lib/db/audit-logs";
 
@@ -29,9 +29,7 @@ export default async function AdminAuditLogsPage() {
   const logs = await getRecentAuditLogs(context.organizationId, 100);
 
   return (
-    <>
-      <AppNav current="auditLogs" />
-      <main className="mx-auto grid w-full max-w-7xl gap-3 px-3 pt-3 pb-6 lg:px-6">
+    <PageShell current="auditLogs" mainClassName="mx-auto grid w-full max-w-7xl gap-3 px-3 pt-3 pb-6 lg:px-6">
         <header className="grid gap-2">
           <p className="text-sm font-semibold text-accent">管理</p>
           <h1 className="text-xl font-bold tracking-tight text-ink">監査ログ</h1>
@@ -76,7 +74,6 @@ export default async function AdminAuditLogsPage() {
             </table>
           </div>
         </section>
-      </main>
-    </>
+    </PageShell>
   );
 }

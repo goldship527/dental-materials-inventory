@@ -1,7 +1,7 @@
 import { PageHeader } from "@/components/ui/page-header";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { AppNav } from "@/components/domain/app-nav";
+import { PageShell } from "@/components/ui/page-shell";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { startStocktakeSessionAction } from "@/lib/actions/stocktake-sessions";
 import { requireActiveClinic } from "@/lib/db/clinic";
@@ -28,9 +28,8 @@ export default async function NewStocktakeSessionPage() {
   const summary = await getStocktakeStartSummary(context.clinicId);
 
   return (
-    <main className="min-h-screen bg-surface px-3 pt-3 pb-6 text-ink">
+    <PageShell current="stocktake" mainClassName="px-3 pt-3 pb-6">
       <div className="mx-auto flex max-w-4xl flex-col gap-6">
-        <AppNav current="stocktake" />
 
         <PageHeader title={"棚卸セッション開始"}>
           <a className="text-sm font-semibold text-accent hover:underline" href="/stocktake/sessions">
@@ -96,6 +95,6 @@ export default async function NewStocktakeSessionPage() {
           </form>
         )}
       </div>
-    </main>
+    </PageShell>
   );
 }

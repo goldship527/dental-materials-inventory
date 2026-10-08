@@ -2,7 +2,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { redirect } from "next/navigation";
 import { barcodeUiEnabled } from "@/lib/workflow-features";
 import { auth } from "@/auth";
-import { AppNav } from "@/components/domain/app-nav";
+import { PageShell } from "@/components/ui/page-shell";
 import { isAdminRole } from "@/lib/auth/roles";
 import {
   getBarcodeScanMatchTypeLabel,
@@ -72,9 +72,8 @@ export default async function BarcodeScansPage({ searchParams }: PageProps) {
   });
 
   return (
-    <main className="min-h-screen bg-surface px-3 pt-3 pb-6 text-ink">
+    <PageShell current="barcode" mainClassName="px-3 pt-3 pb-6">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-3">
-        <AppNav current="barcode" />
 
         <PageHeader title={"バーコード読み取り履歴"}>
           <div className="flex flex-wrap gap-3 text-sm font-semibold">
@@ -213,6 +212,6 @@ export default async function BarcodeScansPage({ searchParams }: PageProps) {
           </div>
         </section>
       </div>
-    </main>
+    </PageShell>
   );
 }

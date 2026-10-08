@@ -1,7 +1,7 @@
 import { PageHeader } from "@/components/ui/page-header";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { AppNav } from "@/components/domain/app-nav";
+import { PageShell } from "@/components/ui/page-shell";
 import { requireAdminUser } from "@/lib/auth/admin";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { buildOnboardingSteps, getOnboardingSummary } from "@/lib/db/onboarding";
@@ -74,9 +74,7 @@ export default async function SetupPage() {
   ];
 
   return (
-    <>
-      <AppNav current="setup" />
-      <main className="mx-auto grid w-full max-w-7xl gap-3 px-3 pt-3 pb-6 text-ink lg:px-6">
+    <PageShell current="setup" mainClassName="mx-auto grid w-full max-w-7xl gap-3 px-3 pt-3 pb-6 lg:px-6">
         <PageHeader title={"初期設定チェック"}>
           <div>
 
@@ -142,7 +140,6 @@ export default async function SetupPage() {
             <p>{barcodeUiEnabled ? "未対応バーコードは、実際に読み取った後で既存商品へ紐づけると現場に合わせて整理できます。" : "出庫画面では商品のカードから選び、単位と数量を確認して記録できます。"}</p>
           </div>
         </section>
-      </main>
-    </>
+    </PageShell>
   );
 }

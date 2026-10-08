@@ -1,7 +1,7 @@
 import { PageHeader } from "@/components/ui/page-header";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { AppNav } from "@/components/domain/app-nav";
+import { PageShell } from "@/components/ui/page-shell";
 import { getDormantStockRows, normalizeDormantDays } from "@/lib/db/dormant-stock";
 import { requireActiveClinic } from "@/lib/db/clinic";
 
@@ -82,9 +82,8 @@ export default async function DormantStockPage({ searchParams }: PageProps) {
   const totalAmount = filteredRows.reduce((total, row) => total + (row.stagnantAmount ?? 0), 0);
 
   return (
-    <main className="min-h-screen bg-surface px-3 pt-3 pb-6 text-ink lg:px-6">
+    <PageShell current="dormant" mainClassName="px-3 pt-3 pb-6 lg:px-6">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-3">
-        <AppNav current="dormant" />
 
         <PageHeader title={"長期在庫レポート"}>
           <div>
@@ -222,6 +221,6 @@ export default async function DormantStockPage({ searchParams }: PageProps) {
           )}
         </section>
       </div>
-    </main>
+    </PageShell>
   );
 }

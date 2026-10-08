@@ -1,7 +1,7 @@
 import { PageHeader } from "@/components/ui/page-header";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { AppNav } from "@/components/domain/app-nav";
+import { PageShell } from "@/components/ui/page-shell";
 import { prisma } from "@/lib/db/prisma";
 import { getNotificationPreferenceForUser } from "@/lib/notifications/preferences";
 import { NotificationPreferenceForm } from "./notification-preference-form";
@@ -32,9 +32,7 @@ export default async function AccountNotificationsPage() {
   const preference = await getNotificationPreferenceForUser(user.organizationId, user.id);
 
   return (
-    <>
-      <AppNav current="account" />
-      <main className="min-h-screen bg-surface px-3 pt-3 pb-6 text-ink lg:px-6">
+    <PageShell current="account" mainClassName="px-3 pt-3 pb-6 lg:px-6">
         <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
           <PageHeader title={"通知設定"}>
             <div>
@@ -52,7 +50,6 @@ export default async function AccountNotificationsPage() {
 
           <NotificationPreferenceForm preference={preference} />
         </div>
-      </main>
-    </>
+    </PageShell>
   );
 }

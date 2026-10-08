@@ -1,7 +1,7 @@
 import { PageHeader } from "@/components/ui/page-header";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { AppNav } from "@/components/domain/app-nav";
+import { PageShell } from "@/components/ui/page-shell";
 import { requireAdminUser } from "@/lib/auth/admin";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { getSupplierDetail } from "@/lib/db/suppliers";
@@ -33,9 +33,8 @@ export default async function SupplierEditPage({ params }: PageProps) {
   }
 
   return (
-    <main className="min-h-screen bg-surface px-3 pt-3 pb-6 text-ink">
+    <PageShell current="suppliers" mainClassName="px-3 pt-3 pb-6">
       <div className="mx-auto flex w-full max-w-4xl flex-col gap-6">
-        <AppNav current="suppliers" />
 
         <PageHeader title={"発注先マスタ編集"}>
           <div>
@@ -52,6 +51,6 @@ export default async function SupplierEditPage({ params }: PageProps) {
 
         <SupplierEditForm supplier={supplier} />
       </div>
-    </main>
+    </PageShell>
   );
 }

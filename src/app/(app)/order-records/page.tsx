@@ -1,7 +1,7 @@
 import { PageHeader } from "@/components/ui/page-header";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { AppNav } from "@/components/domain/app-nav";
+import { PageShell } from "@/components/ui/page-shell";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { getOrderRecordListRows } from "@/lib/db/order-records";
 import { orderSendMethodLabels } from "@/lib/orders/send-method";
@@ -78,9 +78,8 @@ export default async function OrderRecordsPage({ searchParams }: PageProps) {
       : "条件に一致する発注記録はありません。検索語を見直してください。";
 
   return (
-    <main className="min-h-screen bg-surface px-3 pt-3 pb-6 text-ink lg:px-6">
+    <PageShell current="orders" mainClassName="px-3 pt-3 pb-6 lg:px-6">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-3">
-        <AppNav current="orders" />
 
         <PageHeader title={"発注記録"}>
           <div>
@@ -237,6 +236,6 @@ export default async function OrderRecordsPage({ searchParams }: PageProps) {
           </div>
         </section>
       </div>
-    </main>
+    </PageShell>
   );
 }

@@ -1,5 +1,5 @@
 import { PageHeader } from "@/components/ui/page-header";
-import { AppNav } from "@/components/domain/app-nav";
+import { PageShell } from "@/components/ui/page-shell";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { getOrderRequestRows } from "@/lib/db/orders";
 import { getOrderPrintGroups, type OrderPrintGroup } from "@/lib/orders/print";
@@ -69,11 +69,8 @@ export default async function OrdersPrintPage({ searchParams }: PageProps) {
   const issuedAtLabel = formatDateTime(issuedAt);
 
   return (
-    <main className="min-h-screen bg-surface px-3 pt-3 pb-6 text-ink print:bg-panel print:p-0">
+    <PageShell current="orders" mainClassName="px-3 pt-3 pb-6 print:bg-panel print:p-0" shellClassName="print:bg-panel">
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 print:max-w-none print:gap-4">
-        <div className="print:hidden">
-          <AppNav current="orders" />
-        </div>
 
         <PageHeader title={"発注書下書き"} className="print:border-b print:border-ink print:pb-3">
           <div>
@@ -332,6 +329,6 @@ export default async function OrdersPrintPage({ searchParams }: PageProps) {
           </section>
         )}
       </div>
-    </main>
+    </PageShell>
   );
 }

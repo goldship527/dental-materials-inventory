@@ -1,7 +1,7 @@
 import { PageHeader } from "@/components/ui/page-header";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { AppNav } from "@/components/domain/app-nav";
+import { PageShell } from "@/components/ui/page-shell";
 import { isAdminRole } from "@/lib/auth/roles";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { getProductDetail } from "@/lib/db/products";
@@ -200,9 +200,8 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
   const photoUrl = buildProductPhotoUrl(product);
 
   return (
-    <main className="min-h-screen bg-surface px-3 pt-3 pb-6 text-ink lg:px-6">
+    <PageShell current="products" mainClassName="px-3 pt-3 pb-6 lg:px-6">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-4">
-        <AppNav current="products" />
 
         <PageHeader title={product.name}>
           <div className="flex flex-wrap gap-3 text-sm font-semibold">
@@ -605,6 +604,6 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
           </div>
         </section>
       </div>
-    </main>
+    </PageShell>
   );
 }

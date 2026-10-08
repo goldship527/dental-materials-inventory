@@ -1,7 +1,7 @@
 import { PageHeader } from "@/components/ui/page-header";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { AppNav } from "@/components/domain/app-nav";
+import { PageShell } from "@/components/ui/page-shell";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { getStocktakeSessionDetail, getStocktakeSessionStatusLabel } from "@/lib/db/stocktake-sessions";
 
@@ -93,9 +93,8 @@ export default async function StocktakeSessionHistoryPage({ params, searchParams
   const visibleRows = rowsByTab[currentTab];
 
   return (
-    <main className="min-h-screen bg-surface px-3 pt-3 pb-6 text-ink">
+    <PageShell current="stocktake" mainClassName="px-3 pt-3 pb-6">
       <div className="mx-auto flex max-w-7xl flex-col gap-6">
-        <AppNav current="stocktake" />
 
         <PageHeader title={"棚卸セッション履歴"}>
           <div>
@@ -219,6 +218,6 @@ export default async function StocktakeSessionHistoryPage({ params, searchParams
           </div>
         </section>
       </div>
-    </main>
+    </PageShell>
   );
 }

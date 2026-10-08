@@ -1,4 +1,4 @@
-import { AppNav } from "@/components/domain/app-nav";
+import { PageShell } from "@/components/ui/page-shell";
 import { requireAdminUser } from "@/lib/auth/admin";
 import { getProductPhotoStorageDiagnostics, type ProductPhotoStorageDiagnosticItem } from "@/lib/storage/product-photos";
 
@@ -32,9 +32,7 @@ export default async function AdminStoragePage() {
   const hasError = diagnostics.items.some((item) => item.status === "error");
 
   return (
-    <>
-      <AppNav current="storage" />
-      <main className="mx-auto grid w-full max-w-7xl gap-3 px-3 pt-3 pb-6 lg:px-6">
+    <PageShell current="storage" mainClassName="mx-auto grid w-full max-w-7xl gap-3 px-3 pt-3 pb-6 lg:px-6">
         <header className="grid gap-2">
           <p className="text-sm font-semibold text-accent">管理</p>
           <h1 className="text-xl font-bold tracking-tight text-ink">ストレージ診断</h1>
@@ -89,7 +87,6 @@ export default async function AdminStoragePage() {
             SUPABASE_STORAGE_BUCKETにはURLではなくbucket名だけを入れます。例としては product-photos のような形です。
           </p>
         </section>
-      </main>
-    </>
+    </PageShell>
   );
 }

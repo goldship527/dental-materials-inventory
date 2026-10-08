@@ -8,7 +8,7 @@ import { requireActiveClinic } from "@/lib/db/clinic";
 import { getActiveStaffOperatorOptionsForClinic } from "@/lib/db/staff-operators";
 import { isWorkflowLinkVisible, receivePath, stockOutPath } from "@/lib/workflow-features";
 
-type NavItemId =
+export type NavItemId =
   | "home"
   | "overview"
   | "setup"
@@ -224,7 +224,7 @@ export async function AppNav({ current }: AppNavProps) {
   return (
     <nav
       aria-label="アプリ内メニュー"
-      className="sticky top-0 z-30 ml-[calc((100%-100vw)/2)] w-screen bg-accent px-3 print:hidden lg:px-6"
+      className="sticky top-0 z-30 w-full bg-accent px-3 print:hidden lg:px-6"
     >
       <div className="mx-auto flex w-full max-w-7xl flex-col sm:h-14 sm:flex-row sm:items-center">
         {activeClinicContext ? (

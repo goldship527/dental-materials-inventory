@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { barcodeUiEnabled } from "@/lib/workflow-features";
 import { auth } from "@/auth";
 import { Ean13Barcode } from "@/components/domain/ean13-barcode";
-import { AppNav } from "@/components/domain/app-nav";
+import { PageShell } from "@/components/ui/page-shell";
 import { requireAdminUser } from "@/lib/auth/admin";
 import { prisma } from "@/lib/db/prisma";
 import { requireActiveClinic } from "@/lib/db/clinic";
@@ -61,9 +61,7 @@ export default async function MedicalDeviceImportPreviewPage({ searchParams }: P
 
   if (cacheResult.status === "missing") {
     return (
-      <>
-        <AppNav current="imports" />
-        <main className="mx-auto grid w-full max-w-7xl gap-3 px-3 pt-3 pb-6 text-ink lg:px-6">
+      <PageShell current="imports" mainClassName="mx-auto grid w-full max-w-7xl gap-3 px-3 pt-3 pb-6 lg:px-6">
           <PageHeader title={"医療機器データ取り込みプレビュー"}>
 
           </PageHeader>
@@ -75,8 +73,7 @@ export default async function MedicalDeviceImportPreviewPage({ searchParams }: P
               <code className="rounded bg-subtle px-1 py-0.5">{cacheResult.cachePath}</code> を作成してください。
             </p>
           </section>
-        </main>
-      </>
+      </PageShell>
     );
   }
 
@@ -144,9 +141,7 @@ export default async function MedicalDeviceImportPreviewPage({ searchParams }: P
   }
 
   return (
-    <>
-      <AppNav current="imports" />
-      <main className="mx-auto grid w-full max-w-7xl gap-3 px-3 pt-3 pb-6 text-ink lg:px-6">
+    <PageShell current="imports" mainClassName="mx-auto grid w-full max-w-7xl gap-3 px-3 pt-3 pb-6 lg:px-6">
         <PageHeader title={"医療機器データ取り込みプレビュー"}>
           <div>
 
@@ -251,7 +246,6 @@ export default async function MedicalDeviceImportPreviewPage({ searchParams }: P
           </div>
           {visible.length === 0 ? <p className="p-6 text-center text-sm text-muted">条件に合うデータがありません。</p> : null}
         </section>
-      </main>
-    </>
+    </PageShell>
   );
 }

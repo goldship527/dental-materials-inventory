@@ -2,7 +2,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { redirect } from "next/navigation";
 import { barcodeUiEnabled } from "@/lib/workflow-features";
 import { auth } from "@/auth";
-import { AppNav } from "@/components/domain/app-nav";
+import { PageShell } from "@/components/ui/page-shell";
 import { analyzeBarcodeInput } from "@/lib/barcode/gs1";
 import { searchProductsByBarcode } from "@/lib/db/barcodes";
 import { requireActiveClinic } from "@/lib/db/clinic";
@@ -55,9 +55,8 @@ export default async function BarcodeStockPage({ searchParams }: PageProps) {
   const status = selectedProduct ? getStockStatus(selectedProduct.quantity, selectedProduct.minStock) : null;
 
   return (
-    <main className="min-h-screen bg-surface px-3 pt-3 pb-6 text-ink lg:px-6">
+    <PageShell current="barcode" mainClassName="px-3 pt-3 pb-6 lg:px-6">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-3">
-        <AppNav current="barcode" />
 
         <PageHeader title={"バーコード出入庫"}>
           <div className="flex shrink-0 flex-wrap gap-3">
@@ -211,6 +210,6 @@ export default async function BarcodeStockPage({ searchParams }: PageProps) {
             </section>
           ) : null}
       </div>
-    </main>
+    </PageShell>
   );
 }

@@ -1,7 +1,7 @@
 import { PageHeader } from "@/components/ui/page-header";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { AppNav } from "@/components/domain/app-nav";
+import { PageShell } from "@/components/ui/page-shell";
 import { requireAdminUser } from "@/lib/auth/admin";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { getProductSupplierOptions } from "@/lib/db/products";
@@ -21,9 +21,8 @@ export default async function ProductNewPage() {
   const suppliers = await getProductSupplierOptions(context.organizationId);
 
   return (
-    <main className="min-h-screen bg-surface px-3 pt-3 pb-6 text-ink">
+    <PageShell current="products" mainClassName="px-3 pt-3 pb-6">
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
-        <AppNav current="products" />
 
         <PageHeader title={"商品マスタ新規作成"}>
           <a className="text-sm font-semibold text-accent hover:underline" href="/products">
@@ -34,6 +33,6 @@ export default async function ProductNewPage() {
 
         <ProductCreateForm suppliers={suppliers} />
       </div>
-    </main>
+    </PageShell>
   );
 }

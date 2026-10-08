@@ -1,4 +1,4 @@
-import { AppNav } from "@/components/domain/app-nav";
+import { PageShell } from "@/components/ui/page-shell";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { getOrderRequestRows } from "@/lib/db/orders";
 import { getActiveStaffOperatorOptionsForClinic } from "@/lib/db/staff-operators";
@@ -15,11 +15,10 @@ export default async function ReceivePage() {
     requestedQuantity: row.requestedQuantity, orderUnit: row.orderUnit,
     orderedAt: row.orderedAt?.toISOString() ?? null,
   }));
-  return <main className="min-h-screen bg-surface px-3 pt-3 pb-6 text-ink">
+  return <PageShell current="barcodeReceive" mainClassName="px-3 pt-3 pb-6">
     <div className="mx-auto flex max-w-7xl flex-col gap-4">
-      <AppNav current="barcodeReceive" />
       <header><h1 className="text-xl font-semibold">納品する</h1><p className="mt-1">届いた商品を発注日から選んで確認します。</p></header>
       <ReceiveCatalog key={context.clinicId} rows={pending} clinicId={context.clinicId} staffOperators={staffOperators} />
     </div>
-  </main>;
+  </PageShell>;
 }

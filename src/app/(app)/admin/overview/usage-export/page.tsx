@@ -1,5 +1,5 @@
 import { PageHeader } from "@/components/ui/page-header";
-import { AppNav } from "@/components/domain/app-nav";
+import { PageShell } from "@/components/ui/page-shell";
 import { requireAdminUser } from "@/lib/auth/admin";
 import { getDefaultAdminUsageExportDateRange } from "@/lib/db/admin-usage-export";
 
@@ -8,9 +8,7 @@ export default async function AdminUsageExportPage() {
   const defaults = getDefaultAdminUsageExportDateRange();
 
   return (
-    <>
-      <AppNav current="overview" />
-      <main className="mx-auto grid w-full max-w-5xl gap-3 px-3 pt-3 pb-6 lg:px-6">
+    <PageShell current="overview" mainClassName="mx-auto grid w-full max-w-5xl gap-3 px-3 pt-3 pb-6 lg:px-6">
         <PageHeader title={"使用個数CSV出力"}>
           <div>
             <p className="text-sm font-semibold text-accent">本部ダッシュボード / CSV出力</p>
@@ -76,7 +74,6 @@ export default async function AdminUsageExportPage() {
             </ul>
           </div>
         </section>
-      </main>
-    </>
+    </PageShell>
   );
 }

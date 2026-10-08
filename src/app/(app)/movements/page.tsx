@@ -1,7 +1,7 @@
 import { PageHeader } from "@/components/ui/page-header";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { AppNav } from "@/components/domain/app-nav";
+import { PageShell } from "@/components/ui/page-shell";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { getProductCategories } from "@/lib/db/products";
 import {
@@ -156,9 +156,8 @@ export default async function MovementsPage({ searchParams }: PageProps) {
       : "条件に一致する入出庫履歴はありません。検索語や絞り込みを見直してください。";
 
   return (
-    <main className="min-h-screen bg-surface px-3 pt-3 pb-6 text-ink lg:px-6">
+    <PageShell current="movements" mainClassName="px-3 pt-3 pb-6 lg:px-6">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-3">
-        <AppNav current="movements" />
 
         <PageHeader title={"入出庫履歴"}>
           <a className="inline-flex h-11 shrink-0 items-center justify-center rounded btn-secondary px-4 text-sm font-semibold transition" href="/home">
@@ -283,6 +282,6 @@ export default async function MovementsPage({ searchParams }: PageProps) {
           </div>
         </section>
       </div>
-    </main>
+    </PageShell>
   );
 }

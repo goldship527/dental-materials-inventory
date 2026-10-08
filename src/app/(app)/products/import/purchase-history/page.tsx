@@ -1,7 +1,7 @@
 import { PageHeader } from "@/components/ui/page-header";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { AppNav } from "@/components/domain/app-nav";
+import { PageShell } from "@/components/ui/page-shell";
 import { requireAdminUser } from "@/lib/auth/admin";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { PurchaseHistoryImportForm } from "./purchase-history-import-form";
@@ -20,9 +20,8 @@ export default async function PurchaseHistoryImportPage() {
   const context = await requireActiveClinic();
 
   return (
-    <main className="min-h-screen bg-surface px-3 pt-3 pb-6 text-ink lg:px-6">
+    <PageShell current="products" mainClassName="px-3 pt-3 pb-6 lg:px-6">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-3">
-        <AppNav current="products" />
 
         <PageHeader title={"ディーラー購入履歴インポート"}>
           <div>
@@ -39,6 +38,6 @@ export default async function PurchaseHistoryImportPage() {
 
         <PurchaseHistoryImportForm />
       </div>
-    </main>
+    </PageShell>
   );
 }

@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { AppNav } from "@/components/domain/app-nav";
+import { PageShell } from "@/components/ui/page-shell";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { ManualViewer } from "./manual-viewer";
 import { barcodeUiEnabled } from "@/lib/workflow-features";
@@ -19,9 +19,7 @@ export default async function ManualPage() {
   const markdown = await readFile(path.join(process.cwd(), "docs", "user-manual.md"), "utf8");
 
   return (
-    <>
-      <AppNav current="manual" />
-      <main className="min-h-screen bg-surface px-3 pt-3 pb-6 text-ink lg:px-6">
+    <PageShell current="manual" mainClassName="px-3 pt-3 pb-6 lg:px-6">
         <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
           <PageHeader title={"スタッフマニュアル"}>
             <div>
@@ -46,7 +44,6 @@ export default async function ManualPage() {
           </section>}
           {barcodeUiEnabled && <ManualViewer markdown={markdown} />}
         </div>
-      </main>
-    </>
+    </PageShell>
   );
 }

@@ -1,7 +1,7 @@
 import { PageHeader } from "@/components/ui/page-header";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { AppNav } from "@/components/domain/app-nav";
+import { PageShell } from "@/components/ui/page-shell";
 import { isAdminRole } from "@/lib/auth/roles";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { getDashboardSummary } from "@/lib/db/dashboard";
@@ -180,11 +180,8 @@ export default async function HomePage({ searchParams }: PageProps) {
   ];
 
   return (
-    <main className="min-h-screen bg-surface px-3 pt-3 pb-6 text-ink print:bg-panel print:px-0 print:py-0 lg:px-6">
+    <PageShell current="home" mainClassName="px-3 pt-3 pb-6 print:bg-panel print:px-0 print:py-0 lg:px-6" shellClassName="print:bg-panel">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-3">
-        <div className="print:hidden">
-          <AppNav current="home" />
-        </div>
 
         <PageHeader title="ホーム" description="今日の作業を選んでください。" className="print:border-none" />
 
@@ -354,6 +351,6 @@ export default async function HomePage({ searchParams }: PageProps) {
           </section>
         ) : null}
       </div>
-    </main>
+    </PageShell>
   );
 }

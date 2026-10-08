@@ -1,7 +1,7 @@
 import { PageHeader } from "@/components/ui/page-header";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { AppNav } from "@/components/domain/app-nav";
+import { PageShell } from "@/components/ui/page-shell";
 import { requireAdminUser } from "@/lib/auth/admin";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { getProductDetail, getProductSupplierOptions } from "@/lib/db/products";
@@ -43,9 +43,7 @@ export default async function ProductEditPage({ params, searchParams }: PageProp
   }
 
   return (
-    <>
-      <AppNav current="products" />
-      <main className="min-h-screen bg-surface px-3 pt-3 pb-6 text-ink">
+    <PageShell current="products" mainClassName="px-3 pt-3 pb-6">
         <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
           <PageHeader title={"商品マスタ編集"}>
             <a className="text-sm font-semibold text-accent hover:underline" href={`/products/${product.id}`}>
@@ -66,7 +64,6 @@ export default async function ProductEditPage({ params, searchParams }: PageProp
             defaultNewBarcode={newBarcode}
           />}
         </div>
-      </main>
-    </>
+    </PageShell>
   );
 }

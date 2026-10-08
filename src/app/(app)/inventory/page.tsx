@@ -1,7 +1,7 @@
 import { PageHeader } from "@/components/ui/page-header";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { AppNav } from "@/components/domain/app-nav";
+import { PageShell } from "@/components/ui/page-shell";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { getActiveStaffOperatorOptionsForClinic } from "@/lib/db/staff-operators";
 import { getCategories, getStockPage } from "@/lib/db/stock";
@@ -79,9 +79,8 @@ export default async function InventoryPage({ searchParams }: PageProps) {
   const nextHref = buildInventoryPageHref({ q: query, category, shortageOnly }, stockPage.page + 1);
 
   return (
-    <main className="min-h-screen bg-surface px-3 pt-3 pb-6 text-ink lg:px-6">
+    <PageShell current="inventory" mainClassName="px-3 pt-3 pb-6 lg:px-6">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-3">
-        <AppNav current="inventory" />
 
         <PageHeader title={"在庫一覧"}>
           <a className="inline-flex h-11 shrink-0 items-center justify-center rounded btn-secondary px-4 text-sm font-semibold transition" href="/home">
@@ -184,6 +183,6 @@ export default async function InventoryPage({ searchParams }: PageProps) {
           </div>
         </section>
       </div>
-    </main>
+    </PageShell>
   );
 }

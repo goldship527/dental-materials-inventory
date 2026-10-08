@@ -1,7 +1,7 @@
 import { PageHeader } from "@/components/ui/page-header";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { AppNav } from "@/components/domain/app-nav";
+import { PageShell } from "@/components/ui/page-shell";
 import { isAdminRole } from "@/lib/auth/roles";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { getProductCategories, getProductMasterPage, getPurchaseHistoryProductSummary } from "@/lib/db/products";
@@ -145,9 +145,8 @@ export default async function ProductsPage({ searchParams }: PageProps) {
     .join(" / ");
 
   return (
-    <main className="min-h-screen bg-surface px-3 pt-3 pb-6 text-ink lg:px-6">
+    <PageShell current="products" mainClassName="px-3 pt-3 pb-6 lg:px-6">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-3">
-        <AppNav current="products" />
 
         <PageHeader title={"商品マスタ"}>
           <div className="grid w-full grid-cols-1 gap-3 sm:flex sm:w-auto sm:shrink-0 sm:flex-wrap">
@@ -394,6 +393,6 @@ export default async function ProductsPage({ searchParams }: PageProps) {
           </div>
         </section>
       </div>
-    </main>
+    </PageShell>
   );
 }

@@ -2,7 +2,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { redirect } from "next/navigation";
 import { barcodeUiEnabled } from "@/lib/workflow-features";
 import { auth } from "@/auth";
-import { AppNav } from "@/components/domain/app-nav";
+import { PageShell } from "@/components/ui/page-shell";
 import { requireAdminUser } from "@/lib/auth/admin";
 import {
   type BarcodeScanLogRow,
@@ -66,9 +66,8 @@ export default async function UnresolvedBarcodeScansPage() {
   const logs = await getUnresolvedBarcodeScanLogRows(context.clinicId);
 
   return (
-    <main className="min-h-screen bg-surface px-3 pt-3 pb-6 text-ink">
+    <PageShell current="barcode" mainClassName="px-3 pt-3 pb-6">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-3">
-        <AppNav current="barcode" />
 
         <PageHeader title={"未対応バーコード整理"}>
           <div className="flex flex-wrap gap-3 text-sm font-semibold">
@@ -193,6 +192,6 @@ export default async function UnresolvedBarcodeScansPage() {
           </div>
         </section>
       </div>
-    </main>
+    </PageShell>
   );
 }

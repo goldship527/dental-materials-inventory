@@ -1,7 +1,7 @@
 import { PageHeader } from "@/components/ui/page-header";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { AppNav } from "@/components/domain/app-nav";
+import { PageShell } from "@/components/ui/page-shell";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import {
   getStockLotRows,
@@ -131,9 +131,8 @@ export default async function StockLotsPage({ searchParams }: PageProps) {
   );
 
   return (
-    <main className="min-h-screen bg-surface px-3 pt-3 pb-6 text-ink lg:px-6">
+    <PageShell current="inventory" mainClassName="px-3 pt-3 pb-6 lg:px-6">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-3">
-        <AppNav current="inventory" />
 
         <PageHeader title={"期限ロット一覧"}>
           <div>
@@ -280,6 +279,6 @@ export default async function StockLotsPage({ searchParams }: PageProps) {
           )}
         </section>
       </div>
-    </main>
+    </PageShell>
   );
 }

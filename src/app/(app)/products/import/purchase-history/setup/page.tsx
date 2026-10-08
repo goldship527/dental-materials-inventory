@@ -1,7 +1,7 @@
 import { PageHeader } from "@/components/ui/page-header";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { AppNav } from "@/components/domain/app-nav";
+import { PageShell } from "@/components/ui/page-shell";
 import { requireAdminUser } from "@/lib/auth/admin";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { getProductCategories, getPurchaseHistorySetupProductRows } from "@/lib/db/products";
@@ -25,9 +25,8 @@ export default async function PurchaseHistorySetupPage() {
   ]);
 
   return (
-    <main className="min-h-screen bg-surface px-3 pt-3 pb-6 text-ink lg:px-6">
+    <PageShell current="products" mainClassName="px-3 pt-3 pb-6 lg:px-6">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-3">
-        <AppNav current="products" />
 
         <PageHeader title={"購入履歴登録商品の一括整備"}>
           <div>
@@ -49,6 +48,6 @@ export default async function PurchaseHistorySetupPage() {
 
         <PurchaseHistorySetupForm products={products} categories={categories} />
       </div>
-    </main>
+    </PageShell>
   );
 }

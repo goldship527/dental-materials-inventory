@@ -503,3 +503,60 @@ grep -rnoE '\b(text|bg|border|ring)-(warning|caution)\b' src | wc -l
 
 - Vercel Preview にログインし、出庫・納品・ホームを、タブレット横とスマホの幅で見る。
 - 担当スタッフの選択、院の切り替え（複数院の管理者だけ）、「その他」の開閉、ログアウトを実際に操作する。
+
+---
+
+## 12. P2 再レビュー結果（2026-10-08・Claude Code）: 差し戻し（Q1の直し方だけ）
+
+対象: PR #17（`26f0f60`）。
+
+### 12.1 確認できたこと（合格）
+
+- 機械検査10項目（§11.4の2項目を含む）は、レビュー側でも全部0件。
+- Q2: ログアウトは墨。
+- Q3: 「その他」のフォーカスの上書きは削除済み。
+- Q4: 開いている間だけ `pointerdown` を登録し、外側で閉じる。閉じたら解除する。実装は適切。
+- §11.3 の院名の補助行の対応、CI・Vercel Preview の成功を確認。
+
+### 12.2 Q1 の直し方に問題がある
+
+現在の実装は `ml-[calc((100%-100vw)/2)] w-screen`（幅 100vw）。
+
+**`100vw` は縦スクロールバーの幅を含む。** そのため、スクロールバーが幅を取るブラウザー（Windows のパソコンの Chrome・Edge 等）では、ページに横スクロールが出る。
+
+- レビュー側で、同じ指定の最小ページを実ブラウザー（1280×800、縦スクロールバー15px）で計測した。
+  - `scrollWidth` 1273px に対し `clientWidth` 1265px で、**8px はみ出す**。ナビの左端は -7.5px。
+- タブレット・スマホはスクロールバーが幅を取らないため起きない。隔離計測で検出できなかったのはこのため。
+- ナビは `<main>` の内側（上の余白 `pt-3` の下）にある。そのため、帯の上に**紙色の12pxのすき間**が残る。
+
+### 12.3 修正（§11.2 Q1 で推奨した形にする）
+
+1. **ページ外枠の共通部品 `src/components/ui/page-shell.tsx` を作る。**
+   ```tsx
+   // 例
+   <div className="min-h-screen bg-surface text-ink">
+     <AppNav current={current} />          // 全幅の帯。<main> の外、画面の最上部
+     <main className="mx-auto w-full max-w-7xl px-3 pt-3 pb-6 lg:px-6 {className}">
+       {children}
+     </main>
+   </div>
+   ```
+   - `AppNav` は `w-screen`・`100vw`・負のマージンを使わない。親の幅いっぱい（`w-full`）にして、中身だけ `mx-auto max-w-7xl` で揃える。
+   - 印刷用の `print:` 指定（背景を白、余白0 等）は、各ページで指定していた値を `className` 等で渡せるようにし、**消さない**。
+2. `AppNav` を使う53ページを `PageShell` に置き換える。
+   - `max-w-5xl` など、中身の幅が違うページは引数で渡す。
+   - 置き換えは見た目の枠だけにする。ページの中身・処理は変えない。
+3. 機械検査に次を足して0件にする。
+   ```bash
+   grep -rnoE 'w-screen|100vw' src | wc -l
+   grep -rlE '<AppNav' src/app | wc -l   # PageShell 以外から直接使っていないこと（0件）
+   ```
+4. 計測をやり直す（PR本文に書く）。
+   - **縦スクロールバーが幅を取る設定**で行う。Chromium なら `--hide-scrollbars` を付けない。ヘッドレスで幅0になる場合は、`::-webkit-scrollbar { width: 15px }` を当てて再現する。
+   - 対象: ホーム・出庫・納品・在庫・発注。幅は 1024・1280・1440・768・390px。
+   - 確認すること:
+     - `document.documentElement.scrollWidth === document.documentElement.clientWidth`
+     - ナビの帯の左右が表示領域の端に一致する
+     - 帯の上端が0px（すき間なし）
+   - 本体の開始位置と §5.2 のカード寸法（P1との差0px）を再確認する。
+5. ドラフトのまま止める。マージしない。

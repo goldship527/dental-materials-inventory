@@ -1,7 +1,7 @@
 import { PageHeader } from "@/components/ui/page-header";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { AppNav } from "@/components/domain/app-nav";
+import { PageShell } from "@/components/ui/page-shell";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { getOrderRequestRows, type OrderRequestRow } from "@/lib/db/orders";
 import { getActiveStaffOperatorOptionsForClinic, type StaffOperatorOption } from "@/lib/db/staff-operators";
@@ -315,9 +315,8 @@ export default async function OrdersPage({ searchParams }: PageProps) {
       : "条件に一致する発注候補はありません。検索語や状態フィルタを見直してください。";
 
   return (
-    <main className="min-h-screen bg-surface px-3 pt-3 pb-6 text-ink print:bg-panel print:p-0 lg:px-6">
+    <PageShell current="orders" mainClassName="px-3 pt-3 pb-6 print:bg-panel print:p-0 lg:px-6" shellClassName="print:bg-panel">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 print:max-w-none print:gap-3">
-        <AppNav current="orders" />
 
         <PageHeader title={"発注"} className="print:border-b print:border-ink print:pb-3">
           <div>
@@ -593,6 +592,6 @@ export default async function OrdersPage({ searchParams }: PageProps) {
           発注数量、発注先、状態、備考を確認してください。
         </p>
       </div>
-    </main>
+    </PageShell>
   );
 }

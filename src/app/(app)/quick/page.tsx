@@ -1,7 +1,7 @@
 import { PageHeader } from "@/components/ui/page-header";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { AppNav } from "@/components/domain/app-nav";
+import { PageShell } from "@/components/ui/page-shell";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { prisma } from "@/lib/db/prisma";
 import { getActiveStaffOperatorOptionsForClinic } from "@/lib/db/staff-operators";
@@ -114,9 +114,8 @@ export default async function QuickPage({ searchParams }: PageProps) {
   });
 
   return (
-    <main className="min-h-screen bg-surface px-3 pt-3 pb-6 text-ink lg:px-6">
+    <PageShell current="quick" mainClassName="px-3 pt-3 pb-6 lg:px-6">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-5">
-        <AppNav current="quick" />
 
         <PageHeader title={"クイック出庫"}>
           <div>
@@ -232,6 +231,6 @@ export default async function QuickPage({ searchParams }: PageProps) {
           </div>
         </section>
       </div>
-    </main>
+    </PageShell>
   );
 }

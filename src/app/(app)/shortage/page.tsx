@@ -1,7 +1,7 @@
 import { PageHeader } from "@/components/ui/page-header";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { AppNav } from "@/components/domain/app-nav";
+import { PageShell } from "@/components/ui/page-shell";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { getActiveOrderRequestProductIds } from "@/lib/db/orders";
 import { getPendingOrderDetailsByProduct } from "@/lib/db/pending-orders";
@@ -181,9 +181,8 @@ export default async function ShortagePage({ searchParams }: PageProps) {
   );
 
   return (
-    <main className="min-h-screen bg-surface px-3 pt-3 pb-6 text-ink print:bg-panel print:p-0 lg:px-6">
+    <PageShell current="shortage" mainClassName="px-3 pt-3 pb-6 print:bg-panel print:p-0 lg:px-6" shellClassName="print:bg-panel">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-3 print:max-w-none print:gap-3">
-        <AppNav current="shortage" />
 
         <PageHeader title={"不足在庫一覧"} className="print:border-b print:border-ink print:pb-3">
           <div>
@@ -310,6 +309,6 @@ export default async function ShortagePage({ searchParams }: PageProps) {
           在庫棚と照合してください。
         </p>
       </div>
-    </main>
+    </PageShell>
   );
 }

@@ -1,7 +1,7 @@
 import { PageHeader } from "@/components/ui/page-header";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { AppNav } from "@/components/domain/app-nav";
+import { PageShell } from "@/components/ui/page-shell";
 import { isAdminRole } from "@/lib/auth/roles";
 import { getOrganizationSettings } from "@/lib/db/organization-settings";
 import { requireActiveClinic } from "@/lib/db/clinic";
@@ -47,9 +47,8 @@ export default async function StockAnomaliesPage() {
   const totalTodayQuantity = anomalies.reduce((total, row) => total + row.todayQuantity, 0);
 
   return (
-    <main className="min-h-screen bg-surface px-3 pt-3 pb-6 text-ink lg:px-6">
+    <PageShell current="movements" mainClassName="px-3 pt-3 pb-6 lg:px-6">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-3">
-        <AppNav current="movements" />
 
         <PageHeader title={"異常出庫検知"}>
           <div>
@@ -159,6 +158,6 @@ export default async function StockAnomaliesPage() {
           )}
         </section>
       </div>
-    </main>
+    </PageShell>
   );
 }

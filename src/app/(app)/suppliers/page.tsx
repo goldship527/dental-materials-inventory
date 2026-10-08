@@ -1,7 +1,7 @@
 import { PageHeader } from "@/components/ui/page-header";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { AppNav } from "@/components/domain/app-nav";
+import { PageShell } from "@/components/ui/page-shell";
 import { isAdminRole } from "@/lib/auth/roles";
 import { requireActiveClinic } from "@/lib/db/clinic";
 import { getSupplierMasterRows } from "@/lib/db/suppliers";
@@ -52,9 +52,8 @@ export default async function SuppliersPage({ searchParams }: PageProps) {
     .join(" / ");
 
   return (
-    <main className="min-h-screen bg-surface px-3 pt-3 pb-6 text-ink lg:px-6">
+    <PageShell current="suppliers" mainClassName="px-3 pt-3 pb-6 lg:px-6">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-3">
-        <AppNav current="suppliers" />
 
         <PageHeader title={"発注先マスタ"}>
           <div className="grid w-full grid-cols-1 gap-3 sm:flex sm:w-auto sm:shrink-0 sm:flex-wrap">
@@ -174,6 +173,6 @@ export default async function SuppliersPage({ searchParams }: PageProps) {
           )}
         </section>
       </div>
-    </main>
+    </PageShell>
   );
 }
