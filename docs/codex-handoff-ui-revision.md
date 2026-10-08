@@ -237,6 +237,8 @@ grep -rnoE '\b(text|bg|border|ring)-(warning|caution)\b' src | wc -l
 - `docs/user-manual.md` の画面説明で、色や位置に触れている箇所（「右上のログアウト」等）を更新する。
 - 判断に迷った箇所は推測で決めず、PR本文の「確認待ち」に書く。
 
+---
+
 ## 7. P1 レビュー結果（2026-10-08・Claude Code）: 差し戻し
 
 対象: PR #15（`ui/revision-p1`、`d175687`）。
@@ -290,3 +292,103 @@ grep -rnoE '\b(text|bg|border|ring)-(warning|caution)\b' src | wc -l
 
 - 表の見出し行を design.md §5.2 の形にする（`tint` の面、藍の文字、下に藍の罫）。P1の指示書に書いていなかったため、P2で行う。
 - 注意の案内枠（`bg-markSoft` 49箇所）に、左の4pxの墨の線（`border-l-4 border-l-ink`）を付ける。
+
+---
+
+## 8. P1 再レビュー結果（2026-10-08・Claude Code）: 承認（マージは利用者の画面確認後）
+
+対象: PR #15（`408fac5`）。
+
+### 8.1 レビュー側での再現
+
+- 機械検査8項目（§5.1 の5項目と §7.4 の3項目）は、すべて0件だった。
+- `btn-primary` 91件、`btn-secondary` 180件、表の見出し（`<thead>`）は `text-label`。
+- `bg-accent` の残り7件は、ボタンではないもの（理由つき）:
+  - モーダルの背景2件
+  - ファイル選択ボタン4件
+  - 「出し方」の小札1件
+- 枠に `border-accent` が残る10件は、ボタンではないもの:
+  - 案内枠
+  - スピナー
+  - 「出し方」の枠
+  - 選択欄の読み込み中の状態
+- R4: `.edge-stop` は上罫と左の朱線の両方を持つ。
+- 数量欄: ＋／−と入力欄は `text-xl`（22px）で `h-12`（48px）固定。`.card-control-size` は削除済み。
+- CI（receipt-regression）、Vercel、Vercel Preview Comments はすべて成功。
+
+### 8.2 判断
+
+- R1〜R4 と数量欄の修正を確認し、**P1を承認する**。
+- マージと本番公開は、利用者が §7.5 の画面確認と印刷プレビュー確認を終えてから行う。
+
+### 8.3 P2 へ持ち越す小さな項目
+
+- モーダルの背景 `bg-accent/30`（2件）を `bg-ink/40` にする。押せる物を示す藍を、操作でない面に使わないため。
+- `favicon.ico` の404。既存の問題か今回の変更によるものかを確認し、既存の問題なら別の小さな修正として扱う。
+- §7.6 の2件（表の見出し行の網掛けと藍の罫、注意の案内枠の左の線）。
+
+---
+
+## 9. P1 の本番公開と記録（2026-10-08・利用者の指示）
+
+利用者の指示:
+- 「本番公開までして」
+- 「まだ誰も使ってないので問題ない」
+- 「コミットもすべてして」
+- 「マージはコーデックスにやらせて」
+
+ログイン後の画面と印刷プレビューは、利用者が未確認のまま公開することを了承している。
+
+### 9.1 マージと本番公開
+
+1. 次を実行する。`--match-head-commit` は、レビューしたコミットから変わっていないことの確認なので外さない。
+   ```bash
+   gh pr ready 15
+   gh pr merge 15 --merge --match-head-commit 408fac5554bfe603bb9850264bbacce8180fafcf
+   ```
+   - head が `408fac5` から変わっていたら、マージせずに止めて報告する。
+2. マージコミットの Vercel Production デプロイが Ready になるのを確認する。
+3. 本番を、ログインせずに読み取りだけで確認する。
+   - `/login` が 200 で、新しい配色になっていること（紙色の背景、藍の主ボタン）
+   - 未ログインで `/stock-out`・`/receive` を開くと `/login` へ転送されること
+4. ログインはしない。出庫・納品・保存などの書き込み操作、公開DBへの接続はしない。
+
+### 9.2 公開記録のコミット（`docs/ui-revision-p1-release`）
+
+1. 最新の `master` から `docs/ui-revision-p1-release` を作る。
+2. `docs/codex-handoff-ui-revision.md` を、`C:\Dev\dental-materials-inventory\docs\codex-handoff-ui-revision.md`（本書。§7〜§9 を含む最新版）の内容で置き換える。
+3. `docs/dev-log.md` の末尾に、P1公開の作業記録と「朝礼反映」のブロックを追記する。
+   - 前回ブロックの「次のアクション」のうち、片付いたものを「済:」で書く。
+     - P1の実装
+     - Claude Codeのレビュー
+   - 次のアクションには次を書く。
+     - P2（`docs/codex-handoff-ui-revision.md` §4・§7.6・§8.3）
+     - 利用者による本番画面・印刷・実機タブレットの確認
+   - 前回の次のアクションのうち未完了のものは再掲する。
+4. コミットし、PRを作り、CIの成功を確認してからマージする。
+5. 本番デプロイが Ready であることを確認する。文書だけの変更なので、画面の確認は不要。
+
+### 9.3 作業コピー `C:\Dev\dental-materials-inventory` の同期
+
+このフォルダには、PRに入った文書の未コミット版が残っている。そのため `git pull` が止まる。
+
+1. 次の各ファイルについて、`master`（9.2のマージ後）の内容と比べる。
+   - `docs/design.md`
+   - `docs/dev-log.md`
+   - `docs/codex-handoff-ui-revision.md`
+   - `docs/color-rationale-2026-10-08.md`
+   - `docs/mockups/ui-revision-mockup.html`
+2. 内容が master に含まれているもの（改行コードだけの違いを含む）は、手元の版を master の版に合わせてよい。利用者の承認済み。
+   - `dev-log.md` は、手元の 2026-10-08 のブロックが master 側にも入っていることを確認してから合わせる。
+3. **master に無い内容が手元にあるファイルは、変更せずに止めて報告する。**
+4. `.playwright-cli/` と `docs/codex-handoff-barcode-batch-mode.md` は触らない（別件）。
+5. `git pull --ff-only` で `master` を最新にする。`git status` で、上の2つ以外の差分が無いことを確認する。
+
+### 9.4 報告
+
+次をまとめて報告する。
+- マージコミット（P1と公開記録の2つ）
+- Production デプロイの状態
+- 9.1-3 の確認結果
+- 9.3 の比較結果（どのファイルを合わせたか）
+- 最後の `git status`
