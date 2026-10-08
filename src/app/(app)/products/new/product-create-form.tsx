@@ -1,4 +1,5 @@
 "use client";
+import { SectionHeading } from "@/components/ui/section-heading";
 
 import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -45,7 +46,7 @@ export function ProductCreateForm({ suppliers }: ProductCreateFormProps) {
   return (
     <form action={formAction} noValidate className="grid gap-6">
       <section className="rounded border border-line bg-panel p-5 shadow-sheet">
-        <h2 className="text-lg font-semibold">基本情報</h2>
+        <SectionHeading>基本情報</SectionHeading>
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           <label className="grid gap-1 text-sm font-semibold text-muted md:col-span-2">
             商品名
@@ -130,7 +131,7 @@ export function ProductCreateForm({ suppliers }: ProductCreateFormProps) {
       </section>
 
       <section className="rounded border border-line bg-panel p-5 shadow-sheet">
-        <h2 className="text-lg font-semibold">発注・在庫判断</h2>
+        <SectionHeading>発注・在庫判断</SectionHeading>
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           <label className="grid gap-1 text-sm font-semibold text-muted">
             発注単位

@@ -1,4 +1,5 @@
 "use client";
+import { SectionHeading } from "@/components/ui/section-heading";
 
 import { useActionState } from "react";
 import { useWorkStaffSelection } from "@/components/domain/work-staff-selection";
@@ -115,7 +116,7 @@ export function ProductStockUsagePanel({
     <section className="rounded border border-line bg-panel p-4 shadow-sheet">
       <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
         <div>
-          <h2 className="text-lg font-semibold">使用中管理</h2>
+          <SectionHeading>使用中管理</SectionHeading>
           <p className="mt-1 text-sm text-muted">
             使用可能 {availableQuantity} / 使用中 {inUseQuantity} / 廃棄済み累計 {discardedQuantity}
           </p>

@@ -21,7 +21,7 @@ export default async function BarcodeOutPage() {
   });
 
   return (
-    <PageShell current="barcodeOut" mainClassName="px-3 pt-3 pb-6 lg:px-6">
+    <PageShell current="barcodeOut" mainClassName="pt-3 pb-6">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-5">
 
         <header className="flex flex-col gap-2 border-b border-line pb-4">

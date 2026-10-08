@@ -1,4 +1,5 @@
 "use client";
+import { SectionHeading } from "@/components/ui/section-heading";
 
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
@@ -70,7 +71,7 @@ export function StaffOperatorManagement({ operators, clinics }: StaffOperatorMan
   return (
     <div className="grid min-w-0 gap-6">
       <section className="min-w-0 rounded border border-line bg-panel p-5 shadow-sheet">
-        <h2 className="text-lg font-semibold">担当者を追加</h2>
+        <SectionHeading>担当者を追加</SectionHeading>
         <form action={createAction} className="mt-4 grid gap-4 md:grid-cols-2">
           <label className="grid gap-1 text-sm font-semibold text-muted">
             担当者名
@@ -117,7 +118,7 @@ export function StaffOperatorManagement({ operators, clinics }: StaffOperatorMan
       <section className="min-w-0 rounded border border-line bg-panel p-5 shadow-sheet">
         <div className="flex flex-col gap-2 border-b border-line pb-4 md:flex-row md:items-end md:justify-between">
           <div>
-            <h2 className="text-lg font-semibold">担当者一覧</h2>
+            <SectionHeading>担当者一覧</SectionHeading>
             <p className="mt-1 text-sm text-muted">無効化した担当者は新しい入出庫では選択できません。</p>
           </div>
           <div className="flex flex-wrap items-center gap-3">

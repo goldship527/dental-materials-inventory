@@ -78,7 +78,7 @@ export default async function OrderRecordsPage({ searchParams }: PageProps) {
       : "条件に一致する発注記録はありません。検索語を見直してください。";
 
   return (
-    <PageShell current="orders" mainClassName="px-3 pt-3 pb-6 lg:px-6">
+    <PageShell current="orders" mainClassName="pt-3 pb-6">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-3">
 
         <PageHeader title={"発注記録"}>

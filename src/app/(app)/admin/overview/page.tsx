@@ -1,3 +1,4 @@
+import { SectionHeading } from "@/components/ui/section-heading";
 import { PageShell } from "@/components/ui/page-shell";
 import { requireAdminUser } from "@/lib/auth/admin";
 import { getAdminOverview } from "@/lib/db/admin-overview";
@@ -54,7 +55,7 @@ export default async function AdminOverviewPage() {
   ];
 
   return (
-    <PageShell current="overview" mainClassName="mx-auto grid w-full max-w-7xl gap-3 px-3 pt-3 pb-6 lg:px-6">
+    <PageShell current="overview" mainClassName="mx-auto grid w-full max-w-7xl gap-3 pt-3 pb-6">
         <header className="grid gap-2">
           <p className="text-sm font-semibold text-accent">管理</p>
           <h1 className="text-xl font-bold tracking-normal text-ink">本部ダッシュボード</h1>
@@ -93,7 +94,7 @@ export default async function AdminOverviewPage() {
         <section className="rounded border border-line bg-panel shadow-sheet">
           <div className="flex flex-col gap-2 border-b border-line px-5 py-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h2 className="text-lg font-semibold text-ink">クリニック別状況</h2>
+              <SectionHeading>クリニック別状況</SectionHeading>
               <p className="mt-1 text-sm text-muted">
                 最終入出庫: {formatDateTime(overview.summary.latestMovementAt)}
               </p>

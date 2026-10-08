@@ -181,7 +181,7 @@ export default async function ShortagePage({ searchParams }: PageProps) {
   );
 
   return (
-    <PageShell current="shortage" mainClassName="px-3 pt-3 pb-6 print:bg-panel print:p-0 lg:px-6" shellClassName="print:bg-panel">
+    <PageShell current="shortage" mainClassName="pt-3 pb-6 print:bg-panel print:p-0" shellClassName="print:bg-panel">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-3 print:max-w-none print:gap-3">
 
         <PageHeader title={"不足在庫一覧"} className="print:border-b print:border-ink print:pb-3">

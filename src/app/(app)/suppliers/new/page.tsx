@@ -20,7 +20,7 @@ export default async function SupplierNewPage() {
   const context = await requireActiveClinic();
 
   return (
-    <PageShell current="suppliers" mainClassName="px-3 pt-3 pb-6">
+    <PageShell current="suppliers" mainClassName="pt-3 pb-6">
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
 
         <PageHeader title={"発注先マスタ新規作成"}>

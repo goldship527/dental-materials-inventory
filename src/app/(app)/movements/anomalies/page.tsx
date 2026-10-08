@@ -47,7 +47,7 @@ export default async function StockAnomaliesPage() {
   const totalTodayQuantity = anomalies.reduce((total, row) => total + row.todayQuantity, 0);
 
   return (
-    <PageShell current="movements" mainClassName="px-3 pt-3 pb-6 lg:px-6">
+    <PageShell current="movements" mainClassName="pt-3 pb-6">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-3">
 
         <PageHeader title={"異常出庫検知"}>

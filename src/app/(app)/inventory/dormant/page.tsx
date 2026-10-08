@@ -82,7 +82,7 @@ export default async function DormantStockPage({ searchParams }: PageProps) {
   const totalAmount = filteredRows.reduce((total, row) => total + (row.stagnantAmount ?? 0), 0);
 
   return (
-    <PageShell current="dormant" mainClassName="px-3 pt-3 pb-6 lg:px-6">
+    <PageShell current="dormant" mainClassName="pt-3 pb-6">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-3">
 
         <PageHeader title={"長期在庫レポート"}>

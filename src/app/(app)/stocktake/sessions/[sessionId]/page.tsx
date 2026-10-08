@@ -47,7 +47,7 @@ export default async function StocktakeSessionPage({ params }: PageProps) {
   }
 
   return (
-    <PageShell current="stocktake" mainClassName="px-3 pt-3 pb-6">
+    <PageShell current="stocktake" mainClassName="pt-3 pb-6">
       <div className="mx-auto flex max-w-7xl flex-col gap-6">
 
         <PageHeader title={"棚卸セッション入力"}>

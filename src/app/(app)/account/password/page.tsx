@@ -12,7 +12,7 @@ export default async function AccountPasswordPage() {
   }
 
   return (
-    <PageShell current="account" mainClassName="px-3 pt-3 pb-6 lg:px-6">
+    <PageShell current="account" mainClassName="pt-3 pb-6">
         <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
           <PageHeader title={"パスワード変更"}>
             <div>

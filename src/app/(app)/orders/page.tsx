@@ -1,3 +1,4 @@
+import { SectionHeading } from "@/components/ui/section-heading";
 import { PageHeader } from "@/components/ui/page-header";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
@@ -315,7 +316,7 @@ export default async function OrdersPage({ searchParams }: PageProps) {
       : "条件に一致する発注候補はありません。検索語や状態フィルタを見直してください。";
 
   return (
-    <PageShell current="orders" mainClassName="px-3 pt-3 pb-6 print:bg-panel print:p-0 lg:px-6" shellClassName="print:bg-panel">
+    <PageShell current="orders" mainClassName="pt-3 pb-6 print:bg-panel print:p-0" shellClassName="print:bg-panel">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 print:max-w-none print:gap-3">
 
         <PageHeader title={"発注"} className="print:border-b print:border-ink print:pb-3">
@@ -515,7 +516,7 @@ export default async function OrdersPage({ searchParams }: PageProps) {
                 >
                 <div className="flex flex-col gap-3 border-b border-line border-l-8 border-l-accent bg-tint px-5 py-3 text-sm lg:flex-row lg:items-start lg:justify-between print:border-ink print:border-l-black print:bg-panel print:px-2 print:py-2 print:text-xs">
                   <div>
-                    <h2 className="text-lg font-bold text-ink">{supplierName}</h2>
+                    <SectionHeading>{supplierName}</SectionHeading>
                     <p className="mt-1 text-xs font-semibold text-muted print:text-ink">
                       {formatSupplierLeadTime(supplierLeadTime)}
                     </p>

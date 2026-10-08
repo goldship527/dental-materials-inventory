@@ -1,3 +1,4 @@
+import { SectionHeading } from "@/components/ui/section-heading";
 import { PageHeader } from "@/components/ui/page-header";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
@@ -27,7 +28,7 @@ export default async function ProductImportPage() {
   const histories = await getRecentProductImportHistories(context.organizationId);
 
   return (
-    <PageShell current="products" mainClassName="px-3 pt-3 pb-6 lg:px-6">
+    <PageShell current="products" mainClassName="pt-3 pb-6">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-3">
 
         <PageHeader title={"商品マスタ一括取り込み"}>
@@ -44,7 +45,7 @@ export default async function ProductImportPage() {
         <ProductImportForm />
 
         <section className="rounded border border-line bg-panel p-3 shadow-sheet">
-          <h2 className="text-lg font-semibold">取り込み履歴</h2>
+          <SectionHeading>取り込み履歴</SectionHeading>
           <div className="mt-4 overflow-x-auto">
             <table className="w-full min-w-[760px] border-collapse text-left text-sm">
               <thead className="bg-tint text-label text-accent">

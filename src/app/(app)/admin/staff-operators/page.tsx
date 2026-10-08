@@ -11,7 +11,7 @@ export default async function AdminStaffOperatorsPage() {
   ]);
 
   return (
-    <PageShell current="staffOperators" mainClassName="mx-auto grid w-full max-w-7xl gap-3 px-3 pt-3 pb-6 lg:px-6">
+    <PageShell current="staffOperators" mainClassName="mx-auto grid w-full max-w-7xl gap-3 pt-3 pb-6">
         <header className="grid gap-2">
           <p className="text-sm font-semibold text-accent">管理</p>
           <h1 className="text-xl font-bold tracking-tight text-ink">スタッフ担当者</h1>

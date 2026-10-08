@@ -83,7 +83,7 @@ export function MovementFilterForm({
 
   return (
     <section className="grid gap-3 rounded border border-line bg-panel p-4 shadow-sheet">
-      <form className="grid gap-3 lg:grid-cols-[1fr_140px_170px_145px_145px_auto_auto_auto]">
+      <form className="grid min-w-0 gap-3 lg:grid-cols-4 xl:grid-cols-[minmax(0,1fr)_140px_170px_145px_145px_auto_auto_auto]">
         {defaultCategory ? <input type="hidden" name="category" value={defaultCategory} /> : null}
         <input
           type="search"

@@ -79,7 +79,7 @@ export default async function InventoryPage({ searchParams }: PageProps) {
   const nextHref = buildInventoryPageHref({ q: query, category, shortageOnly }, stockPage.page + 1);
 
   return (
-    <PageShell current="inventory" mainClassName="px-3 pt-3 pb-6 lg:px-6">
+    <PageShell current="inventory" mainClassName="pt-3 pb-6">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-3">
 
         <PageHeader title={"在庫一覧"}>

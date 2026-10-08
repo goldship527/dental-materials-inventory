@@ -47,7 +47,7 @@ export default async function AdminOverviewClinicShortagePage({ params, searchPa
   });
 
   return (
-    <PageShell current="overview" mainClassName="mx-auto grid w-full max-w-7xl gap-3 px-3 pt-3 pb-6 lg:px-6">
+    <PageShell current="overview" mainClassName="mx-auto grid w-full max-w-7xl gap-3 pt-3 pb-6">
         <PageHeader title={detail.clinic.name}>
           <div>
             <p className="text-sm font-semibold text-accent">本部ダッシュボード / 不足在庫</p>

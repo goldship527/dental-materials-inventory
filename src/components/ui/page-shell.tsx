@@ -12,7 +12,7 @@ export function PageShell({ current, mainClassName, shellClassName, children }: 
   return (
     <div className={`min-h-screen bg-surface text-ink${shellClassName ? ` ${shellClassName}` : ""}`}>
       <AppNav current={current} />
-      <main className={mainClassName}>{children}</main>
+      <main className={`px-3 lg:px-6 ${mainClassName}`}>{children}</main>
     </div>
   );
 }

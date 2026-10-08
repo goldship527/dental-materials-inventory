@@ -1,4 +1,5 @@
 "use client";
+import { SectionHeading } from "@/components/ui/section-heading";
 
 import { useActionState } from "react";
 import {
@@ -40,7 +41,7 @@ export function SupplierEditForm({ supplier }: SupplierEditFormProps) {
       <input type="hidden" name="supplierId" value={supplier.id} />
 
       <section className="rounded border border-line bg-panel p-5 shadow-sheet">
-        <h2 className="text-lg font-semibold">基本情報</h2>
+        <SectionHeading>基本情報</SectionHeading>
         <div className="mt-4 grid gap-4">
           <label className="grid gap-1 text-sm font-semibold text-muted">
             発注先名
@@ -58,7 +59,7 @@ export function SupplierEditForm({ supplier }: SupplierEditFormProps) {
       </section>
 
       <section className="rounded border border-line bg-panel p-5 shadow-sheet">
-        <h2 className="text-lg font-semibold">連絡先</h2>
+        <SectionHeading>連絡先</SectionHeading>
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           <label className="grid gap-1 text-sm font-semibold text-muted md:col-span-2">
             住所

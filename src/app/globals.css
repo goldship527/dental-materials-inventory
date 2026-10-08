@@ -113,6 +113,13 @@ a {
   }
 }
 
+@media screen and (max-width: 639px) {
+  h1.text-xl {
+    font-size: 20px;
+    line-height: 28px;
+  }
+}
+
 @media print {
   @page {
     size: A4 portrait;

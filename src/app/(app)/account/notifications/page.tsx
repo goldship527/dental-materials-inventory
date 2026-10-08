@@ -32,7 +32,7 @@ export default async function AccountNotificationsPage() {
   const preference = await getNotificationPreferenceForUser(user.organizationId, user.id);
 
   return (
-    <PageShell current="account" mainClassName="px-3 pt-3 pb-6 lg:px-6">
+    <PageShell current="account" mainClassName="pt-3 pb-6">
         <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
           <PageHeader title={"通知設定"}>
             <div>

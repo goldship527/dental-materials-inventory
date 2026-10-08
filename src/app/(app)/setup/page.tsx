@@ -1,3 +1,4 @@
+import { SectionHeading } from "@/components/ui/section-heading";
 import { PageHeader } from "@/components/ui/page-header";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
@@ -74,7 +75,7 @@ export default async function SetupPage() {
   ];
 
   return (
-    <PageShell current="setup" mainClassName="mx-auto grid w-full max-w-7xl gap-3 px-3 pt-3 pb-6 lg:px-6">
+    <PageShell current="setup" mainClassName="mx-auto grid w-full max-w-7xl gap-3 pt-3 pb-6">
         <PageHeader title={"初期設定チェック"}>
           <div>
 
@@ -103,7 +104,7 @@ export default async function SetupPage() {
 
         <section className="rounded border border-line bg-panel shadow-sheet">
           <div className="border-b border-line px-5 py-4">
-            <h2 className="text-lg font-semibold">導入チェックリスト</h2>
+            <SectionHeading>導入チェックリスト</SectionHeading>
           </div>
           <div className="divide-y divide-line">
             {steps.map((step, index) => (
@@ -133,7 +134,7 @@ export default async function SetupPage() {
         </section>
 
         <section className="rounded border border-line bg-panel p-3 shadow-sheet">
-          <h2 className="text-lg font-semibold">おすすめの進め方</h2>
+          <SectionHeading>おすすめの進め方</SectionHeading>
           <div className="mt-4 grid gap-3 text-sm leading-6 text-muted md:grid-cols-3">
             <p>まず商品マスタを一括取り込みし、商品名とカテゴリの土台を作ります。</p>
             <p>{barcodeUiEnabled ? "次に発注先、バーコード、最低在庫を整えると、不足一覧と発注候補が使いやすくなります。" : "次に発注先、在庫の単位、最低在庫を確認します。"}</p>
