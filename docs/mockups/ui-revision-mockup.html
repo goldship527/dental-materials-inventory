@@ -1,0 +1,656 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UI見直しモック 現行と新案（伝票）</title>
+<!--
+  一般歯科材料在庫管理 UI見直しモックアップ（検討材料・本番コードではない）
+  - 「現行」は src の Tailwind クラス値を手書きCSSで再現したもの
+  - 「新案」はモチーフ「ディーラーの納品書・発注伝票」による案
+  - 出庫カードの内部寸法（写真80px・余白・48px操作）は両案で同一にしてある
+  - データはすべて架空
+-->
+<style>
+/* ===== モック操作バー（比較用の外枠。製品UIではない） ===== */
+html, body { margin: 0; }
+body { background: #e4e4e0; font-family: "Inter", "Noto Sans JP", "Yu Gothic UI", system-ui, -apple-system, "Segoe UI", sans-serif; }
+.mock-bar { position: sticky; top: 0; z-index: 100; background: #2a2a28; color: #fff; padding: 8px 12px; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; font-size: 13px; }
+.mock-bar fieldset { border: 0; margin: 0; padding: 0; display: flex; gap: 4px; align-items: center; }
+.mock-bar legend { float: left; margin-right: 6px; opacity: .75; }
+.mock-bar button { font: inherit; border: 1px solid #77776f; background: transparent; color: #fff; padding: 4px 10px; border-radius: 3px; cursor: pointer; }
+.mock-bar button[aria-pressed="true"] { background: #fff; color: #1d201e; border-color: #fff; font-weight: 700; }
+.mock-metrics { width: 100%; display: flex; flex-wrap: wrap; gap: 4px 20px; font-variant-numeric: tabular-nums; }
+.mock-metrics b { color: #ffd9a8; }
+.mock-stage { padding: 16px; display: flex; justify-content: center; }
+.frame { container-type: inline-size; width: 1024px; max-width: 100%; height: auto; min-height: 768px; position: relative; overflow: hidden; outline: 1px solid #b9b9b2; }
+.fold { position: absolute; left: 0; right: 0; top: 768px; border-top: 2px dashed #c0392b; pointer-events: none; z-index: 50; }
+.fold span { position: absolute; right: 4px; top: -20px; font-size: 11px; color: #c0392b; background: #fff; padding: 0 4px; }
+
+/* ===== 現行テーマ（Tailwind既定値の再現） ===== */
+[data-theme="current"] {
+  --canvas: #f8fafc; --panel: #ffffff; --subtle: #f1f5f9; --ink: #0f172a; --muted: #64748b;
+  --line: #dde5e8; --accent: #0f766e; --accentDeep: #115e59; --danger: #dc2626;
+  --ctl-border: #64748b; --primary: #0f766e; --primary-hover: #115e59; --radius: 8px;
+  --shadow: 0 1px 2px rgba(15,23,42,.04), 0 10px 28px rgba(15,23,42,.05);
+}
+/* ===== 新案テーマ：ディーラーの納品書・発注伝票 ===== */
+[data-theme^="new"] {
+  /* 原始トークン */
+  --p-paper: #f3f2ee; --p-sheet: #ffffff; --p-sumi: #1d201e; --p-sumi-2: #575c58;
+  --p-rule: #d8d6cf; --p-rule-strong: #868a84; --p-shu: #b3361f; --p-green: #2f6b48; --p-ochre: #85621a;
+  /* 意味トークン */
+  --canvas: var(--p-paper); --panel: var(--p-sheet); --subtle: var(--p-paper); --ink: var(--p-sumi); --muted: var(--p-sumi-2);
+  --line: var(--p-rule); --accent: var(--p-sumi); --accentDeep: #000; --danger: var(--p-shu);
+  --ctl-border: var(--p-rule-strong); --primary: var(--p-sumi); --primary-hover: #000; --radius: 4px;
+  --shadow: none;
+}
+
+.app { background: var(--canvas); color: var(--ink); min-height: 768px; }
+[data-theme="current"] .app { background: linear-gradient(180deg, rgba(240,253,250,.75) 0, rgba(248,250,252,0) 260px), #f8fafc; }
+.only-current, .only-new { display: none; }
+[data-theme="current"] .only-current { display: block; }
+[data-theme^="new"] .only-new { display: block; }
+.screen { display: none; }
+.screen.on { display: block; }
+.wrap { max-width: 1280px; margin: 0 auto; }
+*, *::before, *::after { box-sizing: border-box; }
+a { color: inherit; text-decoration: none; }
+button, input, select { font: inherit; }
+.tnum { font-variant-numeric: tabular-nums; }
+
+/* ===== 共通ナビ：現行（2段） ===== */
+.nav-cur { position: sticky; top: 0; z-index: 30; border-bottom: 1px solid var(--line); background: rgba(248,250,252,.9); padding: 8px 12px; }
+@container (min-width: 640px) { .nav-cur { padding: 8px 16px; } }
+@container (min-width: 1024px) { .nav-cur { padding: 8px 24px; } }
+.nav-cur .row1 { display: flex; flex-direction: column; gap: 8px; }
+@container (min-width: 1024px) { .nav-cur .row1 { flex-direction: row; align-items: center; justify-content: space-between; gap: 16px; } }
+.nav-cur .grp { display: flex; gap: 4px; overflow-x: auto; min-width: 0; }
+.nav-cur .item { display: inline-flex; height: 48px; align-items: center; white-space: nowrap; padding: 0 12px; font-size: 14px; font-weight: 600; border: 1px solid transparent; border-radius: 4px; color: var(--muted); flex-shrink: 0; }
+.nav-cur .item.cur { border-color: rgba(15,118,110,.3); background: #f0fdfa; color: var(--accent); }
+.nav-cur .util { display: inline-flex; height: 36px; align-items: center; white-space: nowrap; padding: 0 12px; font-size: 14px; font-weight: 600; border: 1px solid var(--line); background: rgba(255,255,255,.8); border-radius: 4px; color: var(--muted); flex-shrink: 0; }
+.nav-cur .row2 { display: flex; flex-direction: column; gap: 8px; border-top: 1px solid rgba(221,229,232,.7); padding: 8px 0; margin-top: 8px; }
+@container (min-width: 768px) { .nav-cur .row2 { flex-direction: row; align-items: center; justify-content: space-between; } }
+.nav-cur .clinic { font-size: 20px; line-height: 28px; font-weight: 600; color: var(--accent); margin: 0; }
+.nav-cur .who { font-size: 14px; color: var(--muted); margin: 0; }
+.staff { display: flex; align-items: center; gap: 8px; white-space: nowrap; font-size: 12px; font-weight: 600; color: var(--muted); }
+.staff select { height: 48px; width: 176px; border: 1px solid var(--ctl-border); border-radius: 4px; background: var(--panel); padding: 0 12px; font-size: 16px; font-weight: 600; color: var(--ink); }
+
+/* ===== 共通ナビ：新案（1段） ===== */
+.nav-new { position: sticky; top: 0; z-index: 30; background: var(--panel); border-bottom: 2px solid var(--ink); padding: 0 12px; }
+@container (min-width: 1024px) { .nav-new { padding: 0 24px; } }
+.nav-new .bar { display: flex; flex-wrap: wrap; align-items: center; gap: 0 16px; min-height: 56px; }
+.nav-new .grp { display: flex; overflow-x: auto; min-width: 0; flex: 1 1 auto; }
+.nav-new .item { display: inline-flex; height: 56px; align-items: center; padding: 0 14px; font-size: 16px; font-weight: 600; color: var(--muted); border-bottom: 3px solid transparent; flex-shrink: 0; white-space: nowrap; }
+.nav-new .item.cur { color: var(--ink); border-bottom-color: var(--p-shu); font-weight: 700; }
+.nav-new .right { display: flex; align-items: center; gap: 12px; padding: 4px 0; flex-shrink: 0; }
+.nav-new .clinic { font-size: 14px; font-weight: 700; color: var(--ink); white-space: nowrap; }
+.nav-new .staff { font-size: 13px; color: var(--muted); }
+.nav-new .staff select { width: 160px; }
+@container (max-width: 639px) {
+  .nav-new .right { width: 100%; flex-wrap: wrap; gap: 4px 12px; padding-bottom: 8px; }
+  .nav-new .clinic { flex-basis: 100%; }
+  .nav-new .staff { flex: 1; }
+  .nav-new .staff select { width: 100%; }
+}
+.nav-new details { position: relative; }
+.nav-new summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; height: 48px; padding: 0 12px; border: 1px solid var(--ctl-border); border-radius: 4px; font-size: 14px; font-weight: 600; white-space: nowrap; }
+.nav-new summary::-webkit-details-marker { display: none; }
+.nav-new .menu { position: absolute; right: 0; top: 52px; background: var(--panel); border: 1px solid var(--ctl-border); min-width: 180px; z-index: 40; }
+.nav-new .menu a { display: flex; align-items: center; height: 44px; padding: 0 14px; font-size: 14px; border-bottom: 1px solid var(--line); }
+.nav-new .menu hr { border: 0; border-top: 2px solid var(--ink); margin: 0; }
+.nav-new .menu .out { border-bottom: 0; }
+
+/* ===== ページ枠 ===== */
+[data-theme="current"] .main { padding: 24px 16px; }
+@container (min-width: 640px) { [data-theme="current"] .main { padding: 24px 24px; } }
+@container (min-width: 1024px) { [data-theme="current"] .main { padding: 24px 32px; } }
+[data-theme="current"] .main.stockout { padding-top: 16px; padding-bottom: 16px; }
+[data-theme^="new"] .main { padding: 12px 12px 24px; }
+@container (min-width: 1024px) { [data-theme^="new"] .main { padding: 12px 24px 24px; } }
+.stack { display: flex; flex-direction: column; }
+[data-theme="current"] .stack { gap: 24px; }
+[data-theme="current"] .stockout .stack { gap: 16px; }
+[data-theme^="new"] .stack { gap: 12px; }
+
+/* ページ見出し */
+[data-theme="current"] .ph { border-bottom: 1px solid var(--line); padding-bottom: 20px; }
+[data-theme="current"] .ph h1 { font-size: 30px; line-height: 36px; font-weight: 600; margin: 0; }
+[data-theme="current"] .ph p { font-size: 14px; line-height: 24px; color: var(--muted); margin: 8px 0 0; }
+[data-theme="current"] .stockout .ph { border: 0; padding: 0; }
+[data-theme="current"] .stockout .ph h1 { font-size: 24px; line-height: 32px; }
+[data-theme^="new"] .ph { display: flex; align-items: baseline; gap: 12px; }
+[data-theme^="new"] .ph h1 { font-size: 22px; line-height: 28px; font-weight: 700; margin: 0; }
+[data-theme^="new"] .ph p { display: none; }
+@container (max-width: 639px) { [data-theme^="new"] .ph h1 { font-size: 20px; } }
+
+/* セクション見出し */
+.sh { margin: 0; font-weight: 600; }
+[data-theme="current"] .sh { font-size: 18px; line-height: 28px; }
+[data-theme^="new"] .sh { font-size: 18px; line-height: 24px; font-weight: 700; padding-bottom: 4px; border-bottom: 1px solid var(--ink); }
+@container (max-width: 639px) { [data-theme^="new"] .sh { font-size: 17px; } }
+
+/* ===== ホーム：現行 ===== */
+.h-ops { display: grid; gap: 16px; }
+@container (min-width: 768px) { .h-ops { grid-template-columns: 1fr 1fr; } }
+.h-op { min-height: 160px; border-radius: 12px; border: 2px solid var(--muted); background: var(--panel); padding: 24px; box-shadow: var(--shadow); display: block; }
+.h-op.out { border-color: var(--accent); }
+.h-op .t { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+.h-op .t p { margin: 0; font-size: 30px; line-height: 36px; font-weight: 600; }
+.h-op.out .t p { color: var(--accent); }
+.h-op .t span { background: var(--subtle); border-radius: 4px; padding: 4px 12px; font-size: 14px; font-weight: 600; }
+.h-op > p { margin: 16px 0 0; font-size: 14px; line-height: 24px; color: var(--muted); }
+.h-att { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@container (min-width: 640px) { .h-att { grid-template-columns: repeat(3, 1fr); } }
+.h-att a { border: 1px solid var(--line); border-radius: 4px; background: #fff; padding: 12px 16px; box-shadow: var(--shadow); display: block; }
+.h-att .t { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.h-att .t p { margin: 0; font-size: 14px; font-weight: 600; color: var(--muted); }
+.h-att .t b { border-radius: 4px; padding: 4px 10px; font-size: 14px; background: #f9fafb; color: var(--muted); }
+.h-att .t b.warn { background: #fef2f2; color: #dc2626; }
+.h-att .n { margin: 8px 0 0; font-size: 12px; line-height: 20px; color: var(--muted); }
+.h-recent { border: 1px solid var(--line); border-radius: 4px; background: #fff; padding: 20px; box-shadow: var(--shadow); }
+.h-recent .hd { display: flex; justify-content: space-between; font-size: 14px; font-weight: 600; color: var(--muted); }
+.h-recent .hd a { color: var(--accent); }
+.h-recent .r { display: grid; grid-template-columns: 1fr auto; gap: 8px; padding: 10px 0; font-size: 14px; border-top: 1px solid var(--line); }
+.h-recent .r:first-of-type { margin-top: 12px; border-top: 0; }
+.h-recent .r span { color: var(--muted); }
+.h-menu { display: grid; gap: 16px; }
+@container (min-width: 640px) { .h-menu { grid-template-columns: 1fr 1fr; } }
+@container (min-width: 1024px) { .h-menu { grid-template-columns: repeat(4, 1fr); } }
+.h-menu a { min-height: 128px; border: 1px solid var(--line); border-radius: 4px; background: #fff; padding: 20px; box-shadow: var(--shadow); display: block; }
+.h-menu .t { display: flex; justify-content: space-between; gap: 16px; }
+.h-menu .t p { margin: 0; font-size: 20px; line-height: 28px; font-weight: 600; }
+.h-menu .t span { background: #f9fafb; border-radius: 4px; padding: 2px 8px; font-size: 12px; font-weight: 600; color: var(--muted); align-self: flex-start; }
+.h-menu a > p { margin: 12px 0 0; font-size: 14px; line-height: 24px; color: var(--muted); }
+
+/* ===== ホーム：新案（伝票） ===== */
+.n-ops { display: grid; gap: 12px; }
+@container (min-width: 640px) { .n-ops { grid-template-columns: 1fr 1fr; } }
+.n-op { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 4px 16px; min-height: 88px; padding: 12px 20px; border: 1px solid var(--ctl-border); border-radius: 4px; background: var(--panel); }
+.n-op.out { background: var(--ink); border-color: var(--ink); color: #fff; }
+.n-op .t { font-size: 22px; line-height: 28px; font-weight: 700; margin: 0; }
+.n-op .d { grid-column: 1 / -1; font-size: 14px; line-height: 20px; margin: 0; color: var(--muted); }
+.n-op.out .d { color: #e3e2dd; }
+.n-op .c { font-size: 14px; font-weight: 600; }
+.sheet { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; }
+.n-att { display: grid; grid-template-columns: 1fr 1fr; }
+@container (min-width: 768px) { .n-att { grid-template-columns: repeat(4, 1fr); } }
+.n-att a { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 52px; padding: 6px 14px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.n-att a .l { font-size: 14px; font-weight: 600; }
+.n-att a .v { font-size: 22px; line-height: 28px; font-weight: 700; }
+.n-att a .v small { font-size: 13px; font-weight: 600; margin-left: 2px; }
+.n-att a.zero .l, .n-att a.zero .v { color: var(--muted); font-weight: 500; }
+.n-att a.hit { box-shadow: inset 3px 0 0 var(--p-shu); }
+.n-att a.hit .v { color: var(--p-shu); }
+.n-two { display: grid; gap: 12px; }
+@container (min-width: 1024px) { .n-two { grid-template-columns: 1fr 1fr; align-items: start; } }
+.n-tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
+.n-tbl th { text-align: left; font-size: 13px; font-weight: 600; color: var(--muted); padding: 6px 12px; border-bottom: 1px solid var(--ink); }
+.n-tbl td { padding: 8px 12px; height: 44px; border-bottom: 1px solid var(--line); }
+.n-tbl td.num { text-align: right; }
+.n-tbl tr:last-child td { border-bottom: 0; }
+.n-list a { display: grid; grid-template-columns: auto 1fr auto; align-items: baseline; gap: 12px; min-height: 48px; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+.n-list a:last-child { border-bottom: 0; }
+.n-list .t { font-size: 16px; font-weight: 700; white-space: nowrap; }
+.n-list .d { font-size: 13px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.n-list .c { font-size: 13px; color: var(--muted); }
+.sec { display: grid; gap: 8px; }
+.sec .more { font-size: 14px; font-weight: 600; text-decoration: underline; }
+
+/* ===== 出庫：絞り込み（構造は両案共通） ===== */
+.filter { display: grid; gap: 8px; border: 1px solid var(--line); background: var(--panel); padding: 12px; border-radius: 12px; }
+[data-theme^="new"] .filter { border-radius: 4px; }
+.filter .lbl { font-size: 14px; font-weight: 600; margin: 0; }
+.cats { display: flex; flex-wrap: wrap; gap: 6px; }
+.cat { min-height: 36px; white-space: nowrap; border-radius: var(--radius); border: 1px solid var(--ctl-border); background: var(--panel); padding: 0 10px; font-size: 12px; font-weight: 600; color: var(--ink); cursor: pointer; }
+@container (min-width: 640px) { .cat { font-size: 14px; } }
+.cat.sel { background: var(--primary); border-color: var(--primary); color: #fff; }
+.search { display: flex; gap: 8px; }
+.search input { height: 40px; flex: 1; min-width: 0; border: 1px solid var(--ctl-border); border-radius: var(--radius); background: var(--panel); padding: 0 12px; font-size: 16px; }
+.status { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; font-size: 14px; color: var(--muted); margin: 0; }
+
+/* ===== 出庫カード（寸法は両案で同一。差は色・線・角・影のみ） ===== */
+.cards { display: grid; gap: 8px; }
+@container (min-width: 640px) { .cards { grid-template-columns: 1fr 1fr; } }
+@container (min-width: 1024px) { .cards { grid-template-columns: repeat(4, 1fr); } }
+.card { display: flex; flex-direction: column; gap: 4px; min-width: 0; height: 100%; border: 1px solid var(--line); background: var(--panel); padding: 8px; border-radius: var(--radius); box-shadow: var(--shadow); }
+.card .head { display: flow-root; border-radius: 4px; }
+@container (min-width: 640px) { .card .head { min-height: 80px; } }
+@container (min-width: 1024px) { .card .head { min-height: 96px; } }
+.photo { float: left; margin: 0 8px 4px 0; width: 80px; height: 80px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--subtle); display: grid; place-items: center; color: var(--ink); }
+.photo svg { width: 24px; height: 24px; }
+.card .cat-l { font-size: 12px; line-height: 16px; color: var(--muted); margin: 0; }
+.card h2 { font-size: 16px; line-height: 20px; font-weight: 600; margin: 0; overflow-wrap: anywhere; }
+.card .spec { font-size: 12px; line-height: 16px; color: var(--muted); margin: 2px 0 0; overflow-wrap: anywhere; }
+.howto { display: grid; grid-template-columns: auto minmax(0,1fr); align-items: center; gap: 8px; border: 1px solid var(--accent); background: var(--subtle); border-radius: var(--radius); padding: 6px 8px; }
+[data-theme^="new"] .howto { border-color: var(--ctl-border); background: var(--panel); }
+.howto .k { font-size: 12px; line-height: 16px; font-weight: 600; margin: 0; }
+.howto .v { font-size: 16px; line-height: 20px; font-weight: 600; margin: 0; overflow-wrap: anywhere; }
+.qty { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 8px; border-radius: var(--radius); background: var(--subtle); padding: 6px 8px; }
+[data-theme^="new"] .qty { background: transparent; border-radius: 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 5px 2px; }
+.qty p { margin: 0; display: flex; align-items: baseline; gap: 4px; }
+.qty .k { font-size: 12px; }
+.qty strong.big { font-size: 24px; line-height: 32px; }
+.qty .u { font-size: 14px; }
+.qty .base { font-size: 12px; }
+.qty .base strong { font-size: 16px; }
+.short { font-size: 12px; line-height: 16px; font-weight: 600; margin: 0; }
+[data-theme^="new"] .card.is-short { box-shadow: inset 3px 0 0 var(--p-shu); }
+[data-theme^="new"] .card.is-short .short { color: var(--p-shu); }
+[data-theme^="new"] .card.is-short .qty strong.big { color: var(--p-shu); }
+.ctl { margin-top: auto; display: grid; gap: 6px; }
+.ctl .k { font-size: 12px; line-height: 16px; font-weight: 600; margin: 0; }
+.stepper { display: grid; grid-template-columns: 48px minmax(64px,1fr) 48px; gap: 6px; }
+.btn { min-height: 48px; border: 1px solid var(--ctl-border); border-radius: var(--radius); background: var(--panel); color: var(--ink); font-size: 16px; font-weight: 600; cursor: pointer; }
+.stepper .btn { font-size: 20px; padding: 0; }
+.stepper input { height: 48px; min-width: 0; border: 1px solid var(--ctl-border); border-radius: var(--radius); background: var(--panel); text-align: center; font-size: 20px; font-weight: 600; }
+.primary { min-height: 48px; border: 0; border-radius: var(--radius); background: var(--primary); color: #fff; font-size: 16px; font-weight: 600; cursor: pointer; padding: 0 8px; }
+.primary:hover { background: var(--primary-hover); }
+.after { min-height: 16px; font-size: 12px; line-height: 16px; color: var(--muted); margin: 0; }
+.guide { display: grid; gap: 6px; margin-top: auto; }
+.guide p { margin: 0; font-size: 14px; font-weight: 600; }
+.guide details { border: 1px solid var(--ctl-border); background: var(--subtle); border-radius: var(--radius); padding: 8px 10px; font-size: 12px; line-height: 20px; }
+.guide summary { font-weight: 600; text-decoration: underline; cursor: pointer; }
+.guide a { display: inline-flex; min-height: 40px; align-items: center; justify-content: center; border: 1px solid var(--ctl-border); border-radius: var(--radius); font-size: 14px; text-decoration: underline; }
+.more-btn { min-height: 48px; width: 100%; max-width: 384px; margin: 0 auto; }
+
+/* ===== 奥行きを足した派生案（伝票の「刷り色」と「網掛け」） =====
+   実物の納品書は、罫線・項目名・見出し行が1色の刷り色で印刷され、
+   記入値（数量・品名）だけが墨で入る。見出し行には網掛けがある。
+   この2層（刷り＝構造／墨＝データ）で面に段差を作る。カードの寸法は変えない。 */
+[data-theme="new-sumi"] { --print: #2a2d2b; --print-hover: #000; --tint: #e7e5df; --canvas: #e9e7e1; }
+[data-theme="new-ai"]   { --print: #24476b; --print-hover: #1a3552; --tint: #e3e9f0; --canvas: #e8e9e6; }
+[data-theme="new-sumi"], [data-theme="new-ai"], [data-theme="new-basis"] { --primary: var(--print); --primary-hover: var(--print-hover); --accent: var(--print); }
+
+/* ナビ：刷り色の帯。現在地は紙色のタブ（帯から紙が覗く形） */
+:is([data-theme="new-sumi"],[data-theme="new-ai"],[data-theme="new-basis"]) .nav-new { background: var(--print); border-bottom: 0; color: #fff; }
+:is([data-theme="new-sumi"],[data-theme="new-ai"],[data-theme="new-basis"]) .nav-new .item { color: rgba(255,255,255,.82); border-bottom: 0; }
+:is([data-theme="new-sumi"],[data-theme="new-ai"],[data-theme="new-basis"]) .nav-new .item.cur { background: var(--canvas); color: var(--ink); box-shadow: inset 0 3px 0 var(--p-shu); }
+:is([data-theme="new-sumi"],[data-theme="new-ai"],[data-theme="new-basis"]) .nav-new .clinic { color: #fff; }
+:is([data-theme="new-sumi"],[data-theme="new-ai"],[data-theme="new-basis"]) .nav-new .staff { color: rgba(255,255,255,.82); }
+:is([data-theme="new-sumi"],[data-theme="new-ai"],[data-theme="new-basis"]) .nav-new .staff select { border-color: #fff; }
+:is([data-theme="new-sumi"],[data-theme="new-ai"],[data-theme="new-basis"]) .nav-new summary { border-color: rgba(255,255,255,.7); color: #fff; }
+:is([data-theme="new-sumi"],[data-theme="new-ai"],[data-theme="new-basis"]) .nav-new .menu { color: var(--ink); }
+
+/* セクション見出し＝伝票の見出し行（網掛け＋刷り色の上罫） */
+:is([data-theme="new-sumi"],[data-theme="new-ai"],[data-theme="new-basis"]) .sh { background: var(--tint); color: var(--print); border-bottom: 0; border-top: 2px solid var(--print); padding: 6px 10px; font-size: 16px; line-height: 20px; }
+:is([data-theme="new-sumi"],[data-theme="new-ai"],[data-theme="new-basis"]) .sh .more { color: var(--print); }
+:is([data-theme="new-sumi"],[data-theme="new-ai"],[data-theme="new-basis"]) .ph h1 { color: var(--ink); }
+
+/* 白い紙が台紙から一段浮く（影ではなく紙の縁） */
+:is([data-theme="new-sumi"],[data-theme="new-ai"],[data-theme="new-basis"]) .sheet,
+:is([data-theme="new-sumi"],[data-theme="new-ai"],[data-theme="new-basis"]) .filter { border-color: #c9c6bd; box-shadow: 0 1px 0 #c9c6bd; }
+:is([data-theme="new-sumi"],[data-theme="new-ai"],[data-theme="new-basis"]) .filter { box-shadow: inset 0 2px 0 var(--print), 0 1px 0 #c9c6bd; }
+:is([data-theme="new-sumi"],[data-theme="new-ai"],[data-theme="new-basis"]) .filter .lbl { color: var(--print); }
+
+/* ホーム */
+:is([data-theme="new-sumi"],[data-theme="new-ai"],[data-theme="new-basis"]) .n-op.out { background: var(--print); border-color: var(--print); }
+:is([data-theme="new-sumi"],[data-theme="new-ai"],[data-theme="new-basis"]) .n-op:not(.out) { box-shadow: inset 0 3px 0 var(--print); }
+:is([data-theme="new-sumi"],[data-theme="new-ai"],[data-theme="new-basis"]) .n-op:not(.out) .t { color: var(--print); }
+:is([data-theme="new-sumi"],[data-theme="new-ai"],[data-theme="new-basis"]) .n-tbl th { background: var(--tint); color: var(--print); border-bottom-color: var(--print); }
+:is([data-theme="new-sumi"],[data-theme="new-ai"],[data-theme="new-basis"]) .n-list .t { color: var(--print); }
+:is([data-theme="new-sumi"],[data-theme="new-ai"],[data-theme="new-basis"]) .n-att a .l { color: var(--print); }
+:is([data-theme="new-sumi"],[data-theme="new-ai"],[data-theme="new-basis"]) .n-att a.zero .l { color: var(--muted); }
+
+/* 出庫カード：上罫を刷り色、現在庫欄を網掛け、「出し方」の項目名を刷り色の小札に。寸法は不変 */
+:is([data-theme="new-sumi"],[data-theme="new-ai"],[data-theme="new-basis"]) .card { border-color: #c9c6bd; box-shadow: inset 0 2px 0 var(--print), 0 1px 0 #c9c6bd; }
+:is([data-theme="new-sumi"],[data-theme="new-ai"],[data-theme="new-basis"]) .card.is-short { box-shadow: inset 0 2px 0 var(--print), inset 3px 0 0 var(--p-shu), 0 1px 0 #c9c6bd; }
+:is([data-theme="new-sumi"],[data-theme="new-ai"],[data-theme="new-basis"]) .card .cat-l { color: var(--print); }
+:is([data-theme="new-sumi"],[data-theme="new-ai"],[data-theme="new-basis"]) .qty { background: var(--tint); border-color: transparent; }
+:is([data-theme="new-sumi"],[data-theme="new-ai"],[data-theme="new-basis"]) .qty .k, :is([data-theme="new-sumi"],[data-theme="new-ai"],[data-theme="new-basis"]) .qty .base { color: var(--print); }
+:is([data-theme="new-sumi"],[data-theme="new-ai"],[data-theme="new-basis"]) .howto { border-color: var(--print); }
+:is([data-theme="new-sumi"],[data-theme="new-ai"],[data-theme="new-basis"]) .howto .k { background: var(--print); color: #fff; padding: 2px 6px; border-radius: 2px; }
+:is([data-theme="new-sumi"],[data-theme="new-ai"],[data-theme="new-basis"]) .ctl .k { color: var(--print); }
+:is([data-theme="new-sumi"],[data-theme="new-ai"],[data-theme="new-basis"]) .photo { background: var(--tint); border-color: #c9c6bd; }
+
+/* ===== 押せる物の立体感（新案2・3） =====
+   押せる物＝下端に厚み（出っ張り）、入力欄＝内側に凹み、選択中＝押し込まれた状態。
+   影はレイアウトに影響しないため、カード・ボタンの寸法は変わらない。 */
+[data-theme="new-sumi"] { --edge: #000000; --edge-light: #a9a59b; }
+[data-theme="new-ai"]   { --edge: #142b43; --edge-light: #a9a59b; }
+:is([data-theme="new-sumi"],[data-theme="new-ai"],[data-theme="new-basis"]) :is(.primary, .cat.sel, .n-op.out) {
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.22), 0 3px 0 var(--edge), 0 4px 6px rgba(0,0,0,.18);
+}
+:is([data-theme="new-sumi"],[data-theme="new-ai"],[data-theme="new-basis"]) :is(.btn, .cat:not(.sel), .guide a) {
+  background: linear-gradient(#ffffff, #f1efe9);
+  box-shadow: inset 0 1px 0 #fff, 0 2px 0 var(--edge-light), 0 3px 4px rgba(0,0,0,.08);
+}
+:is([data-theme="new-sumi"],[data-theme="new-ai"],[data-theme="new-basis"]) .nav-new summary { background: transparent; box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 2px 0 rgba(0,0,0,.35); }
+:is([data-theme="new-sumi"],[data-theme="new-ai"],[data-theme="new-basis"]) .n-op:not(.out) {
+  box-shadow: inset 0 3px 0 var(--print), 0 3px 0 var(--edge-light), 0 4px 6px rgba(0,0,0,.08);
+}
+/* 押した瞬間：厚みの分だけ沈む */
+:is([data-theme="new-sumi"],[data-theme="new-ai"],[data-theme="new-basis"]) :is(.primary, .btn, .cat, .n-op, .guide a):active {
+  transform: translateY(2px);
+  box-shadow: inset 0 2px 3px rgba(0,0,0,.25);
+}
+/* 選択中のカテゴリーは押し込まれたまま（凹み）＋✓ */
+:is([data-theme="new-sumi"],[data-theme="new-ai"],[data-theme="new-basis"]) .cat.sel {
+  transform: translateY(2px);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,.45);
+}
+/* ===== 新案4 根拠版（docs/color-rationale-2026-10-08.md） =====
+   藍＝押せる物（Yahoo! JAPAN・デジタル庁・GOV.UK・NHSのリンク/操作色がすべて濃い青、ISO 7010の指示標識も青）
+   黄マーカー＝注意（JIS安全色の黄＝注意、NHSは警告を黄の面で示す）
+   朱＝停止（JIS安全色の赤＝停止・禁止。在庫0とエラーだけに予約）
+   フォーカス＝黄と墨の二重（デジタル庁・GOV.UK・NHS共通の方式） */
+[data-theme="new-basis"] {
+  --p-paper: #efeee9; --p-shu: #b52a1c; --p-green: #1e6b45;
+  --canvas: var(--p-paper); --subtle: var(--p-paper);
+  --print: #1f4e79; --print-hover: #163a5b; --tint: #e4ebf2;
+  --edge: #102a42; --edge-light: #a9a59b; --mark: #ffe066; --focus: #ffd400;
+}
+[data-theme="new-basis"] .nav-new .item.cur { box-shadow: none; font-weight: 700; }
+/* 基準未満（在庫あり）：朱を使わず、現在庫欄に黄のマーカー＋▲の文言 */
+[data-theme="new-basis"] .card.is-short { box-shadow: inset 0 2px 0 var(--print), 0 1px 0 #c9c6bd; }
+[data-theme="new-basis"] .card.is-short .qty { background: var(--mark); }
+[data-theme="new-basis"] .card.is-short .qty strong.big,
+[data-theme="new-basis"] .card.is-short .short { color: var(--ink); }
+[data-theme="new-basis"] .card.is-short .qty .k,
+[data-theme="new-basis"] .card.is-short .qty .base { color: var(--ink); }
+[data-theme="new-basis"] .card.is-short:not(.is-zero) .short::before { content: "▲ "; }
+/* 在庫0：朱は停止の意味にだけ使う */
+[data-theme="new-basis"] .card.is-zero { box-shadow: inset 0 2px 0 var(--print), inset 4px 0 0 var(--p-shu), 0 1px 0 #c9c6bd; }
+[data-theme="new-basis"] .card.is-zero .qty { background: var(--tint); }
+[data-theme="new-basis"] .card.is-zero .qty strong.big,
+[data-theme="new-basis"] .card.is-zero .short { color: var(--p-shu); }
+[data-theme="new-basis"] .card.is-zero .short::before { content: "■ "; }
+/* ホームの今日の注意：停止＝朱、注意＝黄マーカー、情報＝無彩色（強調しないものを増やす） */
+[data-theme="new-basis"] .n-att a.hit { box-shadow: none; }
+[data-theme="new-basis"] .n-att a.hit .v { color: var(--ink); }
+[data-theme="new-basis"] .n-att a[data-lv="warn"] .v { background: linear-gradient(transparent 52%, var(--mark) 52%); padding: 0 2px; }
+[data-theme="new-basis"] .n-att a[data-lv="stop"] { box-shadow: inset 4px 0 0 var(--p-shu); }
+[data-theme="new-basis"] .n-att a[data-lv="stop"] .v { color: var(--p-shu); }
+[data-theme="new-basis"] .n-att a[data-lv="info"] .l { color: var(--ink); font-weight: 600; }
+/* フォーカス：黄と墨の二重リング（白地でも藍地でも見える） */
+[data-theme="new-basis"] :is(a, button, input, select, summary):focus-visible {
+  outline: 2px solid var(--ink); outline-offset: 2px; box-shadow: 0 0 0 2px var(--focus) !important;
+}
+
+/* 入力欄は凹ませてボタンと区別する */
+:is([data-theme="new-sumi"],[data-theme="new-ai"],[data-theme="new-basis"]) :is(.stepper input, .search input, .staff select) {
+  box-shadow: inset 0 2px 3px rgba(0,0,0,.10);
+}
+</style>
+</head>
+<body>
+<div class="mock-bar" role="region" aria-label="モック操作">
+  <fieldset><legend>案</legend>
+    <button type="button" data-set-theme="current" aria-pressed="false">現行</button>
+    <button type="button" data-set-theme="new" aria-pressed="false">新案1 平刷り（前回）</button>
+    <button type="button" data-set-theme="new-sumi" aria-pressed="false">新案2 墨刷り＋網掛け</button>
+    <button type="button" data-set-theme="new-ai" aria-pressed="false">新案3 藍刷り＋網掛け</button>
+    <button type="button" data-set-theme="new-basis" aria-pressed="true">新案4 根拠版</button>
+  </fieldset>
+  <fieldset><legend>画面</legend>
+    <button type="button" data-set-screen="home" aria-pressed="true">ホーム</button>
+    <button type="button" data-set-screen="stockout" aria-pressed="false">出庫</button>
+  </fieldset>
+  <fieldset><legend>幅</legend>
+    <button type="button" data-set-width="1024" aria-pressed="true">1024 タブレット横</button>
+    <button type="button" data-set-width="768" aria-pressed="false">768 タブレット縦</button>
+    <button type="button" data-set-width="390" aria-pressed="false">390 スマホ</button>
+  </fieldset>
+  <div class="mock-metrics" id="metrics" aria-live="polite"></div>
+</div>
+
+<div class="mock-stage">
+<div class="frame" id="frame" data-theme="new-basis">
+<div class="fold"><span>タブレット横 768px の画面下端</span></div>
+<div class="app">
+
+  <!-- 共通ナビ：現行 -->
+  <div class="only-current">
+    <nav class="nav-cur" aria-label="アプリ内メニュー（現行）">
+      <div class="row1">
+        <div class="grp">
+          <a class="item" data-nav="home">ホーム</a><a class="item" data-nav="stockout">出庫</a><a class="item">納品</a><a class="item">在庫</a><a class="item">発注</a><a class="item">履歴</a><a class="item">棚卸</a>
+        </div>
+        <div class="grp">
+          <a class="util">管理</a><a class="util">マニュアル</a><a class="util">アカウント</a><a class="util">ログアウト</a>
+        </div>
+      </div>
+      <div class="row2">
+        <div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px"><p class="clinic">サンプル歯科 本院</p><p class="who">クリニック1共通 としてログイン中</p></div>
+        <label class="staff">作業スタッフ<select><option>山田（架空）</option></select></label>
+      </div>
+    </nav>
+  </div>
+
+  <!-- 共通ナビ：新案 -->
+  <div class="only-new">
+    <nav class="nav-new" aria-label="アプリ内メニュー（新案）">
+      <div class="bar">
+        <div class="grp">
+          <a class="item" data-nav="home">ホーム</a><a class="item" data-nav="stockout">出庫</a><a class="item">納品</a><a class="item">在庫</a><a class="item">発注</a><a class="item">履歴</a><a class="item">棚卸</a>
+        </div>
+        <div class="right">
+          <span class="clinic">サンプル歯科 本院</span>
+          <label class="staff">担当<select><option>山田（架空）</option></select></label>
+          <details><summary>その他 ▾</summary>
+            <div class="menu"><a>管理</a><a>マニュアル</a><a>アカウント</a><hr><a class="out">ログアウト</a></div>
+          </details>
+        </div>
+      </div>
+    </nav>
+  </div>
+
+  <!-- ===== ホーム ===== -->
+  <main class="main screen" data-screen="home">
+    <div class="stack wrap">
+      <header class="ph"><h1>ホーム</h1><p>今日の作業を選んでください。</p></header>
+
+      <!-- 現行 -->
+      <div class="only-current" data-first>
+        <div class="stack" style="gap:24px">
+          <section class="h-ops">
+            <a class="h-op out"><div class="t"><p>出庫する</p><span>出庫</span></div><p>商品のカードから選び、出す単位と数量を確認して記録します。</p></a>
+            <a class="h-op"><div class="t"><p>納品する</p><span>納品</span></div><p>納品待ちの発注を選び、届いた材料の数量を確認します。</p></a>
+          </section>
+          <section class="stack" style="gap:12px">
+            <h2 class="sh">今日の注意</h2>
+            <div class="h-att">
+              <a><div class="t"><p>確認待ち</p><b class="warn">2 件</b></div><p class="n">在庫変動から自動計算された発注候補</p></a>
+              <a><div class="t"><p>在庫0</p><b class="warn">1 件</b></div><p class="n">今日の使用前に優先確認したい材料</p></a>
+              <a><div class="t"><p>不足在庫</p><b class="warn">6 件</b></div><p class="n">最低在庫を下回っている材料</p></a>
+              <a><div class="t"><p>納品待ち</p><b class="warn">3 件</b></div><p class="n">受領確認を待っている発注</p></a>
+              <a><div class="t"><p>期限ロット</p><b>0 件</b></div><p class="n">期限切れまたは30日以内</p></a>
+              <a><div class="t"><p>長期在庫</p><b class="warn">12 件</b></div><p class="n">過去90日以内に出庫がない在庫</p></a>
+              <a><div class="t"><p>異常出庫検知</p><b>0 件</b></div><p class="n">通常より出庫数が多い商品</p></a>
+            </div>
+          </section>
+          <section class="h-recent">
+            <div class="hd"><span>直近の在庫更新</span><a>すべて見る</a></div>
+            <div class="r"><p style="margin:0"><b>綿球 #2</b> <span>出庫 2袋</span></p><span>10/08 10:12 山田</span></div>
+            <div class="r"><p style="margin:0"><b>グローブ ニトリル M</b> <span>出庫 1箱</span></p><span>10/08 09:40 佐藤</span></div>
+            <div class="r"><p style="margin:0"><b>エッチング材 ジェル</b> <span>納品 3本</span></p><span>10/07 17:05 鈴木</span></div>
+          </section>
+          <section class="stack" style="gap:12px">
+            <h2 class="sh">確認メニュー</h2>
+            <div class="h-menu">
+              <a><div class="t"><p>在庫一覧</p><span>420 件</span></div><p>現在庫と最低在庫</p></a>
+              <a><div class="t"><p>発注</p><span>予定 4 件</span></div><p>発注予定、納品待ち、納品済み</p></a>
+              <a><div class="t"><p>入出庫履歴</p></div><p>在庫変更の記録</p></a>
+              <a><div class="t"><p>棚卸</p></div><p>実在庫の入力と確定</p></a>
+              <a><div class="t"><p>商品マスタ</p><span>420 件</span></div><p>商品コード、規格、発注単位</p></a>
+              <a><div class="t"><p>発注先マスタ</p></div><p>取扱商品と発注候補</p></a>
+              <a><div class="t"><p>不足在庫</p><span>6 件</span></div><p>最低在庫を下回った材料</p></a>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <!-- 新案 -->
+      <div class="only-new" data-first>
+        <div class="stack" style="gap:16px">
+          <section class="n-ops">
+            <a class="n-op out"><p class="t">出庫する</p><span class="c">420 商品</span><p class="d">使った材料をカードから選んで記録します</p></a>
+            <a class="n-op"><p class="t">納品する</p><span class="c">納品待ち 3 件</span><p class="d">届いた材料の数量を確認して受け取ります</p></a>
+          </section>
+          <section class="sec">
+            <h2 class="sh">今日の注意</h2>
+            <div class="sheet n-att">
+              <a class="hit" data-lv="warn" title="在庫変動から自動計算された発注候補"><span class="l">確認待ち</span><span class="v tnum">2<small>件</small></span></a>
+              <a class="hit" data-lv="stop" title="今日の使用前に優先確認したい材料"><span class="l">在庫0</span><span class="v tnum">1<small>件</small></span></a>
+              <a class="hit" data-lv="warn" title="最低在庫を下回っている材料"><span class="l">不足在庫</span><span class="v tnum">6<small>件</small></span></a>
+              <a class="hit" data-lv="info" title="受領確認を待っている発注"><span class="l">納品待ち</span><span class="v tnum">3<small>件</small></span></a>
+              <a class="zero" title="期限切れまたは30日以内"><span class="l">期限ロット</span><span class="v tnum">0<small>件</small></span></a>
+              <a class="hit" data-lv="info" title="過去90日以内に出庫がない在庫"><span class="l">長期在庫</span><span class="v tnum">12<small>件</small></span></a>
+              <a class="zero" title="通常より出庫数が多い商品"><span class="l">異常出庫検知</span><span class="v tnum">0<small>件</small></span></a>
+              <a class="zero"><span class="l">&nbsp;</span><span class="v"></span></a>
+            </div>
+          </section>
+          <div class="n-two">
+            <section class="sec">
+              <h2 class="sh" style="display:flex;justify-content:space-between;align-items:baseline">直近の在庫更新 <a class="more">すべて見る</a></h2>
+              <div class="sheet">
+                <table class="n-tbl">
+                  <thead><tr><th>商品</th><th>内容</th><th style="text-align:right">日時・担当</th></tr></thead>
+                  <tbody>
+                    <tr><td><b>綿球 #2</b></td><td>出庫 <span class="tnum">2</span>袋</td><td class="num tnum">10/08 10:12 山田</td></tr>
+                    <tr><td><b>グローブ ニトリル M</b></td><td>出庫 <span class="tnum">1</span>箱</td><td class="num tnum">10/08 09:40 佐藤</td></tr>
+                    <tr><td><b>エッチング材 ジェル</b></td><td>納品 <span class="tnum">3</span>本</td><td class="num tnum">10/07 17:05 鈴木</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+            <section class="sec">
+              <h2 class="sh">確認メニュー</h2>
+              <div class="sheet n-list">
+                <a><span class="t">在庫一覧</span><span class="d">現在庫と最低在庫</span><span class="c tnum">420件</span></a>
+                <a><span class="t">発注</span><span class="d">発注予定、納品待ち、納品済み</span><span class="c tnum">予定 4件</span></a>
+                <a><span class="t">入出庫履歴</span><span class="d">在庫変更の記録</span><span class="c"></span></a>
+                <a><span class="t">棚卸</span><span class="d">実在庫の入力と確定</span><span class="c"></span></a>
+                <a><span class="t">商品マスタ</span><span class="d">商品コード、規格、発注単位</span><span class="c tnum">420件</span></a>
+                <a><span class="t">発注先マスタ</span><span class="d">取扱商品と発注候補</span><span class="c"></span></a>
+                <a><span class="t">不足在庫</span><span class="d">最低在庫を下回った材料</span><span class="c tnum">6件</span></a>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== 出庫 ===== -->
+  <main class="main stockout screen" data-screen="stockout">
+    <div class="stack wrap">
+      <header class="ph"><h1>出庫する</h1></header>
+      <section class="filter" aria-label="商品を絞り込む" data-first>
+        <div style="display:grid;gap:6px">
+          <p class="lbl">カテゴリー</p>
+          <div class="cats">
+            <button type="button" class="cat sel">✓ すべて</button><button type="button" class="cat">印象材</button><button type="button" class="cat">充填・修復</button><button type="button" class="cat">接着・前処理</button><button type="button" class="cat">根管治療</button><button type="button" class="cat">衛生・感染対策</button><button type="button" class="cat">ペーパー・綿製品</button><button type="button" class="cat">仮封・セメント</button><button type="button" class="cat">切削・研磨</button><button type="button" class="cat">技工用品</button><button type="button" class="cat">麻酔・注射</button><button type="button" class="cat">未分類</button>
+          </div>
+        </div>
+        <div style="display:grid;gap:4px">
+          <label class="lbl" for="q">商品名・規格で検索</label>
+          <div class="search"><input id="q" type="search" placeholder="商品名やサイズを入力"></div>
+        </div>
+        <p class="status"><span>420商品 ／ 全420商品</span><span>担当: 山田（架空）</span></p>
+      </section>
+      <section class="cards" aria-label="在庫商品のカード" id="cards"></section>
+      <button type="button" class="btn more-btn">さらに24商品を表示（残り412商品）</button>
+    </div>
+  </main>
+
+</div>
+</div>
+</div>
+
+<template id="photo"><span class="photo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="m3 7 9-4 9 4v10l-9 4-9-4V7Zm0 0 9 4 9-4M12 11v10M7.5 5l9 4"/></svg></span></template>
+
+<script>
+// 架空データ。名称の長さ・規格の長さ・状態のばらつきでカード高さの揃い方を確かめる
+const items = [
+  {c:"充填・修復", n:"コンポジットレジン ユニバーサル A2", s:"シリンジ 4g ×1本", h:"1本", q:5, m:3, u:"本"},
+  {c:"印象材", n:"シリコーン印象材 ライトボディ カートリッジ", s:"50mL×2本 ミキシングチップ12個付 REF-SL50W2", h:"1箱から1本ずつ", q:2, m:4, u:"本"},
+  {c:"ペーパー・綿製品", n:"綿球 #2", s:"", h:"1袋", q:18, m:10, u:"袋"},
+  {c:"衛生・感染対策", n:"グローブ ニトリル パウダーフリー Mサイズ", s:"100枚入", h:"1箱", q:0, m:6, u:"箱", zero:true},
+  {c:"根管治療", n:"手用ファイル Kタイプ 25mm アソート", s:"#15-40 6本入 ステンレス製 ISOカラー", h:"1パック", q:7, m:5, u:"パック"},
+  {c:"接着・前処理", n:"エッチング材 ジェル 37%", s:"3mL シリンジ ×2本", h:"1本", q:9, m:4, u:"本"},
+  {c:"仮封・セメント", n:"仮封材 ペーストタイプ", s:"", h:"未確認", q:3, m:2, u:null},
+  {c:"切削・研磨", n:"ダイヤモンドポイント FG 206 SuperCoarseGrainVeryLongShankTypeX", s:"5本入", h:"1本", q:11, m:5, u:"本"},
+];
+const cards = document.getElementById("cards");
+const photo = document.getElementById("photo");
+for (const it of items) {
+  const short = it.q < it.m;
+  const el = document.createElement("article");
+  el.className = "card" + (short ? " is-short" : "") + (it.q === 0 ? " is-zero" : "");
+  el.innerHTML = `
+    <a class="head" href="#"><div></div><p class="cat-l">${it.c}</p><h2>${it.n}</h2>${it.s ? `<p class="spec">${it.s}</p>` : ""}</a>
+    <div class="howto"><p class="k">出し方</p><p class="v">${it.h}</p></div>
+    <div class="qty"><p><span class="k">現在庫</span><strong class="big tnum">${it.q}</strong> <span class="u">${it.u || "単位未確認"}</span></p><p class="base">基準 <strong class="tnum">${it.m}</strong> ${it.u || ""}</p></div>
+    ${short ? `<p class="short">${it.zero ? "在庫切れ" : "基準在庫を下回っています"}</p>` : ""}
+    ${it.u === null
+      ? `<div class="guide"><p>単位の確認が必要です</p><details><summary>単位の決め方を見る</summary><ol style="margin:6px 0 0;padding-left:16px"><li>何を1と数えるか</li><li>現在庫と基準数が同じ単位か</li><li>箱から出す場合の入数と開封済みの残数</li></ol></details><a href="#">商品設定で単位を入力</a></div>`
+      : it.q === 0
+        ? `<div class="ctl"><p style="margin:0;font-size:14px;font-weight:600">在庫がないため出庫できません</p><a class="btn" style="display:inline-flex;align-items:center;justify-content:center;text-decoration:underline" href="#">商品詳細を確認</a></div>`
+        : `<div class="ctl"><p class="k">数量（${it.u}）</p><div class="stepper"><button type="button" class="btn">−</button><input type="number" value="1" aria-label="出庫数"><button type="button" class="btn">＋</button></div><button type="button" class="primary">1${it.u}を出庫</button><p class="after">出庫後 ${it.q - 1}${it.u}</p></div>`}`;
+  el.querySelector(".head > div").replaceWith(photo.content.cloneNode(true));
+  cards.appendChild(el);
+}
+
+const frame = document.getElementById("frame");
+let theme = "new-basis", screen = "home", width = 1024;
+
+function apply() {
+  frame.dataset.theme = theme;
+  frame.style.width = width + "px";
+  document.querySelectorAll(".screen").forEach(s => s.classList.toggle("on", s.dataset.screen === screen));
+  document.querySelectorAll("[data-nav]").forEach(a => a.classList.toggle("cur", a.dataset.nav === screen));
+  document.querySelectorAll("[data-set-theme]").forEach(b => b.setAttribute("aria-pressed", b.dataset.setTheme === theme));
+  document.querySelectorAll("[data-set-screen]").forEach(b => b.setAttribute("aria-pressed", b.dataset.setScreen === screen));
+  document.querySelectorAll("[data-set-width]").forEach(b => b.setAttribute("aria-pressed", +b.dataset.setWidth === width));
+  measure();
+}
+
+// 両案を同じ幅で描画し直して実測する（表示中の案に戻してから終わる）
+function snapshot(t) {
+  frame.dataset.theme = t;
+  const top = frame.getBoundingClientRect().top;
+  const scr = frame.querySelector(".screen.on");
+  const first = [...scr.querySelectorAll("[data-first]")].find(e => e.offsetParent !== null);
+  const r = { start: Math.round(first.getBoundingClientRect().top - top), total: Math.round(frame.scrollHeight) };
+  if (screen === "stockout") {
+    const rows = new Map();
+    for (const c of cards.children) {
+      const b = c.getBoundingClientRect();
+      const k = Math.round(b.top);
+      rows.set(k, Math.max(rows.get(k) || 0, Math.round(b.height)));
+    }
+    r.rows = [...rows.values()];
+    const vis = [...cards.children].filter(c => c.getBoundingClientRect().bottom - top <= 768).length;
+    r.visible = vis;
+  }
+  return r;
+}
+function measure() {
+  const cmp = theme === "current" ? "new-basis" : theme; const cur = snapshot("current"), nw = snapshot(cmp);
+  frame.dataset.theme = theme;
+  const pct = (a, b) => Math.round((1 - b / a) * 100);
+  let html = `<span>本体の開始位置: 現行 <b>${cur.start}px</b> → 新案 <b>${nw.start}px</b>（−${pct(cur.start, nw.start)}%）</span>`;
+  html += `<span>ページ全高: 現行 <b>${cur.total}px</b> → 新案 <b>${nw.total}px</b></span>`;
+  if (cur.rows) {
+    const same = cur.rows.length === nw.rows.length && cur.rows.every((h, i) => h === nw.rows[i]);
+    html += `<span>カード行の高さ: 現行 <b>${cur.rows.join(" / ")}px</b> ・ 新案 <b>${nw.rows.join(" / ")}px</b> ${same ? "（一致）" : "（差あり）"}</span>`;
+    html += `<span>768pxの画面に収まるカード: 現行 <b>${cur.visible}枚</b> → 新案 <b>${nw.visible}枚</b></span>`;
+  }
+  document.getElementById("metrics").innerHTML = html;
+}
+
+document.addEventListener("click", e => {
+  const b = e.target.closest("button");
+  if (!b) return;
+  if (b.dataset.setTheme) theme = b.dataset.setTheme;
+  else if (b.dataset.setScreen) screen = b.dataset.setScreen;
+  else if (b.dataset.setWidth) width = +b.dataset.setWidth;
+  else return;
+  apply();
+});
+window.addEventListener("resize", measure);
+apply();
+</script>
+</body>
+</html>
