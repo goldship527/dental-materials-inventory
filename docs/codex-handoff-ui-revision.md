@@ -560,3 +560,56 @@ grep -rnoE '\b(text|bg|border|ring)-(warning|caution)\b' src | wc -l
      - 帯の上端が0px（すき間なし）
    - 本体の開始位置と §5.2 のカード寸法（P1との差0px）を再確認する。
 5. ドラフトのまま止める。マージしない。
+
+---
+
+## 13. P2 再々レビュー結果（2026-10-08・Claude Code）: 承認
+
+対象: PR #17（`05ae198`）。
+
+### 13.1 レビュー側での再現
+
+- 機械検査12項目は全部0件。
+  - `w-screen`／`100vw` 0件
+  - `AppNav` を直接使うページ 0件
+  - ナビの負のマージン 0件
+- `PageShell` は53ページ。`AppNav` は `<main>` の外の最上部にあり、`w-full`（100vwではない）。そのため、スクロールバーの幅によるはみ出しも、帯の上のすき間も、構造上起きない。
+- 印刷用の指定は451件から453件で、消えたものは無い。
+  - 外したナビのラッパーの `print:hidden` は、ナビ自体の `print:hidden` で代わる。
+  - 印刷画面の見出しの `print:hidden` は `PageHeader` の `className` に移った。
+  - 発注・不足在庫の操作列の `print:hidden` は維持されている。
+  - 印刷画面の外枠は `shellClassName="print:bg-panel"` で白地。
+- CI（receipt-regression）、Vercel、Vercel Preview Comments はすべて成功。
+
+### 13.2 判断
+
+- **P2を承認する。** マージと本番公開は利用者の指示を受けてから行う（手順は §13.4）。
+
+### 13.3 次回へ持ち越す小さな項目（公開を止めない）
+
+- 15ページの `mainClassName` に `lg:px-6` が無い。1024px以上で、本体の左端がナビの項目の左端より12px外側に出る。見た目のそろえだけの問題。次の小さな修正で、`PageShell` の既定の余白に統一する。
+  - 対象: 出庫、納品、商品の新規・編集、発注先の新規・詳細・編集、棚卸の新規・詳細・履歴、バーコード読取履歴2画面、印刷系3画面
+- `favicon.ico` の404（P1以前からある問題）。
+
+### 13.4 本番公開の手順（利用者の指示を受けてから）
+
+§9 と同じ手順で行う。
+
+1. PR #17 をマージする。
+   ```bash
+   gh pr ready 17
+   gh pr merge 17 --merge --match-head-commit 05ae1983b57c0684407bade33531cf38b571180f
+   ```
+   - head が変わっていたら止める。
+2. Production デプロイが Ready であることを確認する。
+3. ログインせずに確認する。
+   - `/login` が200
+   - 未ログインの `/stock-out`・`/receive`・`/home` が `/login` へ転送される
+4. 公開記録を `docs/ui-revision-p2-release` でPRにして、マージする。
+   - 本書の最新版（§13まで）を反映する。
+   - `dev-log.md` に朝礼反映のブロックを追記する。
+5. `C:\Dev\dental-materials-inventory` を `git pull --ff-only` で同期する。
+   - 本書の未コミット変更は、master の版と内容が同じなら合わせてよい。
+   - master に無い内容があれば止める。
+6. 共有文脈（`current-state.md`、`decisions.md`）の該当の節を、P2公開済みに更新する。
+7. §9.4 と同じ形式で報告する。
