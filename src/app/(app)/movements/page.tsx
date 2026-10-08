@@ -164,7 +164,7 @@ export default async function MovementsPage({ searchParams }: PageProps) {
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
             <h1 className="mt-2 text-xl font-semibold">入出庫履歴</h1>
           </div>
-          <a className="inline-flex h-11 shrink-0 items-center justify-center rounded border border-line px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent" href="/home">
+          <a className="inline-flex h-11 shrink-0 items-center justify-center rounded btn-secondary px-4 text-sm font-semibold transition" href="/home">
             ホームへ戻る
           </a>
         </header>
@@ -190,7 +190,7 @@ export default async function MovementsPage({ searchParams }: PageProps) {
         <section className="rounded border border-line bg-panel shadow-sheet">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1120px] border-collapse text-left text-sm">
-              <thead className="bg-subtle text-xs text-muted">
+              <thead className="bg-subtle text-label text-muted">
                 <tr>
                   <th className="border-b border-line px-3 py-3">日時</th>
                   <th className="border-b border-line px-3 py-3">商品</th>

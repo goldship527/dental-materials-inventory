@@ -35,7 +35,7 @@ export function SupplierOrderRecordPanel({
     <div className="grid gap-2 print:hidden">
       <div className="flex flex-wrap justify-end gap-2">
         <a
-          className="inline-flex min-h-9 items-center justify-center rounded border border-accent/30 bg-panel px-3 py-1.5 text-xs font-semibold text-accent transition hover:bg-tint"
+          className="inline-flex min-h-9 items-center justify-center rounded btn-secondary border-accent/30 px-3 py-1.5 text-xs font-semibold transition"
           href={printHref}
         >
           このディーラーだけ印刷
@@ -43,7 +43,7 @@ export function SupplierOrderRecordPanel({
         <button
           type="button"
           onClick={() => setIsOpen((current) => !current)}
-          className="inline-flex min-h-9 items-center justify-center rounded bg-accent px-3 py-1.5 text-xs font-semibold text-panel transition hover:bg-accentDeep"
+          className="inline-flex min-h-9 items-center justify-center rounded btn-primary px-3 py-1.5 text-xs font-semibold transition"
         >
           {isOpen ? "入力を閉じる" : "発注済みにする"}
         </button>
@@ -62,11 +62,11 @@ export function SupplierOrderRecordPanel({
             発注スタッフ: {selectedStaffOperator ? selectedStaffOperator.displayName : "画面上部で選択してください"}
           </p>
           <div className="grid gap-2 lg:grid-cols-[auto_12rem_1fr_1fr_auto] lg:items-end">
-            <label className="flex h-9 items-center gap-2 whitespace-nowrap text-xs font-semibold text-muted">
+            <label className="flex h-9 items-center gap-2 whitespace-nowrap text-label font-semibold text-muted">
               <input type="checkbox" name="confirmOrdered" required className="h-4 w-4 accent-accent" />
               送付済み確認
             </label>
-            <label className="grid gap-1 text-xs font-semibold text-muted">
+            <label className="grid gap-1 text-label font-semibold text-muted">
               送付方法
               <select
                 name="orderedMethod"
@@ -99,7 +99,7 @@ export function SupplierOrderRecordPanel({
             <SubmitButton
               pendingLabel="移動中"
               disabled={!canSubmit}
-              className="h-9 rounded bg-accent px-3 text-xs font-semibold text-panel transition hover:bg-accentDeep disabled:cursor-not-allowed disabled:opacity-50"
+              className="h-9 rounded btn-primary px-3 text-xs font-semibold transition disabled:cursor-not-allowed"
             >
               納品待ちへ移す
             </SubmitButton>

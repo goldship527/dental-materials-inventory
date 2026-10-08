@@ -431,8 +431,8 @@ export function BarcodeBatchClient({ clinicId, initialMode, fixedMode, staffOper
                   onClick={() => changeMode("OUT")}
                   className={
                     mode === "OUT"
-                      ? "h-8 rounded bg-accent px-3 text-sm font-semibold text-panel"
-                      : "h-8 rounded px-3 text-sm font-semibold text-muted transition hover:bg-panel hover:text-accent"
+                      ? "h-8 rounded btn-primary px-3 text-sm font-semibold"
+                      : "h-8 rounded btn-secondary px-3 text-sm font-semibold transition"
                   }
                 >
                   出庫
@@ -442,8 +442,8 @@ export function BarcodeBatchClient({ clinicId, initialMode, fixedMode, staffOper
                   onClick={() => changeMode("IN")}
                   className={
                     mode === "IN"
-                      ? "h-8 rounded bg-accent px-3 text-sm font-semibold text-panel"
-                      : "h-8 rounded px-3 text-sm font-semibold text-muted transition hover:bg-panel hover:text-accent"
+                      ? "h-8 rounded btn-primary px-3 text-sm font-semibold"
+                      : "h-8 rounded btn-secondary px-3 text-sm font-semibold transition"
                   }
                 >
                   納品
@@ -454,7 +454,7 @@ export function BarcodeBatchClient({ clinicId, initialMode, fixedMode, staffOper
 
           <form onSubmit={handleScanSubmit} className="grid gap-1">
             <div className="flex min-h-5 items-center justify-between gap-3">
-              <label className="text-xs font-semibold text-muted" htmlFor="batch-barcode-input">
+              <label className="text-label font-semibold text-muted" htmlFor="batch-barcode-input">
                 {mode === "IN" ? "納品バーコード / スタッフバーコード" : "商品バーコード / スタッフバーコード"}
               </label>
               <p className="truncate text-xs font-semibold text-ink">
@@ -474,7 +474,7 @@ export function BarcodeBatchClient({ clinicId, initialMode, fixedMode, staffOper
               <button
                 type="submit"
                 disabled={isPending}
-                className="inline-flex h-10 items-center rounded bg-accent px-4 text-xs font-semibold text-panel transition hover:bg-accentDeep disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex h-10 items-center rounded btn-primary px-4 text-xs font-semibold transition disabled:cursor-not-allowed"
               >
                 {isPending ? "読み取り中" : "追加"}
               </button>
@@ -517,7 +517,7 @@ export function BarcodeBatchClient({ clinicId, initialMode, fixedMode, staffOper
               type="button"
               onClick={clearLines}
               disabled={lines.length === 0 || isPending}
-              className="h-9 rounded border border-line px-3 text-xs font-semibold text-muted transition hover:border-danger hover:text-danger disabled:cursor-not-allowed disabled:opacity-50"
+              className="h-9 rounded btn-secondary btn-danger px-3 text-xs font-semibold transition disabled:cursor-not-allowed"
             >
               クリア
             </button>
@@ -589,7 +589,7 @@ export function BarcodeBatchClient({ clinicId, initialMode, fixedMode, staffOper
                       type="button"
                       onClick={() => updateLineQuantity(line.id, line.quantity - 1)}
                       disabled={!readyStatuses.has(line.status) || isReceiveLocked}
-                      className="h-9 rounded border border-line text-base font-semibold text-muted transition hover:border-accent hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
+                      className="h-9 rounded btn-secondary text-base font-semibold transition disabled:cursor-not-allowed"
                       aria-label="数量を減らす"
                     >
                       -
@@ -608,7 +608,7 @@ export function BarcodeBatchClient({ clinicId, initialMode, fixedMode, staffOper
                       type="button"
                       onClick={() => updateLineQuantity(line.id, line.quantity + 1)}
                       disabled={!readyStatuses.has(line.status) || isReceiveLocked}
-                      className="h-9 rounded border border-line text-base font-semibold text-muted transition hover:border-accent hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
+                      className="h-9 rounded btn-secondary text-base font-semibold transition disabled:cursor-not-allowed"
                       aria-label="数量を増やす"
                     >
                       +
@@ -622,7 +622,7 @@ export function BarcodeBatchClient({ clinicId, initialMode, fixedMode, staffOper
                               currentLines.map((l) => (l.id === line.id ? { ...l, isQuantityEdited: true } : l)),
                             )
                           }
-                          className="h-9 rounded border border-line px-3 text-xs font-semibold text-muted transition hover:border-accent hover:text-accent"
+                          className="h-9 rounded btn-secondary px-3 text-xs font-semibold transition"
                         >
                           数量変更
                         </button>
@@ -630,7 +630,7 @@ export function BarcodeBatchClient({ clinicId, initialMode, fixedMode, staffOper
                       <button
                         type="button"
                         onClick={() => removeLine(line.id)}
-                        className="h-9 rounded border border-line px-3 text-xs font-semibold text-muted transition hover:border-danger hover:text-danger"
+                        className="h-9 rounded btn-secondary btn-danger px-3 text-xs font-semibold transition"
                       >
                         削除
                       </button>
@@ -653,8 +653,8 @@ export function BarcodeBatchClient({ clinicId, initialMode, fixedMode, staffOper
                     key={option}
                     className={
                       reason === option
-                        ? "inline-flex h-10 cursor-pointer items-center justify-center rounded bg-accent px-3 text-sm font-semibold text-panel"
-                        : "inline-flex h-10 cursor-pointer items-center justify-center rounded border border-line bg-panel px-3 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+                        ? "inline-flex h-10 cursor-pointer items-center justify-center rounded chip-selected px-3 text-sm font-semibold"
+                        : "inline-flex h-10 cursor-pointer items-center justify-center rounded btn-secondary px-3 text-sm font-semibold transition"
                     }
                   >
                     <input
@@ -701,7 +701,7 @@ export function BarcodeBatchClient({ clinicId, initialMode, fixedMode, staffOper
               type="button"
               onClick={() => confirmBatch(false)}
               disabled={!canConfirm}
-              className="mt-4 h-11 w-full rounded bg-accent px-5 text-sm font-semibold text-panel transition hover:bg-accentDeep disabled:cursor-not-allowed disabled:opacity-60"
+              className="mt-4 h-11 w-full rounded btn-primary px-5 text-sm font-semibold transition disabled:cursor-not-allowed"
             >
               {isPending ? "確定中" : mode === "IN" ? "一括受領確定" : "一括出庫確定"}
             </button>
@@ -716,7 +716,7 @@ export function BarcodeBatchClient({ clinicId, initialMode, fixedMode, staffOper
                 type="button"
                 onClick={() => confirmBatch(true)}
                 disabled={!selectedStaffOperatorId || readyLines.length === invalidStockOutLines.length || isPending}
-                className="mt-3 h-10 w-full rounded border border-line bg-panel px-4 text-sm font-semibold text-ink transition hover:border-line disabled:cursor-not-allowed disabled:opacity-50"
+                className="mt-3 h-10 w-full rounded btn-secondary px-4 text-sm font-semibold transition disabled:cursor-not-allowed"
               >
                 不足行を除外して確定
               </button>

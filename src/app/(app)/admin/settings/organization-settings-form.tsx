@@ -63,7 +63,7 @@ export function OrganizationSettingsForm({ anomalyOutThreshold }: OrganizationSe
         <button
           type="submit"
           disabled={isPending}
-          className="rounded bg-accent px-5 py-3 text-sm font-semibold text-panel transition hover:bg-accentDeep disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded btn-primary px-5 py-3 text-sm font-semibold transition disabled:cursor-not-allowed"
         >
           {isPending ? "保存中" : "設定を保存"}
         </button>

@@ -65,31 +65,31 @@ export default async function BarcodeStockPage({ searchParams }: PageProps) {
           </div>
           <div className="flex shrink-0 flex-wrap gap-3">
             <a
-              className="inline-flex h-11 items-center justify-center rounded bg-accent px-4 text-sm font-semibold text-panel transition hover:bg-accentDeep"
+              className="inline-flex h-11 items-center justify-center rounded btn-primary px-4 text-sm font-semibold transition"
               href="/barcode/batch?mode=receive"
             >
               納品
             </a>
             <a
-              className="inline-flex h-11 items-center justify-center rounded border border-accent px-4 text-sm font-semibold text-accent transition hover:bg-tint"
+              className="inline-flex h-11 items-center justify-center rounded btn-secondary px-4 text-sm font-semibold transition"
               href="/barcode/batch"
             >
               連続出庫
             </a>
             <a
-              className="inline-flex h-11 items-center justify-center rounded border border-line px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+              className="inline-flex h-11 items-center justify-center rounded btn-secondary px-4 text-sm font-semibold transition"
               href="/barcode"
             >
               バーコード検索
             </a>
             <a
-              className="inline-flex h-11 items-center justify-center rounded border border-line px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+              className="inline-flex h-11 items-center justify-center rounded btn-secondary px-4 text-sm font-semibold transition"
               href="/movements?source=BARCODE_STOCK"
             >
               履歴を見る
             </a>
             <a
-              className="inline-flex h-11 items-center justify-center rounded border border-line px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+              className="inline-flex h-11 items-center justify-center rounded btn-secondary px-4 text-sm font-semibold transition"
               href="/home"
             >
               ホームへ戻る
@@ -119,7 +119,7 @@ export default async function BarcodeStockPage({ searchParams }: PageProps) {
           {barcode && results.length === 0 ? (
             <section className="rounded border border-line bg-markSoft p-5 text-sm text-ink shadow-sheet">
               <p className="font-semibold">商品が見つかりませんでした。</p>
-              <a className="mt-4 inline-flex h-11 items-center rounded border border-line bg-panel px-4 font-semibold" href={`/barcode?barcode=${encodeURIComponent(barcode)}`}>
+              <a className="mt-4 inline-flex h-11 items-center rounded btn-secondary px-4 font-semibold" href={`/barcode?barcode=${encodeURIComponent(barcode)}`}>
                 商品検索へ
               </a>
             </section>
@@ -132,7 +132,7 @@ export default async function BarcodeStockPage({ searchParams }: PageProps) {
                 {results.map((row) => (
                   <a
                     key={row.productId}
-                    className="rounded border border-line bg-panel p-4 font-semibold text-ink transition hover:border-line"
+                    className="rounded btn-secondary p-4 font-semibold transition"
                     href={`/products/${row.productId}`}
                   >
                     {row.productName}
@@ -154,7 +154,7 @@ export default async function BarcodeStockPage({ searchParams }: PageProps) {
                       {selectedProduct.productCode ?? "コード未設定"} / JAN {selectedProduct.janCode ?? "-"}
                     </p>
                   </div>
-                  <span className={`shrink-0 rounded px-3 py-1 text-xs font-semibold ${status.badgeClassName}`}>
+                  <span className={`shrink-0 rounded px-3 py-1 text-label font-semibold ${status.badgeClassName}`}>
                     {status.label}
                   </span>
                 </div>

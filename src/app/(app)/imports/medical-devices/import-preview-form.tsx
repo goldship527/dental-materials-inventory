@@ -40,12 +40,12 @@ export function ImportPreviewForm({ q, sourceFile, duplicateOnly, sourceFiles }:
         重複JANのみ
       </label>
       <div className="flex flex-wrap gap-2 lg:self-end xl:flex-nowrap">
-        <button type="submit" className="h-11 rounded bg-accent px-5 text-sm font-semibold text-panel transition hover:bg-accentDeep">
+        <button type="submit" className="h-11 rounded btn-primary px-5 text-sm font-semibold transition">
           表示
         </button>
         <a
           href="/imports/medical-devices"
-          className="flex h-11 items-center rounded border border-line px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+          className="flex h-11 items-center rounded btn-secondary px-4 text-sm font-semibold transition"
         >
           クリア
         </a>

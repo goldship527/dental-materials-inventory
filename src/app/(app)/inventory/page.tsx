@@ -87,7 +87,7 @@ export default async function InventoryPage({ searchParams }: PageProps) {
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
             <h1 className="mt-2 text-xl font-semibold">在庫一覧</h1>
           </div>
-          <a className="inline-flex h-11 shrink-0 items-center justify-center rounded border border-line px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent" href="/home">
+          <a className="inline-flex h-11 shrink-0 items-center justify-center rounded btn-secondary px-4 text-sm font-semibold transition" href="/home">
             ホームへ戻る
           </a>
         </header>
@@ -107,8 +107,8 @@ export default async function InventoryPage({ searchParams }: PageProps) {
             </span>
             <div className="flex items-center gap-2">
               <a
-                className={`rounded border border-line px-3 py-1.5 text-xs font-semibold transition ${
-                  stockPage.page <= 1 ? "pointer-events-none text-muted/50" : "text-muted hover:border-accent hover:text-accent"
+                className={`rounded btn-secondary px-3 py-1.5 text-xs font-semibold transition ${
+                  stockPage.page <= 1 ? "pointer-events-none bg-subtle text-muted" : ""
                 }`}
                 href={previousHref}
                 aria-disabled={stockPage.page <= 1}
@@ -119,10 +119,10 @@ export default async function InventoryPage({ searchParams }: PageProps) {
                 {stockPage.page} / {stockPage.pageCount}
               </span>
               <a
-                className={`rounded border border-line px-3 py-1.5 text-xs font-semibold transition ${
+                className={`rounded btn-secondary px-3 py-1.5 text-xs font-semibold transition ${
                   stockPage.page >= stockPage.pageCount
-                    ? "pointer-events-none text-muted/50"
-                    : "text-muted hover:border-accent hover:text-accent"
+                    ? "pointer-events-none bg-subtle text-muted"
+                    : ""
                 }`}
                 href={nextHref}
                 aria-disabled={stockPage.page >= stockPage.pageCount}
@@ -133,7 +133,7 @@ export default async function InventoryPage({ searchParams }: PageProps) {
           </div>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1240px] border-collapse text-left text-sm">
-              <thead className="bg-subtle text-xs text-muted">
+              <thead className="bg-subtle text-label text-muted">
                 <tr>
                   <th className="border-b border-line px-4 py-3">商品</th>
                   <th className="border-b border-line px-4 py-3">カテゴリ</th>
@@ -166,7 +166,7 @@ export default async function InventoryPage({ searchParams }: PageProps) {
                     </td>
                     <td className="border-b border-line px-4 py-3 text-right">{row.minStock}</td>
                     <td className="border-b border-line px-4 py-3">
-                      <span className={`rounded px-2 py-1 text-xs font-semibold ${row.stockStatusClassName}`}>
+                      <span className={`rounded px-2 py-1 text-label font-semibold ${row.stockStatusClassName}`}>
                         {row.stockStatusLabel}
                       </span>
                     </td>

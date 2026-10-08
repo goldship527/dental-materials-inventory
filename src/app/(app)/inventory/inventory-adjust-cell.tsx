@@ -20,7 +20,7 @@ export function InventoryAdjustCell({ stockItemId, quantity, stockUpdatedAt, cli
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="inline-flex h-11 items-center justify-center rounded border border-line bg-panel px-4 text-xs font-semibold text-muted transition hover:border-accent hover:text-accent"
+        className="inline-flex h-11 items-center justify-center rounded btn-secondary px-4 text-xs font-semibold transition"
       >
         編集
       </button>
@@ -39,7 +39,7 @@ export function InventoryAdjustCell({ stockItemId, quantity, stockUpdatedAt, cli
       <button
         type="button"
         onClick={() => setIsOpen(false)}
-        className="inline-flex min-h-11 items-center justify-self-start text-xs font-semibold text-muted transition hover:text-ink"
+        className="inline-flex min-h-11 items-center justify-self-start rounded btn-secondary text-xs font-semibold transition"
       >
         閉じる
       </button>

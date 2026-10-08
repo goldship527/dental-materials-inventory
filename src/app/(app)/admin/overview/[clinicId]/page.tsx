@@ -158,7 +158,7 @@ export default async function AdminOverviewClinicDetailPage({ params, searchPara
             </div>
           </div>
           <a
-            className="inline-flex h-11 shrink-0 items-center justify-center rounded border border-line px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+            className="inline-flex h-11 shrink-0 items-center justify-center rounded btn-secondary px-4 text-sm font-semibold transition"
             href="/admin/overview"
           >
             本部ダッシュボードへ戻る
@@ -185,21 +185,21 @@ export default async function AdminOverviewClinicDetailPage({ params, searchPara
 
         <section className="grid gap-3 md:grid-cols-3">
           <a
-            className="rounded border border-line bg-panel p-4 shadow-sheet transition hover:border-accent"
+            className="rounded btn-secondary p-4 transition"
             href={`/admin/overview/${clinicId}/shortage`}
           >
             <p className="text-sm font-semibold text-accent">不足在庫を見る</p>
             <p className="mt-2 text-sm leading-6 text-muted">不足商品だけを、発注先や不足数と一緒に確認します。</p>
           </a>
           <a
-            className="rounded border border-line bg-panel p-4 shadow-sheet transition hover:border-accent"
+            className="rounded btn-secondary p-4 transition"
             href={`/admin/overview/${clinicId}/orders`}
           >
             <p className="text-sm font-semibold text-accent">発注候補を見る</p>
             <p className="mt-2 text-sm leading-6 text-muted">確認待ち、発注予定、納品待ち、納品済み、見送りの候補を読み取り専用で確認します。</p>
           </a>
           <a
-            className="rounded border border-line bg-panel p-4 shadow-sheet transition hover:border-accent"
+            className="rounded btn-secondary p-4 transition"
             href={`/admin/overview/${clinicId}/movements`}
           >
             <p className="text-sm font-semibold text-accent">入出庫履歴を見る</p>
@@ -239,7 +239,7 @@ export default async function AdminOverviewClinicDetailPage({ params, searchPara
               不足のみ
             </label>
             <button
-              className="h-11 self-end rounded bg-accent px-5 text-sm font-semibold text-panel transition hover:bg-accentDeep"
+              className="h-11 self-end rounded btn-primary px-5 text-sm font-semibold transition"
               type="submit"
             >
               表示
@@ -247,13 +247,13 @@ export default async function AdminOverviewClinicDetailPage({ params, searchPara
           </form>
           <div className="mt-3 flex flex-wrap gap-2 text-sm">
             <a
-              className="inline-flex h-9 items-center rounded border border-line px-3 font-semibold text-muted transition hover:border-accent hover:text-accent"
+              className="inline-flex h-9 items-center rounded btn-secondary px-3 font-semibold transition"
               href={buildDetailHref(clinicId, { q: query, category, shortage: true })}
             >
               不足だけ見る
             </a>
             <a
-              className="inline-flex h-9 items-center rounded border border-line px-3 font-semibold text-muted transition hover:border-accent hover:text-accent"
+              className="inline-flex h-9 items-center rounded btn-secondary px-3 font-semibold transition"
               href={buildDetailHref(clinicId, {})}
             >
               条件をクリア
@@ -267,7 +267,7 @@ export default async function AdminOverviewClinicDetailPage({ params, searchPara
           </div>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1120px] border-collapse text-left text-sm">
-              <thead className="bg-subtle text-xs text-muted">
+              <thead className="bg-subtle text-label text-muted">
                 <tr>
                   <th className="border-b border-line px-4 py-3">商品</th>
                   <th className="border-b border-line px-4 py-3">カテゴリ</th>
@@ -304,7 +304,7 @@ export default async function AdminOverviewClinicDetailPage({ params, searchPara
                       {row.shortageCount}
                     </td>
                     <td className="border-b border-line px-4 py-3">
-                      <span className={`rounded px-2 py-1 text-xs font-semibold ${row.stockStatusClassName}`}>
+                      <span className={`rounded px-2 py-1 text-label font-semibold ${row.stockStatusClassName}`}>
                         {row.stockStatusLabel}
                       </span>
                     </td>
@@ -330,7 +330,7 @@ export default async function AdminOverviewClinicDetailPage({ params, searchPara
           </div>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[900px] border-collapse text-left text-sm">
-              <thead className="bg-subtle text-xs text-muted">
+              <thead className="bg-subtle text-label text-muted">
                 <tr>
                   <th className="border-b border-line px-4 py-3">商品</th>
                   <th className="border-b border-line px-4 py-3">ロット番号</th>
@@ -352,7 +352,7 @@ export default async function AdminOverviewClinicDetailPage({ params, searchPara
                     <td className="border-b border-line px-4 py-3">{formatDaysUntilExpiry(row)}</td>
                     <td className="border-b border-line px-4 py-3 text-right">{row.quantity}</td>
                     <td className="border-b border-line px-4 py-3">
-                      <span className={`rounded px-2 py-1 text-xs font-semibold ${row.statusBadgeClassName}`}>
+                      <span className={`rounded px-2 py-1 text-label font-semibold ${row.statusBadgeClassName}`}>
                         {row.statusLabel}
                       </span>
                     </td>

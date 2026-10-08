@@ -64,20 +64,20 @@ export default async function SuppliersPage({ searchParams }: PageProps) {
             {canManageSuppliers ? (
               <>
                 <a
-                  className="inline-flex min-h-11 items-center justify-center rounded bg-accent px-4 py-2 text-sm font-semibold text-panel transition hover:bg-accentDeep"
+                  className="inline-flex min-h-11 items-center justify-center rounded btn-primary px-4 py-2 text-sm font-semibold transition"
                   href="/suppliers/new"
                 >
                   発注先を新規作成
                 </a>
                 <a
-                  className="inline-flex min-h-11 items-center justify-center rounded border border-line bg-panel px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+                  className="inline-flex min-h-11 items-center justify-center rounded btn-secondary px-4 py-2 text-sm font-semibold transition"
                   href="/suppliers/import"
                 >
                   発注先を一括取り込み
                 </a>
               </>
             ) : null}
-            <a className="inline-flex min-h-11 items-center justify-center rounded border border-line px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent" href="/home">
+            <a className="inline-flex min-h-11 items-center justify-center rounded btn-secondary px-4 py-2 text-sm font-semibold transition" href="/home">
               ホームへ戻る
             </a>
           </div>

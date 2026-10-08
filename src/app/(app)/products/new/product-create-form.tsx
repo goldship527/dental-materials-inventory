@@ -248,12 +248,12 @@ export function ProductCreateForm({ suppliers }: ProductCreateFormProps) {
         <button
           type="submit"
           disabled={isPending}
-          className="rounded bg-accent px-5 py-3 text-sm font-semibold text-panel transition hover:bg-accentDeep disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded btn-primary px-5 py-3 text-sm font-semibold transition disabled:cursor-not-allowed"
         >
           {isPending ? "作成中" : "商品を作成"}
         </button>
         <a
-          className="rounded border border-line bg-panel px-5 py-3 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+          className="rounded btn-secondary px-5 py-3 text-sm font-semibold transition"
           href="/products"
         >
           商品マスタ一覧へ戻る

@@ -15,7 +15,7 @@ export function WorkStaffSelector({ clinicId, staffOperators }: WorkStaffSelecto
   });
 
   return (
-    <label className="flex min-w-[12rem] shrink-0 items-center gap-2 whitespace-nowrap text-xs font-semibold text-muted">
+    <label className="flex min-w-[12rem] shrink-0 items-center gap-2 whitespace-nowrap text-label font-semibold text-muted">
       作業スタッフ
       <select
         value={selectedStaffOperatorId}

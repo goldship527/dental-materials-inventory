@@ -75,7 +75,7 @@ function StocktakeRow({ row }: StocktakeRowProps) {
           type="submit"
           form={formId}
           disabled={isPending || difference === null || difference === 0}
-          className="h-10 rounded bg-accent px-4 text-xs font-semibold text-panel transition hover:bg-accentDeep disabled:cursor-not-allowed disabled:opacity-40"
+          className="h-10 rounded btn-primary px-4 text-xs font-semibold transition disabled:cursor-not-allowed"
         >
           {isPending ? "確定中" : "確定"}
         </button>
@@ -92,7 +92,7 @@ export function StocktakeForm({ rows }: StocktakeFormProps) {
       </div>
       <div className="overflow-x-auto">
         <table className="w-full min-w-[980px] border-collapse text-left text-sm">
-          <thead className="bg-subtle text-xs text-muted">
+          <thead className="bg-subtle text-label text-muted">
             <tr>
               <th className="border-b border-line px-4 py-3">商品</th>
               <th className="border-b border-line px-4 py-3">保管場所</th>

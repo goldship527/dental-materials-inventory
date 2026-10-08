@@ -144,8 +144,8 @@ export default async function StocktakeSessionHistoryPage({ params, searchParams
               href={`/stocktake/sessions/${stocktakeSession.id}/history?tab=${tab.id}`}
               className={
                 currentTab === tab.id
-                  ? "rounded bg-accent px-4 py-2 text-sm font-semibold text-panel"
-                  : "rounded border border-line bg-panel px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+                  ? "rounded btn-primary px-4 py-2 text-sm font-semibold"
+                  : "rounded btn-secondary px-4 py-2 text-sm font-semibold transition"
               }
             >
               {tab.label} {countsByTab[tab.id]}
@@ -159,7 +159,7 @@ export default async function StocktakeSessionHistoryPage({ params, searchParams
           </div>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1080px] border-collapse text-left text-sm">
-              <thead className="bg-subtle text-xs text-muted">
+              <thead className="bg-subtle text-label text-muted">
                 <tr>
                   <th className="border-b border-line px-4 py-3">商品</th>
                   <th className="border-b border-line px-4 py-3">保管場所</th>

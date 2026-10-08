@@ -19,7 +19,7 @@ export default async function AdminUsageExportPage() {
             </p>
           </div>
           <a
-            className="inline-flex h-11 shrink-0 items-center justify-center rounded border border-line px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+            className="inline-flex h-11 shrink-0 items-center justify-center rounded btn-secondary px-4 text-sm font-semibold transition"
             href="/admin/overview"
           >
             本部ダッシュボードへ戻る
@@ -49,7 +49,7 @@ export default async function AdminUsageExportPage() {
               />
             </label>
             <button
-              className="h-11 self-end rounded bg-accent px-5 text-sm font-semibold text-panel transition hover:bg-accentDeep"
+              className="h-11 self-end rounded btn-primary px-5 text-sm font-semibold transition"
               type="submit"
             >
               CSVを出力

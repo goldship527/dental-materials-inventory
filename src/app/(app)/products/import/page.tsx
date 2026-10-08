@@ -51,7 +51,7 @@ export default async function ProductImportPage() {
           <h2 className="text-lg font-semibold">取り込み履歴</h2>
           <div className="mt-4 overflow-x-auto">
             <table className="w-full min-w-[760px] border-collapse text-left text-sm">
-              <thead className="bg-subtle text-xs text-muted">
+              <thead className="bg-subtle text-label text-muted">
                 <tr>
                   <th className="border-b border-line px-3 py-2">日時</th>
                   <th className="border-b border-line px-3 py-2">方式</th>

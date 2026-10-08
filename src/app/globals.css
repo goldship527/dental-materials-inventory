@@ -75,6 +75,14 @@ a {
     @apply border border-lineStrong bg-raise text-ink shadow-raise-light active:translate-y-0.5 active:shadow-press disabled:bg-subtle disabled:text-muted disabled:shadow-none;
   }
 
+  .btn-secondary.btn-danger:not(:disabled) {
+    color: var(--c-shu);
+  }
+
+  .btn-secondary.btn-danger:not(:disabled):hover {
+    border-color: var(--c-shu);
+  }
+
   .chip-selected {
     @apply translate-y-0.5 bg-accent text-panel shadow-press;
   }
@@ -88,17 +96,13 @@ a {
   }
 
   .edge-stop {
-    box-shadow: inset 4px 0 0 var(--c-shu);
+    box-shadow: inset 0 2px 0 var(--c-ai), inset 4px 0 0 var(--c-shu);
   }
 
   .edge-top {
     box-shadow: inset 0 2px 0 var(--c-ai);
   }
 
-  .card-control-size.card-control-size {
-    font-size: 20px;
-    line-height: 28px;
-  }
 }
 
 @media (max-width: 640px) {

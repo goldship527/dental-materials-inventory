@@ -76,13 +76,13 @@ export function SupplierImportForm() {
         <div className="flex flex-wrap gap-2">
           <a
             href="/suppliers"
-            className="rounded border border-line bg-panel px-4 py-2 text-sm font-semibold text-ink transition hover:border-accent hover:bg-tint hover:text-accent"
+            className="rounded btn-secondary px-4 py-2 text-sm font-semibold transition"
           >
             発注先一覧へ戻る
           </a>
           <a
             href="/suppliers/import"
-            className="rounded border border-line bg-panel px-4 py-2 text-sm font-semibold text-ink transition hover:border-accent hover:bg-tint hover:text-accent"
+            className="rounded btn-secondary px-4 py-2 text-sm font-semibold transition"
           >
             取り込みをやり直す
           </a>
@@ -131,7 +131,7 @@ export function SupplierImportForm() {
           <button
             type="submit"
             disabled={isPreviewPending || sourceText.trim().length === 0}
-            className="rounded bg-accent px-5 py-3 text-sm font-semibold text-panel transition hover:bg-accentDeep disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded btn-primary px-5 py-3 text-sm font-semibold transition disabled:cursor-not-allowed"
           >
             {isPreviewPending ? "確認中" : "プレビュー"}
           </button>
@@ -180,7 +180,7 @@ export function SupplierImportForm() {
 
           <div className="overflow-x-auto rounded border border-line">
             <table className="w-full min-w-[1040px] border-collapse text-left text-sm">
-              <thead className="bg-subtle text-xs text-muted">
+              <thead className="bg-subtle text-label text-muted">
                 <tr>
                   <th className="border-b border-line px-3 py-2">行</th>
                   <th className="border-b border-line px-3 py-2">状態</th>
@@ -231,19 +231,19 @@ export function SupplierImportForm() {
             <button
               type="submit"
               disabled={!canConfirm || isConfirmPending}
-              className="rounded bg-accent px-5 py-3 text-sm font-semibold text-panel transition hover:bg-accentDeep disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded btn-primary px-5 py-3 text-sm font-semibold transition disabled:cursor-not-allowed"
             >
               {isConfirmPending ? "取り込み中" : "この内容で取り込む"}
             </button>
             <a
               href="/suppliers/import"
-              className="rounded border border-line bg-panel px-4 py-3 text-sm font-semibold text-ink transition hover:border-accent hover:bg-tint hover:text-accent"
+              className="rounded btn-secondary px-4 py-3 text-sm font-semibold transition"
             >
               取り込みをやり直す
             </a>
             <a
               href="/suppliers"
-              className="rounded border border-line bg-panel px-4 py-3 text-sm font-semibold text-ink transition hover:border-accent hover:bg-tint hover:text-accent"
+              className="rounded btn-secondary px-4 py-3 text-sm font-semibold transition"
             >
               発注先一覧へ戻る
             </a>

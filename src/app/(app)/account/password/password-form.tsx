@@ -70,7 +70,7 @@ export function PasswordForm() {
       <button
         type="submit"
         disabled={isPending}
-        className="h-12 rounded bg-accent px-5 text-sm font-semibold text-panel transition hover:bg-accentDeep disabled:cursor-not-allowed disabled:opacity-60"
+        className="h-12 rounded btn-primary px-5 text-sm font-semibold transition disabled:cursor-not-allowed"
       >
         {isPending ? "変更中" : "パスワードを変更"}
       </button>

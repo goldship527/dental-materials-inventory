@@ -219,7 +219,7 @@ export function ProductEditForm({ product, suppliers }: ProductEditFormProps) {
                     defaultMinStockInputRef.current.value = String(product.recommendedMinStock.recommended);
                   }
                 }}
-                className="mt-2 justify-self-start rounded border border-accent px-3 py-2 text-xs font-semibold text-accent transition hover:bg-tint"
+                className="mt-2 justify-self-start rounded btn-secondary px-3 py-2 text-xs font-semibold transition"
               >
                 推奨 {product.recommendedMinStock.recommended} を入力
               </button>
@@ -348,12 +348,12 @@ export function ProductEditForm({ product, suppliers }: ProductEditFormProps) {
         <button
           type="submit"
           disabled={isPending}
-          className="rounded bg-accent px-5 py-3 text-sm font-semibold text-panel transition hover:bg-accentDeep disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded btn-primary px-5 py-3 text-sm font-semibold transition disabled:cursor-not-allowed"
         >
           {isPending ? "保存中" : "保存する"}
         </button>
         <a
-          className="rounded border border-line bg-panel px-5 py-3 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+          className="rounded btn-secondary px-5 py-3 text-sm font-semibold transition"
           href={`/products/${product.id}`}
         >
           詳細へ戻る

@@ -216,12 +216,12 @@ export function BarcodeSearchForm({
           />
           <button
             type="submit"
-            className="h-12 rounded bg-accent px-5 text-sm font-semibold text-panel transition hover:bg-accentDeep"
+            className="h-12 rounded btn-primary px-5 text-sm font-semibold transition"
           >
             検索
           </button>
           <a
-            className="flex h-12 items-center justify-center rounded border border-line px-5 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+            className="flex h-12 items-center justify-center rounded btn-secondary px-5 text-sm font-semibold transition"
             href={clearHref}
           >
             クリア

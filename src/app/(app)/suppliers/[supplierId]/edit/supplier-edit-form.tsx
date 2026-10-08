@@ -184,12 +184,12 @@ export function SupplierEditForm({ supplier }: SupplierEditFormProps) {
         <button
           type="submit"
           disabled={isPending}
-          className="rounded bg-accent px-5 py-3 text-sm font-semibold text-panel transition hover:bg-accentDeep disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded btn-primary px-5 py-3 text-sm font-semibold transition disabled:cursor-not-allowed"
         >
           {isPending ? "保存中" : "保存する"}
         </button>
         <a
-          className="rounded border border-line bg-panel px-5 py-3 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+          className="rounded btn-secondary px-5 py-3 text-sm font-semibold transition"
           href={`/suppliers/${supplier.id}`}
         >
           詳細へ戻る

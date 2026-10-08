@@ -67,7 +67,7 @@ export default async function AdminOverviewPage() {
 
         <section className="flex flex-wrap gap-3">
           <a
-            className="inline-flex h-11 items-center justify-center rounded border border-line bg-panel px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+            className="inline-flex h-11 items-center justify-center rounded btn-secondary px-4 text-sm font-semibold transition"
             href="/admin/overview/usage-export"
           >
             使用個数CSV出力
@@ -105,7 +105,7 @@ export default async function AdminOverviewPage() {
 
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-line text-sm">
-              <thead className="bg-subtle text-left text-xs font-semibold uppercase tracking-normal text-muted">
+              <thead className="bg-subtle text-left text-label font-semibold uppercase tracking-normal text-muted">
                 <tr>
                   <th scope="col" className="min-w-56 px-5 py-3">
                     クリニック

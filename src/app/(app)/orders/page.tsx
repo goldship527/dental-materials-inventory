@@ -180,7 +180,7 @@ function OrderRequestRowsTable({
           <col className="w-[14%]" />
           <col className="w-[22%]" />
         </colgroup>
-        <thead className="bg-subtle text-xs text-muted print:bg-panel print:text-xs print:text-ink">
+        <thead className="bg-subtle text-label text-muted print:bg-panel print:text-label print:text-ink">
           <tr>
             <th className="border-b border-line px-4 py-3 print:border print:border-ink print:px-2 print:py-1.5">
               商品
@@ -328,17 +328,17 @@ export default async function OrdersPage({ searchParams }: PageProps) {
             </p>
           </div>
           <div className="flex w-full gap-2 overflow-x-auto pb-1 print:hidden md:w-auto md:justify-end md:overflow-visible md:pb-0">
-            <a className="inline-flex h-9 shrink-0 items-center justify-center rounded border border-line bg-panel/75 px-3 text-xs font-semibold text-muted transition hover:border-accent hover:bg-panel hover:text-accent" href="/shortage">
+            <a className="inline-flex h-9 shrink-0 items-center justify-center rounded btn-secondary px-3 text-xs font-semibold transition" href="/shortage">
               不足一覧へ
             </a>
             <a
-              className="inline-flex h-9 shrink-0 items-center justify-center rounded border border-line bg-panel/75 px-3 text-xs font-semibold text-muted transition hover:border-accent hover:bg-panel hover:text-accent"
+              className="inline-flex h-9 shrink-0 items-center justify-center rounded btn-secondary px-3 text-xs font-semibold transition"
               href="/orders/print"
             >
               発注書下書き
             </a>
             <a
-              className="inline-flex h-9 shrink-0 items-center justify-center rounded border border-line bg-panel/75 px-3 text-xs font-semibold text-muted transition hover:border-accent hover:bg-panel hover:text-accent"
+              className="inline-flex h-9 shrink-0 items-center justify-center rounded btn-secondary px-3 text-xs font-semibold transition"
               href="/order-records"
             >
               発注記録
@@ -383,12 +383,12 @@ export default async function OrdersPage({ searchParams }: PageProps) {
           {selectedStatus !== defaultOrderListFilter ? <input type="hidden" name="status" value={selectedStatus} /> : null}
           <button
             type="submit"
-            className="h-10 rounded bg-accent px-4 text-sm font-semibold text-panel transition hover:bg-accentDeep"
+            className="h-10 rounded btn-primary px-4 text-sm font-semibold transition"
           >
             検索
           </button>
           <a
-            className="flex h-10 items-center justify-center rounded border border-line bg-panel/75 px-4 text-sm font-semibold text-muted transition hover:border-accent hover:bg-panel hover:text-accent"
+            className="flex h-10 items-center justify-center rounded btn-secondary px-4 text-sm font-semibold transition"
             href={buildOrdersHref(selectedStatus, "")}
           >
             クリア
@@ -534,7 +534,7 @@ export default async function OrdersPage({ searchParams }: PageProps) {
                       {primaryStatusCounts.map((item) => (
                         <span
                           key={item.status}
-                          className={`rounded border px-2 py-1 text-xs font-semibold print:border-ink print:bg-panel print:text-ink ${getSupplierStatusChipClass(
+                          className={`rounded border px-2 py-1 text-label font-semibold print:border-ink print:bg-panel print:text-ink ${getSupplierStatusChipClass(
                             item.status,
                           )}`}
                         >

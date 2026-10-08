@@ -122,7 +122,7 @@ export default async function AdminOverviewClinicOrdersPage({ params, searchPara
             </p>
           </div>
           <a
-            className="inline-flex h-11 shrink-0 items-center justify-center rounded border border-line px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+            className="inline-flex h-11 shrink-0 items-center justify-center rounded btn-secondary px-4 text-sm font-semibold transition"
             href={`/admin/overview/${clinicId}`}
           >
             クリニック詳細へ戻る
@@ -133,7 +133,7 @@ export default async function AdminOverviewClinicOrdersPage({ params, searchPara
           {counts.map((item) => (
             <a
               key={item.value}
-              className="rounded border border-line bg-panel p-4 shadow-sheet transition hover:border-accent"
+              className="rounded btn-secondary p-4 transition"
               href={buildOrdersHref(clinicId, item.value, query)}
             >
               <p className="text-sm font-semibold text-muted">{item.label}</p>
@@ -167,13 +167,13 @@ export default async function AdminOverviewClinicOrdersPage({ params, searchPara
               ))}
             </select>
             <button
-              className="h-11 rounded bg-accent px-5 text-sm font-semibold text-panel transition hover:bg-accentDeep"
+              className="h-11 rounded btn-primary px-5 text-sm font-semibold transition"
               type="submit"
             >
               表示
             </button>
             <a
-              className="inline-flex h-11 items-center justify-center rounded border border-line px-5 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+              className="inline-flex h-11 items-center justify-center rounded btn-secondary px-5 text-sm font-semibold transition"
               href={`/admin/overview/${clinicId}/orders`}
             >
               クリア
@@ -187,7 +187,7 @@ export default async function AdminOverviewClinicOrdersPage({ params, searchPara
           </div>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1200px] border-collapse text-left text-sm">
-              <thead className="bg-subtle text-xs text-muted">
+              <thead className="bg-subtle text-label text-muted">
                 <tr>
                   <th className="border-b border-line px-4 py-3">商品</th>
                   <th className="border-b border-line px-4 py-3">発注先</th>

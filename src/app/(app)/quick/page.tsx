@@ -123,7 +123,7 @@ export default async function QuickPage({ searchParams }: PageProps) {
             <h1 className="mt-2 text-xl font-semibold">クイック出庫</h1>
             <p className="mt-2 text-sm text-muted">よく使う材料をワンタップで出庫・戻しできます。</p>
           </div>
-          <a className="inline-flex h-11 shrink-0 items-center justify-center rounded border border-line bg-panel/75 px-4 text-sm font-semibold text-muted transition hover:border-accent hover:bg-panel hover:text-accent" href="/home">
+          <a className="inline-flex h-11 shrink-0 items-center justify-center rounded btn-secondary px-4 text-sm font-semibold transition" href="/home">
             ホームへ戻る
           </a>
         </header>
@@ -139,25 +139,25 @@ export default async function QuickPage({ searchParams }: PageProps) {
             </div>
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
               <a
-                className="inline-flex h-11 items-center justify-center rounded bg-accent px-4 text-sm font-semibold text-panel transition hover:bg-accentDeep"
+                className="inline-flex h-11 items-center justify-center rounded btn-primary px-4 text-sm font-semibold transition"
                 href="/barcode/batch"
               >
                 連続出庫
               </a>
               <a
-                className="inline-flex h-11 items-center justify-center rounded border border-accent bg-panel px-4 text-sm font-semibold text-accent transition hover:bg-tint"
+                className="inline-flex h-11 items-center justify-center rounded btn-secondary px-4 text-sm font-semibold transition"
                 href="/barcode/batch?mode=receive"
               >
                 納品
               </a>
               <a
-                className="inline-flex h-11 items-center justify-center rounded bg-accent px-4 text-sm font-semibold text-panel transition hover:bg-accentDeep"
+                className="inline-flex h-11 items-center justify-center rounded btn-primary px-4 text-sm font-semibold transition"
                 href="/barcode/stock"
               >
                 1件ずつ出入庫
               </a>
               <a
-                className="inline-flex h-11 items-center justify-center rounded border border-line bg-panel px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+                className="inline-flex h-11 items-center justify-center rounded btn-secondary px-4 text-sm font-semibold transition"
                 href="/barcode"
               >
                 バーコード管理
@@ -180,8 +180,8 @@ export default async function QuickPage({ searchParams }: PageProps) {
                 aria-current={selectedTab === "" ? "page" : undefined}
                 className={
                   selectedTab === ""
-                    ? "inline-flex min-h-10 items-center rounded border border-accent bg-accent px-3 py-2 text-sm font-semibold text-panel "
-                    : "inline-flex min-h-10 items-center rounded border border-line bg-panel/70 px-3 py-2 text-sm font-semibold text-muted transition hover:border-accent/50 hover:bg-subtle hover:text-ink"
+                    ? "inline-flex min-h-10 items-center rounded border chip-selected px-3 py-2 text-sm font-semibold"
+                    : "inline-flex min-h-10 items-center rounded btn-secondary px-3 py-2 text-sm font-semibold transition"
                 }
               >
                 すべて {cards.length}
@@ -196,8 +196,8 @@ export default async function QuickPage({ searchParams }: PageProps) {
                     aria-current={isCurrent ? "page" : undefined}
                     className={
                       isCurrent
-                        ? "inline-flex min-h-10 items-center rounded border border-accent bg-accent px-3 py-2 text-sm font-semibold text-panel "
-                        : "inline-flex min-h-10 items-center rounded border border-line bg-panel/70 px-3 py-2 text-sm font-semibold text-muted transition hover:border-accent/50 hover:bg-subtle hover:text-ink"
+                        ? "inline-flex min-h-10 items-center rounded border chip-selected px-3 py-2 text-sm font-semibold"
+                        : "inline-flex min-h-10 items-center rounded btn-secondary px-3 py-2 text-sm font-semibold transition"
                     }
                   >
                     {tab.category} {tab.count}

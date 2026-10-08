@@ -95,13 +95,13 @@ export default async function DormantStockPage({ searchParams }: PageProps) {
           </div>
           <div className="flex flex-wrap gap-2 text-sm font-semibold">
             <a
-              className="inline-flex h-11 items-center rounded border border-line px-4 text-muted transition hover:border-accent hover:text-accent"
+              className="inline-flex h-11 items-center rounded btn-secondary px-4 transition"
               href="/inventory"
             >
               在庫一覧へ
             </a>
             <a
-              className="inline-flex h-11 items-center rounded border border-line px-4 text-muted transition hover:border-accent hover:text-accent"
+              className="inline-flex h-11 items-center rounded btn-secondary px-4 transition"
               href="/home"
             >
               ホームへ戻る
@@ -143,7 +143,7 @@ export default async function DormantStockPage({ searchParams }: PageProps) {
               />
             </label>
             <button
-              className="h-11 self-end rounded bg-accent px-5 text-sm font-semibold text-panel transition hover:bg-accentDeep"
+              className="h-11 self-end rounded btn-primary px-5 text-sm font-semibold transition"
               type="submit"
             >
               絞り込む
@@ -160,8 +160,8 @@ export default async function DormantStockPage({ searchParams }: PageProps) {
                   aria-current={isCurrent ? "page" : undefined}
                   className={
                     isCurrent
-                      ? "inline-flex h-10 shrink-0 items-center rounded border border-accent/30 bg-tint px-3 text-sm font-semibold text-accent"
-                      : "inline-flex h-10 shrink-0 items-center rounded border border-line px-3 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+                      ? "inline-flex h-10 shrink-0 items-center rounded btn-secondary border-accent/30 px-3 text-sm font-semibold"
+                      : "inline-flex h-10 shrink-0 items-center rounded btn-secondary px-3 text-sm font-semibold transition"
                   }
                   href={buildDaysHref(days, query)}
                 >
@@ -180,7 +180,7 @@ export default async function DormantStockPage({ searchParams }: PageProps) {
           {filteredRows.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[1080px] border-collapse text-left text-sm">
-                <thead className="bg-subtle text-xs text-muted">
+                <thead className="bg-subtle text-label text-muted">
                   <tr>
                     <th className="border-b border-line px-4 py-3">商品</th>
                     <th className="border-b border-line px-4 py-3">カテゴリ</th>

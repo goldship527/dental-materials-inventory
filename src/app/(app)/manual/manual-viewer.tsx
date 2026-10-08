@@ -126,7 +126,7 @@ function SectionPanel({
       <button
         type="button"
         onClick={onToggle}
-        className="flex min-h-14 w-full items-center justify-between gap-4 px-4 py-3 text-left text-lg font-semibold text-ink transition hover:bg-subtle sm:px-5"
+        className="flex min-h-14 w-full items-center justify-between gap-4 rounded btn-secondary px-4 py-3 text-left text-lg font-semibold transition sm:px-5"
         aria-expanded={isOpen}
       >
         <span>{renderTextWithHighlight(section.title, query)}</span>
@@ -144,7 +144,7 @@ function SectionPanel({
             <button
               type="button"
               onClick={onBackToControls}
-              className="min-h-11 rounded border border-line bg-panel px-4 text-sm font-semibold text-accent transition hover:border-accent hover:bg-tint"
+              className="min-h-11 rounded btn-secondary px-4 text-sm font-semibold transition"
             >
               目次へ戻る
             </button>
@@ -223,21 +223,21 @@ export function ManualViewer({ markdown }: { markdown: string }) {
             <button
               type="button"
               onClick={() => setQuery("")}
-              className="min-h-11 rounded border border-line bg-panel px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+              className="min-h-11 rounded btn-secondary px-4 text-sm font-semibold transition"
             >
               クリア
             </button>
             <button
               type="button"
               onClick={openAll}
-              className="min-h-11 rounded border border-accent bg-panel px-4 text-sm font-semibold text-accent transition hover:bg-tint"
+              className="min-h-11 rounded btn-secondary px-4 text-sm font-semibold transition"
             >
               すべて開く
             </button>
             <button
               type="button"
               onClick={closeAll}
-              className="min-h-11 rounded border border-line bg-panel px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+              className="min-h-11 rounded btn-secondary px-4 text-sm font-semibold transition"
             >
               すべて閉じる
             </button>
@@ -252,7 +252,7 @@ export function ManualViewer({ markdown }: { markdown: string }) {
                 key={section.id}
                 type="button"
                 onClick={() => openSection(section.id)}
-                className="min-h-11 rounded border border-line bg-surface px-3 py-2 text-left text-sm font-semibold leading-6 text-ink transition hover:border-accent hover:bg-panel hover:text-accent"
+                className="min-h-11 rounded btn-secondary bg-surface px-3 py-2 text-left text-sm font-semibold leading-6 transition"
               >
                 {section.title}
               </button>
@@ -295,7 +295,7 @@ export function ManualViewer({ markdown }: { markdown: string }) {
       <button
         type="button"
         onClick={scrollToControls}
-        className="fixed bottom-4 right-4 z-30 min-h-11 rounded-full border border-accent bg-panel px-4 text-sm font-semibold text-accent shadow-sheet transition hover:bg-tint   "
+        className="fixed bottom-4 right-4 z-30 min-h-11 rounded-full btn-secondary px-4 text-sm font-semibold transition"
       >
         目次へ戻る
       </button>

@@ -113,7 +113,7 @@ export default async function SetupPage() {
                   <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-line text-sm font-semibold">
                     {index + 1}
                   </span>
-                  <span className={`rounded px-3 py-1 text-xs font-semibold ${getStatusClassName(step.status)}`}>
+                  <span className={`rounded px-3 py-1 text-label font-semibold ${getStatusClassName(step.status)}`}>
                     {getStatusLabel(step.status)}
                   </span>
                 </div>
@@ -123,7 +123,7 @@ export default async function SetupPage() {
                   <p className="mt-2 text-sm font-semibold text-muted">{step.metric}</p>
                 </div>
                 <a
-                  className="inline-flex h-11 items-center justify-center rounded border border-line bg-panel px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+                  className="inline-flex h-11 items-center justify-center rounded btn-secondary px-4 text-sm font-semibold transition"
                   href={step.href}
                 >
                   {step.actionLabel}

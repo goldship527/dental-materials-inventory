@@ -83,7 +83,7 @@ export default async function OrdersPrintPage({ searchParams }: PageProps) {
             </p>
           </div>
           <div className="flex gap-3 print:hidden">
-            <a className="rounded border border-line px-5 py-3 text-sm font-semibold hover:border-accent" href="/orders">
+            <a className="rounded btn-secondary px-5 py-3 text-sm font-semibold" href="/orders">
               発注候補へ戻る
             </a>
             <OrdersPrintButton />
@@ -102,8 +102,8 @@ export default async function OrdersPrintPage({ searchParams }: PageProps) {
                 aria-current={!selectedSupplierId ? "page" : undefined}
                 className={
                   !selectedSupplierId
-                    ? "rounded bg-accent px-4 py-2 text-sm font-semibold text-panel"
-                    : "rounded border border-line px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+                    ? "rounded btn-primary px-4 py-2 text-sm font-semibold"
+                    : "rounded btn-secondary px-4 py-2 text-sm font-semibold transition"
                 }
               >
                 全件
@@ -115,8 +115,8 @@ export default async function OrdersPrintPage({ searchParams }: PageProps) {
                   aria-current={selectedSupplierId === group.supplierKey ? "page" : undefined}
                   className={
                     selectedSupplierId === group.supplierKey
-                      ? "rounded bg-accent px-4 py-2 text-sm font-semibold text-panel"
-                      : "rounded border border-line px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+                      ? "rounded btn-primary px-4 py-2 text-sm font-semibold"
+                      : "rounded btn-secondary px-4 py-2 text-sm font-semibold transition"
                   }
                 >
                   {group.supplierName}
@@ -244,7 +244,7 @@ export default async function OrdersPrintPage({ searchParams }: PageProps) {
 
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[980px] border-collapse text-left text-sm print:min-w-0 print:text-xs">
-                    <thead className="bg-subtle text-xs text-muted print:bg-panel print:text-xs print:text-ink">
+                    <thead className="bg-subtle text-label text-muted print:bg-panel print:text-label print:text-ink">
                       <tr>
                         <th className="border-b border-line px-4 py-3 print:border print:border-ink print:px-2 print:py-1.5">
                           商品

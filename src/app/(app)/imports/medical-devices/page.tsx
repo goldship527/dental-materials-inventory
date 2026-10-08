@@ -183,7 +183,7 @@ export default async function MedicalDeviceImportPreviewPage({ searchParams }: P
           </p>
           <a
             href={buildLabelsHref(q, sourceFile, duplicateOnly)}
-            className="inline-flex h-11 shrink-0 items-center justify-center rounded bg-accent px-4 text-sm font-semibold text-panel transition hover:bg-accentDeep"
+            className="inline-flex h-11 shrink-0 items-center justify-center rounded btn-primary px-4 text-sm font-semibold transition"
           >
             バーコードテスト印刷へ
           </a>
@@ -192,7 +192,7 @@ export default async function MedicalDeviceImportPreviewPage({ searchParams }: P
         <section className="overflow-hidden rounded border border-line bg-panel shadow-sheet">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-line text-sm">
-              <thead className="bg-subtle text-left text-xs font-semibold text-muted">
+              <thead className="bg-subtle text-left text-label font-semibold text-muted">
                 <tr>
                   <th className="px-3 py-3">JAN</th>
                   <th className="px-3 py-3">バーコード</th>

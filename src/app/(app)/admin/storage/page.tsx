@@ -67,7 +67,7 @@ export default async function AdminStoragePage() {
               <div key={item.label} className="grid gap-2 rounded border border-line p-4 sm:grid-cols-[180px_96px_1fr] sm:items-start">
                 <p className="text-sm font-semibold text-ink">{item.label}</p>
                 <span
-                  className={`inline-flex w-fit items-center rounded border px-2.5 py-1 text-xs font-semibold ${statusClassName(
+                  className={`inline-flex w-fit items-center rounded border px-2.5 py-1 text-label font-semibold ${statusClassName(
                     item.status,
                   )}`}
                 >

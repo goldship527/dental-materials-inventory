@@ -97,7 +97,7 @@ export default async function AdminOverviewClinicMovementsPage({ params, searchP
             </p>
           </div>
           <a
-            className="inline-flex h-11 shrink-0 items-center justify-center rounded border border-line px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+            className="inline-flex h-11 shrink-0 items-center justify-center rounded btn-secondary px-4 text-sm font-semibold transition"
             href={`/admin/overview/${clinicId}`}
           >
             クリニック詳細へ戻る
@@ -153,7 +153,7 @@ export default async function AdminOverviewClinicMovementsPage({ params, searchP
               type="date"
             />
             <button
-              className="h-11 rounded bg-accent px-5 text-sm font-semibold text-panel transition hover:bg-accentDeep"
+              className="h-11 rounded btn-primary px-5 text-sm font-semibold transition"
               type="submit"
             >
               表示
@@ -161,7 +161,7 @@ export default async function AdminOverviewClinicMovementsPage({ params, searchP
           </form>
           <div className="mt-3">
             <a
-              className="inline-flex h-9 items-center rounded border border-line px-3 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+              className="inline-flex h-9 items-center rounded btn-secondary px-3 text-sm font-semibold transition"
               href={`/admin/overview/${clinicId}/movements`}
             >
               条件をクリア
@@ -178,7 +178,7 @@ export default async function AdminOverviewClinicMovementsPage({ params, searchP
         <section className="overflow-hidden rounded border border-line bg-panel shadow-sheet">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1280px] border-collapse text-left text-sm">
-              <thead className="bg-subtle text-xs text-muted">
+              <thead className="bg-subtle text-label text-muted">
                 <tr>
                   <th className="border-b border-line px-4 py-3">日時</th>
                   <th className="border-b border-line px-4 py-3">商品</th>

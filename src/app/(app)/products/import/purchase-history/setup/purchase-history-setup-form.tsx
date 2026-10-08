@@ -36,7 +36,7 @@ export function PurchaseHistorySetupForm({ products, categories }: PurchaseHisto
       <section className="rounded border border-line bg-panel p-6 text-sm shadow-sheet">
         <p className="font-semibold text-ink">まとめて整える商品はありません。</p>
         <p className="mt-2 text-muted">購入履歴から登録した商品で、カテゴリや最低在庫の確認が必要なものは見つかりませんでした。</p>
-        <a className="mt-4 inline-flex rounded border border-line px-4 py-2 font-semibold text-muted transition hover:border-accent hover:text-accent" href="/products?source=purchase-history">
+        <a className="mt-4 inline-flex rounded btn-secondary px-4 py-2 font-semibold transition" href="/products?source=purchase-history">
           購入履歴から登録した商品を見る
         </a>
       </section>
@@ -66,7 +66,7 @@ export function PurchaseHistorySetupForm({ products, categories }: PurchaseHisto
 
         <div className="overflow-x-auto rounded border border-line">
           <table className="w-full min-w-[980px] border-collapse text-left text-sm">
-            <thead className="bg-subtle text-xs text-muted">
+            <thead className="bg-subtle text-label text-muted">
               <tr>
                 <th className="border-b border-line px-3 py-2">商品</th>
                 <th className="border-b border-line px-3 py-2">メーカー・規格</th>
@@ -113,7 +113,7 @@ export function PurchaseHistorySetupForm({ products, categories }: PurchaseHisto
                         <button
                           type="button"
                           onClick={() => updateRow(product.id, { defaultMinStock: product.recommendedMinStock?.recommended ?? 0 })}
-                          className="mt-2 rounded border border-accent px-3 py-2 text-xs font-semibold text-accent transition hover:bg-tint"
+                          className="mt-2 rounded btn-secondary px-3 py-2 text-xs font-semibold transition"
                         >
                           推奨 {product.recommendedMinStock.recommended}
                         </button>
@@ -143,12 +143,12 @@ export function PurchaseHistorySetupForm({ products, categories }: PurchaseHisto
           <button
             type="submit"
             disabled={isPending}
-            className="rounded bg-accent px-5 py-3 text-sm font-semibold text-panel transition hover:bg-accentDeep disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded btn-primary px-5 py-3 text-sm font-semibold transition disabled:cursor-not-allowed"
           >
             {isPending ? "保存中" : "まとめて保存"}
           </button>
           <a
-            className="rounded border border-line px-5 py-3 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+            className="rounded btn-secondary px-5 py-3 text-sm font-semibold transition"
             href="/products?source=purchase-history&setup=1"
           >
             商品一覧で確認

@@ -113,7 +113,7 @@ export default async function BarcodeScansPage({ searchParams }: PageProps) {
         <section className="overflow-hidden rounded border border-line bg-panel shadow-sheet">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1100px] border-collapse text-left text-sm">
-              <thead className="bg-subtle text-xs text-muted">
+              <thead className="bg-subtle text-label text-muted">
                 <tr>
                   <th className="border-b border-line px-4 py-3">保存日時</th>
                   <th className="border-b border-line px-4 py-3">判定</th>
@@ -156,7 +156,7 @@ export default async function BarcodeScansPage({ searchParams }: PageProps) {
                             <span className={`w-fit rounded px-2 py-1 text-xs font-semibold ${getMatchBadgeClass(log.matchType)}`}>
                               {getBarcodeScanMatchTypeLabel(log.matchType)}
                             </span>
-                            <span className={`w-fit rounded px-2 py-1 text-xs font-semibold ${getBarcodeScanResolveStatusClass(log.resolveStatus)}`}>
+                            <span className={`w-fit rounded px-2 py-1 text-label font-semibold ${getBarcodeScanResolveStatusClass(log.resolveStatus)}`}>
                               {getBarcodeScanResolveStatusLabel(log.resolveStatus)}
                             </span>
                           </div>

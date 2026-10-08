@@ -257,7 +257,7 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
           <div className="flex flex-col gap-3 p-3 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <div className="flex flex-wrap items-center gap-2">
-                <span className={`rounded px-3 py-1 text-xs font-semibold ${stockStatus.badgeClass}`}>
+                <span className={`rounded px-3 py-1 text-label font-semibold ${stockStatus.badgeClass}`}>
                   {stockStatus.label}
                 </span>
                 {product.orderRequests.length > 0 ? (
@@ -283,20 +283,20 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
             </div>
             <div className="flex flex-wrap gap-2">
               <a
-                className="rounded border border-line bg-panel px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+                className="rounded btn-secondary px-4 py-2 text-sm font-semibold transition"
                 href={inventoryHref}
               >
                 在庫一覧で確認
               </a>
               <a
-                className="rounded border border-line bg-panel px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+                className="rounded btn-secondary px-4 py-2 text-sm font-semibold transition"
                 href={movementsHref}
               >
                 履歴で確認
               </a>
               {shortageCount > 0 ? (
                 <a
-                  className="rounded bg-accent px-4 py-2 text-sm font-semibold text-panel transition hover:bg-accentDeep"
+                  className="rounded btn-primary px-4 py-2 text-sm font-semibold transition"
                   href={shortageHref}
                 >
                   不足一覧へ
@@ -311,7 +311,7 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
               ) : null}
               {product.orderRequests.length > 0 ? (
                 <a
-                  className="rounded bg-accent px-4 py-2 text-sm font-semibold text-panel transition hover:bg-accentDeep"
+                  className="rounded btn-primary px-4 py-2 text-sm font-semibold transition"
                   href={ordersHref}
                 >
                   発注候補へ
@@ -340,7 +340,7 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
               <p className={shortageCount > 0 ? "mt-0.5 text-2xl font-semibold text-danger" : "mt-0.5 text-2xl font-semibold"}>
                 {shortageCount}
               </p>
-              <p className="mt-1 text-xs text-muted">{stockStatus.label}</p>
+              <p className="mt-1 text-label text-muted">{stockStatus.label}</p>
             </div>
             <div className="border-t border-line p-3 sm:border-l lg:border-t-0">
               <p className="text-sm font-semibold text-muted">発注候補</p>
@@ -377,7 +377,7 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
                 </p>
               </div>
               <a
-                className="inline-flex min-h-10 items-center justify-center rounded border border-line bg-panel px-4 py-2 text-sm font-semibold text-ink transition hover:border-line"
+                className="inline-flex min-h-10 items-center justify-center rounded btn-secondary px-4 py-2 text-sm font-semibold transition"
                 href={ordersHref}
               >
                 発注候補で確認

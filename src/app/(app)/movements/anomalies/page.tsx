@@ -61,20 +61,20 @@ export default async function StockAnomaliesPage() {
           <div className="flex flex-wrap gap-2 text-sm font-semibold">
             {canManageSettings ? (
               <a
-                className="inline-flex h-11 items-center rounded border border-line px-4 text-muted transition hover:border-accent hover:text-accent"
+                className="inline-flex h-11 items-center rounded btn-secondary px-4 transition"
                 href="/admin/settings"
               >
                 閾値設定
               </a>
             ) : null}
             <a
-              className="inline-flex h-11 items-center rounded border border-line px-4 text-muted transition hover:border-accent hover:text-accent"
+              className="inline-flex h-11 items-center rounded btn-secondary px-4 transition"
               href="/movements"
             >
               入出庫履歴へ
             </a>
             <a
-              className="inline-flex h-11 items-center rounded border border-line px-4 text-muted transition hover:border-accent hover:text-accent"
+              className="inline-flex h-11 items-center rounded btn-secondary px-4 transition"
               href="/home"
             >
               ホームへ戻る
@@ -109,7 +109,7 @@ export default async function StockAnomaliesPage() {
           {anomalies.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[1120px] border-collapse text-left text-sm">
-                <thead className="bg-subtle text-xs text-muted">
+                <thead className="bg-subtle text-label text-muted">
                   <tr>
                     <th className="border-b border-line px-4 py-3">商品</th>
                     <th className="border-b border-line px-4 py-3">カテゴリ</th>

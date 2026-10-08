@@ -29,7 +29,7 @@ export default async function ManualPage() {
               <p className="mt-2 text-sm text-muted">日常操作の確認用マニュアルです。</p>
             </div>
             <a
-              className="inline-flex min-h-11 items-center rounded border border-line bg-panel px-4 text-sm font-semibold text-accent transition hover:border-accent"
+              className="inline-flex min-h-11 items-center rounded btn-secondary px-4 text-sm font-semibold transition"
               href="/home"
             >
               ホームへ戻る
@@ -41,8 +41,8 @@ export default async function ManualPage() {
             <p>「出庫」から商品名・規格やカテゴリで探し、商品を選んでください。担当者、出庫数、在庫と同じ単位で出すことを確認して確定します。</p>
             <p>商品の「出し方」を確認してください。箱から本などへの換算はまだ行いません。単位が不明な商品は管理者に確認してください。</p>
             <p>「納品する」は自院の納品待ち商品を発注日ごとに表示します。届いた商品を選び、数量を確認して確定すると在庫に追加されます。</p>
-            <a href="/receive" className="inline-flex min-h-12 items-center justify-center rounded border border-muted px-4 font-semibold">納品を開く</a>
-            <a href="/stock-out" className="inline-flex min-h-12 items-center justify-center rounded border border-muted px-4 font-semibold  ">商品カードの出庫を開く</a>
+            <a href="/receive" className="inline-flex min-h-12 items-center justify-center rounded btn-secondary px-4 font-semibold">納品を開く</a>
+            <a href="/stock-out" className="inline-flex min-h-12 items-center justify-center rounded btn-secondary px-4 font-semibold">商品カードの出庫を開く</a>
           </section>}
           {barcodeUiEnabled && <ManualViewer markdown={markdown} />}
         </div>

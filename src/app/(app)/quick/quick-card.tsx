@@ -58,7 +58,7 @@ export function QuickCard({ categoryLabel, row, selectedStaffOperatorId }: Quick
         </div>
       </div>
       {row.stockStatus !== "ENOUGH" ? (
-        <span className={`inline-flex w-fit rounded px-2 py-1 text-xs font-semibold ${row.stockStatusClassName}`}>
+        <span className={`inline-flex w-fit rounded px-2 py-1 text-label font-semibold ${row.stockStatusClassName}`}>
           {row.stockStatusLabel}
         </span>
       ) : null}
@@ -70,7 +70,7 @@ export function QuickCard({ categoryLabel, row, selectedStaffOperatorId }: Quick
           <button
             type="submit"
             disabled={row.quantity <= 0 || !isStaffSelected || isPending}
-            className="h-11 w-full rounded border border-line bg-panel text-2xl font-semibold text-danger transition hover:border-lineStrong hover:bg-panel disabled:cursor-not-allowed disabled:opacity-40"
+            className="h-11 w-full rounded btn-secondary btn-danger text-2xl font-semibold transition disabled:cursor-not-allowed"
           >
             {isPending && pendingDelta === "-1" ? "出庫中" : "-1"}
           </button>
@@ -82,7 +82,7 @@ export function QuickCard({ categoryLabel, row, selectedStaffOperatorId }: Quick
           <button
             type="submit"
             disabled={!isStaffSelected || isPending}
-            className="h-11 w-full rounded border border-line bg-panel text-lg font-semibold text-accent transition hover:border-accent hover:bg-tint disabled:cursor-not-allowed disabled:opacity-50"
+            className="h-11 w-full rounded btn-secondary text-lg font-semibold transition disabled:cursor-not-allowed"
           >
             {isPending && pendingDelta === "+1" ? "入庫中" : "+1"}
           </button>

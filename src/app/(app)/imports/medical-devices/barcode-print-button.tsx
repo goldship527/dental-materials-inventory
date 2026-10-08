@@ -5,7 +5,7 @@ export function BarcodePrintButton() {
     <button
       type="button"
       onClick={() => window.print()}
-      className="rounded bg-accent px-4 py-2 text-sm font-semibold text-panel transition hover:bg-accentDeep print:hidden"
+      className="rounded btn-primary px-4 py-2 text-sm font-semibold transition print:hidden"
     >
       印刷
     </button>

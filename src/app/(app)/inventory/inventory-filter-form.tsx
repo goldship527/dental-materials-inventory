@@ -28,8 +28,8 @@ function buildCategoryHref(category: string, query: string, shortageOnly: boolea
 
 function categoryButtonClass(isCurrent: boolean) {
   return isCurrent
-    ? "inline-flex min-h-10 items-center rounded border border-accent bg-accent px-3 py-2 text-sm font-semibold text-panel "
-    : "inline-flex min-h-10 items-center rounded border border-line bg-panel px-3 py-2 text-sm font-semibold text-muted transition hover:border-accent/50 hover:bg-subtle hover:text-ink";
+    ? "inline-flex min-h-10 items-center rounded border border-accent chip-selected px-3 py-2 text-sm font-semibold"
+    : "inline-flex min-h-10 items-center rounded btn-secondary px-3 py-2 text-sm font-semibold transition";
 }
 
 export function InventoryFilterForm({
@@ -55,7 +55,7 @@ export function InventoryFilterForm({
         </label>
         <button
           type="submit"
-          className="h-11 rounded bg-accent px-5 text-sm font-semibold text-panel transition hover:bg-accentDeep"
+          className="h-11 rounded btn-primary px-5 text-sm font-semibold transition"
         >
           絞り込み
         </button>

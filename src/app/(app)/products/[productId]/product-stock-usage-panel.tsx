@@ -53,7 +53,7 @@ function StockUsageForm({
       </div>
 
       <div className="grid gap-3 sm:grid-cols-3">
-        <label className="grid gap-1 text-xs font-semibold text-muted">
+        <label className="grid gap-1 text-label font-semibold text-muted">
           数量
           <input
             type="number"
@@ -73,7 +73,7 @@ function StockUsageForm({
         </div>
       </div>
 
-      <label className="grid gap-1 text-xs font-semibold text-muted">
+      <label className="grid gap-1 text-label font-semibold text-muted">
         メモ
         <input
           name="memo"
@@ -85,7 +85,7 @@ function StockUsageForm({
       <button
         type="submit"
         disabled={isDisabled}
-        className="justify-self-start rounded bg-accent px-4 py-2 text-sm font-semibold text-panel transition hover:bg-accentDeep disabled:cursor-not-allowed disabled:opacity-50"
+        className="justify-self-start rounded btn-primary px-4 py-2 text-sm font-semibold transition disabled:cursor-not-allowed"
       >
         {isPending ? "更新中" : title}
       </button>

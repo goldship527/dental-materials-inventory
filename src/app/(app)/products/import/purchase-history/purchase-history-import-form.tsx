@@ -172,7 +172,7 @@ export function PurchaseHistoryImportForm() {
         </div>
         <a
           href="/products/import"
-          className="inline-flex min-h-11 items-center justify-center rounded border border-line bg-panel px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+          className="inline-flex min-h-11 items-center justify-center rounded btn-secondary px-4 py-2 text-sm font-semibold transition"
         >
           商品マスタ取り込みへ戻る
         </a>
@@ -221,7 +221,7 @@ export function PurchaseHistoryImportForm() {
           <button
             type="submit"
             disabled={isPreviewPending || sourceText.trim().length === 0}
-            className="rounded bg-accent px-5 py-3 text-sm font-semibold text-panel transition hover:bg-accentDeep disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded btn-primary px-5 py-3 text-sm font-semibold transition disabled:cursor-not-allowed"
           >
             {isPreviewPending ? "確認中" : "プレビュー"}
           </button>
@@ -275,7 +275,7 @@ export function PurchaseHistoryImportForm() {
 
           <div className="overflow-x-auto rounded border border-line">
             <table className="w-full min-w-[1400px] border-collapse text-left text-sm">
-              <thead className="bg-subtle text-xs text-muted">
+              <thead className="bg-subtle text-label text-muted">
                 <tr>
                   <th className="border-b border-line px-3 py-2">行</th>
                   <th className="border-b border-line px-3 py-2">状態</th>
@@ -377,7 +377,7 @@ export function PurchaseHistoryImportForm() {
               <button
                 type="submit"
                 disabled={!canConfirm || isConfirmPending}
-                className="inline-flex min-h-11 items-center justify-center rounded bg-accent px-5 py-3 text-sm font-semibold text-panel transition hover:bg-accentDeep disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex min-h-11 items-center justify-center rounded btn-primary px-5 py-3 text-sm font-semibold transition disabled:cursor-not-allowed"
               >
                 {isConfirmPending ? "登録中" : "登録予定の商品を追加"}
               </button>

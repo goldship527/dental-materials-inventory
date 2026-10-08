@@ -77,7 +77,7 @@ function BarcodeRow({ productId, barcode }: BarcodeRowProps) {
         <input type="hidden" name="productId" value={productId} />
         <input type="hidden" name="barcodeId" value={barcode.id} />
         <div className="grid gap-3 lg:grid-cols-12 lg:items-end">
-          <label className="grid gap-1 text-xs font-semibold text-muted lg:col-span-6">
+          <label className="grid gap-1 text-label font-semibold text-muted lg:col-span-6">
             バーコード
             <input
               name="barcode"
@@ -87,7 +87,7 @@ function BarcodeRow({ productId, barcode }: BarcodeRowProps) {
               className="h-10 rounded border border-line px-3 font-mono text-sm text-ink    "
             />
           </label>
-          <label className="grid gap-1 text-xs font-semibold text-muted sm:col-span-1 lg:col-span-2">
+          <label className="grid gap-1 text-label font-semibold text-muted sm:col-span-1 lg:col-span-2">
             種別
             <input
               name="barcodeType"
@@ -97,7 +97,7 @@ function BarcodeRow({ productId, barcode }: BarcodeRowProps) {
               className="h-10 rounded border border-line px-3 text-sm text-ink    "
             />
           </label>
-          <label className="grid gap-1 text-xs font-semibold text-muted sm:col-span-1 lg:col-span-2">
+          <label className="grid gap-1 text-label font-semibold text-muted sm:col-span-1 lg:col-span-2">
             単位ラベル
             <input
               name="unitLabel"
@@ -106,7 +106,7 @@ function BarcodeRow({ productId, barcode }: BarcodeRowProps) {
               className="h-10 rounded border border-line px-3 text-sm text-ink    "
             />
           </label>
-          <label className="flex min-h-10 items-center gap-2 rounded border border-line bg-subtle px-3 py-2 text-xs font-semibold text-muted lg:col-span-2">
+          <label className="flex min-h-10 items-center gap-2 rounded border border-line bg-subtle px-3 py-2 text-label font-semibold text-muted lg:col-span-2">
             <input
               type="checkbox"
               name="isPrimary"
@@ -120,7 +120,7 @@ function BarcodeRow({ productId, barcode }: BarcodeRowProps) {
           <button
             type="submit"
             disabled={isUpdatePending}
-            className="rounded bg-accent px-4 py-2 text-xs font-semibold text-panel transition hover:bg-accentDeep disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded btn-primary px-4 py-2 text-xs font-semibold transition disabled:cursor-not-allowed"
           >
             {isUpdatePending ? "更新中" : "更新"}
           </button>
@@ -134,7 +134,7 @@ function BarcodeRow({ productId, barcode }: BarcodeRowProps) {
         <button
           type="submit"
           disabled={isUnlinkPending}
-          className="rounded border border-line px-4 py-2 text-xs font-semibold text-muted transition hover:border-danger hover:text-danger disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded btn-secondary btn-danger px-4 py-2 text-xs font-semibold transition disabled:cursor-not-allowed"
         >
           {isUnlinkPending ? "解除中" : "紐づけ解除"}
         </button>
@@ -184,7 +184,7 @@ export function BarcodeManagement({ productId, barcodes, defaultNewBarcode = "" 
         <input type="hidden" name="productId" value={productId} />
         <h3 className="text-sm font-semibold">バーコードを追加</h3>
         <div className="grid gap-3 lg:grid-cols-12 lg:items-end">
-          <label className="grid gap-1 text-xs font-semibold text-muted lg:col-span-6">
+          <label className="grid gap-1 text-label font-semibold text-muted lg:col-span-6">
             バーコード
             <input
               name="barcode"
@@ -195,7 +195,7 @@ export function BarcodeManagement({ productId, barcodes, defaultNewBarcode = "" 
               className="h-10 rounded border border-line px-3 font-mono text-sm text-ink    "
             />
           </label>
-          <label className="grid gap-1 text-xs font-semibold text-muted sm:col-span-1 lg:col-span-2">
+          <label className="grid gap-1 text-label font-semibold text-muted sm:col-span-1 lg:col-span-2">
             種別
             <input
               name="barcodeType"
@@ -205,7 +205,7 @@ export function BarcodeManagement({ productId, barcodes, defaultNewBarcode = "" 
               className="h-10 rounded border border-line px-3 text-sm text-ink    "
             />
           </label>
-          <label className="grid gap-1 text-xs font-semibold text-muted sm:col-span-1 lg:col-span-2">
+          <label className="grid gap-1 text-label font-semibold text-muted sm:col-span-1 lg:col-span-2">
             単位ラベル
             <input
               name="unitLabel"
@@ -214,7 +214,7 @@ export function BarcodeManagement({ productId, barcodes, defaultNewBarcode = "" 
               className="h-10 rounded border border-line px-3 text-sm text-ink    "
             />
           </label>
-          <label className="flex min-h-10 items-center gap-2 rounded border border-line bg-panel px-3 py-2 text-xs font-semibold text-muted lg:col-span-2">
+          <label className="flex min-h-10 items-center gap-2 rounded border border-line bg-panel px-3 py-2 text-label font-semibold text-muted lg:col-span-2">
             <input type="checkbox" name="isPrimary" className="h-4 w-4 shrink-0 rounded border-line text-accent" />
             <span className="leading-tight">代表バーコード</span>
           </label>
@@ -223,7 +223,7 @@ export function BarcodeManagement({ productId, barcodes, defaultNewBarcode = "" 
           <button
             type="submit"
             disabled={isCreatePending}
-            className="rounded bg-accent px-4 py-2 text-xs font-semibold text-panel transition hover:bg-accentDeep disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded btn-primary px-4 py-2 text-xs font-semibold transition disabled:cursor-not-allowed"
           >
             {isCreatePending ? "追加中" : "追加"}
           </button>

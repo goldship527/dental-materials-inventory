@@ -307,7 +307,7 @@ function StocktakeItemRow({ sessionId, row, editable, highlighted, registerInput
           type="button"
           onClick={skip}
           disabled={!editable || isPending}
-          className="h-10 rounded border border-line px-4 text-xs font-semibold text-muted transition hover:border-accent hover:text-accent disabled:cursor-not-allowed disabled:opacity-40"
+          className="h-10 rounded btn-secondary px-4 text-xs font-semibold transition disabled:cursor-not-allowed"
         >
           {isPending ? "保存中" : "スキップ"}
         </button>
@@ -463,7 +463,7 @@ export function StocktakeSessionScanForm({ session }: StocktakeSessionScanFormPr
           </label>
           <button
             type="submit"
-            className="self-end h-12 rounded bg-accent px-5 text-sm font-semibold text-panel transition hover:bg-accentDeep"
+            className="self-end h-12 rounded btn-primary px-5 text-sm font-semibold transition"
           >
             商品へ移動
           </button>
@@ -510,8 +510,8 @@ export function StocktakeSessionScanForm({ session }: StocktakeSessionScanFormPr
             onClick={() => setStatusTab(tab.id)}
             className={
               statusTab === tab.id
-                ? "rounded bg-accent px-4 py-2 text-sm font-semibold text-panel"
-                : "rounded border border-line bg-panel px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+                ? "rounded btn-primary px-4 py-2 text-sm font-semibold"
+                : "rounded btn-secondary px-4 py-2 text-sm font-semibold transition"
             }
           >
             {tab.label} {counts[tab.id]}
@@ -533,7 +533,7 @@ export function StocktakeSessionScanForm({ session }: StocktakeSessionScanFormPr
                     setCommitError(null);
                     setIsCommitModalOpen(true);
                   }}
-                  className="h-10 rounded bg-accent px-4 text-xs font-semibold text-panel transition hover:bg-accentDeep"
+                  className="h-10 rounded btn-primary px-4 text-xs font-semibold transition"
                 >
                   確定する
                 </button>
@@ -551,7 +551,7 @@ export function StocktakeSessionScanForm({ session }: StocktakeSessionScanFormPr
                 <input type="hidden" name="sessionId" value={session.id} />
                 <SubmitButton
                   pendingLabel="破棄中"
-                  className="h-10 rounded border border-danger px-4 text-xs font-semibold text-danger transition hover:bg-panel disabled:cursor-not-allowed disabled:opacity-50"
+                  className="h-10 rounded btn-secondary btn-danger px-4 text-xs font-semibold transition disabled:cursor-not-allowed"
                 >
                   破棄する
                 </SubmitButton>
@@ -561,7 +561,7 @@ export function StocktakeSessionScanForm({ session }: StocktakeSessionScanFormPr
         </div>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[1180px] border-collapse text-left text-sm">
-            <thead className="bg-subtle text-xs text-muted">
+            <thead className="bg-subtle text-label text-muted">
               <tr>
                 <th className="border-b border-line px-4 py-3">商品</th>
                 <th className="border-b border-line px-4 py-3">保管場所</th>
@@ -629,7 +629,7 @@ export function StocktakeSessionScanForm({ session }: StocktakeSessionScanFormPr
                 type="button"
                 onClick={() => setIsCommitModalOpen(false)}
                 disabled={isCommitPending}
-                className="h-10 rounded border border-line px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+                className="h-10 rounded btn-secondary px-4 text-sm font-semibold transition"
               >
                 破棄しない
               </button>
@@ -637,7 +637,7 @@ export function StocktakeSessionScanForm({ session }: StocktakeSessionScanFormPr
                 type="button"
                 onClick={commitSession}
                 disabled={isCommitPending}
-                className="h-10 rounded bg-accent px-4 text-sm font-semibold text-panel transition hover:bg-accentDeep disabled:cursor-not-allowed disabled:opacity-60"
+                className="h-10 rounded btn-primary px-4 text-sm font-semibold transition disabled:cursor-not-allowed"
               >
                 {isCommitPending ? "確定中" : "確定する"}
               </button>

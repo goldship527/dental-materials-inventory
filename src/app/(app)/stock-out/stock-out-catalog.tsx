@@ -78,9 +78,9 @@ function InlineIssueControl({card, selectedStaffOperatorId, onResult}: {
     <input type="hidden" name="staffOperatorId" value={selectedStaffOperatorId} />
     <p className="text-xs font-semibold">数量（{unit}）</p>
     <div className="grid grid-cols-[48px_minmax(64px,1fr)_48px] gap-1.5">
-      <button type="button" disabled={pending || number <= 1} aria-label={`${card.name}の出庫数を1減らす`} onClick={() => setQuantity(String(Math.max(1, (Number.isFinite(number) ? number : 1) - 1)))} className={`${buttonStyle} px-0 card-control-size`}>−</button>
-      <input name="quantity" aria-label={`${card.name}の出庫数`} type="number" inputMode="numeric" min={1} max={maxQuantity} step={1} required disabled={pending} value={quantity} onChange={event => setQuantity(event.target.value)} className={`h-12 min-w-0 rounded px-1 text-center font-semibold tabular-nums field card-control-size ${focusStyle}`} />
-      <button type="button" disabled={pending || number >= maxQuantity} aria-label={`${card.name}の出庫数を1増やす`} onClick={() => setQuantity(String(Math.min(maxQuantity, (Number.isFinite(number) ? number : 0) + 1)))} className={`${buttonStyle} px-0 card-control-size`}>＋</button>
+      <button type="button" disabled={pending || number <= 1} aria-label={`${card.name}の出庫数を1減らす`} onClick={() => setQuantity(String(Math.max(1, (Number.isFinite(number) ? number : 1) - 1)))} className={`${buttonStyle} px-0 text-xl`}>−</button>
+      <input name="quantity" aria-label={`${card.name}の出庫数`} type="number" inputMode="numeric" min={1} max={maxQuantity} step={1} required disabled={pending} value={quantity} onChange={event => setQuantity(event.target.value)} className={`h-12 min-w-0 rounded px-1 text-center font-semibold tabular-nums field text-xl ${focusStyle}`} />
+      <button type="button" disabled={pending || number >= maxQuantity} aria-label={`${card.name}の出庫数を1増やす`} onClick={() => setQuantity(String(Math.min(maxQuantity, (Number.isFinite(number) ? number : 0) + 1)))} className={`${buttonStyle} px-0 text-xl`}>＋</button>
     </div>
     <button type="submit" disabled={pending || !valid || !selectedStaffOperatorId} aria-label={`${card.name}を${valid ? number : "入力した数量"}${unit}出庫する`} className={`${primaryStyle} px-2`}>
       {pending ? "記録中…" : `${valid ? number : "—"}${unit}を出庫`}

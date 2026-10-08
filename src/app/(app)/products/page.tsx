@@ -157,13 +157,13 @@ export default async function ProductsPage({ searchParams }: PageProps) {
             {canManageProducts && !attachBarcode ? (
               <>
                 <a
-                  className="inline-flex min-h-11 items-center justify-center rounded bg-accent px-4 py-2 text-sm font-semibold text-panel transition hover:bg-accentDeep"
+                  className="inline-flex min-h-11 items-center justify-center rounded btn-primary px-4 py-2 text-sm font-semibold transition"
                   href="/products/new"
                 >
                   商品を新規作成
                 </a>
                 <a
-                  className="inline-flex min-h-11 items-center justify-center rounded border border-line bg-panel px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+                  className="inline-flex min-h-11 items-center justify-center rounded btn-secondary px-4 py-2 text-sm font-semibold transition"
                   href="/products/import"
                 >
                   一括取り込み
@@ -171,7 +171,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
               </>
             ) : null}
             <a
-              className="inline-flex min-h-11 items-center justify-center rounded border border-line px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+              className="inline-flex min-h-11 items-center justify-center rounded btn-secondary px-4 py-2 text-sm font-semibold transition"
               href="/home"
             >
               ホームへ戻る
@@ -206,14 +206,14 @@ export default async function ProductsPage({ searchParams }: PageProps) {
               </div>
               <div className="flex flex-wrap gap-2">
                 <a
-                  className="inline-flex min-h-10 items-center justify-center rounded border border-line px-3 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+                  className="inline-flex min-h-10 items-center justify-center rounded btn-secondary px-3 py-2 text-sm font-semibold transition"
                   href="/products?source=purchase-history"
                 >
                   登録商品を見る
                 </a>
                 {canManageProducts ? (
                   <a
-                    className="inline-flex min-h-10 items-center justify-center rounded bg-accent px-3 py-2 text-sm font-semibold text-panel transition hover:bg-accentDeep"
+                    className="inline-flex min-h-10 items-center justify-center rounded btn-primary px-3 py-2 text-sm font-semibold transition"
                     href="/products/import/purchase-history/setup"
                   >
                     まとめて整える
@@ -242,8 +242,8 @@ export default async function ProductsPage({ searchParams }: PageProps) {
             </span>
             <div className="flex items-center gap-2">
               <a
-                className={`rounded border border-line px-3 py-1.5 text-xs font-semibold transition ${
-                  productPage.page <= 1 ? "pointer-events-none text-muted/50" : "text-muted hover:border-accent hover:text-accent"
+                className={`rounded btn-secondary px-3 py-1.5 text-xs font-semibold transition ${
+                  productPage.page <= 1 ? "pointer-events-none bg-subtle text-muted" : ""
                 }`}
                 href={previousHref}
                 aria-disabled={productPage.page <= 1}
@@ -254,10 +254,10 @@ export default async function ProductsPage({ searchParams }: PageProps) {
                 {productPage.page} / {productPage.pageCount}
               </span>
               <a
-                className={`rounded border border-line px-3 py-1.5 text-xs font-semibold transition ${
+                className={`rounded btn-secondary px-3 py-1.5 text-xs font-semibold transition ${
                   productPage.page >= productPage.pageCount
-                    ? "pointer-events-none text-muted/50"
-                    : "text-muted hover:border-accent hover:text-accent"
+                    ? "pointer-events-none bg-subtle text-muted"
+                    : ""
                 }`}
                 href={nextHref}
                 aria-disabled={productPage.page >= productPage.pageCount}
@@ -268,7 +268,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
           </div>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1440px] border-collapse text-left text-sm">
-              <thead className="bg-subtle text-xs text-muted">
+              <thead className="bg-subtle text-label text-muted">
                 <tr>
                   <th className="border-b border-line px-4 py-3">商品</th>
                   <th className="border-b border-line px-4 py-3 text-right">現在庫</th>
@@ -311,7 +311,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
                             </span>
                             {needsInitialSetup(row) ? (
                               <a
-                                className="inline-flex rounded border border-line bg-markSoft px-2 py-1 text-xs font-semibold text-ink transition hover:border-line"
+                                className="inline-flex rounded btn-secondary bg-markSoft px-2 py-1 text-xs font-semibold transition"
                                 href={`/products/${row.id}/edit`}
                               >
                                 設定を整える
@@ -376,7 +376,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
                       {canManageProducts && attachBarcode ? (
                         <td className="border-b border-line px-4 py-3">
                           <a
-                            className="inline-flex min-h-11 items-center justify-center rounded bg-accent px-3 py-2 text-xs font-semibold text-panel transition hover:bg-accentDeep"
+                            className="inline-flex min-h-11 items-center justify-center rounded btn-primary px-3 py-2 text-xs font-semibold transition"
                             href={`/products/${row.id}/edit?newBarcode=${encodeURIComponent(attachBarcode)}`}
                           >
                             この商品に紐づける

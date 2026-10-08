@@ -111,7 +111,7 @@ export function ProductStockItemCreateForm({ productId, defaultMinStock }: Produ
         <button
           type="submit"
           disabled={isPending}
-          className="rounded bg-accent px-4 py-2 text-sm font-semibold text-panel transition hover:bg-accentDeep disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded btn-primary px-4 py-2 text-sm font-semibold transition disabled:cursor-not-allowed"
         >
           {isPending ? "追加中" : "在庫一覧に追加"}
         </button>

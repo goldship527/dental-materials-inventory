@@ -205,8 +205,8 @@ export default async function HomePage({ searchParams }: PageProps) {
               href={item.href}
               className={
                 item.tone === "out"
-                  ? "min-h-40 rounded border-2 border-accent bg-panel p-6 shadow-sheet transition hover:bg-subtle   "
-                  : "min-h-40 rounded border-2 border-muted bg-panel p-6 shadow-sheet transition hover:bg-subtle   "
+                  ? "min-h-40 rounded border-2 border-accent btn-secondary p-6 transition"
+                  : "min-h-40 rounded border-2 border-muted btn-secondary p-6 transition"
               }
             >
               <div className="flex items-start justify-between gap-4">
@@ -240,7 +240,7 @@ export default async function HomePage({ searchParams }: PageProps) {
             {attentionItems.map((item) => (
               <a
                 key={item.title}
-                className="rounded border border-line bg-panel px-4 py-3 shadow-sheet transition hover:border-accent "
+                className="rounded btn-secondary px-4 py-3 transition"
                 href={item.href}
               >
                 <div className="flex items-center justify-between gap-3">
@@ -298,7 +298,7 @@ export default async function HomePage({ searchParams }: PageProps) {
               <a
                 key={item.href}
                 href={item.href}
-                className="min-h-32 rounded border border-line bg-panel p-5 shadow-sheet transition hover:border-accent "
+                className="min-h-32 rounded btn-secondary p-5 transition"
               >
                 <div className="flex items-start justify-between gap-4">
                   <p className="text-lg font-semibold">{item.title}</p>
@@ -328,7 +328,7 @@ export default async function HomePage({ searchParams }: PageProps) {
                 <a
                   key={item.href}
                   href={item.href}
-                  className="min-h-32 rounded border border-line bg-panel p-5 shadow-sheet transition hover:border-accent "
+                  className="min-h-32 rounded btn-secondary p-5 transition"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <p className="text-lg font-semibold">{item.title}</p>

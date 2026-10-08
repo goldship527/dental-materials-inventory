@@ -132,18 +132,18 @@ export function MovementFilterForm({
         />
         <button
           type="submit"
-          className="h-11 rounded bg-accent px-5 text-sm font-semibold text-panel transition hover:bg-accentDeep"
+          className="h-11 rounded btn-primary px-5 text-sm font-semibold transition"
         >
           絞り込み
         </button>
         <a
-          className="flex h-11 items-center justify-center rounded border border-line px-5 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+          className="flex h-11 items-center justify-center rounded btn-secondary px-5 text-sm font-semibold transition"
           href="/movements"
         >
           クリア
         </a>
         <a
-          className="flex h-11 items-center justify-center rounded border border-accent/30 bg-tint px-5 text-sm font-semibold text-accent transition hover:border-accent hover:bg-panel"
+          className="flex h-11 items-center justify-center rounded btn-secondary border-accent/30 px-5 text-sm font-semibold transition"
           href={exportHref}
         >
           CSV出力
@@ -155,8 +155,8 @@ export function MovementFilterForm({
           aria-current={defaultCategory === "" ? "page" : undefined}
           className={
             defaultCategory === ""
-              ? "inline-flex min-h-9 items-center rounded border border-accent bg-accent px-3 py-1.5 text-sm font-semibold text-panel"
-              : "inline-flex min-h-9 items-center rounded border border-line bg-panel/75 px-3 py-1.5 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+              ? "inline-flex min-h-9 items-center rounded border chip-selected px-3 py-1.5 text-sm font-semibold"
+              : "inline-flex min-h-9 items-center rounded btn-secondary px-3 py-1.5 text-sm font-semibold transition"
           }
         >
           すべて
@@ -171,8 +171,8 @@ export function MovementFilterForm({
               aria-current={isCurrent ? "page" : undefined}
               className={
                 isCurrent
-                  ? "inline-flex min-h-9 items-center rounded border border-accent bg-accent px-3 py-1.5 text-sm font-semibold text-panel"
-                  : "inline-flex min-h-9 items-center rounded border border-line bg-panel/75 px-3 py-1.5 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+                  ? "inline-flex min-h-9 items-center rounded border chip-selected px-3 py-1.5 text-sm font-semibold"
+                  : "inline-flex min-h-9 items-center rounded btn-secondary px-3 py-1.5 text-sm font-semibold transition"
               }
             >
               {category}

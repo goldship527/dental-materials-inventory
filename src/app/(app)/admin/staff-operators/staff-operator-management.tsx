@@ -101,7 +101,7 @@ export function StaffOperatorManagement({ operators, clinics }: StaffOperatorMan
           </fieldset>
           <div className="md:col-span-2">
             <button
-              className="inline-flex min-h-11 items-center justify-center rounded bg-accent px-5 py-3 text-sm font-semibold text-panel transition hover:bg-accentDeep disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex min-h-11 items-center justify-center rounded btn-primary px-5 py-3 text-sm font-semibold transition disabled:cursor-not-allowed"
               disabled={isCreating}
               type="submit"
             >
@@ -123,7 +123,7 @@ export function StaffOperatorManagement({ operators, clinics }: StaffOperatorMan
           <div className="flex flex-wrap items-center gap-3">
             <p className="text-sm font-semibold text-muted">合計 {operators.length} 件</p>
             {barcodeUiEnabled && <a
-              className="rounded border border-line bg-panel px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+              className="rounded btn-secondary px-4 py-2 text-sm font-semibold transition"
               href="/admin/staff-operators/labels"
             >
               バーコード印刷
@@ -196,7 +196,7 @@ export function StaffOperatorManagement({ operators, clinics }: StaffOperatorMan
                         <form action={updateAction} id={updateFormId}>
                           <input name="staffOperatorId" type="hidden" value={operator.id} />
                           <RowSubmitButton
-                            className="h-11 rounded bg-accent px-3 text-sm font-semibold text-panel transition hover:bg-accentDeep disabled:cursor-not-allowed disabled:opacity-50"
+                            className="h-11 rounded btn-primary px-3 text-sm font-semibold transition disabled:cursor-not-allowed"
                             pendingLabel="保存中"
                           >
                             保存
@@ -213,7 +213,7 @@ export function StaffOperatorManagement({ operators, clinics }: StaffOperatorMan
                           >
                             <input name="staffOperatorId" type="hidden" value={operator.id} />
                             <RowSubmitButton
-                              className="h-11 rounded border border-line bg-panel px-3 text-sm font-semibold text-muted transition hover:border-danger hover:text-danger disabled:cursor-not-allowed disabled:opacity-50"
+                              className="h-11 rounded btn-secondary btn-danger px-3 text-sm font-semibold transition disabled:cursor-not-allowed"
                               pendingLabel="無効化中"
                             >
                               無効化

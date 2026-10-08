@@ -245,8 +245,8 @@ export async function AppNav({ current }: AppNavProps) {
     ? "inline-flex h-9 shrink-0 items-center whitespace-nowrap rounded border border-line bg-panel/80 px-2 text-xs font-semibold text-muted transition hover:border-accent hover:bg-panel hover:text-accent"
     : "inline-flex h-11 shrink-0 items-center whitespace-nowrap rounded border border-line bg-panel/80 px-3 text-sm font-semibold text-muted transition hover:border-accent hover:bg-panel hover:text-accent sm:h-9";
   const logoutButtonClassName = isAdminMode
-    ? "inline-flex h-9 shrink-0 items-center justify-center whitespace-nowrap rounded border border-line bg-panel/80 px-2 text-xs font-semibold text-muted transition hover:border-danger hover:bg-panel hover:text-danger disabled:cursor-not-allowed disabled:opacity-50"
-    : "inline-flex h-11 shrink-0 items-center justify-center whitespace-nowrap rounded border border-line bg-panel/80 px-3 text-sm font-semibold text-muted transition hover:border-danger hover:bg-panel hover:text-danger disabled:cursor-not-allowed disabled:opacity-50 sm:h-9";
+    ? "inline-flex h-9 shrink-0 items-center justify-center whitespace-nowrap rounded btn-secondary btn-danger px-2 text-xs font-semibold transition disabled:cursor-not-allowed"
+    : "inline-flex h-11 shrink-0 items-center justify-center whitespace-nowrap rounded btn-secondary btn-danger px-3 text-sm font-semibold transition disabled:cursor-not-allowed sm:h-9";
 
   return (
     <nav

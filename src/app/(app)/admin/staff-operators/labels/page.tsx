@@ -14,8 +14,8 @@ type PageProps = {
 
 function filterLinkClass(isSelected: boolean) {
   return isSelected
-    ? "rounded border border-accent bg-accent px-3 py-2 text-sm font-semibold text-panel"
-    : "rounded border border-line bg-panel px-3 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent";
+    ? "rounded border border-accent chip-selected px-3 py-2 text-sm font-semibold"
+    : "rounded btn-secondary px-3 py-2 text-sm font-semibold transition";
 }
 
 export default async function StaffOperatorLabelsPage({ searchParams }: PageProps) {
@@ -67,7 +67,7 @@ export default async function StaffOperatorLabelsPage({ searchParams }: PageProp
           </div>
           <div className="flex flex-wrap gap-2">
             <a
-              className="rounded border border-line bg-panel px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+              className="rounded btn-secondary px-4 py-2 text-sm font-semibold transition"
               href="/admin/staff-operators"
             >
               担当者管理へ戻る

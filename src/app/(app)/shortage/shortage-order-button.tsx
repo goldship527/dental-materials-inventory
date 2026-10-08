@@ -22,7 +22,7 @@ export function ShortageOrderButton({ stockItemId, isAlreadyAdded, pendingQuanti
       <button
         type="submit"
         disabled={isDisabled}
-        className="h-9 rounded bg-accent px-3 text-xs font-semibold text-panel transition hover:bg-accentDeep disabled:cursor-not-allowed disabled:bg-subtle disabled:text-muted"
+        className="h-9 rounded btn-primary px-3 text-xs font-semibold transition disabled:cursor-not-allowed"
       >
         {hasPendingOrder ? "納品待ちあり" : isAlreadyAdded ? "追加済み" : isPending ? "追加中" : "候補へ追加"}
       </button>

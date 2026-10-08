@@ -30,7 +30,7 @@ export function InventoryAdjustForm({ stockItemId, quantity, stockUpdatedAt, cli
       <input type="hidden" name="expectedUpdatedAt" value={stockUpdatedAt} />
       <input type="hidden" name="staffOperatorId" value={selectedStaffOperatorId} />
       <div className="grid gap-2 sm:grid-cols-[96px_minmax(140px,1fr)_80px] sm:items-end">
-        <label className="grid gap-1 text-xs font-semibold text-muted">
+        <label className="grid gap-1 text-label font-semibold text-muted">
           新数量
           <input
             type="number"
@@ -43,7 +43,7 @@ export function InventoryAdjustForm({ stockItemId, quantity, stockUpdatedAt, cli
             className="h-11 rounded border border-line px-3 text-right text-sm font-semibold text-ink    "
           />
         </label>
-        <label className="grid gap-1 text-xs font-semibold text-muted">
+        <label className="grid gap-1 text-label font-semibold text-muted">
           理由メモ
           <input
             type="text"
@@ -57,7 +57,7 @@ export function InventoryAdjustForm({ stockItemId, quantity, stockUpdatedAt, cli
         <button
           type="submit"
           disabled={isPending || !hasSelectedStaffOperator}
-          className="h-11 rounded bg-accent px-4 text-xs font-semibold text-panel transition hover:bg-accentDeep disabled:cursor-not-allowed disabled:opacity-50"
+          className="h-11 rounded btn-primary px-4 text-xs font-semibold transition disabled:cursor-not-allowed"
         >
           {isPending ? "更新中" : "更新"}
         </button>

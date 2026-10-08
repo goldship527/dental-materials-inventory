@@ -236,3 +236,57 @@ grep -rnoE '\b(text|bg|border|ring)-(warning|caution)\b' src | wc -l
 - `docs/spec.md` に「§96 UI見直し（見た目のみ・業務処理は不変）」を短く追加し、design.md を参照させる。
 - `docs/user-manual.md` の画面説明で、色や位置に触れている箇所（「右上のログアウト」等）を更新する。
 - 判断に迷った箇所は推測で決めず、PR本文の「確認待ち」に書く。
+
+## 7. P1 レビュー結果（2026-10-08・Claude Code）: 差し戻し
+
+対象: PR #15（`ui/revision-p1`、`d175687`）。
+
+### 7.1 確認できたこと（合格）
+
+- §5.1 の機械検査5項目は、レビュー側でも全部0件を再現した。
+- 出庫・納品カードの差分は、色・角丸・影・状態の文言の変更だけだった。寸法に関わるクラス（padding、gap、min-h、写真80px、h-12）は変わっていない。数量欄の20pxも `.card-control-size` で維持されている。
+- 基準未満は黄の面＋「▲ 」、在庫0は朱＋「■ 」で、design.md §2.3 どおり。
+- 案内枠の「エラー: 」24箇所、「✓ 」27箇所を確認した。
+
+### 7.2 修正してほしいこと（このPRで直す）
+
+| # | 問題 | 修正 | 根拠 |
+|---|---|---|---|
+| R1 | **立体のボタンの適用漏れ。** `btn-primary` は3箇所、`btn-secondary` は4箇所だけ。`bg-accent` の塗りボタン85箇所と、`border-accent … text-accent` の枠ボタン107箇所が平らなまま | ボタン（`<button>`、ボタンの見た目の `<a>`、`SubmitButton`）の色・影・hover・disabled のクラスを `btn-primary`／`btn-secondary` に置き換える。高さ・padding・文字サイズのクラスは残す。ナビの項目と、表の中の文字リンクは対象外 | 指示書 §3.3、design.md §5.1 |
+| R2 | **無効状態が不透明度だけ。** `disabled:opacity-40/50/60/70` が61箇所 | R1 の置き換えで `btn-*` の disabled（`bg-subtle text-muted`）に寄せ、`disabled:opacity-*` を0件にする。ボタン以外（入力欄等）は `disabled:bg-subtle disabled:text-muted` | design.md §2.3「低い不透明度だけで済ませない」 |
+| R3 | **表ヘッダーが本文より2段小さい。** `<thead>`・`<th>` の34箇所が `text-xs`（12px）、セルは `text-sm`（14px）。`text-label` の使用が0件 | 表ヘッダーを `text-label`（13px）にする。フォームのラベル・状態表示で12pxにしたものも、design.md §3 の用途に合わせて `text-label` へ | 共通UI設計ガイド §1.3、design.md §3、指示書 §3.5 |
+| R4 | **在庫0のカードで上罫が消える。** `edge-stop` と `edge-top` が択一で、どちらも `box-shadow` | `.edge-stop` を `box-shadow: inset 0 2px 0 var(--c-ai), inset 4px 0 0 var(--c-shu);` にする | design.md §5.4・モック |
+
+### 7.3 確認待ちへの回答
+
+| 項目 | 判断 |
+|---|---|
+| 数量欄の20px（`.card-control-size`） | **`text-xl`（22px／行高28px）に置き換え、`.card-control-size` を削除する。** ＋／−と入力欄は `h-12`（48px）固定で行高も28pxのまま変わらないため、カードの高さは変わらない。これで8段目のサイズがなくなる。置き換え後、§5.2 の計測をやり直し、差0pxを確認する |
+| 納品カードに在庫状態が無い | **今のままでよい。** 納品は「届いた物を受け取る」画面で、基準未満・在庫0の判定は必要ない。状態データの追加は行わない |
+| 印刷の白地・墨 | 今のままでよい。印刷プレビューは利用者がVercel Previewで確認する（§7.5） |
+| 拡張機能によるコンソール警告 | 拡張機能なしのブラウザー（新しいプロファイルか、Playwrightの素のChromium）で再計測し、アプリ由来のエラーが0件であることをPR本文に書く |
+
+### 7.4 再提出の条件
+
+- R1〜R4 と §7.3 の数量欄を直し、§5.1 の機械検査に次の3つを追加して、すべて0件にする。
+  ```bash
+  grep -rnoE 'disabled:opacity-[0-9]+' src | wc -l
+  grep -rnoE 'card-control-size' src | wc -l
+  grep -rnoE '<(thead|th)[^>]*\btext-xs\b' src | wc -l
+  ```
+- 次の2つの件数をPR本文に書く。
+  - `bg-accent` を含み `btn-primary`・`chip-selected` を含まないクラス文字列の件数（ナビの現在地・小札など、ボタン以外の残りは理由つきで列挙）
+  - 枠ボタンの `btn-secondary` 適用件数
+- §5.2 のカード寸法の計測をやり直し、差0pxを再確認する。
+- マージはしない。
+
+### 7.5 利用者に確認してほしいこと（Codexでは不可）
+
+- Vercel Preview にログインして、ホーム・出庫・納品・在庫・発注・商品詳細を見る。
+- 発注書下書きと不足在庫の印刷プレビューを見る。
+- できれば実機タブレットで、明るい場所での黄の面と藍の網掛けの見分けやすさを見る。
+
+### 7.6 P2 への追加（このPRでは行わない）
+
+- 表の見出し行を design.md §5.2 の形にする（`tint` の面、藍の文字、下に藍の罫）。P1の指示書に書いていなかったため、P2で行う。
+- 注意の案内枠（`bg-markSoft` 49箇所）に、左の4pxの墨の線（`border-l-4 border-l-ink`）を付ける。

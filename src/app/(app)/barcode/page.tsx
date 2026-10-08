@@ -71,24 +71,24 @@ export default async function BarcodePage({ searchParams }: PageProps) {
             <h1 className="mt-2 text-xl font-semibold">バーコード検索</h1>
           </div>
           <div className="flex shrink-0 flex-wrap gap-3">
-            <a className="inline-flex h-11 items-center justify-center rounded bg-accent px-4 text-sm font-semibold text-panel transition hover:bg-accentDeep" href="/barcode/batch?mode=receive">
+            <a className="inline-flex h-11 items-center justify-center rounded btn-primary px-4 text-sm font-semibold transition" href="/barcode/batch?mode=receive">
               納品
             </a>
-            <a className="inline-flex h-11 items-center justify-center rounded border border-accent px-4 text-sm font-semibold text-accent transition hover:bg-tint" href="/barcode/batch">
+            <a className="inline-flex h-11 items-center justify-center rounded btn-secondary px-4 text-sm font-semibold transition" href="/barcode/batch">
               連続出庫
             </a>
-            <a className="inline-flex h-11 items-center justify-center rounded bg-accent px-4 text-sm font-semibold text-panel transition hover:bg-accentDeep" href={`/barcode/stock${barcode ? `?barcode=${encodeURIComponent(barcode)}` : ""}`}>
+            <a className="inline-flex h-11 items-center justify-center rounded btn-primary px-4 text-sm font-semibold transition" href={`/barcode/stock${barcode ? `?barcode=${encodeURIComponent(barcode)}` : ""}`}>
               出入庫
             </a>
             {canManageBarcodeMaster ? (
-              <a className="inline-flex h-11 items-center justify-center rounded border border-line px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent" href="/barcode/scans/unresolved">
+              <a className="inline-flex h-11 items-center justify-center rounded btn-secondary px-4 text-sm font-semibold transition" href="/barcode/scans/unresolved">
                 未対応を整理
               </a>
             ) : null}
-            <a className="inline-flex h-11 items-center justify-center rounded border border-line px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent" href="/barcode/scans">
+            <a className="inline-flex h-11 items-center justify-center rounded btn-secondary px-4 text-sm font-semibold transition" href="/barcode/scans">
               読み取り履歴
             </a>
-            <a className="inline-flex h-11 items-center justify-center rounded border border-line px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent" href="/home">
+            <a className="inline-flex h-11 items-center justify-center rounded btn-secondary px-4 text-sm font-semibold transition" href="/home">
               ホームへ戻る
             </a>
           </div>
@@ -120,7 +120,7 @@ export default async function BarcodePage({ searchParams }: PageProps) {
                   <input type="hidden" name="rawInput" value={barcode} />
                   <SubmitButton
                     pendingLabel="保存中"
-                    className="rounded border border-accent bg-panel px-4 py-2 text-sm font-semibold text-accent transition hover:bg-tint disabled:cursor-not-allowed disabled:opacity-50"
+                    className="rounded btn-secondary px-4 py-2 text-sm font-semibold transition disabled:cursor-not-allowed"
                   >
                     履歴に保存
                   </SubmitButton>
@@ -173,7 +173,7 @@ export default async function BarcodePage({ searchParams }: PageProps) {
                           >
                             {result.productName}
                           </a>
-                          <span className={`rounded px-3 py-1 text-xs font-semibold ${stockStatus.badgeClassName}`}>
+                          <span className={`rounded px-3 py-1 text-label font-semibold ${stockStatus.badgeClassName}`}>
                             {stockStatus.label}
                           </span>
                         </div>
@@ -226,13 +226,13 @@ export default async function BarcodePage({ searchParams }: PageProps) {
                       </div>
                       <div className="flex flex-wrap gap-2 lg:justify-end">
                         <a
-                          className="rounded bg-accent px-4 py-2 text-sm font-semibold text-panel transition hover:bg-accentDeep"
+                          className="rounded btn-primary px-4 py-2 text-sm font-semibold transition"
                           href={`/products/${result.productId}`}
                         >
                           商品詳細へ
                         </a>
                         <a
-                          className="rounded border border-line bg-panel px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+                          className="rounded btn-secondary px-4 py-2 text-sm font-semibold transition"
                           href={`/inventory?q=${encodeURIComponent(result.productName)}`}
                         >
                           在庫一覧で確認
@@ -276,7 +276,7 @@ export default async function BarcodePage({ searchParams }: PageProps) {
                         {canManageBarcodeMaster ? (
                           <>
                             <a
-                              className="rounded border border-line bg-panel px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+                              className="rounded btn-secondary px-4 py-2 text-sm font-semibold transition"
                               href={`/imports/medical-devices?q=${encodeURIComponent(sample.janCode)}`}
                             >
                               取込確認で見る
@@ -287,13 +287,13 @@ export default async function BarcodePage({ searchParams }: PageProps) {
                               <input type="hidden" name="sourceRow" value={sample.sourceRow} />
                               <SubmitButton
                                 pendingLabel="追加中"
-                                className="rounded bg-accent px-4 py-2 text-sm font-semibold text-panel transition hover:bg-accentDeep disabled:cursor-not-allowed disabled:opacity-50"
+                                className="rounded btn-primary px-4 py-2 text-sm font-semibold transition disabled:cursor-not-allowed"
                               >
                                 テスト商品として在庫に追加
                               </SubmitButton>
                             </form>
                             <a
-                              className="rounded border border-line bg-panel px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+                              className="rounded btn-secondary px-4 py-2 text-sm font-semibold transition"
                               href={attachBarcodeHref}
                             >
                               既存商品へ紐づける
@@ -313,7 +313,7 @@ export default async function BarcodePage({ searchParams }: PageProps) {
                 {canManageBarcodeMaster ? (
                 <div>
                   <a
-                    className="inline-flex rounded bg-accent px-5 py-3 text-sm font-semibold text-panel transition hover:bg-accentDeep"
+                    className="inline-flex rounded btn-primary px-5 py-3 text-sm font-semibold transition"
                     href={attachBarcodeHref}
                   >
                     商品を探して紐づける

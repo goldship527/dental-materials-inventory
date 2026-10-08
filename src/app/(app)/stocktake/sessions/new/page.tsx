@@ -49,7 +49,7 @@ export default async function NewStocktakeSessionPage() {
               {formatDateTime(summary.inProgressSession.startedAt)} に開始した棚卸があります。
             </p>
             <a
-              className="mt-5 inline-flex h-11 items-center rounded bg-accent px-5 text-sm font-semibold text-panel transition hover:bg-accentDeep"
+              className="mt-5 inline-flex h-11 items-center rounded btn-primary px-5 text-sm font-semibold transition"
               href={`/stocktake/sessions/${summary.inProgressSession.id}`}
             >
               入力中の棚卸を開く
@@ -82,12 +82,12 @@ export default async function NewStocktakeSessionPage() {
               <SubmitButton
                 pendingLabel="開始中"
                 disabled={summary.itemCount === 0}
-                className="h-11 rounded bg-accent px-5 text-sm font-semibold text-panel transition hover:bg-accentDeep disabled:cursor-not-allowed disabled:opacity-40"
+                className="h-11 rounded btn-primary px-5 text-sm font-semibold transition disabled:cursor-not-allowed"
               >
                 セッションを開始
               </SubmitButton>
               <a
-                className="inline-flex h-11 items-center rounded border border-line px-5 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+                className="inline-flex h-11 items-center rounded btn-secondary px-5 text-sm font-semibold transition"
                 href="/stocktake/sessions"
               >
                 キャンセル

@@ -43,7 +43,7 @@ export default async function AdminAuditLogsPage() {
         <section className="overflow-hidden rounded border border-line bg-panel shadow-sheet">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[960px] border-collapse text-left text-sm">
-              <thead className="bg-subtle text-xs text-muted">
+              <thead className="bg-subtle text-label text-muted">
                 <tr>
                   <th className="border-b border-line px-4 py-3">日時</th>
                   <th className="border-b border-line px-4 py-3">操作</th>

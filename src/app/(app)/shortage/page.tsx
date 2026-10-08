@@ -193,7 +193,7 @@ export default async function ShortagePage({ searchParams }: PageProps) {
             </p>
           </div>
           <div className="flex gap-3 print:hidden">
-            <a className="rounded border border-line px-5 py-3 text-sm font-semibold hover:border-accent" href="/home">
+            <a className="rounded btn-secondary px-5 py-3 text-sm font-semibold" href="/home">
               ホームへ戻る
             </a>
             <PrintButton />
@@ -211,12 +211,12 @@ export default async function ShortagePage({ searchParams }: PageProps) {
           />
           <button
             type="submit"
-            className="h-11 rounded bg-accent px-5 text-sm font-semibold text-panel transition hover:bg-accentDeep"
+            className="h-11 rounded btn-primary px-5 text-sm font-semibold transition"
           >
             検索
           </button>
           <a
-            className="flex h-11 items-center justify-center rounded border border-line px-5 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+            className="flex h-11 items-center justify-center rounded btn-secondary px-5 text-sm font-semibold transition"
             href="/shortage"
           >
             クリア
@@ -240,8 +240,8 @@ export default async function ShortagePage({ searchParams }: PageProps) {
             </span>
             <div className="flex items-center gap-2 print:hidden">
               <a
-                className={`rounded border border-line px-3 py-1.5 text-xs font-semibold transition ${
-                  page <= 1 ? "pointer-events-none text-muted/50" : "text-muted hover:border-accent hover:text-accent"
+                className={`rounded btn-secondary px-3 py-1.5 text-xs font-semibold transition ${
+                  page <= 1 ? "pointer-events-none bg-subtle text-muted" : ""
                 }`}
                 href={previousHref}
                 aria-disabled={page <= 1}
@@ -252,8 +252,8 @@ export default async function ShortagePage({ searchParams }: PageProps) {
                 {page} / {shortagePageCount}
               </span>
               <a
-                className={`rounded border border-line px-3 py-1.5 text-xs font-semibold transition ${
-                  page >= shortagePageCount ? "pointer-events-none text-muted/50" : "text-muted hover:border-accent hover:text-accent"
+                className={`rounded btn-secondary px-3 py-1.5 text-xs font-semibold transition ${
+                  page >= shortagePageCount ? "pointer-events-none bg-subtle text-muted" : ""
                 }`}
                 href={nextHref}
                 aria-disabled={page >= shortagePageCount}
@@ -269,7 +269,7 @@ export default async function ShortagePage({ searchParams }: PageProps) {
             </div>
           ) : null}
           <table className="w-full border-collapse text-left text-sm print:text-xs">
-            <thead className="bg-subtle text-xs text-muted print:bg-panel print:text-xs print:text-ink">
+            <thead className="bg-subtle text-label text-muted print:bg-panel print:text-label print:text-ink">
               <tr>
                 <th className="border-b border-line px-4 py-3 print:border print:border-ink print:px-2 print:py-1.5">
                   商品名

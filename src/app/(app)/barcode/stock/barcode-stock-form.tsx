@@ -110,8 +110,8 @@ export function BarcodeStockForm({
               onClick={() => changeMovementType("OUT")}
               className={
                 movementType === "OUT"
-                  ? "h-12 rounded bg-accent px-4 text-sm font-semibold text-panel"
-                  : "h-12 rounded border border-line px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+                  ? "h-12 rounded btn-primary px-4 text-sm font-semibold"
+                  : "h-12 rounded btn-secondary px-4 text-sm font-semibold transition"
               }
             >
               出庫
@@ -121,8 +121,8 @@ export function BarcodeStockForm({
               onClick={() => changeMovementType("IN")}
               className={
                 movementType === "IN"
-                  ? "h-12 rounded bg-accent px-4 text-sm font-semibold text-panel"
-                  : "h-12 rounded border border-line px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+                  ? "h-12 rounded btn-primary px-4 text-sm font-semibold"
+                  : "h-12 rounded btn-secondary px-4 text-sm font-semibold transition"
               }
             >
               入庫
@@ -139,7 +139,7 @@ export function BarcodeStockForm({
             <button
               type="button"
               onClick={() => changeQuantity(quantity - 1)}
-              className="h-12 rounded border border-line text-lg font-semibold text-muted transition hover:border-accent hover:text-accent"
+              className="h-12 rounded btn-secondary text-lg font-semibold transition"
               aria-label="数量を減らす"
             >
               -
@@ -157,7 +157,7 @@ export function BarcodeStockForm({
             <button
               type="button"
               onClick={() => changeQuantity(quantity + 1)}
-              className="h-12 rounded border border-line text-lg font-semibold text-muted transition hover:border-accent hover:text-accent"
+              className="h-12 rounded btn-secondary text-lg font-semibold transition"
               aria-label="数量を増やす"
             >
               +
@@ -179,8 +179,8 @@ export function BarcodeStockForm({
               key={option}
               className={
                 reason === option
-                  ? "inline-flex h-11 cursor-pointer items-center rounded bg-accent px-4 text-sm font-semibold text-panel"
-                  : "inline-flex h-11 cursor-pointer items-center rounded border border-line bg-panel px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+                  ? "inline-flex h-11 cursor-pointer items-center rounded chip-selected px-4 text-sm font-semibold"
+                  : "inline-flex h-11 cursor-pointer items-center rounded btn-secondary px-4 text-sm font-semibold transition"
               }
             >
               <input
@@ -244,8 +244,8 @@ export function BarcodeStockForm({
         disabled={isSubmitDisabled}
         className={
           movementType === "OUT"
-            ? "mt-5 h-12 w-full rounded bg-accent px-5 text-base font-semibold text-panel transition hover:bg-accentDeep disabled:cursor-not-allowed disabled:opacity-60"
-            : "mt-5 h-12 w-full rounded bg-accent px-5 text-base font-semibold text-panel transition hover:bg-accentDeep disabled:cursor-not-allowed disabled:opacity-60"
+            ? "mt-5 h-12 w-full rounded btn-primary px-5 text-base font-semibold transition disabled:cursor-not-allowed"
+            : "mt-5 h-12 w-full rounded btn-primary px-5 text-base font-semibold transition disabled:cursor-not-allowed"
         }
       >
         {isPending ? "確定中" : movementType === "OUT" ? "出庫を確定" : "入庫を確定"}

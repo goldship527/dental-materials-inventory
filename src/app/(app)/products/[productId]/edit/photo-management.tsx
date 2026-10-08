@@ -57,7 +57,7 @@ export function PhotoManagement({ productId, productName, photoUpdatedAt }: Phot
                 type="file"
               />
               <button
-                className="inline-flex h-11 shrink-0 items-center justify-center rounded bg-accent px-5 text-sm font-semibold text-panel transition hover:bg-accentDeep disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex h-11 shrink-0 items-center justify-center rounded btn-primary px-5 text-sm font-semibold transition disabled:cursor-not-allowed"
                 disabled={isUploading}
                 type="submit"
               >
@@ -78,7 +78,7 @@ export function PhotoManagement({ productId, productName, photoUpdatedAt }: Phot
             >
               <input type="hidden" name="productId" value={productId} />
               <button
-                className="inline-flex h-11 items-center justify-center rounded border border-line bg-panel px-5 text-sm font-semibold text-muted transition hover:border-danger hover:text-danger disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex h-11 items-center justify-center rounded btn-secondary btn-danger px-5 text-sm font-semibold transition disabled:cursor-not-allowed"
                 disabled={isDeleting}
                 type="submit"
               >

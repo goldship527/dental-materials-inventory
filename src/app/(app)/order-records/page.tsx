@@ -91,13 +91,13 @@ export default async function OrderRecordsPage({ searchParams }: PageProps) {
           </div>
           <div className="flex flex-wrap gap-3">
             <a
-              className="inline-flex h-11 shrink-0 items-center justify-center rounded border border-line px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+              className="inline-flex h-11 shrink-0 items-center justify-center rounded btn-secondary px-4 text-sm font-semibold transition"
               href="/orders"
             >
               発注候補へ
             </a>
             <a
-              className="inline-flex h-11 shrink-0 items-center justify-center rounded border border-line px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+              className="inline-flex h-11 shrink-0 items-center justify-center rounded btn-secondary px-4 text-sm font-semibold transition"
               href="/home"
             >
               ホームへ戻る
@@ -134,12 +134,12 @@ export default async function OrderRecordsPage({ searchParams }: PageProps) {
           />
           <button
             type="submit"
-            className="h-10 rounded bg-accent px-4 text-sm font-semibold text-panel transition hover:bg-accentDeep"
+            className="h-10 rounded btn-primary px-4 text-sm font-semibold transition"
           >
             検索
           </button>
           <a
-            className="flex h-10 items-center justify-center rounded border border-line bg-panel/75 px-4 text-sm font-semibold text-muted transition hover:border-accent hover:bg-panel hover:text-accent"
+            className="flex h-10 items-center justify-center rounded btn-secondary px-4 text-sm font-semibold transition"
             href="/order-records"
           >
             クリア
@@ -154,7 +154,7 @@ export default async function OrderRecordsPage({ searchParams }: PageProps) {
         <section className="overflow-hidden rounded border border-line bg-panel shadow-sheet">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1080px] border-collapse text-left text-sm">
-              <thead className="bg-subtle text-xs text-muted">
+              <thead className="bg-subtle text-label text-muted">
                 <tr>
                   <th className="border-b border-line px-4 py-3">発注日時</th>
                   <th className="border-b border-line px-4 py-3">発注記録</th>

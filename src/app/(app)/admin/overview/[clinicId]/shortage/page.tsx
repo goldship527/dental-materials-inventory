@@ -58,7 +58,7 @@ export default async function AdminOverviewClinicShortagePage({ params, searchPa
             </p>
           </div>
           <a
-            className="inline-flex h-11 shrink-0 items-center justify-center rounded border border-line px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+            className="inline-flex h-11 shrink-0 items-center justify-center rounded btn-secondary px-4 text-sm font-semibold transition"
             href={`/admin/overview/${clinicId}`}
           >
             クリニック詳細へ戻る
@@ -97,13 +97,13 @@ export default async function AdminOverviewClinicShortagePage({ params, searchPa
               type="search"
             />
             <button
-              className="h-11 rounded bg-accent px-5 text-sm font-semibold text-panel transition hover:bg-accentDeep"
+              className="h-11 rounded btn-primary px-5 text-sm font-semibold transition"
               type="submit"
             >
               検索
             </button>
             <a
-              className="inline-flex h-11 items-center justify-center rounded border border-line px-5 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+              className="inline-flex h-11 items-center justify-center rounded btn-secondary px-5 text-sm font-semibold transition"
               href={`/admin/overview/${clinicId}/shortage`}
             >
               クリア
@@ -118,7 +118,7 @@ export default async function AdminOverviewClinicShortagePage({ params, searchPa
           </div>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1040px] border-collapse text-left text-sm">
-              <thead className="bg-subtle text-xs text-muted">
+              <thead className="bg-subtle text-label text-muted">
                 <tr>
                   <th className="border-b border-line px-4 py-3">商品</th>
                   <th className="border-b border-line px-4 py-3">カテゴリ</th>

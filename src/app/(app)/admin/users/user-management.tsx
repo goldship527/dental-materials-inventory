@@ -122,7 +122,7 @@ export function UserManagement({ users, currentUserId }: UserManagementProps) {
           </label>
           <div className="md:col-span-2">
             <button
-              className="inline-flex min-h-11 items-center justify-center rounded bg-accent px-5 py-3 text-sm font-semibold text-panel transition hover:bg-accentDeep disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex min-h-11 items-center justify-center rounded btn-primary px-5 py-3 text-sm font-semibold transition disabled:cursor-not-allowed"
               disabled={isCreating}
               type="submit"
             >
@@ -202,7 +202,7 @@ export function UserManagement({ users, currentUserId }: UserManagementProps) {
                             type="password"
                           />
                           <button
-                            className="h-11 rounded border border-line bg-panel px-3 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
+                            className="h-11 rounded btn-secondary px-3 text-sm font-semibold transition disabled:cursor-not-allowed"
                             disabled={!user.isActive || isResetting}
                             type="submit"
                           >
@@ -220,7 +220,7 @@ export function UserManagement({ users, currentUserId }: UserManagementProps) {
                           >
                             <input name="userId" type="hidden" value={user.id} />
                             <button
-                              className="h-11 rounded border border-line bg-panel px-3 text-sm font-semibold text-muted transition hover:border-danger hover:text-danger disabled:cursor-not-allowed disabled:opacity-50"
+                              className="h-11 rounded btn-secondary btn-danger px-3 text-sm font-semibold transition disabled:cursor-not-allowed"
                               disabled={isSelf || isDeactivating}
                               type="submit"
                             >

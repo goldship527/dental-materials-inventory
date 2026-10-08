@@ -27,7 +27,7 @@ export function RevertMovementButton({
         type="button"
         onClick={() => setIsModalOpen(true)}
         disabled={isPending}
-        className="h-9 rounded border border-danger px-3 text-xs font-semibold text-danger transition hover:bg-panel disabled:cursor-not-allowed disabled:opacity-50"
+        className="h-9 rounded btn-secondary btn-danger px-3 text-xs font-semibold transition disabled:cursor-not-allowed"
       >
         取り消す
       </button>
@@ -53,7 +53,7 @@ export function RevertMovementButton({
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="h-10 rounded border border-line px-4 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+                className="h-10 rounded btn-secondary px-4 text-sm font-semibold transition"
               >
                 やめる
               </button>
@@ -67,7 +67,7 @@ export function RevertMovementButton({
                 <button
                   type="submit"
                   disabled={isPending}
-                  className="h-10 rounded bg-accent px-4 text-sm font-semibold text-panel transition hover:bg-accentDeep disabled:cursor-not-allowed disabled:opacity-50"
+                  className="h-10 rounded btn-primary px-4 text-sm font-semibold transition disabled:cursor-not-allowed"
                 >
                   {isPending ? "取り消し中" : "取り消す"}
                 </button>

@@ -238,7 +238,7 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
             <button
               type="button"
               onClick={() => togglePanel("supplier")}
-              className="inline-flex h-8 w-fit items-center rounded border border-line bg-panel/75 px-3 text-xs font-semibold text-muted transition hover:border-accent hover:bg-panel hover:text-accent"
+              className="inline-flex h-8 w-fit items-center rounded btn-secondary px-3 text-xs font-semibold transition"
             >
               {activePanel === "supplier" ? "閉じる" : "発注先を変更"}
             </button>
@@ -266,7 +266,7 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
                 <button
                   type="submit"
                   disabled={isSupplierPending || !selectedSupplierId || selectedSupplierId === (row.supplierId ?? "")}
-                  className="h-8 rounded border border-line bg-panel/75 px-3 text-xs font-semibold text-muted transition hover:border-accent hover:bg-panel hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
+                  className="h-8 rounded btn-secondary px-3 text-xs font-semibold transition disabled:cursor-not-allowed"
                 >
                   {isSupplierPending ? "変更中" : "発注先を変更"}
                 </button>
@@ -285,7 +285,7 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
             <button
               type="button"
               onClick={() => togglePanel("quantity")}
-              className="inline-flex h-8 w-fit items-center rounded border border-line bg-panel/75 px-3 text-xs font-semibold text-muted transition hover:border-accent hover:bg-panel hover:text-accent print:hidden"
+              className="inline-flex h-8 w-fit items-center rounded btn-secondary px-3 text-xs font-semibold transition print:hidden"
             >
               {activePanel === "quantity"
                 ? "閉じる"
@@ -302,7 +302,7 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
                   type="button"
                   onClick={() => changeRequestedQuantity(requestedQuantity - 1)}
                   disabled={requestedQuantity <= 1 || isQuantityPending}
-                  className="h-9 w-9 rounded border border-line bg-panel/75 text-base font-semibold text-muted transition hover:border-accent hover:bg-panel hover:text-accent disabled:cursor-not-allowed disabled:opacity-40"
+                  className="h-9 w-9 rounded btn-secondary text-base font-semibold transition disabled:cursor-not-allowed"
                   aria-label="発注数量を1減らす"
                 >
                   -
@@ -320,7 +320,7 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
                   type="button"
                   onClick={() => changeRequestedQuantity(requestedQuantity + 1)}
                   disabled={requestedQuantity >= 9999 || isQuantityPending}
-                  className="h-9 w-9 rounded border border-line bg-panel/75 text-base font-semibold text-muted transition hover:border-accent hover:bg-panel hover:text-accent disabled:cursor-not-allowed disabled:opacity-40"
+                  className="h-9 w-9 rounded btn-secondary text-base font-semibold transition disabled:cursor-not-allowed"
                   aria-label="発注数量を1増やす"
                 >
                   +
@@ -328,7 +328,7 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
                 <button
                   type="submit"
                   disabled={isQuantityPending}
-                  className="h-9 rounded bg-accent px-3 text-xs font-semibold text-panel transition hover:bg-accentDeep disabled:cursor-not-allowed disabled:opacity-50"
+                  className="h-9 rounded btn-primary px-3 text-xs font-semibold transition disabled:cursor-not-allowed"
                 >
                   {isQuantityPending ? "更新中" : "更新"}
                 </button>
@@ -341,7 +341,7 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
         <div className="grid gap-1.5">
           <div className="flex flex-wrap items-center gap-2">
             <span
-              className={`inline-flex min-h-7 items-center rounded border px-2.5 py-1 text-xs font-semibold ${getStatusBadgeClass(row)}`}
+              className={`inline-flex min-h-7 items-center rounded border px-2.5 py-1 text-label font-semibold ${getStatusBadgeClass(row)}`}
             >
               {getOrderRowStatusLabel(row)}
             </span>
@@ -362,7 +362,7 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
                 <button
                   type="submit"
                   disabled={isStatusPending}
-                  className="h-8 rounded bg-accent px-3 text-xs font-semibold text-panel transition hover:bg-accentDeep disabled:opacity-50"
+                  className="h-8 rounded btn-primary px-3 text-xs font-semibold transition"
                 >
                   確認して発注予定へ
                 </button>
@@ -373,7 +373,7 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
                 <button
                   type="submit"
                   disabled={isStatusPending}
-                  className="h-8 rounded border border-line bg-panel px-3 text-xs font-semibold text-muted transition hover:border-muted disabled:opacity-50"
+                  className="h-8 rounded btn-secondary px-3 text-xs font-semibold transition"
                 >
                   見送り
                 </button>
@@ -395,7 +395,7 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
           <button
             type="button"
             onClick={() => togglePanel("status")}
-            className="inline-flex h-8 w-fit items-center rounded border border-line bg-panel/75 px-3 text-xs font-semibold text-muted transition hover:border-accent hover:bg-panel hover:text-accent"
+            className="inline-flex h-8 w-fit items-center rounded btn-secondary px-3 text-xs font-semibold transition"
           >
             {activePanel === "status" ? "閉じる" : "状態・メモを編集"}
           </button>
@@ -413,7 +413,7 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
                 <button
                   type="submit"
                   disabled={isReceiptRevertPending}
-                  className="h-8 rounded border border-line bg-panel/75 px-3 text-xs font-semibold text-muted transition hover:border-danger hover:text-danger disabled:cursor-not-allowed disabled:opacity-50"
+                  className="h-8 rounded btn-secondary btn-danger px-3 text-xs font-semibold transition disabled:cursor-not-allowed"
                 >
                   {isReceiptRevertPending ? "取り消し中" : "納品確認を取り消す"}
                 </button>
@@ -425,7 +425,7 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
               <button
                 type="button"
                 onClick={() => togglePanel("receipt")}
-                className="inline-flex h-8 w-fit items-center rounded border border-line bg-markSoft px-3 text-xs font-semibold text-ink transition hover:border-line hover:bg-panel"
+                className="inline-flex h-8 w-fit items-center rounded btn-secondary bg-markSoft px-3 text-xs font-semibold transition"
               >
                 {activePanel === "receipt" ? "閉じる" : "納品確認"}
               </button>
@@ -437,7 +437,7 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
                     確認スタッフ: {selectedStaffOperator ? selectedStaffOperator.displayName : "画面上部で選択してください"}
                   </p>
                   <div className="grid gap-1.5 sm:grid-cols-[1fr_auto] sm:items-end">
-                    <label className="grid gap-1 text-xs font-semibold text-muted">
+                    <label className="grid gap-1 text-label font-semibold text-muted">
                       納品数量
                       <input
                         type="number"
@@ -448,7 +448,7 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
                         className="h-9 rounded border border-line bg-panel px-3 text-right text-sm    "
                       />
                     </label>
-                    <label className="flex h-9 items-center gap-2 whitespace-nowrap text-xs font-semibold text-muted">
+                    <label className="flex h-9 items-center gap-2 whitespace-nowrap text-label font-semibold text-muted">
                       <input type="checkbox" name="applyToStock" defaultChecked className="h-4 w-4 accent-accent" />
                       在庫反映
                     </label>
@@ -535,7 +535,7 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
                   </p>
                 </>
               ) : null}
-              <label className="grid gap-1 text-xs font-semibold text-muted">
+              <label className="grid gap-1 text-label font-semibold text-muted">
                 送付方法
                 <select
                   name="orderedMethod"
@@ -583,7 +583,7 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
           <button
             type="submit"
             disabled={isStatusPending || (requiresStaffForStatus && !hasSelectedStaffOperator)}
-            className="h-9 rounded border border-line bg-panel/75 px-3 text-xs font-semibold text-muted transition hover:border-accent hover:bg-panel hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
+            className="h-9 rounded btn-secondary px-3 text-xs font-semibold transition disabled:cursor-not-allowed"
           >
             {isStatusPending ? "変更中" : "状態・メモを更新"}
           </button>
