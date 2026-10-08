@@ -25,7 +25,6 @@ export default async function ManualPage() {
         <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
           <PageHeader title={"スタッフマニュアル"}>
             <div>
-              <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
 
               <p className="mt-2 text-sm text-muted">日常操作の確認用マニュアルです。</p>
             </div>

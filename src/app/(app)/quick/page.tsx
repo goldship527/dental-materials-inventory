@@ -120,7 +120,6 @@ export default async function QuickPage({ searchParams }: PageProps) {
 
         <PageHeader title={"クイック出庫"}>
           <div>
-            <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
 
             <p className="mt-2 text-sm text-muted">よく使う材料をワンタップで出庫・戻しできます。</p>
           </div>

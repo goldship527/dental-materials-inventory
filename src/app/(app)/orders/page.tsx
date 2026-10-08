@@ -321,7 +321,6 @@ export default async function OrdersPage({ searchParams }: PageProps) {
 
         <PageHeader title={"発注"} className="print:border-b print:border-ink print:pb-3">
           <div>
-            <p className="text-sm font-semibold text-accent print:text-ink">{context.clinicName}</p>
 
             <p className="mt-2 text-sm text-muted print:text-xs print:text-ink">
               <span className="hidden print:inline">この一覧は発注前の確認用で、外部発注送信済みではありません。</span>

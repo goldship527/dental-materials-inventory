@@ -33,10 +33,6 @@ export default async function NewStocktakeSessionPage() {
         <AppNav current="stocktake" />
 
         <PageHeader title={"棚卸セッション開始"}>
-          <div>
-            <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-
-          </div>
           <a className="text-sm font-semibold text-accent hover:underline" href="/stocktake/sessions">
             セッション一覧へ戻る
           </a>

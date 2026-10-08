@@ -88,7 +88,6 @@ export default async function DormantStockPage({ searchParams }: PageProps) {
 
         <PageHeader title={"長期在庫レポート"}>
           <div>
-            <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
 
             <p className="mt-2 text-sm text-muted">
               過去{selectedDays}日以内に出庫がなく、現在庫が1以上ある商品を表示します。

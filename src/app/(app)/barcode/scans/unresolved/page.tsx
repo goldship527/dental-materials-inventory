@@ -71,10 +71,6 @@ export default async function UnresolvedBarcodeScansPage() {
         <AppNav current="barcode" />
 
         <PageHeader title={"未対応バーコード整理"}>
-          <div>
-            <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-
-          </div>
           <div className="flex flex-wrap gap-3 text-sm font-semibold">
             <a className="text-accent hover:underline" href="/barcode/scans">
               読み取り履歴へ

@@ -150,10 +150,6 @@ export default async function ProductsPage({ searchParams }: PageProps) {
         <AppNav current="products" />
 
         <PageHeader title={"商品マスタ"}>
-          <div>
-            <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-
-          </div>
           <div className="grid w-full grid-cols-1 gap-3 sm:flex sm:w-auto sm:shrink-0 sm:flex-wrap">
             {canManageProducts && !attachBarcode ? (
               <>

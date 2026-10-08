@@ -39,7 +39,6 @@ export default async function SupplierEditPage({ params }: PageProps) {
 
         <PageHeader title={"発注先マスタ編集"}>
           <div>
-            <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
 
             <p className="mt-2 text-sm text-muted">
               発注候補や商品マスタに表示される発注先名を編集します。

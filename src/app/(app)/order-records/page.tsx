@@ -84,7 +84,6 @@ export default async function OrderRecordsPage({ searchParams }: PageProps) {
 
         <PageHeader title={"発注記録"}>
           <div>
-            <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
 
             <p className="mt-2 text-sm text-muted">
               発注を記録したまとまりを、発注先・送付方法・納品状況とあわせて確認します。

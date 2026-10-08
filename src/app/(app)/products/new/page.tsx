@@ -26,10 +26,6 @@ export default async function ProductNewPage() {
         <AppNav current="products" />
 
         <PageHeader title={"商品マスタ新規作成"}>
-          <div>
-            <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-
-          </div>
           <a className="text-sm font-semibold text-accent hover:underline" href="/products">
             商品マスタ一覧へ戻る
           </a>

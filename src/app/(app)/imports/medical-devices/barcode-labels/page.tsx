@@ -91,7 +91,6 @@ export default async function MedicalDeviceBarcodeLabelsPage({ searchParams }: P
 
         <PageHeader title={"バーコードテスト印刷"} className="print:hidden">
           <div>
-            <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
 
             <p className="mt-2 text-sm text-muted">
               画面表示または印刷したJANバーコードをスキャナーで読み取り、`/barcode` の検索確認に使います。
@@ -108,6 +107,7 @@ export default async function MedicalDeviceBarcodeLabelsPage({ searchParams }: P
           </div>
         </PageHeader>
 
+        <p className="hidden text-sm font-semibold text-ink print:block">{context.clinicName}</p>
 
         <section className="rounded border border-line bg-panel p-4 text-sm text-muted shadow-sheet print:hidden">
           <p>

@@ -99,7 +99,6 @@ export default async function StocktakeSessionHistoryPage({ params, searchParams
 
         <PageHeader title={"棚卸セッション履歴"}>
           <div>
-            <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
 
             <p className="mt-2 text-sm text-muted">
               確定済み・破棄済みセッションの入力内容と、確定時に作成された在庫履歴を確認します。

@@ -48,10 +48,6 @@ export default async function ProductEditPage({ params, searchParams }: PageProp
       <main className="min-h-screen bg-surface px-3 pt-3 pb-6 text-ink">
         <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
           <PageHeader title={"商品マスタ編集"}>
-            <div>
-              <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-
-            </div>
             <a className="text-sm font-semibold text-accent hover:underline" href={`/products/${product.id}`}>
               商品詳細へ戻る
             </a>

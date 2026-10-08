@@ -31,7 +31,6 @@ export default async function PurchaseHistorySetupPage() {
 
         <PageHeader title={"購入履歴登録商品の一括整備"}>
           <div>
-            <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
 
             <p className="mt-2 max-w-3xl text-sm leading-6 text-muted">
               購入履歴から登録した商品のカテゴリと最低在庫をまとめて整えます。

@@ -53,7 +53,6 @@ export default async function StocktakeSessionPage({ params }: PageProps) {
 
         <PageHeader title={"棚卸セッション入力"}>
           <div>
-            <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
 
             <p className="mt-2 text-sm text-muted">
               1商品ずつ実在庫を入力します。入力内容は明細ごとに保存され、確定までは在庫数を変更しません。

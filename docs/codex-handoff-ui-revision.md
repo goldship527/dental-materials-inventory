@@ -449,3 +449,57 @@ grep -rnoE '\b(text|bg|border|ring)-(warning|caution)\b' src | wc -l
 - `docs/dev-log.md` に作業記録と朝礼反映のブロックを追記する。
 - `docs/spec.md` §96 に P2 の内容を追記する。
 - `docs/user-manual.md` の、ナビ・ログアウトの位置の説明を更新する。
+
+---
+
+## 11. P2 レビュー結果（2026-10-08・Claude Code）: 差し戻し
+
+対象: PR #17（`ui/revision-p2`、`97f2887`）。
+
+### 11.1 確認できたこと（合格）
+
+- 機械検査8項目は、レビュー側でも全部0件を再現した。
+- `bg-accent/30` 0件、`PageHeader` 44箇所、`main` の `py-6` 0件。
+- `PageHeader` は 22px の `h1`、説明は1行。印刷時は `print:text-2xl` で、印刷用の指定は維持されている。
+- 「その他」は `<details>`。Esc で閉じてフォーカスが戻る。ログアウトは区切り線の下。
+- CI（receipt-regression）、Vercel、Vercel Preview Comments は成功。
+
+### 11.2 修正してほしいこと（このPRで直す）
+
+| # | 問題 | 修正 |
+|---|---|---|
+| Q1 | **1024px以上で、ナビの帯が左右に12pxずつはみ出し、横スクロールが出る。** ナビは `-mx-3 lg:-mx-6` で外枠の余白を打ち消す作りだが、次の15ページの `<main>` は `lg:px-6` が無く `px-3` のまま。出庫・納品は、タブレット横で一番使う画面。隔離計測はホームの外枠で行ったため検出できていない。対象: `stock-out`、`receive`、`products/new`、`products/[productId]/edit`、`suppliers/new`、`suppliers/[supplierId]`、`suppliers/[supplierId]/edit`、`stocktake/sessions/new`、`stocktake/sessions/[sessionId]`、`stocktake/sessions/[sessionId]/history`、`barcode/scans`、`barcode/scans/unresolved`、`orders/print`、`imports/medical-devices/barcode-labels`、`admin/staff-operators/labels` | **外枠の余白に依存しない作りへ直す。** 推奨はページ外枠の共通部品（`PageShell` 等）を作り、ナビを `max-w-7xl` の外に置いて全幅の帯にすること。中身だけ `mx-auto max-w-7xl` で揃える。これで1280px超の画面でも、帯が途中で切れない。最低限の修正なら、上の15ページの `<main>` に `lg:px-6` を足す。ただし、今後の追加ページで同じ問題を繰り返すので推奨しない |
+| Q2 | **「ログアウト」が朱の文字（`text-danger`）。** 朱は「停止＝在庫0・エラー」専用（design.md §2.2-3） | `text-ink` にする。区切り線の下という位置で区別する |
+| Q3 | **「その他」のフォーカスを白い輪郭で上書きしている。** design.md §2.2-6「フォーカスは黄と墨の二重リングだけ。色を変えない」に反する | `focus-visible:outline*` の上書きを外し、共通の `:focus-visible` に任せる。藍の帯の上でも黄の輪（藍に対して6.05:1）で見える |
+| Q4 | **「その他」が外側をタップしても閉じない。** `<details>` の初期の動きのまま。タブレットで開いたまま本体を触ると、メニューが残る | `pointerdown` を document で受けて、メニューの外なら閉じる。開いたときだけ登録し、閉じたら解除する |
+
+### 11.3 確認待ちへの回答
+
+| 項目 | 判断 |
+|---|---|
+| 見出しの院名の補助行（32画面） | **画面では削除する**（院名はナビの帯に常時出ている）。ただし、印刷物には院名が必要。`orders/print` と `imports/medical-devices/barcode-labels` は、画面では隠して印刷では出す（`hidden print:block`）。他の30画面は削除する |
+| 「その他」を `<details>` にすること | **採用する。** Q4 の外側タップで閉じる処理を足すこと |
+| 院の切り替えを「その他」の中に置くこと | **このままでよい。** 選択中の院名はナビの帯に常に出ている |
+| ログイン後の実ページの確認 | Docker が使えないので、利用者が Vercel Preview で確認する（§11.5） |
+
+### 11.4 再提出の条件
+
+- Q1〜Q4 と、§11.3 の院名の補助行を直す。
+- 機械検査8項目に、次の2つを足して0件にする。
+  ```bash
+  # Q1: 外枠に依存する負のマージン
+  grep -rnoE '\-m[xt]-[0-9]+' src/components/domain/app-nav.tsx | wc -l
+  # Q2
+  grep -rnoE 'text-danger' src/components/domain/app-nav.tsx | wc -l
+  ```
+- 隔離計測を、ホームと**出庫（`stock-out/page.tsx` の実際の外枠）**の両方で、1024・1280・1440・768・390px で行う。
+  - 確認すること: `document.documentElement.scrollWidth === innerWidth`（横のはみ出し0）
+  - 確認すること: ナビの帯の左右が画面の端に接していること
+  - 結果をPR本文に書く。
+- §5.2 のカード寸法の比較を、P1（`master`）と差0pxで再確認する。
+- ドラフトのまま止める。マージしない。
+
+### 11.5 利用者に確認してほしいこと（再提出のあと）
+
+- Vercel Preview にログインし、出庫・納品・ホームを、タブレット横とスマホの幅で見る。
+- 担当スタッフの選択、院の切り替え（複数院の管理者だけ）、「その他」の開閉、ログアウトを実際に操作する。

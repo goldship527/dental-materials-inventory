@@ -161,10 +161,6 @@ export default async function MovementsPage({ searchParams }: PageProps) {
         <AppNav current="movements" />
 
         <PageHeader title={"入出庫履歴"}>
-          <div>
-            <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-
-          </div>
           <a className="inline-flex h-11 shrink-0 items-center justify-center rounded btn-secondary px-4 text-sm font-semibold transition" href="/home">
             ホームへ戻る
           </a>

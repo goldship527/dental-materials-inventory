@@ -224,7 +224,7 @@ export async function AppNav({ current }: AppNavProps) {
   return (
     <nav
       aria-label="アプリ内メニュー"
-      className="sticky top-0 z-30 -mx-3 -mt-3 bg-accent px-3 print:hidden lg:-mx-6 lg:px-6"
+      className="sticky top-0 z-30 ml-[calc((100%-100vw)/2)] w-screen bg-accent px-3 print:hidden lg:px-6"
     >
       <div className="mx-auto flex w-full max-w-7xl flex-col sm:h-14 sm:flex-row sm:items-center">
         {activeClinicContext ? (
@@ -261,7 +261,7 @@ export async function AppNav({ current }: AppNavProps) {
             ) : null}
             <div role="separator" className="my-1 border-t border-line" />
             <form action="/logout" method="post">
-              <SubmitButton pendingLabel="ログアウト中" className={`${menuItemClassName} text-danger`}>
+              <SubmitButton pendingLabel="ログアウト中" className={menuItemClassName}>
                 ログアウト
               </SubmitButton>
             </form>

@@ -53,7 +53,6 @@ export default async function StockAnomaliesPage() {
 
         <PageHeader title={"異常出庫検知"}>
           <div>
-            <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
 
             <p className="mt-2 text-sm text-muted">
               直近24時間の出庫数が、過去30日の通常ペースより多い商品を表示します。

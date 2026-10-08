@@ -32,10 +32,6 @@ export default async function ProductImportPage() {
         <AppNav current="products" />
 
         <PageHeader title={"商品マスタ一括取り込み"}>
-          <div>
-            <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-
-          </div>
           <div className="flex flex-wrap gap-3">
             <a className="text-sm font-semibold text-accent hover:underline" href="/products/import/purchase-history">
               購入履歴インポート

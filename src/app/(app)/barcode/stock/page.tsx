@@ -60,10 +60,6 @@ export default async function BarcodeStockPage({ searchParams }: PageProps) {
         <AppNav current="barcode" />
 
         <PageHeader title={"バーコード出入庫"}>
-          <div>
-            <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-
-          </div>
           <div className="flex shrink-0 flex-wrap gap-3">
             <a
               className="inline-flex h-11 items-center justify-center rounded btn-primary px-4 text-sm font-semibold transition"

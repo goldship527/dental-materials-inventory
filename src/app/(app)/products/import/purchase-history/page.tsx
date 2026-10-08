@@ -26,7 +26,6 @@ export default async function PurchaseHistoryImportPage() {
 
         <PageHeader title={"ディーラー購入履歴インポート"}>
           <div>
-            <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
 
             <p className="mt-2 max-w-3xl text-sm leading-6 text-muted">
               ディーラーから受け取った購入履歴をもとに、商品マスタ候補を確認します。

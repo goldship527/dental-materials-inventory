@@ -205,10 +205,6 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
         <AppNav current="products" />
 
         <PageHeader title={product.name}>
-          <div>
-            <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-
-          </div>
           <div className="flex flex-wrap gap-3 text-sm font-semibold">
             {canManageProducts ? (
               <a className="text-accent hover:underline" href={`/products/${product.id}/edit`}>

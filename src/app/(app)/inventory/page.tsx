@@ -84,10 +84,6 @@ export default async function InventoryPage({ searchParams }: PageProps) {
         <AppNav current="inventory" />
 
         <PageHeader title={"在庫一覧"}>
-          <div>
-            <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-
-          </div>
           <a className="inline-flex h-11 shrink-0 items-center justify-center rounded btn-secondary px-4 text-sm font-semibold transition" href="/home">
             ホームへ戻る
           </a>

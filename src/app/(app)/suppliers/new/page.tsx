@@ -25,10 +25,6 @@ export default async function SupplierNewPage() {
         <AppNav current="suppliers" />
 
         <PageHeader title={"発注先マスタ新規作成"}>
-          <div>
-            <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-
-          </div>
           <a className="text-sm font-semibold text-accent hover:underline" href="/suppliers">
             発注先マスタへ戻る
           </a>

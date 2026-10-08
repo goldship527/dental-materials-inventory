@@ -187,7 +187,6 @@ export default async function ShortagePage({ searchParams }: PageProps) {
 
         <PageHeader title={"不足在庫一覧"} className="print:border-b print:border-ink print:pb-3">
           <div>
-            <p className="text-sm font-semibold text-accent print:text-ink">{context.clinicName}</p>
 
             <p className="mt-2 text-sm text-muted print:text-xs print:text-ink">
               発行日時: {generatedAt}

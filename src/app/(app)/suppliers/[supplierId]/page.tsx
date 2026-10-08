@@ -83,10 +83,6 @@ export default async function SupplierDetailPage({ params }: PageProps) {
         <AppNav current="suppliers" />
 
         <PageHeader title={supplier.name}>
-          <div>
-            <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-
-          </div>
           <div className="flex flex-wrap gap-3 text-sm font-semibold">
             {canManageSuppliers ? (
               <a className="text-accent hover:underline" href={`/suppliers/${supplier.id}/edit`}>

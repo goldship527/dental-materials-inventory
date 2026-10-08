@@ -77,10 +77,6 @@ export default async function BarcodeScansPage({ searchParams }: PageProps) {
         <AppNav current="barcode" />
 
         <PageHeader title={"バーコード読み取り履歴"}>
-          <div>
-            <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-
-          </div>
           <div className="flex flex-wrap gap-3 text-sm font-semibold">
             {canManageBarcodeMaster ? (
               <a className="text-accent hover:underline" href="/barcode/scans/unresolved">

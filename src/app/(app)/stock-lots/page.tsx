@@ -137,7 +137,6 @@ export default async function StockLotsPage({ searchParams }: PageProps) {
 
         <PageHeader title={"期限ロット一覧"}>
           <div>
-            <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
 
             <p className="mt-2 text-sm text-muted">在庫に保存されたロット番号と有効期限を、期限切れ・期限間近から確認します。</p>
           </div>

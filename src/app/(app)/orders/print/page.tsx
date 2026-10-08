@@ -77,7 +77,7 @@ export default async function OrdersPrintPage({ searchParams }: PageProps) {
 
         <PageHeader title={"発注書下書き"} className="print:border-b print:border-ink print:pb-3">
           <div>
-            <p className="text-sm font-semibold text-accent print:text-ink">{context.clinicName}</p>
+            <p className="hidden text-sm font-semibold text-ink print:block">{context.clinicName}</p>
 
             <p className="mt-2 text-sm text-muted print:text-xs print:text-ink">
               発行日時: {issuedAtLabel} / 外部送信済みではありません
