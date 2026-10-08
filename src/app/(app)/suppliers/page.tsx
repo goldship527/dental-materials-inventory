@@ -58,19 +58,19 @@ export default async function SuppliersPage({ searchParams }: PageProps) {
         <header className="flex flex-col gap-4 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-            <h1 className="mt-2 text-3xl font-semibold">発注先マスタ</h1>
+            <h1 className="mt-2 text-xl font-semibold">発注先マスタ</h1>
           </div>
           <div className="grid w-full grid-cols-1 gap-3 sm:flex sm:w-auto sm:shrink-0 sm:flex-wrap">
             {canManageSuppliers ? (
               <>
                 <a
-                  className="inline-flex min-h-11 items-center justify-center rounded bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-800"
+                  className="inline-flex min-h-11 items-center justify-center rounded bg-accent px-4 py-2 text-sm font-semibold text-panel transition hover:bg-accentDeep"
                   href="/suppliers/new"
                 >
                   発注先を新規作成
                 </a>
                 <a
-                  className="inline-flex min-h-11 items-center justify-center rounded border border-line bg-white px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+                  className="inline-flex min-h-11 items-center justify-center rounded border border-line bg-panel px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
                   href="/suppliers/import"
                 >
                   発注先を一括取り込み
@@ -90,7 +90,7 @@ export default async function SuppliersPage({ searchParams }: PageProps) {
           hasOrderRequestOnly={hasOrderRequestOnly}
         />
 
-        <section className="rounded border border-line bg-white px-4 py-3 text-sm text-muted shadow-panel">
+        <section className="rounded border border-line bg-panel px-4 py-3 text-sm text-muted shadow-sheet">
           表示 {filteredRows.length} 件 / 全 {rows.length} 件
           {filterLabel ? `（${filterLabel}）` : ""}
         </section>
@@ -106,17 +106,17 @@ export default async function SuppliersPage({ searchParams }: PageProps) {
               const plannedOrderRequestCount = row.orderRequestCounts.DRAFT + row.orderRequestCounts.CONFIRMED;
 
               return (
-                <article key={row.id} className="rounded border border-line bg-white p-5 shadow-panel">
+                <article key={row.id} className="rounded border border-line bg-panel p-5 shadow-sheet">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div>
-                      <a className="text-xl font-semibold text-accent hover:underline" href={`/suppliers/${row.id}`}>
+                      <a className="text-lg font-semibold text-accent hover:underline" href={`/suppliers/${row.id}`}>
                         {row.name}
                       </a>
                       <p className="mt-2 text-sm text-muted">
                         取扱商品 {row.productCount} 件 / 不足あり {row.shortageProductCount} 件
                       </p>
                     </div>
-                    <div className="rounded bg-gray-50 px-3 py-2 text-sm text-muted">
+                    <div className="rounded bg-subtle px-3 py-2 text-sm text-muted">
                       発注候補 {orderRequestTotal} 件
                     </div>
                   </div>
@@ -151,7 +151,7 @@ export default async function SuppliersPage({ searchParams }: PageProps) {
                     <div className="mt-2 flex flex-wrap gap-2">
                       {row.categories.length > 0 ? (
                         row.categories.map((category) => (
-                          <span key={category} className="rounded bg-gray-50 px-3 py-1 text-xs font-semibold text-muted">
+                          <span key={category} className="rounded bg-subtle px-3 py-1 text-xs font-semibold text-muted">
                             {category}
                           </span>
                         ))
@@ -171,7 +171,7 @@ export default async function SuppliersPage({ searchParams }: PageProps) {
               );
             })
           ) : (
-            <div className="rounded border border-line bg-white px-4 py-12 text-center text-sm text-muted shadow-panel lg:col-span-2">
+            <div className="rounded border border-line bg-panel px-4 py-12 text-center text-sm text-muted shadow-sheet lg:col-span-2">
               条件に一致する発注先はありません。
             </div>
           )}

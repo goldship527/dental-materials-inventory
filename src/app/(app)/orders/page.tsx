@@ -81,77 +81,46 @@ function buildOrdersPrintHref(supplierId: string | null | undefined) {
 
 function getSupplierStatusChipClass(status: OrderStatusFilterValue) {
   if (status === "SUGGESTED") {
-    return "border-blue-200 bg-blue-50 text-blue-700";
+    return "border-line bg-tint text-accent";
   }
   if (status === "SKIPPED") {
     return "border-line bg-subtle text-muted";
   }
 
   if (status === "AWAITING_RECEIPT") {
-    return "border-yellow-200 bg-yellow-50 text-warning";
+    return "border-line bg-markSoft text-ink";
   }
 
   if (status === "RECEIVED") {
-    return "border-green-100 bg-green-50 text-success";
+    return "border-line bg-panel text-success";
   }
 
   if (status === "PLANNED") {
-    return "border-teal-100 bg-teal-50 text-accent";
+    return "border-line bg-tint text-accent";
   }
 
-  return "border-line bg-white/80 text-muted";
+  return "border-line bg-panel/80 text-muted";
 }
 
 function getStatusCardClass(status: OrderStatusFilterValue) {
   if (status === "PLANNED") {
-    return "border-teal-100 bg-teal-50 text-accent";
+    return "border-line bg-tint text-accent";
   }
 
   if (status === "AWAITING_RECEIPT") {
-    return "border-yellow-200 bg-yellow-50 text-warning";
+    return "border-line bg-markSoft text-ink";
   }
 
   if (status === "RECEIVED") {
-    return "border-green-100 bg-green-50 text-success";
+    return "border-line bg-panel text-success";
   }
 
   return "border-line bg-subtle text-muted";
 }
 
-function getStatusFilterClass(status: OrderListFilterValue, isCurrent: boolean) {
-  const baseClass =
-    "inline-flex min-h-10 items-center rounded border px-4 py-2 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2";
-
-  if (status === "ALL") {
-    return isCurrent
-      ? `${baseClass} border-ink bg-ink text-white shadow-sm ring-2 ring-ink/20 focus-visible:ring-ink/50`
-      : `${baseClass} border-line bg-white/75 text-muted hover:border-ink hover:bg-white hover:text-ink focus-visible:ring-ink/30`;
-  }
-
-  const toneClassByStatus: Record<OrderStatusFilterValue, { current: string; idle: string }> = {
-    SUGGESTED: {
-      current: "border-blue-300 bg-blue-100 text-blue-800 shadow-sm ring-2 ring-blue-200 focus-visible:ring-blue-300",
-      idle: "border-blue-200 bg-white/75 text-blue-700 hover:border-blue-300 hover:bg-blue-50 focus-visible:ring-blue-300",
-    },
-    PLANNED: {
-      current: "border-accent bg-teal-100 text-accentDeep shadow-sm ring-2 ring-accent/25 focus-visible:ring-accent/50",
-      idle: "border-teal-100 bg-white/75 text-accent hover:border-accent hover:bg-teal-50 focus-visible:ring-accent/30",
-    },
-    AWAITING_RECEIPT: {
-      current: "border-yellow-400 bg-yellow-100 text-warning shadow-sm ring-2 ring-yellow-200 focus-visible:ring-yellow-300",
-      idle: "border-yellow-200 bg-white/75 text-warning hover:border-yellow-400 hover:bg-yellow-50 focus-visible:ring-yellow-300",
-    },
-    RECEIVED: {
-      current: "border-green-300 bg-green-100 text-success shadow-sm ring-2 ring-green-200 focus-visible:ring-green-300",
-      idle: "border-green-100 bg-white/75 text-success hover:border-green-300 hover:bg-green-50 focus-visible:ring-green-300",
-    },
-    SKIPPED: {
-      current: "border-muted bg-subtle text-ink shadow-sm ring-2 ring-line focus-visible:ring-muted/40",
-      idle: "border-line bg-white/75 text-muted hover:border-muted hover:bg-subtle hover:text-ink focus-visible:ring-muted/30",
-    },
-  };
-
-  return `${baseClass} ${isCurrent ? toneClassByStatus[status].current : toneClassByStatus[status].idle}`;
+function getStatusFilterClass(_status: OrderListFilterValue, isCurrent: boolean) {
+  const baseClass = "inline-flex min-h-10 items-center rounded border px-4 py-2 text-sm font-semibold transition";
+  return `${baseClass} ${isCurrent ? "chip-selected border-accent" : "border-lineStrong bg-panel text-ink hover:bg-tint"}`;
 }
 
 function formatSupplierLeadTime(leadTime: SupplierLeadTimeStats | undefined) {
@@ -203,7 +172,7 @@ function OrderRequestRowsTable({
 }) {
   return (
     <div className="overflow-x-auto">
-      <table className="w-full min-w-[960px] border-collapse text-left text-sm print:min-w-0 print:text-[10.5px]">
+      <table className="w-full min-w-[960px] border-collapse text-left text-sm print:min-w-0 print:text-xs">
         <colgroup className="print:hidden">
           <col className="w-[22%]" />
           <col className="w-[18%]" />
@@ -211,24 +180,24 @@ function OrderRequestRowsTable({
           <col className="w-[14%]" />
           <col className="w-[22%]" />
         </colgroup>
-        <thead className="bg-subtle text-xs text-muted print:bg-white print:text-[10px] print:text-black">
+        <thead className="bg-subtle text-xs text-muted print:bg-panel print:text-xs print:text-ink">
           <tr>
-            <th className="border-b border-line px-4 py-3 print:border print:border-black print:px-2 print:py-1.5">
+            <th className="border-b border-line px-4 py-3 print:border print:border-ink print:px-2 print:py-1.5">
               商品
             </th>
-            <th className="border-b border-line px-4 py-3 print:border print:border-black print:px-2 print:py-1.5">
+            <th className="border-b border-line px-4 py-3 print:border print:border-ink print:px-2 print:py-1.5">
               在庫状況
             </th>
-            <th className="border-b border-line px-4 py-3 print:border print:border-black print:px-2 print:py-1.5">
+            <th className="border-b border-line px-4 py-3 print:border print:border-ink print:px-2 print:py-1.5">
               発注先
             </th>
-            <th className="border-b border-line px-4 py-3 print:border print:border-black print:px-2 print:py-1.5">
+            <th className="border-b border-line px-4 py-3 print:border print:border-ink print:px-2 print:py-1.5">
               発注量
             </th>
             <th className="border-b border-line px-4 py-3 print:hidden">状態・操作</th>
-            <th className="hidden border border-black px-2 py-1.5 print:table-cell">状態</th>
-            <th className="hidden border border-black px-2 py-1.5 print:table-cell">備考</th>
-            <th className="hidden border border-black px-2 py-1.5 print:table-cell">確認</th>
+            <th className="hidden border border-ink px-2 py-1.5 print:table-cell">状態</th>
+            <th className="hidden border border-ink px-2 py-1.5 print:table-cell">備考</th>
+            <th className="hidden border border-ink px-2 py-1.5 print:table-cell">確認</th>
           </tr>
         </thead>
         <tbody>
@@ -345,31 +314,31 @@ export default async function OrdersPage({ searchParams }: PageProps) {
       : "条件に一致する発注候補はありません。検索語や状態フィルタを見直してください。";
 
   return (
-    <main className="min-h-screen bg-surface px-4 py-5 text-ink print:bg-white print:p-0 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-surface px-4 py-5 text-ink print:bg-panel print:p-0 sm:px-6 lg:px-8">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 print:max-w-none print:gap-3">
         <AppNav current="orders" />
 
-        <header className="flex flex-col gap-3 border-b border-line pb-4 md:flex-row md:items-end md:justify-between print:border-black print:pb-3">
+        <header className="flex flex-col gap-3 border-b border-line pb-4 md:flex-row md:items-end md:justify-between print:border-ink print:pb-3">
           <div>
-            <p className="text-sm font-semibold text-accent print:text-black">{context.clinicName}</p>
-            <h1 className="mt-2 text-3xl font-semibold print:text-2xl">発注</h1>
-            <p className="mt-2 text-sm text-muted print:text-xs print:text-black">
+            <p className="text-sm font-semibold text-accent print:text-ink">{context.clinicName}</p>
+            <h1 className="mt-2 text-xl font-semibold print:text-2xl">発注</h1>
+            <p className="mt-2 text-sm text-muted print:text-xs print:text-ink">
               <span className="hidden print:inline">この一覧は発注前の確認用で、外部発注送信済みではありません。</span>
               発行日時: {generatedAt}
             </p>
           </div>
           <div className="flex w-full gap-2 overflow-x-auto pb-1 print:hidden md:w-auto md:justify-end md:overflow-visible md:pb-0">
-            <a className="inline-flex h-9 shrink-0 items-center justify-center rounded border border-line bg-white/75 px-3 text-xs font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent" href="/shortage">
+            <a className="inline-flex h-9 shrink-0 items-center justify-center rounded border border-line bg-panel/75 px-3 text-xs font-semibold text-muted transition hover:border-accent hover:bg-panel hover:text-accent" href="/shortage">
               不足一覧へ
             </a>
             <a
-              className="inline-flex h-9 shrink-0 items-center justify-center rounded border border-line bg-white/75 px-3 text-xs font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent"
+              className="inline-flex h-9 shrink-0 items-center justify-center rounded border border-line bg-panel/75 px-3 text-xs font-semibold text-muted transition hover:border-accent hover:bg-panel hover:text-accent"
               href="/orders/print"
             >
               発注書下書き
             </a>
             <a
-              className="inline-flex h-9 shrink-0 items-center justify-center rounded border border-line bg-white/75 px-3 text-xs font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent"
+              className="inline-flex h-9 shrink-0 items-center justify-center rounded border border-line bg-panel/75 px-3 text-xs font-semibold text-muted transition hover:border-accent hover:bg-panel hover:text-accent"
               href="/order-records"
             >
               発注記録
@@ -380,46 +349,46 @@ export default async function OrdersPage({ searchParams }: PageProps) {
 
 
         <section className="hidden grid-cols-4 gap-2 text-xs print:grid">
-          <div className="border border-black px-2 py-1.5">印刷対象: {filteredRows.length} 件</div>
-          <div className="border border-black px-2 py-1.5">検索後: {queryFilteredRows.length} 件</div>
-          <div className="border border-black px-2 py-1.5">発注予定: {countByStatus.PLANNED} 件</div>
-          <div className="border border-black px-2 py-1.5">納品待ち: {countByStatus.AWAITING_RECEIPT} 件</div>
+          <div className="border border-ink px-2 py-1.5">印刷対象: {filteredRows.length} 件</div>
+          <div className="border border-ink px-2 py-1.5">検索後: {queryFilteredRows.length} 件</div>
+          <div className="border border-ink px-2 py-1.5">発注予定: {countByStatus.PLANNED} 件</div>
+          <div className="border border-ink px-2 py-1.5">納品待ち: {countByStatus.AWAITING_RECEIPT} 件</div>
         </section>
-        <section className="hidden border border-black px-2 py-1.5 text-xs print:block">
+        <section className="hidden border border-ink px-2 py-1.5 text-xs print:block">
           出力条件: {filterLabel || "すべて"} / 全発注候補: {rows.length} 件 / 納品済み: {countByStatus.RECEIVED} 件 / 見送り:{" "}
           {countByStatus.SKIPPED} 件
         </section>
 
         <section className="grid gap-3 md:grid-cols-4 print:hidden">
           {counts.map((item) => (
-            <div key={item.status} className={`rounded border p-4 shadow-panel ${getStatusCardClass(item.status)}`}>
+            <div key={item.status} className={`rounded border p-4 shadow-sheet ${getStatusCardClass(item.status)}`}>
               <p className="text-sm font-semibold">
                 {item.label}
               </p>
-              <p className="mt-2 text-3xl font-bold tabular-nums">
+              <p className="mt-2 text-2xl font-bold tabular-nums">
                 {item.count} 件
               </p>
             </div>
           ))}
         </section>
 
-        <form className="grid gap-3 rounded border border-line/90 bg-panel/95 p-3 shadow-panel md:grid-cols-[1fr_auto_auto] print:hidden">
+        <form className="grid gap-3 rounded border border-line/90 bg-panel/95 p-3 shadow-sheet md:grid-cols-[1fr_auto_auto] print:hidden">
           <input
             type="search"
             name="q"
             defaultValue={query}
             placeholder="商品名・商品コード・カテゴリ・発注先・メモ"
-            className="h-10 rounded border border-line bg-white/90 px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+            className="h-10 rounded border border-line bg-panel/90 px-3 text-sm    "
           />
           {selectedStatus !== defaultOrderListFilter ? <input type="hidden" name="status" value={selectedStatus} /> : null}
           <button
             type="submit"
-            className="h-10 rounded bg-accent px-4 text-sm font-semibold text-white transition hover:bg-accentDeep"
+            className="h-10 rounded bg-accent px-4 text-sm font-semibold text-panel transition hover:bg-accentDeep"
           >
             検索
           </button>
           <a
-            className="flex h-10 items-center justify-center rounded border border-line bg-white/75 px-4 text-sm font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent"
+            className="flex h-10 items-center justify-center rounded border border-line bg-panel/75 px-4 text-sm font-semibold text-muted transition hover:border-accent hover:bg-panel hover:text-accent"
             href={buildOrdersHref(selectedStatus, "")}
           >
             クリア
@@ -444,12 +413,12 @@ export default async function OrdersPage({ searchParams }: PageProps) {
         </section>
 
         <section className="hidden grid-cols-2 gap-3 text-xs print:grid">
-          <div className="min-h-12 border border-black px-3 py-2">発注前確認</div>
-          <div className="min-h-12 border border-black px-3 py-2">印刷備考</div>
+          <div className="min-h-12 border border-ink px-3 py-2">発注前確認</div>
+          <div className="min-h-12 border border-ink px-3 py-2">印刷備考</div>
         </section>
 
         <section className="flex flex-col gap-3 print:gap-3">
-          <div className="rounded border border-line/90 bg-panel/95 px-4 py-2 text-sm text-muted shadow-panel print:rounded-none print:border-black print:px-2 print:py-2 print:text-xs print:text-black print:shadow-none">
+          <div className="rounded border border-line/90 bg-panel/95 px-4 py-2 text-sm text-muted shadow-sheet print:rounded-none print:border-ink print:px-2 print:py-2 print:text-xs print:text-ink print:shadow-none">
             表示 {filteredRows.length} 件 / 検索後 {queryFilteredRows.length} 件 / 全 {rows.length} 件
             {hasFilter ? `（${filterLabel}）` : ""}
             <span className="hidden print:float-right print:inline">一般歯科材料在庫管理システム</span>
@@ -471,8 +440,8 @@ export default async function OrdersPage({ searchParams }: PageProps) {
                   title: "確認待ち",
                   description: "在庫変動から自動計算・スタッフ確認待ち",
                   rows: suggestedRows,
-                  className: "border-blue-200",
-                  headerClassName: "bg-blue-50/80",
+                  className: "border-line",
+                  headerClassName: "bg-tint",
                 },
                 {
                   key: "active",
@@ -480,23 +449,23 @@ export default async function OrdersPage({ searchParams }: PageProps) {
                   description: "これから発注する対象",
                   rows: activeRows,
                   className: "border-accent/30",
-                  headerClassName: "bg-white",
+                  headerClassName: "bg-panel",
                 },
                 {
                   key: "awaiting-receipt",
                   title: "納品待ち",
                   description: "発注記録済み・商品到着待ち",
                   rows: awaitingReceiptRows,
-                  className: "border-yellow-200",
-                  headerClassName: "bg-yellow-50/80",
+                  className: "border-line",
+                  headerClassName: "bg-markSoft",
                 },
                 {
                   key: "received",
                   title: "納品済み",
                   description: "納品確認済み",
                   rows: receivedRows,
-                  className: "border-green-100",
-                  headerClassName: "bg-green-50/80",
+                  className: "border-line",
+                  headerClassName: "bg-panel",
                 },
                 {
                   key: "skipped",
@@ -543,12 +512,12 @@ export default async function OrdersPage({ searchParams }: PageProps) {
               return (
                 <section
                   key={supplierKey}
-                  className="overflow-hidden rounded border border-line/90 bg-white shadow-panel print:break-inside-avoid print:rounded-none print:border-black print:shadow-none"
+                  className="overflow-hidden rounded border border-line/90 bg-panel shadow-sheet print:break-inside-avoid print:rounded-none print:border-ink print:shadow-none"
                 >
-                <div className="flex flex-col gap-3 border-b border-line border-l-8 border-l-accent bg-teal-100/90 px-5 py-3 text-sm lg:flex-row lg:items-start lg:justify-between print:border-black print:border-l-black print:bg-white print:px-2 print:py-2 print:text-xs">
+                <div className="flex flex-col gap-3 border-b border-line border-l-8 border-l-accent bg-tint px-5 py-3 text-sm lg:flex-row lg:items-start lg:justify-between print:border-ink print:border-l-black print:bg-panel print:px-2 print:py-2 print:text-xs">
                   <div>
                     <h2 className="text-lg font-bold text-ink">{supplierName}</h2>
-                    <p className="mt-1 text-xs font-semibold text-muted print:text-black">
+                    <p className="mt-1 text-xs font-semibold text-muted print:text-ink">
                       {formatSupplierLeadTime(supplierLeadTime)}
                     </p>
                     {hasUnassignedSupplier ? (
@@ -559,13 +528,13 @@ export default async function OrdersPage({ searchParams }: PageProps) {
                   </div>
                   <div className="flex flex-wrap items-start justify-end gap-2">
                     <div className="flex flex-wrap items-center justify-end gap-1.5">
-                      <span className="rounded border border-line bg-white/80 px-2 py-1 text-xs font-semibold text-muted print:border-black print:text-black">
+                      <span className="rounded border border-line bg-panel/80 px-2 py-1 text-xs font-semibold text-muted print:border-ink print:text-ink">
                         全 {supplierRows.length} 件
                       </span>
                       {primaryStatusCounts.map((item) => (
                         <span
                           key={item.status}
-                          className={`rounded border px-2 py-1 text-xs font-semibold print:border-black print:bg-white print:text-black ${getSupplierStatusChipClass(
+                          className={`rounded border px-2 py-1 text-xs font-semibold print:border-ink print:bg-panel print:text-ink ${getSupplierStatusChipClass(
                             item.status,
                           )}`}
                         >
@@ -575,21 +544,21 @@ export default async function OrdersPage({ searchParams }: PageProps) {
                     </div>
                   </div>
                 </div>
-                <div className="grid gap-3 bg-subtle/30 p-3 print:bg-white print:p-0">
+                <div className="grid gap-3 bg-subtle/30 p-3 print:bg-panel print:p-0">
                   {rowBlocks.map((block) => (
                     <section
                       key={block.key}
-                      className={`overflow-hidden rounded border bg-white print:break-inside-avoid print:rounded-none print:border-black ${block.className}`}
+                      className={`overflow-hidden rounded border bg-panel print:break-inside-avoid print:rounded-none print:border-ink ${block.className}`}
                     >
                       <div
-                        className={`flex flex-col gap-2 border-b border-line px-3 py-2 text-sm lg:flex-row lg:items-start lg:justify-between print:border-black print:bg-white print:px-2 print:py-1.5 print:text-xs ${block.headerClassName}`}
+                        className={`flex flex-col gap-2 border-b border-line px-3 py-2 text-sm lg:flex-row lg:items-start lg:justify-between print:border-ink print:bg-panel print:px-2 print:py-1.5 print:text-xs ${block.headerClassName}`}
                       >
                         <div>
                           <h3 className="font-semibold">{block.title}</h3>
-                          <p className="mt-0.5 text-xs text-muted print:text-black">{block.description}</p>
+                          <p className="mt-0.5 text-xs text-muted print:text-ink">{block.description}</p>
                         </div>
                         <div className="flex flex-wrap items-start justify-end gap-2">
-                          <span className="rounded border border-line bg-white/80 px-2 py-1 text-xs font-semibold text-muted print:border-black print:text-black">
+                          <span className="rounded border border-line bg-panel/80 px-2 py-1 text-xs font-semibold text-muted print:border-ink print:text-ink">
                             {block.rows.length} 件
                           </span>
                           {block.key === "active" && activeRows.length > 0 ? (
@@ -614,13 +583,13 @@ export default async function OrdersPage({ searchParams }: PageProps) {
               );
             })
           ) : (
-            <div className="rounded border border-line bg-white px-4 py-12 text-center text-sm text-muted shadow-panel print:border-black print:shadow-none">
+            <div className="rounded border border-line bg-panel px-4 py-12 text-center text-sm text-muted shadow-sheet print:border-ink print:shadow-none">
               {emptyMessage}
             </div>
           )}
         </section>
 
-        <p className="hidden text-[10px] leading-5 text-black print:block">
+        <p className="hidden text-xs leading-5 text-ink print:block">
           発注数量、発注先、状態、備考を確認してください。
         </p>
       </div>

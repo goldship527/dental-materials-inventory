@@ -16,7 +16,7 @@ export default async function AdminStaffOperatorsPage() {
       <main className="mx-auto grid w-full max-w-7xl gap-6 px-4 py-8 sm:px-6 lg:px-8">
         <header className="grid gap-2">
           <p className="text-sm font-semibold text-accent">管理</p>
-          <h1 className="text-2xl font-bold tracking-tight text-ink">スタッフ担当者</h1>
+          <h1 className="text-xl font-bold tracking-tight text-ink">スタッフ担当者</h1>
           <p className="max-w-3xl text-sm leading-6 text-muted">
             入出庫で実際に作業した担当者を管理します。
             ログインアカウントとは分けて扱い、複数クリニックで作業する担当者は利用できるクリニックを複数選びます。

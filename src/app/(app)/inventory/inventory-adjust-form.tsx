@@ -40,7 +40,7 @@ export function InventoryAdjustForm({ stockItemId, quantity, stockUpdatedAt, cli
             inputMode="numeric"
             defaultValue={quantity}
             required
-            className="h-11 rounded border border-line px-3 text-right text-sm font-semibold text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+            className="h-11 rounded border border-line px-3 text-right text-sm font-semibold text-ink    "
           />
         </label>
         <label className="grid gap-1 text-xs font-semibold text-muted">
@@ -51,13 +51,13 @@ export function InventoryAdjustForm({ stockItemId, quantity, stockUpdatedAt, cli
             placeholder="例: 棚卸差異、補充、使用"
             required
             maxLength={200}
-            className="h-11 rounded border border-line px-3 text-sm text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+            className="h-11 rounded border border-line px-3 text-sm text-ink    "
           />
         </label>
         <button
           type="submit"
           disabled={isPending || !hasSelectedStaffOperator}
-          className="h-11 rounded bg-ink px-4 text-xs font-semibold text-white transition hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+          className="h-11 rounded bg-accent px-4 text-xs font-semibold text-panel transition hover:bg-accentDeep disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isPending ? "更新中" : "更新"}
         </button>
@@ -67,11 +67,11 @@ export function InventoryAdjustForm({ stockItemId, quantity, stockUpdatedAt, cli
         {selectedStaffOperator ? `（${selectedStaffOperator.displayName}）` : ""}と理由メモは履歴に残ります。
       </p>
       {!hasStaffOperators ? (
-        <p className="rounded bg-red-50 px-3 py-2 text-xs font-semibold text-danger">
+        <p className="rounded bg-panel px-3 py-2 text-xs font-semibold text-danger">
           有効な作業スタッフがありません。先に管理画面でスタッフを登録してください。
         </p>
       ) : !hasSelectedStaffOperator ? (
-        <p className="rounded bg-yellow-50 px-3 py-2 text-xs font-semibold text-warning">
+        <p className="rounded bg-markSoft px-3 py-2 text-xs font-semibold text-ink">
           画面上部で作業スタッフを選択してください。
         </p>
       ) : null}
@@ -79,11 +79,11 @@ export function InventoryAdjustForm({ stockItemId, quantity, stockUpdatedAt, cli
         <p
           className={
             state.status === "success"
-              ? "rounded bg-emerald-50 px-3 py-2 text-xs font-semibold text-accent"
-              : "rounded bg-red-50 px-3 py-2 text-xs font-semibold text-danger"
+              ? "rounded bg-panel px-3 py-2 text-xs font-semibold text-accent"
+              : "rounded bg-panel px-3 py-2 text-xs font-semibold text-danger"
           }
         >
-          {state.message}
+          {state.status === "success" ? "✓ " : state.message.startsWith("エラー") ? "" : "エラー: "}{state.message}
         </p>
       ) : null}
     </form>

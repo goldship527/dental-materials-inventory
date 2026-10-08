@@ -86,18 +86,18 @@ function getAbcRankBadgeText(rank: string) {
 
 function getAbcRankBadgeClass(rank: string) {
   if (rank === "A") {
-    return "border-emerald-200 bg-emerald-50 text-accent";
+    return "border-line bg-panel text-accent";
   }
 
   if (rank === "B") {
-    return "border-sky-200 bg-sky-50 text-sky-700";
+    return "border-line bg-tint text-accent";
   }
 
   if (rank === "C") {
-    return "border-gray-200 bg-gray-50 text-muted";
+    return "border-line bg-subtle text-muted";
   }
 
-  return "border-line bg-white text-muted";
+  return "border-line bg-panel text-muted";
 }
 
 export default async function ProductsPage({ searchParams }: PageProps) {
@@ -151,19 +151,19 @@ export default async function ProductsPage({ searchParams }: PageProps) {
         <header className="flex flex-col gap-4 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-            <h1 className="mt-2 text-3xl font-semibold">商品マスタ</h1>
+            <h1 className="mt-2 text-xl font-semibold">商品マスタ</h1>
           </div>
           <div className="grid w-full grid-cols-1 gap-3 sm:flex sm:w-auto sm:shrink-0 sm:flex-wrap">
             {canManageProducts && !attachBarcode ? (
               <>
                 <a
-                  className="inline-flex min-h-11 items-center justify-center rounded bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-800"
+                  className="inline-flex min-h-11 items-center justify-center rounded bg-accent px-4 py-2 text-sm font-semibold text-panel transition hover:bg-accentDeep"
                   href="/products/new"
                 >
                   商品を新規作成
                 </a>
                 <a
-                  className="inline-flex min-h-11 items-center justify-center rounded border border-line bg-white px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+                  className="inline-flex min-h-11 items-center justify-center rounded border border-line bg-panel px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
                   href="/products/import"
                 >
                   一括取り込み
@@ -180,7 +180,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
         </header>
 
         {params.adminDenied ? (
-          <section className="rounded border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm font-semibold text-warning shadow-panel">
+          <section className="rounded border border-line bg-markSoft px-4 py-3 text-sm font-semibold text-ink shadow-sheet">
             商品マスタの作成・編集は管理者専用です。必要な場合は管理者に依頼してください。
           </section>
         ) : null}
@@ -196,7 +196,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
         />
 
         {!attachBarcode && purchaseHistorySummary.total > 0 ? (
-          <section className="rounded border border-line bg-white p-4 text-sm shadow-panel">
+          <section className="rounded border border-line bg-panel p-4 text-sm shadow-sheet">
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div>
                 <p className="font-semibold text-ink">購入履歴から登録した商品</p>
@@ -213,7 +213,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
                 </a>
                 {canManageProducts ? (
                   <a
-                    className="inline-flex min-h-10 items-center justify-center rounded bg-accent px-3 py-2 text-sm font-semibold text-white transition hover:bg-teal-800"
+                    className="inline-flex min-h-10 items-center justify-center rounded bg-accent px-3 py-2 text-sm font-semibold text-panel transition hover:bg-accentDeep"
                     href="/products/import/purchase-history/setup"
                   >
                     まとめて整える
@@ -225,7 +225,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
         ) : null}
 
         {attachBarcode ? (
-          <section className="rounded border border-warning/30 bg-yellow-50 p-4 text-sm text-warning shadow-panel">
+          <section className="rounded border border-line bg-markSoft p-4 text-sm text-ink shadow-sheet">
             <p className="font-semibold">紐づける商品を選択中</p>
             <p className="mt-2">
               読み取ったバーコード <span className="font-mono text-ink">{attachBarcode}</span>{" "}
@@ -234,7 +234,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
           </section>
         ) : null}
 
-        <section className="overflow-hidden rounded border border-line bg-white shadow-panel">
+        <section className="overflow-hidden rounded border border-line bg-panel shadow-sheet">
           <div className="flex flex-col gap-3 border-b border-line px-4 py-3 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
             <span>
               表示 {filteredRows.length} 件 / 全 {productPage.total} 件
@@ -268,7 +268,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
           </div>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1440px] border-collapse text-left text-sm">
-              <thead className="bg-gray-50 text-xs text-muted">
+              <thead className="bg-subtle text-xs text-muted">
                 <tr>
                   <th className="border-b border-line px-4 py-3">商品</th>
                   <th className="border-b border-line px-4 py-3 text-right">現在庫</th>
@@ -306,12 +306,12 @@ export default async function ProductsPage({ searchParams }: PageProps) {
                         </p>
                         {canManageProducts && isPurchaseHistoryImportSource(row.importSource) ? (
                           <div className="mt-2 flex flex-wrap gap-2">
-                            <span className="inline-flex rounded bg-teal-50 px-2 py-1 text-xs font-semibold text-accent">
+                            <span className="inline-flex rounded bg-tint px-2 py-1 text-xs font-semibold text-accent">
                               購入履歴から登録
                             </span>
                             {needsInitialSetup(row) ? (
                               <a
-                                className="inline-flex rounded border border-orange-200 bg-orange-50 px-2 py-1 text-xs font-semibold text-warning transition hover:border-warning"
+                                className="inline-flex rounded border border-line bg-markSoft px-2 py-1 text-xs font-semibold text-ink transition hover:border-line"
                                 href={`/products/${row.id}/edit`}
                               >
                                 設定を整える
@@ -376,7 +376,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
                       {canManageProducts && attachBarcode ? (
                         <td className="border-b border-line px-4 py-3">
                           <a
-                            className="inline-flex min-h-11 items-center justify-center rounded bg-accent px-3 py-2 text-xs font-semibold text-white transition hover:bg-teal-800"
+                            className="inline-flex min-h-11 items-center justify-center rounded bg-accent px-3 py-2 text-xs font-semibold text-panel transition hover:bg-accentDeep"
                             href={`/products/${row.id}/edit?newBarcode=${encodeURIComponent(attachBarcode)}`}
                           >
                             この商品に紐づける

@@ -27,7 +27,7 @@ export default async function ProductNewPage() {
         <header className="flex flex-col gap-3 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-            <h1 className="mt-2 text-3xl font-semibold">商品マスタ新規作成</h1>
+            <h1 className="mt-2 text-xl font-semibold">商品マスタ新規作成</h1>
           </div>
           <a className="text-sm font-semibold text-accent hover:underline" href="/products">
             商品マスタ一覧へ戻る

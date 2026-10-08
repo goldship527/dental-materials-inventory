@@ -99,7 +99,7 @@ export default async function StocktakeSessionHistoryPage({ params, searchParams
         <header className="flex flex-col gap-3 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-            <h1 className="mt-2 text-3xl font-semibold">棚卸セッション履歴</h1>
+            <h1 className="mt-2 text-xl font-semibold">棚卸セッション履歴</h1>
             <p className="mt-2 text-sm text-muted">
               確定済み・破棄済みセッションの入力内容と、確定時に作成された在庫履歴を確認します。
             </p>
@@ -110,7 +110,7 @@ export default async function StocktakeSessionHistoryPage({ params, searchParams
         </header>
 
 
-        <section className="grid gap-3 rounded border border-line bg-white p-4 text-sm shadow-panel md:grid-cols-3">
+        <section className="grid gap-3 rounded border border-line bg-panel p-4 text-sm shadow-sheet md:grid-cols-3">
           <div>
             <p className="text-muted">状態</p>
             <p className="mt-1 font-semibold">{getStocktakeSessionStatusLabel(stocktakeSession.status)}</p>
@@ -144,8 +144,8 @@ export default async function StocktakeSessionHistoryPage({ params, searchParams
               href={`/stocktake/sessions/${stocktakeSession.id}/history?tab=${tab.id}`}
               className={
                 currentTab === tab.id
-                  ? "rounded bg-ink px-4 py-2 text-sm font-semibold text-white"
-                  : "rounded border border-line bg-white px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+                  ? "rounded bg-accent px-4 py-2 text-sm font-semibold text-panel"
+                  : "rounded border border-line bg-panel px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
               }
             >
               {tab.label} {countsByTab[tab.id]}
@@ -153,13 +153,13 @@ export default async function StocktakeSessionHistoryPage({ params, searchParams
           ))}
         </div>
 
-        <section className="overflow-hidden rounded border border-line bg-white shadow-panel">
+        <section className="overflow-hidden rounded border border-line bg-panel shadow-sheet">
           <div className="border-b border-line px-4 py-3 text-sm text-muted">
             表示 {visibleRows.length} 件 / 全 {stocktakeSession.itemCount} 件。スキップ {stocktakeSession.skippedCount} 件。
           </div>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1080px] border-collapse text-left text-sm">
-              <thead className="bg-gray-50 text-xs text-muted">
+              <thead className="bg-subtle text-xs text-muted">
                 <tr>
                   <th className="border-b border-line px-4 py-3">商品</th>
                   <th className="border-b border-line px-4 py-3">保管場所</th>

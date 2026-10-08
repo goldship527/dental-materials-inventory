@@ -23,7 +23,7 @@ export function getStockStatus(quantity: number, minStock: number): StockStatus 
     return {
       key: stockStatusKeys.out,
       label: "在庫切れ",
-      badgeClassName: "bg-red-50 text-danger",
+      badgeClassName: "bg-panel text-danger",
       isShortage: quantity < minStock,
       isAtMin: false,
       shortageCount,
@@ -34,7 +34,7 @@ export function getStockStatus(quantity: number, minStock: number): StockStatus 
     return {
       key: stockStatusKeys.shortage,
       label: "不足",
-      badgeClassName: "bg-orange-50 text-warning",
+      badgeClassName: "bg-markSoft text-ink",
       isShortage: true,
       isAtMin: false,
       shortageCount,
@@ -45,7 +45,7 @@ export function getStockStatus(quantity: number, minStock: number): StockStatus 
     return {
       key: stockStatusKeys.atMin,
       label: "ぎりぎり",
-      badgeClassName: "bg-yellow-50 text-caution",
+      badgeClassName: "bg-markSoft text-ink",
       isShortage: false,
       isAtMin: true,
       shortageCount: 0,
@@ -55,7 +55,7 @@ export function getStockStatus(quantity: number, minStock: number): StockStatus 
   return {
     key: stockStatusKeys.enough,
     label: "十分",
-    badgeClassName: "bg-green-50 text-success",
+    badgeClassName: "bg-panel text-muted",
     isShortage: false,
     isAtMin: false,
     shortageCount: 0,

@@ -8,18 +8,18 @@ import { receiveOrderRequestWithStateAction, type OrderActionState } from "@/lib
 import { groupReceiptsByOrderDate, type ReceiptCard } from "@/lib/orders/receipt-groups";
 import { buildProductPhotoUrl } from "@/lib/product-photos/url";
 
-const field = "min-h-12 min-w-0 rounded-lg border border-muted bg-panel px-3 text-base disabled:cursor-not-allowed disabled:border-line disabled:bg-subtle disabled:text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent";
-const button = `${field} font-semibold hover:bg-subtle`;
-const primary = "min-h-12 rounded-lg bg-accent px-4 text-base font-semibold text-panel hover:bg-accentDeep disabled:bg-subtle disabled:text-muted focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2";
-const categoryButton = "min-h-10 whitespace-nowrap rounded-lg border border-muted bg-panel px-3 text-sm font-semibold hover:border-accent hover:bg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent";
-const selectedCategoryButton = "min-h-10 whitespace-nowrap rounded-lg bg-accent px-3 text-sm font-semibold text-panel hover:bg-accentDeep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2";
+const field = "min-h-12 min-w-0 rounded px-3 text-base field disabled:cursor-not-allowed disabled:border-line disabled:bg-subtle disabled:text-muted focus-ring";
+const button = "min-h-12 min-w-0 rounded px-3 text-base font-semibold btn-secondary focus-ring";
+const primary = "min-h-12 rounded px-4 text-base font-semibold btn-primary focus-ring";
+const categoryButton = "min-h-10 whitespace-nowrap rounded border border-muted bg-panel px-3 text-sm font-semibold hover:border-accent hover:bg-subtle   ";
+const selectedCategoryButton = "min-h-10 whitespace-nowrap rounded px-3 text-sm font-semibold chip-selected";
 
 function ReceiptPhoto({row}: {row: ReceiptCard}) {
   const [failed, setFailed] = useState(false);
   const url = buildProductPhotoUrl({id: row.productId, photoUpdatedAt: row.photoUpdatedAt});
 
-  return url && !failed ? <img src={url} alt="" loading="lazy" width={80} height={80} onError={() => setFailed(true)} className="h-20 w-20 shrink-0 rounded-lg border border-line bg-panel object-contain" /> :
-    <span aria-hidden="true" className="grid h-20 w-20 shrink-0 place-items-center rounded-lg border border-line bg-subtle text-ink">
+  return url && !failed ? <img src={url} alt="" loading="lazy" width={80} height={80} onError={() => setFailed(true)} className="h-20 w-20 shrink-0 rounded border border-line bg-panel object-contain" /> :
+    <span aria-hidden="true" className="grid h-20 w-20 shrink-0 place-items-center rounded border border-line bg-subtle text-ink">
       <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.4"><path d="m3 7 9-4 9 4v10l-9 4-9-4V7Zm0 0 9 4 9-4M12 11v10M7.5 5l9 4" /></svg>
     </span>;
 }
@@ -43,10 +43,10 @@ function ReceiptItem({row, staffId, onReceived}: {row: ReceiptCard; staffId: str
       setResult({status: "error", message: "通信結果を確認できません。履歴を確認してから一覧を更新してください。"});
     } finally { setPending(false); router.refresh(); }
   }
-  return <article className="flex h-full min-w-0 flex-col gap-1.5 rounded-lg border border-line bg-panel p-2 shadow-panel">
+  return <article className="flex h-full min-w-0 flex-col gap-1.5 rounded border border-line bg-panel p-2 edge-top">
     <div className="flex items-start gap-2"><ReceiptPhoto row={row} /><div className="min-w-0 flex-1"><p className="text-xs leading-4 text-muted">{row.supplierName || "発注先未設定"} / {row.category || "未分類"}</p><h3 className="mt-0.5 whitespace-normal text-base font-semibold leading-5 [overflow-wrap:anywhere]">{row.name}</h3></div></div>
-    <p className="flex items-baseline gap-1 rounded-lg bg-subtle px-2 py-1.5"><span className="text-xs">発注数</span><strong className="text-2xl tabular-nums">{row.requestedQuantity}</strong><span className="text-sm">{row.orderUnit || "単位未確認"}</span></p>
-    {result ? <div role={result.status === "success" ? "status" : "alert"} className="grid gap-2"><p>{result.message}</p>{result.status !== "success" && <a className="underline" href="/movements">入出庫履歴を確認</a>}</div> : open ?
+    <p className="flex items-baseline gap-1 rounded bg-tint px-2 py-1.5"><span className="text-xs">発注数</span><strong className="text-2xl tabular-nums">{row.requestedQuantity}</strong><span className="text-sm">{row.orderUnit || "単位未確認"}</span></p>
+    {result ? <div role={result.status === "success" ? "status" : "alert"} className="grid gap-2"><p>{result.status === "success" ? "✓ " : "エラー: "}{result.message}</p>{result.status !== "success" && <a className="underline" href="/movements">入出庫履歴を確認</a>}</div> : open ?
       <form onSubmit={submit} className="grid gap-2">
         <input type="hidden" name="orderRequestId" value={row.id} />
         <input type="hidden" name="staffOperatorId" value={staffId} />
@@ -80,7 +80,7 @@ export function ReceiveCatalog({rows, clinicId, staffOperators}: {rows: ReceiptC
   }, [remaining, category, query]);
   const groups = useMemo(() => groupReceiptsByOrderDate(filtered), [filtered]);
   return <>
-    <section aria-label="納品待ち商品を絞り込む" className="grid gap-2 rounded-xl border border-line bg-panel p-3">
+    <section aria-label="納品待ち商品を絞り込む" className="grid gap-2 rounded border border-line bg-panel p-3">
       <div className="grid gap-1.5" aria-label="カテゴリで絞り込む">
         <p className="text-sm font-semibold">カテゴリー</p>
         <div className="flex min-w-0 flex-wrap gap-1.5">
@@ -92,11 +92,11 @@ export function ReceiveCatalog({rows, clinicId, staffOperators}: {rows: ReceiptC
       </div>
       <div className="flex flex-wrap justify-between gap-2 text-sm text-muted"><p role="status">{filtered.length}商品 ／ 全{remaining.length}商品</p><p>担当: {staff.selectedStaffOperator?.displayName || "画面上部で選択"}</p></div>
     </section>
-    {received.length > 0 && <p role="status" className="font-semibold text-success">{received.length}商品の納品を記録しました。</p>}
-    {!staff.selectedStaffOperatorId && groups.length > 0 && <p role="status" className="rounded-lg border border-accent bg-subtle px-3 py-2 text-base font-semibold">
+    {received.length > 0 && <p role="status" className="font-semibold text-success">✓ {received.length}商品の納品を記録しました。</p>}
+    {!staff.selectedStaffOperatorId && groups.length > 0 && <p role="status" className="rounded border border-accent bg-subtle px-3 py-2 text-base font-semibold">
       画面上部で作業スタッフを選ぶと、納品を確定できるようになります。
     </p>}
-    {!groups.length && <div className="rounded-xl border border-line bg-panel p-6"><p>{remaining.length ? "条件に合う商品がありません。" : "納品待ちの商品はありません。"}</p>{remaining.length > 0 && <button className={`${button} mt-3`} onClick={() => {setQuery(""); setCategory("");}}>絞り込みを解除</button>}</div>}
+    {!groups.length && <div className="rounded border border-line bg-panel p-6"><p>{remaining.length ? "条件に合う商品がありません。" : "納品待ちの商品はありません。"}</p>{remaining.length > 0 && <button className={`${button} mt-3`} onClick={() => {setQuery(""); setCategory("");}}>絞り込みを解除</button>}</div>}
     {groups.map(([day, items]) => <section key={day} className="grid gap-2"><h2 className="text-lg font-semibold">{day} 発注 <span className="text-sm font-normal">／ {items.length}商品</span></h2><div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">{items.map(row => <ReceiptItem key={row.id} row={row} staffId={staff.selectedStaffOperatorId} onReceived={id => setReceived(ids => [...ids,id])} />)}</div></section>)}
   </>;
 }

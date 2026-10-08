@@ -26,7 +26,7 @@ export function PhotoManagement({ productId, productName, photoUpdatedAt }: Phot
   const hasPhoto = photoUrl !== null;
 
   return (
-    <section className="overflow-hidden rounded border border-line bg-white p-4 shadow-panel sm:p-5">
+    <section className="overflow-hidden rounded border border-line bg-panel p-4 shadow-sheet sm:p-5">
       <div className="grid min-w-0 gap-5 md:grid-cols-[180px_minmax(0,1fr)]">
         <div className="w-full max-w-[180px] md:max-w-none">
           {hasPhoto ? (
@@ -36,7 +36,7 @@ export function PhotoManagement({ productId, productName, photoUpdatedAt }: Phot
               src={photoUrl}
             />
           ) : (
-            <div className="grid aspect-square w-full place-items-center rounded border border-dashed border-line bg-gray-50 text-sm font-semibold text-muted">
+            <div className="grid aspect-square w-full place-items-center rounded border border-dashed border-line bg-subtle text-sm font-semibold text-muted">
               写真なし
             </div>
           )}
@@ -52,12 +52,12 @@ export function PhotoManagement({ productId, productName, photoUpdatedAt }: Phot
             <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center">
               <input
                 accept="image/png,image/jpeg,image/webp"
-                className="block h-11 min-w-0 flex-1 rounded border border-line text-sm text-muted file:mr-3 file:h-full file:border-0 file:bg-accent file:px-3 file:text-sm file:font-semibold file:text-white"
+                className="block h-11 min-w-0 flex-1 rounded border border-line text-sm text-muted file:mr-3 file:h-full file:border-0 file:bg-accent file:px-3 file:text-sm file:font-semibold file:text-panel"
                 name="photo"
                 type="file"
               />
               <button
-                className="inline-flex h-11 shrink-0 items-center justify-center rounded bg-ink px-5 text-sm font-semibold text-white transition hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex h-11 shrink-0 items-center justify-center rounded bg-accent px-5 text-sm font-semibold text-panel transition hover:bg-accentDeep disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={isUploading}
                 type="submit"
               >
@@ -78,7 +78,7 @@ export function PhotoManagement({ productId, productName, photoUpdatedAt }: Phot
             >
               <input type="hidden" name="productId" value={productId} />
               <button
-                className="inline-flex h-11 items-center justify-center rounded border border-line bg-white px-5 text-sm font-semibold text-muted transition hover:border-danger hover:text-danger disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex h-11 items-center justify-center rounded border border-line bg-panel px-5 text-sm font-semibold text-muted transition hover:border-danger hover:text-danger disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={isDeleting}
                 type="submit"
               >
@@ -92,12 +92,12 @@ export function PhotoManagement({ productId, productName, photoUpdatedAt }: Phot
               <p
                 className={
                   state.status === "success"
-                    ? "rounded border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm font-semibold text-accent"
-                    : "rounded border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold text-danger"
+                    ? "rounded border border-line border-l-4 border-l-success bg-panel px-4 py-3 text-sm font-semibold text-success"
+                    : "rounded border border-line border-l-4 border-l-danger bg-panel px-4 py-3 text-sm font-semibold text-danger"
                 }
                 key={`${state.status}-${index}`}
               >
-                {state.message}
+                {state.status === "success" ? "✓ " : state.message.startsWith("エラー") ? "" : "エラー: "}{state.message}
               </p>
             ) : null,
           )}

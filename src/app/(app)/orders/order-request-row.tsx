@@ -53,25 +53,25 @@ function formatOrderRecordId(orderRecordId: string | null) {
 
 function getStatusBadgeClass(row: OrderRequestRow) {
   if (row.status === "SUGGESTED") {
-    return "border-blue-200 bg-blue-50 text-blue-700";
+    return "border-line bg-tint text-accent";
   }
   if (row.status === "SKIPPED") {
     return "border-line bg-subtle text-muted";
   }
 
   if (row.status === "ORDERED" && row.receivedAt) {
-    return "border-green-100 bg-green-50 text-success";
+    return "border-line bg-panel text-success";
   }
 
   if (row.status === "ORDERED") {
-    return "border-yellow-200 bg-yellow-50 text-warning";
+    return "border-line bg-markSoft text-ink";
   }
 
   if (row.status === "CONFIRMED") {
-    return "border-teal-100 bg-teal-50 text-accent";
+    return "border-line bg-tint text-accent";
   }
 
-  return "border-line bg-white text-muted";
+  return "border-line bg-panel text-muted";
 }
 
 function getRowToneClass(row: OrderRequestRow) {
@@ -163,47 +163,47 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
 
   return (
     <tr className={`align-top transition hover:bg-subtle/60 print:break-inside-avoid ${getRowToneClass(row)}`}>
-      <td className="border-b border-line px-3 py-2 print:border print:border-black print:px-2 print:py-1.5">
+      <td className="border-b border-line px-3 py-2 print:border print:border-ink print:px-2 print:py-1.5">
         <a
-          className="font-semibold text-accent hover:underline print:text-black print:no-underline"
+          className="font-semibold text-accent hover:underline print:text-ink print:no-underline"
           href={`/products/${row.productId}`}
         >
           {row.name}
         </a>
-        <p className="mt-0.5 text-xs text-muted print:mt-0.5 print:text-[9px] print:text-black">
+        <p className="mt-0.5 text-xs text-muted print:mt-0.5 print:text-xs print:text-ink">
           {row.productCode ?? "コード未設定"} / {row.category ?? "未分類"}
         </p>
         {activeState.message ? (
           <p
             className={
               activeState.status === "success"
-                ? "mt-1.5 rounded bg-green-50 px-3 py-1.5 text-xs font-semibold text-success print:hidden"
-                : "mt-1.5 rounded bg-red-50 px-3 py-1.5 text-xs font-semibold text-danger print:hidden"
+                ? "mt-1.5 rounded bg-panel px-3 py-1.5 text-xs font-semibold text-success print:hidden"
+                : "mt-1.5 rounded bg-panel px-3 py-1.5 text-xs font-semibold text-danger print:hidden"
             }
           >
             {activeState.message}
           </p>
         ) : null}
       </td>
-      <td className="border-b border-line px-3 py-2 print:border print:border-black print:px-2 print:py-1.5">
-        <div className="grid w-44 grid-cols-3 gap-2 rounded border border-line bg-white px-2 py-1.5 text-center print:w-auto print:border-0 print:p-0">
+      <td className="border-b border-line px-3 py-2 print:border print:border-ink print:px-2 print:py-1.5">
+        <div className="grid w-44 grid-cols-3 gap-2 rounded border border-line bg-panel px-2 py-1.5 text-center print:w-auto print:border-0 print:p-0">
           <div className="min-w-0">
-            <p className="text-[10px] font-semibold text-muted print:text-[9px] print:text-black">現在</p>
-            <p className="text-lg font-bold tabular-nums text-ink print:text-[11px]">{row.quantity}</p>
+            <p className="text-xs font-semibold text-muted print:text-xs print:text-ink">現在</p>
+            <p className="text-lg font-bold tabular-nums text-ink print:text-xs">{row.quantity}</p>
           </div>
           <div className="min-w-0">
-            <p className="text-[10px] font-semibold text-muted print:text-[9px] print:text-black">最低</p>
-            <p className="text-lg font-bold tabular-nums text-ink print:text-[11px]">{row.minStock}</p>
+            <p className="text-xs font-semibold text-muted print:text-xs print:text-ink">最低</p>
+            <p className="text-lg font-bold tabular-nums text-ink print:text-xs">{row.minStock}</p>
           </div>
           <div className="min-w-0">
-            <p className="text-[10px] font-semibold text-muted print:text-[9px] print:text-black">不足</p>
-            <p className="text-lg font-bold tabular-nums text-danger print:text-[11px] print:text-black">
+            <p className="text-xs font-semibold text-muted print:text-xs print:text-ink">不足</p>
+            <p className="text-lg font-bold tabular-nums text-danger print:text-xs print:text-ink">
               {row.shortageCount}
             </p>
           </div>
         </div>
         {row.status === "SUGGESTED" ? (
-          <div className="mt-2 grid gap-1 rounded border border-blue-100 bg-blue-50 px-2 py-1.5 text-xs text-blue-800 print:hidden">
+          <div className="mt-2 grid gap-1 rounded border border-line bg-tint px-2 py-1.5 text-xs text-accent print:hidden">
             <span className="font-semibold">不足 {row.requestedQuantity}{row.orderUnit ? `（${row.orderUnit}）` : ""}</span>
             <span>
               基準 {row.minStock} − 現在庫 {row.quantity} − 納品待ち {row.pendingOrderedQuantity} − 発注予定 {row.plannedQuantity}
@@ -211,23 +211,23 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
           </div>
         ) : null}
       </td>
-      <td className="border-b border-line px-3 py-2 print:border print:border-black print:px-2 print:py-1.5">
+      <td className="border-b border-line px-3 py-2 print:border print:border-ink print:px-2 print:py-1.5">
         {row.supplierId && row.supplierName ? (
           <div className="grid gap-1 print:block">
             <a
-              className="text-accent hover:underline print:text-black print:no-underline"
+              className="text-accent hover:underline print:text-ink print:no-underline"
               href={`/suppliers/${row.supplierId}`}
             >
               {row.supplierName}
             </a>
-            <div className="grid gap-0.5 text-xs text-muted print:text-[9px] print:text-black">
+            <div className="grid gap-0.5 text-xs text-muted print:text-xs print:text-ink">
               {row.supplierProductCode ? <span>発注先品番: {row.supplierProductCode}</span> : null}
               {row.orderUnit ? <span>単位: {row.orderUnit}</span> : null}
             </div>
           </div>
         ) : (
           <div className="grid gap-1 print:block">
-            <span className="text-danger print:text-black">発注先未設定</span>
+            <span className="text-danger print:text-ink">発注先未設定</span>
             <a className="text-xs font-semibold text-accent hover:underline print:hidden" href={`/products/${row.productId}/edit`}>
               主発注先を設定
             </a>
@@ -238,7 +238,7 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
             <button
               type="button"
               onClick={() => togglePanel("supplier")}
-              className="inline-flex h-8 w-fit items-center rounded border border-line bg-white/75 px-3 text-xs font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent"
+              className="inline-flex h-8 w-fit items-center rounded border border-line bg-panel/75 px-3 text-xs font-semibold text-muted transition hover:border-accent hover:bg-panel hover:text-accent"
             >
               {activePanel === "supplier" ? "閉じる" : "発注先を変更"}
             </button>
@@ -249,7 +249,7 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
                   name="supplierId"
                   value={selectedSupplierId}
                   onChange={(event) => setSelectedSupplierId(event.target.value)}
-                  className="h-9 rounded border border-line bg-white/90 px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                  className="h-9 rounded border border-line bg-panel/90 px-3 text-sm    "
                 >
                   {row.supplierId ? null : (
                     <option value="" disabled>
@@ -266,7 +266,7 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
                 <button
                   type="submit"
                   disabled={isSupplierPending || !selectedSupplierId || selectedSupplierId === (row.supplierId ?? "")}
-                  className="h-8 rounded border border-line bg-white/75 px-3 text-xs font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
+                  className="h-8 rounded border border-line bg-panel/75 px-3 text-xs font-semibold text-muted transition hover:border-accent hover:bg-panel hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {isSupplierPending ? "変更中" : "発注先を変更"}
                 </button>
@@ -275,17 +275,17 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
           </div>
         ) : null}
       </td>
-      <td className="border-b border-line px-3 py-2 print:border print:border-black print:px-2 print:py-1.5">
+      <td className="border-b border-line px-3 py-2 print:border print:border-ink print:px-2 print:py-1.5">
         <div className="grid gap-2">
-          <div className="flex w-fit items-baseline gap-1 rounded bg-teal-50 px-2.5 py-1 text-accent print:bg-white print:px-0 print:py-0 print:text-black">
-            <span className="text-[10px] font-semibold">発注</span>
-            <span className="text-xl font-bold tabular-nums print:text-[12px]">{row.requestedQuantity}</span>
+          <div className="flex w-fit items-baseline gap-1 rounded bg-tint px-2.5 py-1 text-accent print:bg-panel print:px-0 print:py-0 print:text-ink">
+            <span className="text-xs font-semibold">発注</span>
+            <span className="text-lg font-bold tabular-nums print:text-xs">{row.requestedQuantity}</span>
           </div>
           {canChangeQuantity ? (
             <button
               type="button"
               onClick={() => togglePanel("quantity")}
-              className="inline-flex h-8 w-fit items-center rounded border border-line bg-white/75 px-3 text-xs font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent print:hidden"
+              className="inline-flex h-8 w-fit items-center rounded border border-line bg-panel/75 px-3 text-xs font-semibold text-muted transition hover:border-accent hover:bg-panel hover:text-accent print:hidden"
             >
               {activePanel === "quantity"
                 ? "閉じる"
@@ -302,7 +302,7 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
                   type="button"
                   onClick={() => changeRequestedQuantity(requestedQuantity - 1)}
                   disabled={requestedQuantity <= 1 || isQuantityPending}
-                  className="h-9 w-9 rounded border border-line bg-white/75 text-base font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent disabled:cursor-not-allowed disabled:opacity-40"
+                  className="h-9 w-9 rounded border border-line bg-panel/75 text-base font-semibold text-muted transition hover:border-accent hover:bg-panel hover:text-accent disabled:cursor-not-allowed disabled:opacity-40"
                   aria-label="発注数量を1減らす"
                 >
                   -
@@ -314,13 +314,13 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
                   name="requestedQuantity"
                   value={requestedQuantity}
                   onChange={(event) => changeRequestedQuantity(Number(event.target.value))}
-                  className="h-9 w-20 rounded border border-line bg-white/90 px-3 text-right outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                  className="h-9 w-20 rounded border border-line bg-panel/90 px-3 text-right    "
                 />
                 <button
                   type="button"
                   onClick={() => changeRequestedQuantity(requestedQuantity + 1)}
                   disabled={requestedQuantity >= 9999 || isQuantityPending}
-                  className="h-9 w-9 rounded border border-line bg-white/75 text-base font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent disabled:cursor-not-allowed disabled:opacity-40"
+                  className="h-9 w-9 rounded border border-line bg-panel/75 text-base font-semibold text-muted transition hover:border-accent hover:bg-panel hover:text-accent disabled:cursor-not-allowed disabled:opacity-40"
                   aria-label="発注数量を1増やす"
                 >
                   +
@@ -328,7 +328,7 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
                 <button
                   type="submit"
                   disabled={isQuantityPending}
-                  className="h-9 rounded bg-ink px-3 text-xs font-semibold text-white transition hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="h-9 rounded bg-accent px-3 text-xs font-semibold text-panel transition hover:bg-accentDeep disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {isQuantityPending ? "更新中" : "更新"}
                 </button>
@@ -349,7 +349,7 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
               <span className="text-xs text-muted">{dateTimeFormatter.format(row.orderedAt)}</span>
             ) : null}
             {row.status === "ORDERED" && row.receivedAt ? (
-              <span className="rounded border border-teal-100 bg-teal-50 px-2 py-1 text-xs font-semibold text-accent">
+              <span className="rounded border border-line bg-tint px-2 py-1 text-xs font-semibold text-accent">
                 納品済み
               </span>
             ) : null}
@@ -362,7 +362,7 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
                 <button
                   type="submit"
                   disabled={isStatusPending}
-                  className="h-8 rounded bg-accent px-3 text-xs font-semibold text-white transition hover:bg-accentDeep disabled:opacity-50"
+                  className="h-8 rounded bg-accent px-3 text-xs font-semibold text-panel transition hover:bg-accentDeep disabled:opacity-50"
                 >
                   確認して発注予定へ
                 </button>
@@ -373,7 +373,7 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
                 <button
                   type="submit"
                   disabled={isStatusPending}
-                  className="h-8 rounded border border-line bg-white px-3 text-xs font-semibold text-muted transition hover:border-muted disabled:opacity-50"
+                  className="h-8 rounded border border-line bg-panel px-3 text-xs font-semibold text-muted transition hover:border-muted disabled:opacity-50"
                 >
                   見送り
                 </button>
@@ -395,12 +395,12 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
           <button
             type="button"
             onClick={() => togglePanel("status")}
-            className="inline-flex h-8 w-fit items-center rounded border border-line bg-white/75 px-3 text-xs font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent"
+            className="inline-flex h-8 w-fit items-center rounded border border-line bg-panel/75 px-3 text-xs font-semibold text-muted transition hover:border-accent hover:bg-panel hover:text-accent"
           >
             {activePanel === "status" ? "閉じる" : "状態・メモを編集"}
           </button>
           {row.status === "ORDERED" && row.receivedAt ? (
-            <div className="grid gap-1.5 rounded border border-green-100 bg-green-50 px-3 py-2 text-xs font-semibold text-success">
+            <div className="grid gap-1.5 rounded border border-line bg-panel px-3 py-2 text-xs font-semibold text-success">
               <span>
                 納品済み {dateTimeFormatter.format(row.receivedAt)} / {row.receivedQuantity ?? "-"} 個
               </span>
@@ -413,7 +413,7 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
                 <button
                   type="submit"
                   disabled={isReceiptRevertPending}
-                  className="h-8 rounded border border-green-200 bg-white/75 px-3 text-xs font-semibold text-muted transition hover:border-danger hover:text-danger disabled:cursor-not-allowed disabled:opacity-50"
+                  className="h-8 rounded border border-line bg-panel/75 px-3 text-xs font-semibold text-muted transition hover:border-danger hover:text-danger disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {isReceiptRevertPending ? "取り消し中" : "納品確認を取り消す"}
                 </button>
@@ -425,12 +425,12 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
               <button
                 type="button"
                 onClick={() => togglePanel("receipt")}
-                className="inline-flex h-8 w-fit items-center rounded border border-yellow-200 bg-yellow-50 px-3 text-xs font-semibold text-warning transition hover:border-warning hover:bg-white"
+                className="inline-flex h-8 w-fit items-center rounded border border-line bg-markSoft px-3 text-xs font-semibold text-ink transition hover:border-line hover:bg-panel"
               >
                 {activePanel === "receipt" ? "閉じる" : "納品確認"}
               </button>
               {activePanel === "receipt" ? (
-                <form action={receiptAction} className="grid gap-1.5 rounded border border-yellow-200 bg-yellow-50 p-2">
+                <form action={receiptAction} className="grid gap-1.5 rounded border border-line bg-markSoft p-2">
                   <input type="hidden" name="orderRequestId" value={row.id} />
                   <input type="hidden" name="staffOperatorId" value={selectedStaffOperatorId} />
                   <p className="text-xs font-semibold text-muted">
@@ -445,11 +445,11 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
                         min={1}
                         max={row.requestedQuantity}
                         defaultValue={row.requestedQuantity}
-                        className="h-9 rounded border border-line bg-white px-3 text-right text-sm outline-none focus:border-warning focus:ring-2 focus:ring-warning/20"
+                        className="h-9 rounded border border-line bg-panel px-3 text-right text-sm    "
                       />
                     </label>
                     <label className="flex h-9 items-center gap-2 whitespace-nowrap text-xs font-semibold text-muted">
-                      <input type="checkbox" name="applyToStock" defaultChecked className="h-4 w-4 accent-amber-600" />
+                      <input type="checkbox" name="applyToStock" defaultChecked className="h-4 w-4 accent-accent" />
                       在庫反映
                     </label>
                   </div>
@@ -457,19 +457,19 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
                     name="receivedMemo"
                     placeholder="納品メモ"
                     maxLength={200}
-                    className="h-10 min-h-10 rounded border border-line bg-white px-3 py-2 text-sm outline-none focus:border-warning focus:ring-2 focus:ring-warning/20"
+                    className="h-10 min-h-10 rounded border border-line bg-panel px-3 py-2 text-sm    "
                   />
                   <button
                     type="submit"
                     disabled={isReceiptPending || !hasSelectedStaffOperator}
-                    className="h-9 rounded bg-warning px-3 text-xs font-semibold text-white transition hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="h-9 rounded px-3 text-xs font-semibold btn-secondary transition disabled:cursor-not-allowed"
                   >
                     {isReceiptPending ? "確認中" : "納品を確認"}
                   </button>
                   {!hasStaffOperators ? (
                     <p className="text-xs font-semibold text-danger">有効な作業スタッフがありません。</p>
                   ) : !hasSelectedStaffOperator ? (
-                    <p className="text-xs font-semibold text-warning">画面上部で作業スタッフを選択してください。</p>
+                    <p className="text-xs font-semibold text-ink">画面上部で作業スタッフを選択してください。</p>
                   ) : null}
                 </form>
               ) : null}
@@ -484,10 +484,10 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
             onChange={(event) => setSelectedStatus(event.target.value as OrderRequestStatusValue)}
             className={
               selectedStatus === "SKIPPED"
-                ? "h-9 rounded border border-line bg-subtle px-3 text-sm font-semibold text-muted outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                ? "h-9 rounded border border-line bg-subtle px-3 text-sm font-semibold text-muted    "
                 : selectedStatus === "ORDERED"
-                  ? "h-9 rounded border border-success bg-green-50 px-3 text-sm font-semibold text-success outline-none focus:border-success focus:ring-2 focus:ring-success/20"
-                  : "h-9 rounded border border-line bg-white px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                  ? "h-9 rounded border border-success bg-panel px-3 text-sm font-semibold text-success    "
+                  : "h-9 rounded border border-line bg-panel px-3 text-sm    "
             }
           >
             {statusOptions.map((status) => (
@@ -497,7 +497,7 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
             ))}
           </select>
           {row.status === "ORDERED" ? (
-            <p className="rounded border border-green-100 bg-green-50 px-3 py-1.5 text-xs font-semibold text-success">
+            <p className="rounded border border-line bg-panel px-3 py-1.5 text-xs font-semibold text-success">
               誤って発注を記録した場合は、発注予定に戻せます。
             </p>
           ) : null}
@@ -541,7 +541,7 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
                   name="orderedMethod"
                   required
                   defaultValue={row.orderedMethod ?? ""}
-                  className="h-9 rounded border border-line bg-white px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                  className="h-9 rounded border border-line bg-panel px-3 text-sm    "
                 >
                   <option value="" disabled>
                     選択してください
@@ -559,14 +559,14 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
                   defaultValue={row.orderedMemo ?? ""}
                   placeholder="送付メモ（任意）"
                   maxLength={300}
-                  className="h-10 min-h-10 rounded border border-line px-3 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                  className="h-10 min-h-10 rounded border border-line px-3 py-2 text-sm    "
                 />
                 <textarea
                   name="supplierResponseMemo"
                   defaultValue={row.supplierResponseMemo ?? ""}
                   placeholder="先方対応メモ（任意）"
                   maxLength={300}
-                  className="h-10 min-h-10 rounded border border-line px-3 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                  className="h-10 min-h-10 rounded border border-line px-3 py-2 text-sm    "
                 />
               </div>
             </>
@@ -578,19 +578,19 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
               selectedStatus === "SKIPPED" ? "見送り理由・メモ" : selectedStatus === "ORDERED" ? "送付メモ" : "備考メモ"
             }
             maxLength={200}
-            className="h-10 min-h-10 rounded border border-line px-3 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+            className="h-10 min-h-10 rounded border border-line px-3 py-2 text-sm    "
           />
           <button
             type="submit"
             disabled={isStatusPending || (requiresStaffForStatus && !hasSelectedStaffOperator)}
-            className="h-9 rounded border border-line bg-white/75 px-3 text-xs font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
+            className="h-9 rounded border border-line bg-panel/75 px-3 text-xs font-semibold text-muted transition hover:border-accent hover:bg-panel hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isStatusPending ? "変更中" : "状態・メモを更新"}
           </button>
           {requiresStaffForStatus && !hasStaffOperators ? (
             <p className="text-xs font-semibold text-danger">有効な作業スタッフがありません。</p>
           ) : requiresStaffForStatus && !hasSelectedStaffOperator ? (
-            <p className="text-xs font-semibold text-warning">画面上部で作業スタッフを選択してください。</p>
+            <p className="text-xs font-semibold text-ink">画面上部で作業スタッフを選択してください。</p>
           ) : null}
             </form>
           ) : null}
@@ -599,18 +599,18 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
       <td
         className={
           row.status === "SKIPPED"
-            ? "hidden border-b border-line px-4 py-3 text-muted print:table-cell print:border print:border-black print:px-2 print:py-1.5 print:font-semibold print:text-black"
+            ? "hidden border-b border-line px-4 py-3 text-muted print:table-cell print:border print:border-ink print:px-2 print:py-1.5 print:font-semibold print:text-ink"
             : row.status === "ORDERED"
-              ? "hidden border-b border-line px-4 py-3 text-success print:table-cell print:border print:border-black print:px-2 print:py-1.5 print:font-semibold print:text-black"
-            : "hidden border-b border-line px-4 py-3 print:table-cell print:border print:border-black print:px-2 print:py-1.5 print:font-semibold"
+              ? "hidden border-b border-line px-4 py-3 text-success print:table-cell print:border print:border-ink print:px-2 print:py-1.5 print:font-semibold print:text-ink"
+            : "hidden border-b border-line px-4 py-3 print:table-cell print:border print:border-ink print:px-2 print:py-1.5 print:font-semibold"
         }
       >
         {getOrderRowStatusLabel(row)}
       </td>
-      <td className="hidden border-b border-line px-4 py-3 print:table-cell print:border print:border-black print:px-2 print:py-1.5">
+      <td className="hidden border-b border-line px-4 py-3 print:table-cell print:border print:border-ink print:px-2 print:py-1.5">
         {row.memo ?? "-"}
       </td>
-      <td className="hidden border-b border-line px-4 py-3 print:table-cell print:border print:border-black print:px-2 print:py-1.5" />
+      <td className="hidden border-b border-line px-4 py-3 print:table-cell print:border print:border-ink print:px-2 print:py-1.5" />
     </tr>
   );
 }

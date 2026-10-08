@@ -37,7 +37,7 @@ export default async function AdminUsersPage() {
       <main className="mx-auto grid w-full max-w-7xl gap-6 px-4 py-8 sm:px-6 lg:px-8">
         <header className="grid gap-2">
           <p className="text-sm font-semibold text-accent">管理</p>
-          <h1 className="text-2xl font-bold tracking-tight text-ink">ログインアカウント管理</h1>
+          <h1 className="text-xl font-bold tracking-tight text-ink">ログインアカウント管理</h1>
           <p className="max-w-3xl text-sm leading-6 text-muted">
             クリニック共通アカウントと管理者個人アカウントを管理します。共通アカウントは一般ユーザーとして作成し、ADMINは本部・事務などの個人アカウントに限定します。
             パスワードリセットはメール送信を行わず、管理者が新しい仮パスワードを設定します。

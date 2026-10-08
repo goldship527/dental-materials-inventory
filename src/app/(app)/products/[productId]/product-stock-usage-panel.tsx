@@ -41,7 +41,7 @@ function StockUsageForm({
   const isDisabled = maxQuantity <= 0 || selectedStaffOperatorId.length === 0 || isPending;
 
   return (
-    <form action={formAction} className="grid gap-3 rounded border border-line bg-gray-50 p-3">
+    <form action={formAction} className="grid gap-3 rounded border border-line bg-subtle p-3">
       <input type="hidden" name="stockItemId" value={stockItemId} />
       <input type="hidden" name="operation" value={operation} />
       <input type="hidden" name="staffOperatorId" value={selectedStaffOperatorId} />
@@ -62,12 +62,12 @@ function StockUsageForm({
             min="1"
             max={Math.max(1, maxQuantity)}
             inputMode="numeric"
-            className="h-10 rounded border border-line bg-white px-3 text-right text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+            className="h-10 rounded border border-line bg-panel px-3 text-right text-ink    "
           />
         </label>
         <div className="grid gap-1 text-xs font-semibold text-muted sm:col-span-2">
           作業スタッフ
-          <p className="flex h-10 items-center rounded border border-line bg-white px-3 text-sm text-ink">
+          <p className="flex h-10 items-center rounded border border-line bg-panel px-3 text-sm text-ink">
             {selectedStaffOperator ? selectedStaffOperator.displayName : "画面上部で選択してください"}
           </p>
         </div>
@@ -78,26 +78,26 @@ function StockUsageForm({
         <input
           name="memo"
           maxLength={200}
-          className="h-10 rounded border border-line bg-white px-3 text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+          className="h-10 rounded border border-line bg-panel px-3 text-ink    "
         />
       </label>
 
       <button
         type="submit"
         disabled={isDisabled}
-        className="justify-self-start rounded bg-ink px-4 py-2 text-sm font-semibold text-white transition hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+        className="justify-self-start rounded bg-accent px-4 py-2 text-sm font-semibold text-panel transition hover:bg-accentDeep disabled:cursor-not-allowed disabled:opacity-50"
       >
         {isPending ? "更新中" : title}
       </button>
       {state.message ? (
         <p className={state.status === "success" ? "text-xs font-semibold text-accent" : "text-xs font-semibold text-danger"}>
-          {state.message}
+          {state.status === "success" ? "✓ " : state.message.startsWith("エラー") ? "" : "エラー: "}{state.message}
         </p>
       ) : null}
       {!hasStaffOperators ? (
         <p className="text-xs font-semibold text-danger">有効な作業スタッフがありません。</p>
       ) : selectedStaffOperatorId.length === 0 ? (
-        <p className="text-xs font-semibold text-warning">画面上部で作業スタッフを選択してください。</p>
+        <p className="text-xs font-semibold text-ink">画面上部で作業スタッフを選択してください。</p>
       ) : null}
     </form>
   );
@@ -112,7 +112,7 @@ export function ProductStockUsagePanel({
   staffOperators,
 }: ProductStockUsagePanelProps) {
   return (
-    <section className="rounded border border-line bg-white p-4 shadow-panel">
+    <section className="rounded border border-line bg-panel p-4 shadow-sheet">
       <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
         <div>
           <h2 className="text-lg font-semibold">使用中管理</h2>

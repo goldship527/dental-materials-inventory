@@ -64,14 +64,14 @@ export default async function MedicalDeviceImportPreviewPage({ searchParams }: P
         <AppNav current="imports" />
         <main className="mx-auto grid w-full max-w-7xl gap-6 px-4 py-8 text-ink sm:px-6 lg:px-8">
           <header className="border-b border-line pb-5">
-            <h1 className="text-2xl font-semibold">医療機器データ取り込みプレビュー</h1>
+            <h1 className="text-xl font-semibold">医療機器データ取り込みプレビュー</h1>
           </header>
-          <section className="rounded border border-line bg-white p-5 text-sm text-muted shadow-panel">
+          <section className="rounded border border-line bg-panel p-5 text-sm text-muted shadow-sheet">
             <p className="font-semibold text-ink">ローカルキャッシュがまだありません。</p>
             <p className="mt-2">
               サンプルXLSを読み取る場合は、ローカル環境で{" "}
-              <code className="rounded bg-gray-50 px-1 py-0.5">scripts/build-medical-device-sample-cache.py</code> を実行し、
-              <code className="rounded bg-gray-50 px-1 py-0.5">{cacheResult.cachePath}</code> を作成してください。
+              <code className="rounded bg-subtle px-1 py-0.5">scripts/build-medical-device-sample-cache.py</code> を実行し、
+              <code className="rounded bg-subtle px-1 py-0.5">{cacheResult.cachePath}</code> を作成してください。
             </p>
           </section>
         </main>
@@ -148,7 +148,7 @@ export default async function MedicalDeviceImportPreviewPage({ searchParams }: P
       <main className="mx-auto grid w-full max-w-7xl gap-6 px-4 py-8 text-ink sm:px-6 lg:px-8">
         <header className="border-b border-line pb-5">
           <div>
-            <h1 className="text-2xl font-semibold">医療機器データ取り込みプレビュー</h1>
+            <h1 className="text-xl font-semibold">医療機器データ取り込みプレビュー</h1>
             <p className="mt-2 text-sm text-muted">
               取込サンプルを表示しています。
             </p>
@@ -157,19 +157,19 @@ export default async function MedicalDeviceImportPreviewPage({ searchParams }: P
 
 
         <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <div className="rounded border border-line bg-white p-4 shadow-panel">
+          <div className="rounded border border-line bg-panel p-4 shadow-sheet">
             <p className="text-xs font-semibold text-muted">読み取り件数</p>
             <p className="mt-1 text-2xl font-semibold">{cache.recordCount.toLocaleString()}</p>
           </div>
-          <div className="rounded border border-line bg-white p-4 shadow-panel">
+          <div className="rounded border border-line bg-panel p-4 shadow-sheet">
             <p className="text-xs font-semibold text-muted">表示対象</p>
             <p className="mt-1 text-2xl font-semibold">{filtered.length.toLocaleString()}</p>
           </div>
-          <div className="rounded border border-line bg-white p-4 shadow-panel">
+          <div className="rounded border border-line bg-panel p-4 shadow-sheet">
             <p className="text-xs font-semibold text-muted">重複JAN行</p>
             <p className="mt-1 text-2xl font-semibold">{duplicateRecordCount.toLocaleString()}</p>
           </div>
-          <div className="rounded border border-line bg-white p-4 shadow-panel">
+          <div className="rounded border border-line bg-panel p-4 shadow-sheet">
             <p className="text-xs font-semibold text-muted">キャッシュ作成</p>
             <p className="mt-1 text-sm font-semibold">{new Date(cache.generatedAt).toLocaleString("ja-JP")}</p>
           </div>
@@ -177,22 +177,22 @@ export default async function MedicalDeviceImportPreviewPage({ searchParams }: P
 
         <ImportPreviewForm q={q} sourceFile={sourceFile} duplicateOnly={duplicateOnly} sourceFiles={sourceFiles} />
 
-        <div className="flex flex-col gap-3 rounded border border-line bg-white p-4 text-sm text-muted shadow-panel md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col gap-3 rounded border border-line bg-panel p-4 text-sm text-muted shadow-sheet md:flex-row md:items-center md:justify-between">
           <p>
             最大100件を表示中。バーコード印刷画面では、同じ条件の先頭60件をテストラベルとして表示します。
           </p>
           <a
             href={buildLabelsHref(q, sourceFile, duplicateOnly)}
-            className="inline-flex h-11 shrink-0 items-center justify-center rounded bg-accent px-4 text-sm font-semibold text-white transition hover:bg-teal-800"
+            className="inline-flex h-11 shrink-0 items-center justify-center rounded bg-accent px-4 text-sm font-semibold text-panel transition hover:bg-accentDeep"
           >
             バーコードテスト印刷へ
           </a>
         </div>
 
-        <section className="overflow-hidden rounded border border-line bg-white shadow-panel">
+        <section className="overflow-hidden rounded border border-line bg-panel shadow-sheet">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-line text-sm">
-              <thead className="bg-gray-50 text-left text-xs font-semibold text-muted">
+              <thead className="bg-subtle text-left text-xs font-semibold text-muted">
                 <tr>
                   <th className="px-3 py-3">JAN</th>
                   <th className="px-3 py-3">バーコード</th>
@@ -210,7 +210,7 @@ export default async function MedicalDeviceImportPreviewPage({ searchParams }: P
                     <tr key={`${record.sourceFile}-${record.sourceRow}-${record.janCode}`} className="align-top">
                       <td className="px-3 py-3">
                         <p className="font-mono font-semibold">{record.janCode}</p>
-                        {record.isDuplicateJan ? <p className="mt-1 text-xs font-semibold text-warning">重複JAN</p> : null}
+                        {record.isDuplicateJan ? <p className="mt-1 text-xs font-semibold text-ink">重複JAN</p> : null}
                       </td>
                       <td className="px-3 py-3">
                         <Ean13Barcode value={record.janCode} height={42} moduleWidth={1.4} showText={false} />

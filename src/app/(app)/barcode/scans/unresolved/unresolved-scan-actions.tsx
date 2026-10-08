@@ -23,7 +23,7 @@ export function UnresolvedScanActions({ logId, matchType }: UnresolvedScanAction
           <input type="hidden" name="logId" value={logId} />
           <SubmitButton
             pendingLabel="作成中"
-            className="w-full rounded bg-accent px-3 py-2 text-xs font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-50"
+            className="w-full rounded bg-accent px-3 py-2 text-xs font-semibold text-panel transition hover:bg-accentDeep disabled:cursor-not-allowed disabled:opacity-50"
           >
             昇格させる
           </SubmitButton>
@@ -36,11 +36,11 @@ export function UnresolvedScanActions({ logId, matchType }: UnresolvedScanAction
           name="resolvedNote"
           placeholder="無視メモ 任意"
           maxLength={500}
-          className="h-9 rounded border border-line px-2 text-xs text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+          className="h-9 rounded border border-line px-2 text-xs text-ink    "
         />
         <SubmitButton
           pendingLabel="処理中"
-          className="rounded border border-line bg-white px-3 py-2 text-xs font-semibold text-muted transition hover:border-danger hover:text-danger disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded border border-line bg-panel px-3 py-2 text-xs font-semibold text-muted transition hover:border-danger hover:text-danger disabled:cursor-not-allowed disabled:opacity-50"
         >
           無視する
         </SubmitButton>

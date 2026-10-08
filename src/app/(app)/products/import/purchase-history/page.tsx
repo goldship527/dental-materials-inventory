@@ -26,7 +26,7 @@ export default async function PurchaseHistoryImportPage() {
         <header className="flex flex-col gap-3 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-            <h1 className="mt-2 text-3xl font-semibold">ディーラー購入履歴インポート</h1>
+            <h1 className="mt-2 text-xl font-semibold">ディーラー購入履歴インポート</h1>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-muted">
               ディーラーから受け取った購入履歴をもとに、商品マスタ候補を確認します。
               まずは既存商品との照合とプレビューに絞り、在庫数や商品マスタは変更しません。

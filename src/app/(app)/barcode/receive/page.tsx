@@ -28,7 +28,7 @@ export default async function BarcodeReceivePage() {
         <header className="flex flex-col gap-2 border-b border-line pb-4">
           <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
           <div>
-            <h1 className="text-3xl font-semibold">納品する</h1>
+            <h1 className="text-xl font-semibold">納品する</h1>
             <p className="mt-2 text-sm leading-6 text-muted">
               届いた材料を連続で読み取り、納品待ちに一致したものを受領リストにためてから一括確定します。
             </p>

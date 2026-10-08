@@ -21,7 +21,7 @@ export default async function LoginPage({ searchParams }: PageProps) {
       <div className="mx-auto flex min-h-[calc(100vh-5rem)] w-full max-w-6xl flex-col justify-center gap-8">
         <section>
           <p className="text-sm font-semibold text-accent">dental-materials-inventory</p>
-          <h1 className="mt-3 max-w-3xl text-3xl font-semibold tracking-normal sm:text-4xl">
+          <h1 className="mt-3 max-w-3xl text-xl font-semibold tracking-normal sm:text-2xl">
             一般歯科材料在庫管理システム
           </h1>
           <p className="mt-4 max-w-2xl text-base leading-7 text-muted">
@@ -30,7 +30,7 @@ export default async function LoginPage({ searchParams }: PageProps) {
         </section>
 
         <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_420px]">
-          <div className="overflow-hidden rounded border border-line bg-white shadow-panel">
+          <div className="overflow-hidden rounded border border-line bg-panel shadow-sheet">
             <img
               src="/login-visual-tablet-desk.webp"
               alt=""
@@ -38,8 +38,8 @@ export default async function LoginPage({ searchParams }: PageProps) {
             />
           </div>
 
-          <section className="rounded border border-line bg-white p-6 shadow-panel">
-            <h2 className="text-xl font-semibold">ログイン</h2>
+          <section className="rounded border border-line bg-panel p-6 shadow-sheet">
+            <h2 className="text-lg font-semibold">ログイン</h2>
             <p className="mt-2 text-sm leading-6 text-muted">
               メールアドレスとパスワードを入力してください。
             </p>

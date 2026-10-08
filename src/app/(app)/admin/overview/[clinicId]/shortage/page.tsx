@@ -52,7 +52,7 @@ export default async function AdminOverviewClinicShortagePage({ params, searchPa
         <header className="flex flex-col gap-4 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-sm font-semibold text-accent">本部ダッシュボード / 不足在庫</p>
-            <h1 className="mt-2 text-3xl font-semibold text-ink">{detail.clinic.name}</h1>
+            <h1 className="mt-2 text-xl font-semibold text-ink">{detail.clinic.name}</h1>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-muted">
               この画面は読み取り専用です。不足している商品だけを本部向けに確認します。
             </p>
@@ -66,38 +66,38 @@ export default async function AdminOverviewClinicShortagePage({ params, searchPa
         </header>
 
         <section className="grid gap-4 sm:grid-cols-3">
-          <div className="rounded border border-line bg-white p-5 shadow-panel">
+          <div className="rounded border border-line bg-panel p-5 shadow-sheet">
             <p className="text-sm font-semibold text-muted">不足在庫</p>
-            <p className="mt-2 text-3xl font-semibold text-warning">{numberText(shortageRows.length)}</p>
+            <p className="mt-2 text-2xl font-semibold text-ink">{numberText(shortageRows.length)}</p>
             <p className="mt-2 text-sm text-muted">最低在庫を下回る商品</p>
           </div>
-          <div className="rounded border border-line bg-white p-5 shadow-panel">
+          <div className="rounded border border-line bg-panel p-5 shadow-sheet">
             <p className="text-sm font-semibold text-muted">在庫0</p>
-            <p className="mt-2 text-3xl font-semibold text-warning">
+            <p className="mt-2 text-2xl font-semibold text-ink">
               {numberText(shortageRows.filter((row) => row.quantity === 0).length)}
             </p>
             <p className="mt-2 text-sm text-muted">手元在庫がない商品</p>
           </div>
-          <div className="rounded border border-line bg-white p-5 shadow-panel">
+          <div className="rounded border border-line bg-panel p-5 shadow-sheet">
             <p className="text-sm font-semibold text-muted">不足数合計</p>
-            <p className="mt-2 text-3xl font-semibold text-ink">
+            <p className="mt-2 text-2xl font-semibold text-ink">
               {shortageRows.reduce((total, row) => total + row.shortageCount, 0).toLocaleString("ja-JP")}
             </p>
             <p className="mt-2 text-sm text-muted">最低在庫までの差分</p>
           </div>
         </section>
 
-        <section className="rounded border border-line bg-white p-4 shadow-panel">
+        <section className="rounded border border-line bg-panel p-4 shadow-sheet">
           <form className="grid gap-3 md:grid-cols-[1fr_auto_auto]" action={`/admin/overview/${clinicId}/shortage`}>
             <input
-              className="h-11 rounded border border-line bg-white px-3 text-base text-ink outline-none transition placeholder:text-muted focus:border-accent"
+              className="h-11 rounded border border-line bg-panel px-3 text-base text-ink  transition placeholder:text-muted "
               defaultValue={query}
               name="q"
               placeholder="商品名、商品コード、カテゴリ、発注先"
               type="search"
             />
             <button
-              className="h-11 rounded bg-accent px-5 text-sm font-semibold text-white transition hover:bg-teal-800"
+              className="h-11 rounded bg-accent px-5 text-sm font-semibold text-panel transition hover:bg-accentDeep"
               type="submit"
             >
               検索
@@ -111,14 +111,14 @@ export default async function AdminOverviewClinicShortagePage({ params, searchPa
           </form>
         </section>
 
-        <section className="overflow-hidden rounded border border-line bg-white shadow-panel">
+        <section className="overflow-hidden rounded border border-line bg-panel shadow-sheet">
           <div className="border-b border-line px-5 py-4 text-sm text-muted">
             表示 {filteredRows.length} 件 / 不足 {shortageRows.length} 件
             {query ? `（検索: ${query}）` : ""}
           </div>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1040px] border-collapse text-left text-sm">
-              <thead className="bg-gray-50 text-xs text-muted">
+              <thead className="bg-subtle text-xs text-muted">
                 <tr>
                   <th className="border-b border-line px-4 py-3">商品</th>
                   <th className="border-b border-line px-4 py-3">カテゴリ</th>
@@ -144,7 +144,7 @@ export default async function AdminOverviewClinicShortagePage({ params, searchPa
                       {row.quantity.toLocaleString("ja-JP")}
                     </td>
                     <td className="border-b border-line px-4 py-3 text-right">{row.minStock}</td>
-                    <td className="border-b border-line px-4 py-3 text-right font-semibold text-warning">
+                    <td className="border-b border-line px-4 py-3 text-right font-semibold text-ink">
                       {row.shortageCount}
                     </td>
                     <td className="border-b border-line px-4 py-3">{row.location ?? "-"}</td>

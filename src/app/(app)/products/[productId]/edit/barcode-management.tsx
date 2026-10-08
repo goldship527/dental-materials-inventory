@@ -36,11 +36,11 @@ function BarcodeMessage({ state }: { state: BarcodeActionState }) {
     <p
       className={
         state.status === "success"
-          ? "rounded border border-emerald-100 bg-emerald-50 px-3 py-2 text-xs font-semibold text-accent"
-          : "rounded border border-red-100 bg-red-50 px-3 py-2 text-xs font-semibold text-danger"
+          ? "rounded border border-line bg-panel px-3 py-2 text-xs font-semibold text-accent"
+          : "rounded border border-line bg-panel px-3 py-2 text-xs font-semibold text-danger"
       }
     >
-      {state.message}
+      {state.status === "success" ? "✓ " : state.message.startsWith("エラー") ? "" : "エラー: "}{state.message}
     </p>
   );
 }
@@ -57,7 +57,7 @@ function BarcodeRow({ productId, barcode }: BarcodeRowProps) {
 
   if (!barcode.id) {
     return (
-      <article className="rounded border border-line bg-gray-50 p-4">
+      <article className="rounded border border-line bg-subtle p-4">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <p className="font-mono text-sm font-semibold">{barcode.barcode}</p>
@@ -65,14 +65,14 @@ function BarcodeRow({ productId, barcode }: BarcodeRowProps) {
               {barcode.barcodeType} / {barcode.unitLabel ?? "単位未設定"} / 代表バーコード
             </p>
           </div>
-          <span className="rounded bg-white px-3 py-1 text-xs font-semibold text-muted">商品基本情報から表示</span>
+          <span className="rounded bg-panel px-3 py-1 text-xs font-semibold text-muted">商品基本情報から表示</span>
         </div>
       </article>
     );
   }
 
   return (
-    <article className="rounded border border-line bg-white p-4">
+    <article className="rounded border border-line bg-panel p-4">
       <form action={updateAction} className="grid gap-3">
         <input type="hidden" name="productId" value={productId} />
         <input type="hidden" name="barcodeId" value={barcode.id} />
@@ -84,7 +84,7 @@ function BarcodeRow({ productId, barcode }: BarcodeRowProps) {
               defaultValue={barcode.barcode}
               required
               maxLength={100}
-              className="h-10 rounded border border-line px-3 font-mono text-sm text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+              className="h-10 rounded border border-line px-3 font-mono text-sm text-ink    "
             />
           </label>
           <label className="grid gap-1 text-xs font-semibold text-muted sm:col-span-1 lg:col-span-2">
@@ -94,7 +94,7 @@ function BarcodeRow({ productId, barcode }: BarcodeRowProps) {
               defaultValue={barcode.barcodeType}
               required
               maxLength={40}
-              className="h-10 rounded border border-line px-3 text-sm text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+              className="h-10 rounded border border-line px-3 text-sm text-ink    "
             />
           </label>
           <label className="grid gap-1 text-xs font-semibold text-muted sm:col-span-1 lg:col-span-2">
@@ -103,10 +103,10 @@ function BarcodeRow({ productId, barcode }: BarcodeRowProps) {
               name="unitLabel"
               defaultValue={valueOrEmpty(barcode.unitLabel)}
               maxLength={100}
-              className="h-10 rounded border border-line px-3 text-sm text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+              className="h-10 rounded border border-line px-3 text-sm text-ink    "
             />
           </label>
-          <label className="flex min-h-10 items-center gap-2 rounded border border-line bg-gray-50 px-3 py-2 text-xs font-semibold text-muted lg:col-span-2">
+          <label className="flex min-h-10 items-center gap-2 rounded border border-line bg-subtle px-3 py-2 text-xs font-semibold text-muted lg:col-span-2">
             <input
               type="checkbox"
               name="isPrimary"
@@ -120,7 +120,7 @@ function BarcodeRow({ productId, barcode }: BarcodeRowProps) {
           <button
             type="submit"
             disabled={isUpdatePending}
-            className="rounded bg-ink px-4 py-2 text-xs font-semibold text-white transition hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded bg-accent px-4 py-2 text-xs font-semibold text-panel transition hover:bg-accentDeep disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isUpdatePending ? "更新中" : "更新"}
           </button>
@@ -151,18 +151,18 @@ export function BarcodeManagement({ productId, barcodes, defaultNewBarcode = "" 
   );
 
   return (
-    <section className="rounded border border-line bg-white p-5 shadow-panel">
+    <section className="rounded border border-line bg-panel p-5 shadow-sheet">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h2 className="text-lg font-semibold">バーコード管理</h2>
         </div>
-        <span className="rounded bg-gray-50 px-3 py-1 text-xs font-semibold text-muted">
+        <span className="rounded bg-subtle px-3 py-1 text-xs font-semibold text-muted">
           登録 {barcodes.filter((barcode) => barcode.id).length} 件
         </span>
       </div>
 
       {defaultNewBarcode ? (
-        <p className="mt-4 rounded border border-warning/30 bg-yellow-50 px-3 py-2 text-xs text-warning">
+        <p className="mt-4 rounded border border-line bg-markSoft px-3 py-2 text-xs text-ink">
           未登録バーコード <span className="font-mono text-ink">{defaultNewBarcode}</span>{" "}
           を追加します。
         </p>
@@ -180,7 +180,7 @@ export function BarcodeManagement({ productId, barcodes, defaultNewBarcode = "" 
         )}
       </div>
 
-      <form action={createAction} className="mt-5 grid gap-3 rounded border border-line bg-gray-50 p-4">
+      <form action={createAction} className="mt-5 grid gap-3 rounded border border-line bg-subtle p-4">
         <input type="hidden" name="productId" value={productId} />
         <h3 className="text-sm font-semibold">バーコードを追加</h3>
         <div className="grid gap-3 lg:grid-cols-12 lg:items-end">
@@ -192,7 +192,7 @@ export function BarcodeManagement({ productId, barcodes, defaultNewBarcode = "" 
               required
               maxLength={100}
               autoComplete="off"
-              className="h-10 rounded border border-line px-3 font-mono text-sm text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+              className="h-10 rounded border border-line px-3 font-mono text-sm text-ink    "
             />
           </label>
           <label className="grid gap-1 text-xs font-semibold text-muted sm:col-span-1 lg:col-span-2">
@@ -202,7 +202,7 @@ export function BarcodeManagement({ productId, barcodes, defaultNewBarcode = "" 
               defaultValue="JAN"
               required
               maxLength={40}
-              className="h-10 rounded border border-line px-3 text-sm text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+              className="h-10 rounded border border-line px-3 text-sm text-ink    "
             />
           </label>
           <label className="grid gap-1 text-xs font-semibold text-muted sm:col-span-1 lg:col-span-2">
@@ -211,10 +211,10 @@ export function BarcodeManagement({ productId, barcodes, defaultNewBarcode = "" 
               name="unitLabel"
               placeholder="箱、袋、1本など"
               maxLength={100}
-              className="h-10 rounded border border-line px-3 text-sm text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+              className="h-10 rounded border border-line px-3 text-sm text-ink    "
             />
           </label>
-          <label className="flex min-h-10 items-center gap-2 rounded border border-line bg-white px-3 py-2 text-xs font-semibold text-muted lg:col-span-2">
+          <label className="flex min-h-10 items-center gap-2 rounded border border-line bg-panel px-3 py-2 text-xs font-semibold text-muted lg:col-span-2">
             <input type="checkbox" name="isPrimary" className="h-4 w-4 shrink-0 rounded border-line text-accent" />
             <span className="leading-tight">代表バーコード</span>
           </label>
@@ -223,7 +223,7 @@ export function BarcodeManagement({ productId, barcodes, defaultNewBarcode = "" 
           <button
             type="submit"
             disabled={isCreatePending}
-            className="rounded bg-accent px-4 py-2 text-xs font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded bg-accent px-4 py-2 text-xs font-semibold text-panel transition hover:bg-accentDeep disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isCreatePending ? "追加中" : "追加"}
           </button>

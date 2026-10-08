@@ -35,11 +35,11 @@ function StatusMessage({ state }: { state: StaffOperatorActionState }) {
     <p
       className={
         state.status === "success"
-          ? "rounded border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm font-semibold text-accent"
-          : "rounded border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold text-danger"
+          ? "rounded border border-line border-l-4 border-l-success bg-panel px-4 py-3 text-sm font-semibold text-success"
+          : "rounded border border-line border-l-4 border-l-danger bg-panel px-4 py-3 text-sm font-semibold text-danger"
       }
     >
-      {state.message}
+      {state.status === "success" ? "✓ " : state.message.startsWith("エラー") ? "" : "エラー: "}{state.message}
     </p>
   );
 }
@@ -69,13 +69,13 @@ export function StaffOperatorManagement({ operators, clinics }: StaffOperatorMan
 
   return (
     <div className="grid min-w-0 gap-6">
-      <section className="min-w-0 rounded border border-line bg-white p-5 shadow-panel">
+      <section className="min-w-0 rounded border border-line bg-panel p-5 shadow-sheet">
         <h2 className="text-lg font-semibold">担当者を追加</h2>
         <form action={createAction} className="mt-4 grid gap-4 md:grid-cols-2">
           <label className="grid gap-1 text-sm font-semibold text-muted">
             担当者名
             <input
-              className="h-11 rounded border border-line px-3 text-base text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+              className="h-11 rounded border border-line px-3 text-base text-ink    "
               maxLength={100}
               name="displayName"
               placeholder="例: 山田"
@@ -88,7 +88,7 @@ export function StaffOperatorManagement({ operators, clinics }: StaffOperatorMan
               {clinics.map((clinic, index) => (
                 <label key={clinic.id} className="flex items-center gap-2 text-sm font-semibold text-ink">
                   <input
-                    className="h-4 w-4 rounded border-line text-accent focus:ring-accent/20"
+                    className="h-4 w-4 rounded border-line text-accent "
                     defaultChecked={index === 0}
                     name="clinicIds"
                     type="checkbox"
@@ -101,7 +101,7 @@ export function StaffOperatorManagement({ operators, clinics }: StaffOperatorMan
           </fieldset>
           <div className="md:col-span-2">
             <button
-              className="inline-flex min-h-11 items-center justify-center rounded bg-accent px-5 py-3 text-sm font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex min-h-11 items-center justify-center rounded bg-accent px-5 py-3 text-sm font-semibold text-panel transition hover:bg-accentDeep disabled:cursor-not-allowed disabled:opacity-60"
               disabled={isCreating}
               type="submit"
             >
@@ -114,7 +114,7 @@ export function StaffOperatorManagement({ operators, clinics }: StaffOperatorMan
         </div>
       </section>
 
-      <section className="min-w-0 rounded border border-line bg-white p-5 shadow-panel">
+      <section className="min-w-0 rounded border border-line bg-panel p-5 shadow-sheet">
         <div className="flex flex-col gap-2 border-b border-line pb-4 md:flex-row md:items-end md:justify-between">
           <div>
             <h2 className="text-lg font-semibold">担当者一覧</h2>
@@ -123,7 +123,7 @@ export function StaffOperatorManagement({ operators, clinics }: StaffOperatorMan
           <div className="flex flex-wrap items-center gap-3">
             <p className="text-sm font-semibold text-muted">合計 {operators.length} 件</p>
             {barcodeUiEnabled && <a
-              className="rounded border border-line bg-white px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+              className="rounded border border-line bg-panel px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
               href="/admin/staff-operators/labels"
             >
               バーコード印刷
@@ -151,7 +151,7 @@ export function StaffOperatorManagement({ operators, clinics }: StaffOperatorMan
                   <tr key={operator.id}>
                     <td className="border-b border-line px-3 py-3 align-top">
                       <input
-                        className="h-10 w-full min-w-36 rounded border border-line px-3 text-sm font-semibold text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                        className="h-10 w-full min-w-36 rounded border border-line px-3 text-sm font-semibold text-ink    "
                         form={updateFormId}
                         maxLength={100}
                         name="displayName"
@@ -165,7 +165,7 @@ export function StaffOperatorManagement({ operators, clinics }: StaffOperatorMan
                         {clinics.map((clinic) => (
                           <label key={clinic.id} className="flex items-center gap-2 text-sm font-semibold text-ink">
                             <input
-                              className="h-4 w-4 rounded border-line text-accent focus:ring-accent/20"
+                              className="h-4 w-4 rounded border-line text-accent "
                               defaultChecked={assignedClinicIds.has(clinic.id)}
                               form={updateFormId}
                               name="clinicIds"
@@ -181,8 +181,8 @@ export function StaffOperatorManagement({ operators, clinics }: StaffOperatorMan
                       <span
                         className={
                           operator.isActive
-                            ? "rounded bg-emerald-50 px-2 py-1 text-xs font-semibold text-accent"
-                            : "rounded bg-gray-100 px-2 py-1 text-xs font-semibold text-muted"
+                            ? "rounded bg-panel px-2 py-1 text-xs font-semibold text-accent"
+                            : "rounded bg-subtle px-2 py-1 text-xs font-semibold text-muted"
                         }
                       >
                         {operator.isActive ? "有効" : "無効"}
@@ -196,7 +196,7 @@ export function StaffOperatorManagement({ operators, clinics }: StaffOperatorMan
                         <form action={updateAction} id={updateFormId}>
                           <input name="staffOperatorId" type="hidden" value={operator.id} />
                           <RowSubmitButton
-                            className="h-11 rounded bg-accent px-3 text-sm font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-50"
+                            className="h-11 rounded bg-accent px-3 text-sm font-semibold text-panel transition hover:bg-accentDeep disabled:cursor-not-allowed disabled:opacity-50"
                             pendingLabel="保存中"
                           >
                             保存
@@ -213,7 +213,7 @@ export function StaffOperatorManagement({ operators, clinics }: StaffOperatorMan
                           >
                             <input name="staffOperatorId" type="hidden" value={operator.id} />
                             <RowSubmitButton
-                              className="h-11 rounded border border-line bg-white px-3 text-sm font-semibold text-muted transition hover:border-danger hover:text-danger disabled:cursor-not-allowed disabled:opacity-50"
+                              className="h-11 rounded border border-line bg-panel px-3 text-sm font-semibold text-muted transition hover:border-danger hover:text-danger disabled:cursor-not-allowed disabled:opacity-50"
                               pendingLabel="無効化中"
                             >
                               無効化

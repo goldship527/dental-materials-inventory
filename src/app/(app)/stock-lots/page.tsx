@@ -137,7 +137,7 @@ export default async function StockLotsPage({ searchParams }: PageProps) {
         <header className="flex flex-col gap-4 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-            <h1 className="mt-2 text-3xl font-semibold">期限ロット一覧</h1>
+            <h1 className="mt-2 text-xl font-semibold">期限ロット一覧</h1>
             <p className="mt-2 text-sm text-muted">在庫に保存されたロット番号と有効期限を、期限切れ・期限間近から確認します。</p>
           </div>
           <div className="flex flex-wrap gap-2 text-sm font-semibold">
@@ -157,41 +157,41 @@ export default async function StockLotsPage({ searchParams }: PageProps) {
         </header>
 
         <section className="grid gap-4 md:grid-cols-4">
-          <div className="rounded border border-line bg-white p-5 shadow-panel">
+          <div className="rounded border border-line bg-panel p-5 shadow-sheet">
             <p className="text-sm font-semibold text-muted">要確認</p>
-            <p className={counts.attention > 0 ? "mt-2 text-3xl font-semibold text-warning" : "mt-2 text-3xl font-semibold"}>
+            <p className={counts.attention > 0 ? "mt-2 text-2xl font-semibold text-ink" : "mt-2 text-2xl font-semibold"}>
               {counts.attention}
             </p>
             <p className="mt-2 text-sm text-muted">期限切れ + 30日以内</p>
           </div>
-          <div className="rounded border border-line bg-white p-5 shadow-panel">
+          <div className="rounded border border-line bg-panel p-5 shadow-sheet">
             <p className="text-sm font-semibold text-muted">期限切れ</p>
-            <p className={counts.expired > 0 ? "mt-2 text-3xl font-semibold text-danger" : "mt-2 text-3xl font-semibold"}>
+            <p className={counts.expired > 0 ? "mt-2 text-2xl font-semibold text-danger" : "mt-2 text-2xl font-semibold"}>
               {counts.expired}
             </p>
             <p className="mt-2 text-sm text-muted">使用前に確認</p>
           </div>
-          <div className="rounded border border-line bg-white p-5 shadow-panel">
+          <div className="rounded border border-line bg-panel p-5 shadow-sheet">
             <p className="text-sm font-semibold text-muted">30日以内</p>
-            <p className={counts.expiring > 0 ? "mt-2 text-3xl font-semibold text-warning" : "mt-2 text-3xl font-semibold"}>
+            <p className={counts.expiring > 0 ? "mt-2 text-2xl font-semibold text-ink" : "mt-2 text-2xl font-semibold"}>
               {counts.expiring}
             </p>
             <p className="mt-2 text-sm text-muted">期限が近いロット</p>
           </div>
-          <div className="rounded border border-line bg-white p-5 shadow-panel">
+          <div className="rounded border border-line bg-panel p-5 shadow-sheet">
             <p className="text-sm font-semibold text-muted">ロット別在庫</p>
-            <p className="mt-2 text-3xl font-semibold">{counts.all}</p>
+            <p className="mt-2 text-2xl font-semibold">{counts.all}</p>
             <p className="mt-2 text-sm text-muted">数量が1以上のロット</p>
           </div>
         </section>
 
-        <section className="rounded border border-line bg-white p-4 shadow-panel">
+        <section className="rounded border border-line bg-panel p-4 shadow-sheet">
           <form className="grid gap-3 lg:grid-cols-[1fr_auto]" action="/stock-lots">
             <input type="hidden" name="filter" value={selectedFilter} />
             <label className="grid gap-2 text-sm font-semibold text-muted">
               検索
               <input
-                className="h-11 rounded border border-line bg-white px-3 text-base font-normal text-ink outline-none transition placeholder:text-muted focus:border-accent"
+                className="h-11 rounded border border-line bg-panel px-3 text-base font-normal text-ink  transition placeholder:text-muted "
                 defaultValue={query}
                 name="q"
                 placeholder="商品名、商品コード、ロット番号"
@@ -199,7 +199,7 @@ export default async function StockLotsPage({ searchParams }: PageProps) {
               />
             </label>
             <button
-              className="h-11 self-end rounded bg-accent px-5 text-sm font-semibold text-white transition hover:bg-teal-800"
+              className="h-11 self-end rounded bg-accent px-5 text-sm font-semibold text-panel transition hover:bg-accentDeep"
               type="submit"
             >
               絞り込む
@@ -216,7 +216,7 @@ export default async function StockLotsPage({ searchParams }: PageProps) {
                   aria-current={isCurrent ? "page" : undefined}
                   className={
                     isCurrent
-                      ? "inline-flex h-10 shrink-0 items-center rounded border border-accent/30 bg-teal-50 px-3 text-sm font-semibold text-accent"
+                      ? "inline-flex h-10 shrink-0 items-center rounded border border-accent/30 bg-tint px-3 text-sm font-semibold text-accent"
                       : "inline-flex h-10 shrink-0 items-center rounded border border-line px-3 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
                   }
                   href={buildFilterHref(filter, query)}
@@ -228,14 +228,14 @@ export default async function StockLotsPage({ searchParams }: PageProps) {
           </div>
         </section>
 
-        <section className="overflow-hidden rounded border border-line bg-white shadow-panel">
+        <section className="overflow-hidden rounded border border-line bg-panel shadow-sheet">
           <div className="border-b border-line px-4 py-3 text-sm text-muted">
             表示 {filteredRows.length} 件 / 全 {rows.length} 件
           </div>
           {filteredRows.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[980px] border-collapse text-left text-sm">
-                <thead className="bg-gray-50 text-xs text-muted">
+                <thead className="bg-subtle text-xs text-muted">
                   <tr>
                     <th className="border-b border-line px-4 py-3">商品</th>
                     <th className="border-b border-line px-4 py-3">ロット番号</th>

@@ -14,8 +14,8 @@ type PageProps = {
 
 function filterLinkClass(isSelected: boolean) {
   return isSelected
-    ? "rounded border border-accent bg-accent px-3 py-2 text-sm font-semibold text-white"
-    : "rounded border border-line bg-white px-3 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent";
+    ? "rounded border border-accent bg-accent px-3 py-2 text-sm font-semibold text-panel"
+    : "rounded border border-line bg-panel px-3 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent";
 }
 
 export default async function StaffOperatorLabelsPage({ searchParams }: PageProps) {
@@ -34,7 +34,7 @@ export default async function StaffOperatorLabelsPage({ searchParams }: PageProp
   );
 
   return (
-    <main className="min-h-screen bg-surface px-6 py-8 text-ink print:bg-white print:px-0 print:py-0">
+    <main className="min-h-screen bg-surface px-6 py-8 text-ink print:bg-panel print:px-0 print:py-0">
       <style>{`
         @page {
           size: A4 portrait;
@@ -60,14 +60,14 @@ export default async function StaffOperatorLabelsPage({ searchParams }: PageProp
         <header className="flex flex-col gap-3 border-b border-line pb-5 md:flex-row md:items-end md:justify-between print:hidden">
           <div>
             <p className="text-sm font-semibold text-accent">管理</p>
-            <h1 className="mt-2 text-3xl font-semibold">担当者バーコード印刷</h1>
+            <h1 className="mt-2 text-xl font-semibold">担当者バーコード印刷</h1>
             <p className="mt-2 text-sm text-muted">
               必要な場合だけ、担当者の内部バーコードをCode 128形式で印刷します。クリニックごとに絞り込んで印刷できます。
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
             <a
-              className="rounded border border-line bg-white px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+              className="rounded border border-line bg-panel px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
               href="/admin/staff-operators"
             >
               担当者管理へ戻る
@@ -76,7 +76,7 @@ export default async function StaffOperatorLabelsPage({ searchParams }: PageProp
           </div>
         </header>
 
-        <section className="rounded border border-line bg-white p-4 text-sm text-muted shadow-panel print:hidden">
+        <section className="rounded border border-line bg-panel p-4 text-sm text-muted shadow-sheet print:hidden">
           <div className="grid gap-3">
             <p>
               {selectedClinic ? `${selectedClinic.name} の` : "全クリニックの"}有効な担当者 {activeOperators.length.toLocaleString()} 件を表示しています。
@@ -101,7 +101,7 @@ export default async function StaffOperatorLabelsPage({ searchParams }: PageProp
 
         <section className="label-grid grid gap-4 md:grid-cols-2">
           {activeOperators.map((operator) => (
-            <article key={operator.id} className="staff-label rounded border border-line bg-white p-4 shadow-panel">
+            <article key={operator.id} className="staff-label rounded border border-line bg-panel p-4 shadow-sheet">
               <div className="flex flex-col items-center gap-2">
                 <Code128Barcode value={operator.barcode} height={72} moduleWidth={2} />
               </div>
@@ -116,7 +116,7 @@ export default async function StaffOperatorLabelsPage({ searchParams }: PageProp
           ))}
         </section>
 
-        {activeOperators.length === 0 ? <p className="rounded bg-white p-6 text-center text-sm text-muted">印刷できる有効な担当者がありません。</p> : null}
+        {activeOperators.length === 0 ? <p className="rounded bg-panel p-6 text-center text-sm text-muted">印刷できる有効な担当者がありません。</p> : null}
       </div>
     </main>
   );

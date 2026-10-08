@@ -70,19 +70,19 @@ export function SupplierImportForm() {
   }
 
   return (
-    <section className="rounded border border-line bg-white p-5 shadow-panel">
+    <section className="rounded border border-line bg-panel p-5 shadow-sheet">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <p className="text-sm font-semibold text-muted">取り込み内容を確認してから確定します。</p>
         <div className="flex flex-wrap gap-2">
           <a
             href="/suppliers"
-            className="rounded border border-line bg-white px-4 py-2 text-sm font-semibold text-ink transition hover:border-accent hover:bg-teal-50 hover:text-accent"
+            className="rounded border border-line bg-panel px-4 py-2 text-sm font-semibold text-ink transition hover:border-accent hover:bg-tint hover:text-accent"
           >
             発注先一覧へ戻る
           </a>
           <a
             href="/suppliers/import"
-            className="rounded border border-line bg-white px-4 py-2 text-sm font-semibold text-ink transition hover:border-accent hover:bg-teal-50 hover:text-accent"
+            className="rounded border border-line bg-panel px-4 py-2 text-sm font-semibold text-ink transition hover:border-accent hover:bg-tint hover:text-accent"
           >
             取り込みをやり直す
           </a>
@@ -101,7 +101,7 @@ export function SupplierImportForm() {
               type="file"
               accept=".csv,text/csv"
               onChange={handleFileChange}
-              className="block w-full rounded border border-line bg-white px-3 py-2 text-sm text-ink file:mr-3 file:rounded file:border-0 file:bg-accent file:px-3 file:py-2 file:text-sm file:font-semibold file:text-white"
+              className="block w-full rounded border border-line bg-panel px-3 py-2 text-sm text-ink file:mr-3 file:rounded file:border-0 file:bg-accent file:px-3 file:py-2 file:text-sm file:font-semibold file:text-panel"
             />
             <span className="text-xs font-normal text-muted">
               ヘッダー行に「発注先名」または「name」を含めてください。
@@ -118,12 +118,12 @@ export function SupplierImportForm() {
                 setSourceText(event.target.value);
               }}
               placeholder={"発注先名\t住所\t電話番号\tFAX番号\tメールアドレス\t担当者名\t備考"}
-              className="min-h-32 rounded border border-line px-3 py-2 text-sm font-normal text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+              className="min-h-32 rounded border border-line px-3 py-2 text-sm font-normal text-ink    "
             />
           </label>
         </div>
 
-        <div className="rounded border border-orange-200 bg-orange-50 px-4 py-3 text-sm text-warning">
+        <div className="rounded border border-line bg-markSoft px-4 py-3 text-sm text-ink">
           実在患者情報、秘密情報、パスワード、APIキーは取り込みデータに入れないでください。発注先情報だけを扱います。
         </div>
 
@@ -131,7 +131,7 @@ export function SupplierImportForm() {
           <button
             type="submit"
             disabled={isPreviewPending || sourceText.trim().length === 0}
-            className="rounded bg-ink px-5 py-3 text-sm font-semibold text-white transition hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded bg-accent px-5 py-3 text-sm font-semibold text-panel transition hover:bg-accentDeep disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isPreviewPending ? "確認中" : "プレビュー"}
           </button>
@@ -145,8 +145,8 @@ export function SupplierImportForm() {
         <p
           className={
             activeState.status === "success"
-              ? "mt-5 rounded border border-green-100 bg-green-50 px-4 py-3 text-sm font-semibold text-success"
-              : "mt-5 rounded border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold text-danger"
+              ? "mt-5 rounded border border-line bg-panel px-4 py-3 text-sm font-semibold text-success"
+              : "mt-5 rounded border border-line border-l-4 border-l-danger bg-panel px-4 py-3 text-sm font-semibold text-danger"
           }
         >
           {activeState.message}
@@ -170,7 +170,7 @@ export function SupplierImportForm() {
             </div>
             <div className="rounded border border-line p-3">
               <p className="text-xs text-muted">警告</p>
-              <p className="mt-1 text-2xl font-semibold text-warning">{preview.summary.warningRows}</p>
+              <p className="mt-1 text-2xl font-semibold text-ink">{preview.summary.warningRows}</p>
             </div>
             <div className="rounded border border-line p-3">
               <p className="text-xs text-muted">エラー</p>
@@ -180,7 +180,7 @@ export function SupplierImportForm() {
 
           <div className="overflow-x-auto rounded border border-line">
             <table className="w-full min-w-[1040px] border-collapse text-left text-sm">
-              <thead className="bg-gray-50 text-xs text-muted">
+              <thead className="bg-subtle text-xs text-muted">
                 <tr>
                   <th className="border-b border-line px-3 py-2">行</th>
                   <th className="border-b border-line px-3 py-2">状態</th>
@@ -198,9 +198,9 @@ export function SupplierImportForm() {
                     key={row.rowNumber}
                     className={
                       row.errors.length > 0
-                        ? "bg-red-50/50"
+                        ? "bg-panel"
                         : row.warnings.length > 0
-                          ? "bg-orange-50/60"
+                          ? "bg-markSoft"
                           : undefined
                     }
                   >
@@ -231,19 +231,19 @@ export function SupplierImportForm() {
             <button
               type="submit"
               disabled={!canConfirm || isConfirmPending}
-              className="rounded bg-accent px-5 py-3 text-sm font-semibold text-white transition hover:bg-accentDeep disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded bg-accent px-5 py-3 text-sm font-semibold text-panel transition hover:bg-accentDeep disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isConfirmPending ? "取り込み中" : "この内容で取り込む"}
             </button>
             <a
               href="/suppliers/import"
-              className="rounded border border-line bg-white px-4 py-3 text-sm font-semibold text-ink transition hover:border-accent hover:bg-teal-50 hover:text-accent"
+              className="rounded border border-line bg-panel px-4 py-3 text-sm font-semibold text-ink transition hover:border-accent hover:bg-tint hover:text-accent"
             >
               取り込みをやり直す
             </a>
             <a
               href="/suppliers"
-              className="rounded border border-line bg-white px-4 py-3 text-sm font-semibold text-ink transition hover:border-accent hover:bg-teal-50 hover:text-accent"
+              className="rounded border border-line bg-panel px-4 py-3 text-sm font-semibold text-ink transition hover:border-accent hover:bg-tint hover:text-accent"
             >
               発注先一覧へ戻る
             </a>

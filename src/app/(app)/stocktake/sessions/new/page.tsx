@@ -34,7 +34,7 @@ export default async function NewStocktakeSessionPage() {
         <header className="flex flex-col gap-3 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-            <h1 className="mt-2 text-3xl font-semibold">棚卸セッション開始</h1>
+            <h1 className="mt-2 text-xl font-semibold">棚卸セッション開始</h1>
           </div>
           <a className="text-sm font-semibold text-accent hover:underline" href="/stocktake/sessions">
             セッション一覧へ戻る
@@ -43,22 +43,22 @@ export default async function NewStocktakeSessionPage() {
 
 
         {summary.inProgressSession ? (
-          <section className="rounded border border-line bg-white p-5 shadow-panel">
+          <section className="rounded border border-line bg-panel p-5 shadow-sheet">
             <h2 className="text-lg font-semibold">入力中のセッションがあります</h2>
             <p className="mt-2 text-sm text-muted">
               {formatDateTime(summary.inProgressSession.startedAt)} に開始した棚卸があります。
             </p>
             <a
-              className="mt-5 inline-flex h-11 items-center rounded bg-accent px-5 text-sm font-semibold text-white transition hover:bg-teal-800"
+              className="mt-5 inline-flex h-11 items-center rounded bg-accent px-5 text-sm font-semibold text-panel transition hover:bg-accentDeep"
               href={`/stocktake/sessions/${summary.inProgressSession.id}`}
             >
               入力中の棚卸を開く
             </a>
           </section>
         ) : (
-          <form action={startStocktakeSessionAction} className="rounded border border-line bg-white p-5 shadow-panel">
+          <form action={startStocktakeSessionAction} className="rounded border border-line bg-panel p-5 shadow-sheet">
             <h2 className="text-lg font-semibold">新しい棚卸を開始</h2>
-            <dl className="mt-5 grid gap-3 rounded bg-gray-50 p-4 text-sm sm:grid-cols-2">
+            <dl className="mt-5 grid gap-3 rounded bg-subtle p-4 text-sm sm:grid-cols-2">
               <div>
                 <dt className="text-muted">対象クリニック</dt>
                 <dd className="mt-1 font-semibold">{context.clinicName}</dd>
@@ -75,14 +75,14 @@ export default async function NewStocktakeSessionPage() {
                 rows={3}
                 maxLength={200}
                 placeholder="任意。棚卸範囲や担当者交代時のメモなど"
-                className="rounded border border-line px-3 py-2 text-sm font-normal text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                className="rounded border border-line px-3 py-2 text-sm font-normal text-ink    "
               />
             </label>
             <div className="mt-5 flex flex-wrap gap-3">
               <SubmitButton
                 pendingLabel="開始中"
                 disabled={summary.itemCount === 0}
-                className="h-11 rounded bg-accent px-5 text-sm font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-40"
+                className="h-11 rounded bg-accent px-5 text-sm font-semibold text-panel transition hover:bg-accentDeep disabled:cursor-not-allowed disabled:opacity-40"
               >
                 セッションを開始
               </SubmitButton>

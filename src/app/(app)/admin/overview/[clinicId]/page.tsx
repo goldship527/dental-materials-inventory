@@ -147,7 +147,7 @@ export default async function AdminOverviewClinicDetailPage({ params, searchPara
         <header className="flex flex-col gap-4 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-sm font-semibold text-accent">本部ダッシュボード / クリニック詳細</p>
-            <h1 className="mt-2 text-3xl font-semibold text-ink">{detail.clinic.name}</h1>
+            <h1 className="mt-2 text-xl font-semibold text-ink">{detail.clinic.name}</h1>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-muted">
               この画面は読み取り専用です。クリニック別の在庫、不足、発注候補、期限ロットを確認できます。
             </p>
@@ -167,13 +167,13 @@ export default async function AdminOverviewClinicDetailPage({ params, searchPara
 
         <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {summaryItems.map((item) => (
-            <div key={item.label} className="rounded border border-line bg-white p-5 shadow-panel">
+            <div key={item.label} className="rounded border border-line bg-panel p-5 shadow-sheet">
               <p className="text-sm font-semibold text-muted">{item.label}</p>
               <p
                 className={
                   item.isWarning
-                    ? "mt-2 text-3xl font-semibold text-warning"
-                    : "mt-2 text-3xl font-semibold text-ink"
+                    ? "mt-2 text-2xl font-semibold text-ink"
+                    : "mt-2 text-2xl font-semibold text-ink"
                 }
               >
                 {item.value}
@@ -185,21 +185,21 @@ export default async function AdminOverviewClinicDetailPage({ params, searchPara
 
         <section className="grid gap-3 md:grid-cols-3">
           <a
-            className="rounded border border-line bg-white p-4 shadow-panel transition hover:border-accent"
+            className="rounded border border-line bg-panel p-4 shadow-sheet transition hover:border-accent"
             href={`/admin/overview/${clinicId}/shortage`}
           >
             <p className="text-sm font-semibold text-accent">不足在庫を見る</p>
             <p className="mt-2 text-sm leading-6 text-muted">不足商品だけを、発注先や不足数と一緒に確認します。</p>
           </a>
           <a
-            className="rounded border border-line bg-white p-4 shadow-panel transition hover:border-accent"
+            className="rounded border border-line bg-panel p-4 shadow-sheet transition hover:border-accent"
             href={`/admin/overview/${clinicId}/orders`}
           >
             <p className="text-sm font-semibold text-accent">発注候補を見る</p>
             <p className="mt-2 text-sm leading-6 text-muted">確認待ち、発注予定、納品待ち、納品済み、見送りの候補を読み取り専用で確認します。</p>
           </a>
           <a
-            className="rounded border border-line bg-white p-4 shadow-panel transition hover:border-accent"
+            className="rounded border border-line bg-panel p-4 shadow-sheet transition hover:border-accent"
             href={`/admin/overview/${clinicId}/movements`}
           >
             <p className="text-sm font-semibold text-accent">入出庫履歴を見る</p>
@@ -207,12 +207,12 @@ export default async function AdminOverviewClinicDetailPage({ params, searchPara
           </a>
         </section>
 
-        <section className="rounded border border-line bg-white p-4 shadow-panel">
+        <section className="rounded border border-line bg-panel p-4 shadow-sheet">
           <form className="grid gap-3 lg:grid-cols-[1fr_220px_auto_auto]" action={`/admin/overview/${clinicId}`}>
             <label className="grid gap-2 text-sm font-semibold text-muted">
               検索
               <input
-                className="h-11 rounded border border-line bg-white px-3 text-base font-normal text-ink outline-none transition placeholder:text-muted focus:border-accent"
+                className="h-11 rounded border border-line bg-panel px-3 text-base font-normal text-ink  transition placeholder:text-muted "
                 defaultValue={query}
                 name="q"
                 placeholder="商品名、商品コード、発注先"
@@ -222,7 +222,7 @@ export default async function AdminOverviewClinicDetailPage({ params, searchPara
             <label className="grid gap-2 text-sm font-semibold text-muted">
               カテゴリ
               <select
-                className="h-11 rounded border border-line bg-white px-3 text-base font-normal text-ink outline-none transition focus:border-accent"
+                className="h-11 rounded border border-line bg-panel px-3 text-base font-normal text-ink  transition "
                 defaultValue={category}
                 name="category"
               >
@@ -239,7 +239,7 @@ export default async function AdminOverviewClinicDetailPage({ params, searchPara
               不足のみ
             </label>
             <button
-              className="h-11 self-end rounded bg-accent px-5 text-sm font-semibold text-white transition hover:bg-teal-800"
+              className="h-11 self-end rounded bg-accent px-5 text-sm font-semibold text-panel transition hover:bg-accentDeep"
               type="submit"
             >
               表示
@@ -261,13 +261,13 @@ export default async function AdminOverviewClinicDetailPage({ params, searchPara
           </div>
         </section>
 
-        <section className="overflow-hidden rounded border border-line bg-white shadow-panel">
+        <section className="overflow-hidden rounded border border-line bg-panel shadow-sheet">
           <div className="border-b border-line px-5 py-4 text-sm text-muted">
             表示 {filteredRows.length} 件 / 全 {detail.stockRows.length} 件
           </div>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1120px] border-collapse text-left text-sm">
-              <thead className="bg-gray-50 text-xs text-muted">
+              <thead className="bg-subtle text-xs text-muted">
                 <tr>
                   <th className="border-b border-line px-4 py-3">商品</th>
                   <th className="border-b border-line px-4 py-3">カテゴリ</th>
@@ -297,7 +297,7 @@ export default async function AdminOverviewClinicDetailPage({ params, searchPara
                     <td
                       className={
                         row.shortageCount > 0
-                          ? "border-b border-line px-4 py-3 text-right font-semibold text-warning"
+                          ? "border-b border-line px-4 py-3 text-right font-semibold text-ink"
                           : "border-b border-line px-4 py-3 text-right"
                       }
                     >
@@ -323,14 +323,14 @@ export default async function AdminOverviewClinicDetailPage({ params, searchPara
           </div>
         </section>
 
-        <section className="overflow-hidden rounded border border-line bg-white shadow-panel">
+        <section className="overflow-hidden rounded border border-line bg-panel shadow-sheet">
           <div className="border-b border-line px-5 py-4">
             <h2 className="text-lg font-semibold text-ink">期限ロット要確認</h2>
             <p className="mt-1 text-sm text-muted">期限切れ、または30日以内に期限を迎えるロットです。</p>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[900px] border-collapse text-left text-sm">
-              <thead className="bg-gray-50 text-xs text-muted">
+              <thead className="bg-subtle text-xs text-muted">
                 <tr>
                   <th className="border-b border-line px-4 py-3">商品</th>
                   <th className="border-b border-line px-4 py-3">ロット番号</th>

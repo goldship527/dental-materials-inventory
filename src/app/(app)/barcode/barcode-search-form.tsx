@@ -187,7 +187,7 @@ export function BarcodeSearchForm({
       ref={formRef}
       method="get"
       action={actionPath}
-      className="rounded border border-line bg-white p-5 shadow-panel"
+      className="rounded border border-line bg-panel p-5 shadow-sheet"
     >
       <label className="grid gap-2 text-sm font-semibold text-muted">
         {label}
@@ -212,11 +212,11 @@ export function BarcodeSearchForm({
                 submitImmediately(event.currentTarget.value);
               }
             }}
-            className="h-12 rounded border border-line px-4 font-mono text-base text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+            className="h-12 rounded border border-line px-4 font-mono text-base text-ink    "
           />
           <button
             type="submit"
-            className="h-12 rounded bg-accent px-5 text-sm font-semibold text-white transition hover:bg-teal-800"
+            className="h-12 rounded bg-accent px-5 text-sm font-semibold text-panel transition hover:bg-accentDeep"
           >
             検索
           </button>
@@ -229,7 +229,7 @@ export function BarcodeSearchForm({
         </div>
       </label>
       {lastScannedBarcode ? (
-        <p className="mt-3 rounded border border-blue-100 bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-900">
+        <p className="mt-3 rounded border border-line bg-tint px-3 py-2 text-xs font-semibold text-accent">
           読み取り値: <span className="font-mono">{lastScannedBarcode}</span>
         </p>
       ) : null}

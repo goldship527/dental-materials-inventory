@@ -116,7 +116,7 @@ export default async function AdminOverviewClinicOrdersPage({ params, searchPara
         <header className="flex flex-col gap-4 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-sm font-semibold text-accent">本部ダッシュボード / 発注候補</p>
-            <h1 className="mt-2 text-3xl font-semibold text-ink">{detail.clinic.name}</h1>
+            <h1 className="mt-2 text-xl font-semibold text-ink">{detail.clinic.name}</h1>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-muted">
               この画面は読み取り専用です。発注候補の状態、数量、発注先、メモを確認できます。
             </p>
@@ -133,29 +133,29 @@ export default async function AdminOverviewClinicOrdersPage({ params, searchPara
           {counts.map((item) => (
             <a
               key={item.value}
-              className="rounded border border-line bg-white p-4 shadow-panel transition hover:border-accent"
+              className="rounded border border-line bg-panel p-4 shadow-sheet transition hover:border-accent"
               href={buildOrdersHref(clinicId, item.value, query)}
             >
               <p className="text-sm font-semibold text-muted">{item.label}</p>
-              <p className="mt-2 text-3xl font-semibold text-ink">{numberText(item.count)}</p>
+              <p className="mt-2 text-2xl font-semibold text-ink">{numberText(item.count)}</p>
             </a>
           ))}
         </section>
 
-        <section className="rounded border border-line bg-white p-4 shadow-panel">
+        <section className="rounded border border-line bg-panel p-4 shadow-sheet">
           <form
             className="grid gap-3 md:grid-cols-[1fr_220px_auto_auto]"
             action={`/admin/overview/${clinicId}/orders`}
           >
             <input
-              className="h-11 rounded border border-line bg-white px-3 text-base text-ink outline-none transition placeholder:text-muted focus:border-accent"
+              className="h-11 rounded border border-line bg-panel px-3 text-base text-ink  transition placeholder:text-muted "
               defaultValue={query}
               name="q"
               placeholder="商品名、商品コード、カテゴリ、発注先、メモ"
               type="search"
             />
             <select
-              className="h-11 rounded border border-line bg-white px-3 text-base text-ink outline-none transition focus:border-accent"
+              className="h-11 rounded border border-line bg-panel px-3 text-base text-ink  transition "
               defaultValue={selectedStatus}
               name="status"
             >
@@ -167,7 +167,7 @@ export default async function AdminOverviewClinicOrdersPage({ params, searchPara
               ))}
             </select>
             <button
-              className="h-11 rounded bg-accent px-5 text-sm font-semibold text-white transition hover:bg-teal-800"
+              className="h-11 rounded bg-accent px-5 text-sm font-semibold text-panel transition hover:bg-accentDeep"
               type="submit"
             >
               表示
@@ -181,13 +181,13 @@ export default async function AdminOverviewClinicOrdersPage({ params, searchPara
           </form>
         </section>
 
-        <section className="overflow-hidden rounded border border-line bg-white shadow-panel">
+        <section className="overflow-hidden rounded border border-line bg-panel shadow-sheet">
           <div className="border-b border-line px-5 py-4 text-sm text-muted">
             表示 {filteredRows.length} 件 / 条件一致 {queryFilteredRows.length} 件 / 全 {rows.length} 件
           </div>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1200px] border-collapse text-left text-sm">
-              <thead className="bg-gray-50 text-xs text-muted">
+              <thead className="bg-subtle text-xs text-muted">
                 <tr>
                   <th className="border-b border-line px-4 py-3">商品</th>
                   <th className="border-b border-line px-4 py-3">発注先</th>
@@ -214,7 +214,7 @@ export default async function AdminOverviewClinicOrdersPage({ params, searchPara
                     <td
                       className={
                         row.shortageCount > 0
-                          ? "border-b border-line px-4 py-3 text-right font-semibold text-warning"
+                          ? "border-b border-line px-4 py-3 text-right font-semibold text-ink"
                           : "border-b border-line px-4 py-3 text-right"
                       }
                     >
@@ -224,7 +224,7 @@ export default async function AdminOverviewClinicOrdersPage({ params, searchPara
                       {row.requestedQuantity}
                     </td>
                     <td className="border-b border-line px-4 py-3">
-                      <span className="rounded bg-gray-100 px-2 py-1 text-xs font-semibold text-muted">
+                      <span className="rounded bg-subtle px-2 py-1 text-xs font-semibold text-muted">
                         {getAdminOrderStatusLabel(row)}
                       </span>
                     </td>

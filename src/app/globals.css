@@ -4,8 +4,25 @@
 
 :root {
   color-scheme: light;
-  background: #f8fafc;
-  color: #0f172a;
+  --c-paper: #efeee9;
+  --c-sheet: #ffffff;
+  --c-paper-2: #f4f3ef;
+  --c-tint: #e4ebf2;
+  --c-ink: #1d201e;
+  --c-ink-2: #575c58;
+  --c-rule: #d8d6cf;
+  --c-rule-strong: #868a84;
+  --c-ai: #1f4e79;
+  --c-ai-deep: #163a5b;
+  --c-ai-edge: #102a42;
+  --c-control-edge: #a9a59b;
+  --c-mark: #ffe066;
+  --c-mark-soft: #fff4c2;
+  --c-shu: #b52a1c;
+  --c-green: #1e6b45;
+  --c-focus: #ffd400;
+  background: var(--c-paper);
+  color: var(--c-ink);
 }
 
 * {
@@ -19,10 +36,8 @@ body {
 
 body {
   margin: 0;
-  background:
-    linear-gradient(180deg, rgba(240, 253, 250, 0.75) 0, rgba(248, 250, 252, 0) 260px),
-    #f8fafc;
-  color: #0f172a;
+  background: var(--c-paper);
+  color: var(--c-ink);
   font-family:
     "Inter",
     "Noto Sans JP",
@@ -40,8 +55,50 @@ a {
 }
 
 ::selection {
-  background: #cfe9e4;
-  color: #0f172a;
+  background: var(--c-tint);
+  color: var(--c-ink);
+}
+
+@layer components {
+  .focus-ring:focus-visible,
+  :focus-visible:not(:disabled) {
+    outline: 2px solid var(--c-ink);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 2px var(--c-focus);
+  }
+
+  .btn-primary {
+    @apply bg-accent text-panel shadow-raise hover:bg-accentDeep active:translate-y-0.5 active:shadow-press disabled:bg-subtle disabled:text-muted disabled:shadow-none;
+  }
+
+  .btn-secondary {
+    @apply border border-lineStrong bg-raise text-ink shadow-raise-light active:translate-y-0.5 active:shadow-press disabled:bg-subtle disabled:text-muted disabled:shadow-none;
+  }
+
+  .chip-selected {
+    @apply translate-y-0.5 bg-accent text-panel shadow-press;
+  }
+
+  .field {
+    @apply border border-lineStrong bg-panel shadow-inset-field;
+  }
+
+  .mark-under {
+    background: linear-gradient(transparent 52%, var(--c-mark) 52%);
+  }
+
+  .edge-stop {
+    box-shadow: inset 4px 0 0 var(--c-shu);
+  }
+
+  .edge-top {
+    box-shadow: inset 0 2px 0 var(--c-ai);
+  }
+
+  .card-control-size.card-control-size {
+    font-size: 20px;
+    line-height: 28px;
+  }
 }
 
 @media (max-width: 640px) {
@@ -65,11 +122,11 @@ a {
   html,
   body {
     min-height: auto;
-    background: #ffffff;
+    background: var(--c-sheet);
   }
 
   body {
-    font-size: 11px;
+    font-size: 12px;
   }
 
   table {

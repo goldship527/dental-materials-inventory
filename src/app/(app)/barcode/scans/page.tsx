@@ -28,18 +28,18 @@ const dateTimeFormatter = new Intl.DateTimeFormat("ja-JP", {
 
 function getMatchBadgeClass(matchType: string) {
   if (matchType === "PRODUCT") {
-    return "bg-emerald-50 text-accent";
+    return "bg-panel text-accent";
   }
 
   if (matchType === "PRODUCT_MULTI") {
-    return "bg-orange-50 text-orange-700";
+    return "bg-markSoft text-ink";
   }
 
   if (matchType === "SAMPLE") {
-    return "bg-yellow-50 text-warning";
+    return "bg-markSoft text-ink";
   }
 
-  return "bg-gray-100 text-muted";
+  return "bg-subtle text-muted";
 }
 
 function formatGs1ExpiryDate(value: Date | null, fallback: string | null) {
@@ -78,7 +78,7 @@ export default async function BarcodeScansPage({ searchParams }: PageProps) {
         <header className="flex flex-col gap-3 border-b border-line pb-5 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-            <h1 className="mt-2 text-3xl font-semibold">バーコード読み取り履歴</h1>
+            <h1 className="mt-2 text-xl font-semibold">バーコード読み取り履歴</h1>
           </div>
           <div className="flex flex-wrap gap-3 text-sm font-semibold">
             {canManageBarcodeMaster ? (
@@ -96,7 +96,7 @@ export default async function BarcodeScansPage({ searchParams }: PageProps) {
         </header>
 
 
-        <section className="flex flex-col gap-3 rounded border border-line bg-white px-4 py-3 text-sm text-muted shadow-panel md:flex-row md:items-center md:justify-between">
+        <section className="flex flex-col gap-3 rounded border border-line bg-panel px-4 py-3 text-sm text-muted shadow-sheet md:flex-row md:items-center md:justify-between">
           <p>
             表示 {logs.length} 件{resolveStatus ? " / 未対応のみ" : ""}
           </p>
@@ -110,10 +110,10 @@ export default async function BarcodeScansPage({ searchParams }: PageProps) {
           </div>
         </section>
 
-        <section className="overflow-hidden rounded border border-line bg-white shadow-panel">
+        <section className="overflow-hidden rounded border border-line bg-panel shadow-sheet">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1100px] border-collapse text-left text-sm">
-              <thead className="bg-gray-50 text-xs text-muted">
+              <thead className="bg-subtle text-xs text-muted">
                 <tr>
                   <th className="border-b border-line px-4 py-3">保存日時</th>
                   <th className="border-b border-line px-4 py-3">判定</th>

@@ -23,7 +23,7 @@ export function Ean13Barcode({ value, height = 56, moduleWidth = 2, showText = t
         width={width}
         height={height}
         viewBox={`0 0 ${width} ${height}`}
-        className="bg-white"
+        className="bg-panel"
       >
         <rect width={width} height={height} fill="white" />
         {bars.map((bar) => (

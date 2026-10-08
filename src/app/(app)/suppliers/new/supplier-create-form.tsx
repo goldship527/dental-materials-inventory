@@ -14,8 +14,8 @@ export function SupplierCreateForm() {
     const hasError = Boolean(getFieldError(fieldName));
 
     return [
-      "rounded border px-3 text-ink outline-none focus:ring-2",
-      hasError ? "border-danger focus:border-danger focus:ring-danger/20" : "border-line focus:border-accent focus:ring-accent/20",
+      "rounded border px-3 text-ink  ",
+      hasError ? "border-danger  " : "border-line  ",
       className,
     ]
       .filter(Boolean)
@@ -35,7 +35,7 @@ export function SupplierCreateForm() {
 
   return (
     <form action={formAction} noValidate className="grid gap-6">
-      <section className="rounded border border-line bg-white p-5 shadow-panel">
+      <section className="rounded border border-line bg-panel p-5 shadow-sheet">
         <h2 className="text-lg font-semibold">基本情報</h2>
         <div className="mt-4 grid gap-4">
           <label className="grid gap-1 text-sm font-semibold text-muted">
@@ -52,7 +52,7 @@ export function SupplierCreateForm() {
         </div>
       </section>
 
-      <section className="rounded border border-line bg-white p-5 shadow-panel">
+      <section className="rounded border border-line bg-panel p-5 shadow-sheet">
         <h2 className="text-lg font-semibold">連絡先</h2>
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           <label className="grid gap-1 text-sm font-semibold text-muted md:col-span-2">
@@ -110,7 +110,7 @@ export function SupplierCreateForm() {
         </div>
       </section>
 
-      <section className="rounded border border-line bg-white p-5 shadow-panel">
+      <section className="rounded border border-line bg-panel p-5 shadow-sheet">
         <label className="grid gap-1 text-sm font-semibold text-muted">
           備考
           <textarea name="notes" maxLength={1000} aria-invalid={Boolean(getFieldError("notes"))} className={controlClass("notes", "min-h-32 py-2")} />
@@ -123,11 +123,11 @@ export function SupplierCreateForm() {
         <p
           className={
             state.status === "success"
-              ? "rounded border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm font-semibold text-accent"
-              : "rounded border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold text-danger"
+              ? "rounded border border-line border-l-4 border-l-success bg-panel px-4 py-3 text-sm font-semibold text-success"
+              : "rounded border border-line border-l-4 border-l-danger bg-panel px-4 py-3 text-sm font-semibold text-danger"
           }
         >
-          {state.message}
+          {state.status === "success" ? "✓ " : state.message.startsWith("エラー") ? "" : "エラー: "}{state.message}
         </p>
       ) : null}
 
@@ -135,12 +135,12 @@ export function SupplierCreateForm() {
         <button
           type="submit"
           disabled={isPending}
-          className="rounded bg-ink px-5 py-3 text-sm font-semibold text-white transition hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded bg-accent px-5 py-3 text-sm font-semibold text-panel transition hover:bg-accentDeep disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isPending ? "作成中" : "発注先を作成"}
         </button>
         <a
-          className="rounded border border-line bg-white px-5 py-3 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+          className="rounded border border-line bg-panel px-5 py-3 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
           href="/suppliers"
         >
           発注先マスタへ戻る

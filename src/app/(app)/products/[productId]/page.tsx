@@ -81,18 +81,18 @@ function getAbcRankBadgeText(rank: string) {
 
 function getAbcRankBadgeClass(rank: string) {
   if (rank === "A") {
-    return "border-emerald-200 bg-emerald-50 text-accent";
+    return "border-line bg-panel text-accent";
   }
 
   if (rank === "B") {
-    return "border-sky-200 bg-sky-50 text-sky-700";
+    return "border-line bg-tint text-accent";
   }
 
   if (rank === "C") {
-    return "border-gray-200 bg-gray-50 text-muted";
+    return "border-line bg-subtle text-muted";
   }
 
-  return "border-line bg-white text-muted";
+  return "border-line bg-panel text-muted";
 }
 
 function formatLeadTime(leadTime: { avgDays: number; medianDays: number; sampleCount: number; isSampleSufficient: boolean } | null) {
@@ -112,8 +112,8 @@ function getStockStatus(currentQuantity: number, minStock: number, hasStockItem:
     return {
       label: "在庫行なし",
       description: "在庫一覧の対象外",
-      badgeClass: "bg-gray-100 text-muted",
-      panelClass: "border-line bg-white",
+      badgeClass: "bg-subtle text-muted",
+      panelClass: "border-line bg-panel",
     };
   }
 
@@ -124,7 +124,7 @@ function getStockStatus(currentQuantity: number, minStock: number, hasStockItem:
       label: stockStatus.label,
       description: "補充が必要",
       badgeClass: stockStatus.badgeClassName,
-      panelClass: "border-danger/40 bg-red-50/40",
+      panelClass: "border-danger/40 bg-panel",
     };
   }
 
@@ -133,7 +133,7 @@ function getStockStatus(currentQuantity: number, minStock: number, hasStockItem:
       label: stockStatus.label,
       description: "最低在庫を下回っています",
       badgeClass: stockStatus.badgeClassName,
-      panelClass: "border-warning/40 bg-yellow-50/50",
+      panelClass: "border-line bg-markSoft",
     };
   }
 
@@ -142,7 +142,7 @@ function getStockStatus(currentQuantity: number, minStock: number, hasStockItem:
       label: stockStatus.label,
       description: "補充判断が必要",
       badgeClass: stockStatus.badgeClassName,
-      panelClass: "border-warning/40 bg-yellow-50/50",
+      panelClass: "border-line bg-markSoft",
     };
   }
 
@@ -150,7 +150,7 @@ function getStockStatus(currentQuantity: number, minStock: number, hasStockItem:
     label: stockStatus.label,
     description: "最低在庫を上回っています",
     badgeClass: stockStatus.badgeClassName,
-    panelClass: "border-line bg-white",
+    panelClass: "border-line bg-panel",
   };
 }
 
@@ -206,7 +206,7 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
         <header className="flex flex-col gap-3 border-b border-line pb-4 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-sm font-semibold text-accent">{context.clinicName}</p>
-            <h1 className="mt-2 text-3xl font-semibold">{product.name}</h1>
+            <h1 className="mt-2 text-xl font-semibold">{product.name}</h1>
           </div>
           <div className="flex flex-wrap gap-3 text-sm font-semibold">
             {canManageProducts ? (
@@ -221,12 +221,12 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
         </header>
 
         {paramsValue.adminDenied ? (
-          <section className="rounded border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm font-semibold text-warning shadow-panel">
+          <section className="rounded border border-line bg-markSoft px-4 py-3 text-sm font-semibold text-ink shadow-sheet">
             商品マスタの編集は管理者専用です。必要な場合は管理者に依頼してください。
           </section>
         ) : null}
 
-        <section className="rounded border border-line bg-white p-4 shadow-panel">
+        <section className="rounded border border-line bg-panel p-4 shadow-sheet">
           <div className="grid gap-4 md:grid-cols-[128px_1fr] md:items-center">
             {photoUrl ? (
               <img
@@ -235,7 +235,7 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
                 src={photoUrl}
               />
             ) : (
-              <div className="grid aspect-square w-full max-w-32 place-items-center rounded border border-dashed border-line bg-gray-50 text-sm font-semibold text-muted">
+              <div className="grid aspect-square w-full max-w-32 place-items-center rounded border border-dashed border-line bg-subtle text-sm font-semibold text-muted">
                 写真なし
               </div>
             )}
@@ -253,7 +253,7 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
           ) : null}
         </section>
 
-        <section className={`overflow-hidden rounded border shadow-panel ${stockStatus.panelClass}`}>
+        <section className={`overflow-hidden rounded border shadow-sheet ${stockStatus.panelClass}`}>
           <div className="flex flex-col gap-3 p-3 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <div className="flex flex-wrap items-center gap-2">
@@ -261,12 +261,12 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
                   {stockStatus.label}
                 </span>
                 {product.orderRequests.length > 0 ? (
-                  <span className="rounded bg-gray-100 px-3 py-1 text-xs font-semibold text-muted">
+                  <span className="rounded bg-subtle px-3 py-1 text-xs font-semibold text-muted">
                     発注候補 {product.orderRequests.length} 件
                   </span>
                 ) : null}
                 {product.pendingOrders.totalQuantity > 0 ? (
-                  <span className="rounded bg-yellow-50 px-3 py-1 text-xs font-semibold text-warning">
+                  <span className="rounded bg-markSoft px-3 py-1 text-xs font-semibold text-ink">
                     納品待ち {product.pendingOrders.totalQuantity}個
                   </span>
                 ) : null}
@@ -274,7 +274,7 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
                   {getAbcRankBadgeText(product.abcRank.rank)}
                 </span>
                 {product.abcRank.rank !== "UNUSED" ? (
-                  <span className="rounded bg-gray-100 px-3 py-1 text-xs font-semibold text-muted">
+                  <span className="rounded bg-subtle px-3 py-1 text-xs font-semibold text-muted">
                     90日出庫 {product.abcRank.totalQuantity}
                   </span>
                 ) : null}
@@ -283,20 +283,20 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
             </div>
             <div className="flex flex-wrap gap-2">
               <a
-                className="rounded border border-line bg-white px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+                className="rounded border border-line bg-panel px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
                 href={inventoryHref}
               >
                 在庫一覧で確認
               </a>
               <a
-                className="rounded border border-line bg-white px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
+                className="rounded border border-line bg-panel px-4 py-2 text-sm font-semibold text-muted transition hover:border-accent hover:text-accent"
                 href={movementsHref}
               >
                 履歴で確認
               </a>
               {shortageCount > 0 ? (
                 <a
-                  className="rounded bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-800"
+                  className="rounded bg-accent px-4 py-2 text-sm font-semibold text-panel transition hover:bg-accentDeep"
                   href={shortageHref}
                 >
                   不足一覧へ
@@ -311,7 +311,7 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
               ) : null}
               {product.orderRequests.length > 0 ? (
                 <a
-                  className="rounded bg-ink px-4 py-2 text-sm font-semibold text-white transition hover:bg-gray-700"
+                  className="rounded bg-accent px-4 py-2 text-sm font-semibold text-panel transition hover:bg-accentDeep"
                   href={ordersHref}
                 >
                   発注候補へ
@@ -319,10 +319,10 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
               ) : null}
             </div>
           </div>
-          <div aria-label="在庫サマリー" className="grid border-t border-line bg-white/80 sm:grid-cols-2 lg:grid-cols-4">
+          <div aria-label="在庫サマリー" className="grid border-t border-line bg-panel/80 sm:grid-cols-2 lg:grid-cols-4">
             <div className="p-3">
               <p className="text-sm font-semibold text-muted">{product.stockUsageMode === "IN_USE" ? "使用可能" : "現在庫"}</p>
-              <p className="mt-0.5 text-5xl font-bold leading-none tabular-nums">{product.currentQuantity}</p>
+              <p className="mt-0.5 text-display font-bold leading-none tabular-nums">{product.currentQuantity}</p>
               <p className="mt-1 text-xs text-muted">保管場所 {product.location ?? "-"}</p>
               {product.stockUsageMode === "IN_USE" ? (
                 <p className="mt-1 text-xs font-semibold text-muted">
@@ -365,10 +365,10 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
         ) : null}
 
         {product.pendingOrders.totalQuantity > 0 ? (
-          <section className="rounded border border-warning/30 bg-yellow-50 p-4 shadow-panel">
+          <section className="rounded border border-line bg-markSoft p-4 shadow-sheet">
             <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
               <div>
-                <h2 className="text-lg font-semibold text-warning">未納の発注があります</h2>
+                <h2 className="text-lg font-semibold text-ink">未納の発注があります</h2>
                 <p className="mt-1 text-sm text-muted">
                   発注済 {product.pendingOrders.count}件 / 合計 {product.pendingOrders.totalQuantity}個
                   {product.pendingOrders.latestOrderedAt
@@ -377,7 +377,7 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
                 </p>
               </div>
               <a
-                className="inline-flex min-h-10 items-center justify-center rounded border border-warning/40 bg-white px-4 py-2 text-sm font-semibold text-warning transition hover:border-warning"
+                className="inline-flex min-h-10 items-center justify-center rounded border border-line bg-panel px-4 py-2 text-sm font-semibold text-ink transition hover:border-line"
                 href={ordersHref}
               >
                 発注候補で確認
@@ -385,7 +385,7 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
             </div>
             <div className="mt-3 grid gap-2 md:grid-cols-2">
               {product.pendingOrderSuppliers.map((supplier) => (
-                <div key={supplier.supplierId ?? "none"} className="rounded border border-warning/20 bg-white px-3 py-2 text-sm">
+                <div key={supplier.supplierId ?? "none"} className="rounded border border-line bg-panel px-3 py-2 text-sm">
                   <p className="font-semibold">{supplier.supplierName ?? "発注先未設定"}</p>
                   <p className="mt-1 text-muted">
                     {supplier.count}件 / {supplier.totalQuantity}個
@@ -398,7 +398,7 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
         ) : null}
 
         <section className="grid gap-3 lg:grid-cols-[1.3fr_1fr]">
-          <div className="rounded border border-line bg-white p-4 shadow-panel">
+          <div className="rounded border border-line bg-panel p-4 shadow-sheet">
             <h2 className="text-lg font-semibold">基本情報</h2>
             <div className="mt-3"><IssueInstructions text={getIssueInstructions(product.notes)} /></div>
             <dl className="mt-3 grid gap-x-4 gap-y-2 text-sm sm:grid-cols-2">
@@ -474,8 +474,8 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
                         <span
                           className={
                             productSupplier.isPrimary
-                              ? "rounded bg-emerald-50 px-2 py-1 text-xs font-semibold text-accent"
-                              : "rounded bg-gray-50 px-2 py-1 text-xs font-semibold text-muted"
+                              ? "rounded bg-panel px-2 py-1 text-xs font-semibold text-accent"
+                              : "rounded bg-subtle px-2 py-1 text-xs font-semibold text-muted"
                           }
                         >
                           {productSupplier.isPrimary ? "主発注先" : "代替"}
@@ -497,7 +497,7 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
             </div>
           </div>
 
-          {barcodeUiEnabled && <div className="rounded border border-line bg-white p-4 shadow-panel">
+          {barcodeUiEnabled && <div className="rounded border border-line bg-panel p-4 shadow-sheet">
             <h2 className="text-lg font-semibold">バーコード</h2>
             <div className="mt-3 grid gap-2">
               {product.barcodes.length > 0 ? (
@@ -515,7 +515,7 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
         </section>
 
         <section className="grid gap-3 lg:grid-cols-2">
-          <div className="rounded border border-line bg-white p-4 shadow-panel">
+          <div className="rounded border border-line bg-panel p-4 shadow-sheet">
             <h2 className="text-lg font-semibold">直近の在庫変更</h2>
             <div className="mt-3 divide-y divide-line">
               {product.recentMovements.length > 0 ? (
@@ -541,7 +541,7 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
             </div>
           </div>
 
-          <div className="rounded border border-line bg-white p-4 shadow-panel">
+          <div className="rounded border border-line bg-panel p-4 shadow-sheet">
             <h2 className="text-lg font-semibold">発注候補</h2>
             <div className="mt-3 divide-y divide-line">
               {product.orderRequests.length > 0 ? (
@@ -590,7 +590,7 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
                       <p className="text-muted">先方対応メモ: {request.supplierResponseMemo}</p>
                     ) : null}
                     {request.receivedAt ? (
-                      <p className="font-semibold text-blue-800">
+                      <p className="font-semibold text-accent">
                         納品確認済み {dateTimeFormatter.format(request.receivedAt)} / 数量 {request.receivedQuantity ?? "-"}
                       </p>
                     ) : null}

@@ -4,14 +4,14 @@ import { getProductPhotoStorageDiagnostics, type ProductPhotoStorageDiagnosticIt
 
 function statusClassName(status: ProductPhotoStorageDiagnosticItem["status"]) {
   if (status === "ok") {
-    return "border-emerald-200 bg-emerald-50 text-emerald-800";
+    return "border-line bg-panel text-success";
   }
 
   if (status === "warning") {
-    return "border-amber-200 bg-amber-50 text-amber-800";
+    return "border-line bg-markSoft text-ink";
   }
 
-  return "border-red-200 bg-red-50 text-red-800";
+  return "border-line bg-panel text-danger";
 }
 
 function statusLabel(status: ProductPhotoStorageDiagnosticItem["status"]) {
@@ -37,13 +37,13 @@ export default async function AdminStoragePage() {
       <main className="mx-auto grid w-full max-w-7xl gap-6 px-4 py-8 sm:px-6 lg:px-8">
         <header className="grid gap-2">
           <p className="text-sm font-semibold text-accent">管理</p>
-          <h1 className="text-2xl font-bold tracking-tight text-ink">ストレージ診断</h1>
+          <h1 className="text-xl font-bold tracking-tight text-ink">ストレージ診断</h1>
           <p className="max-w-3xl text-sm leading-6 text-muted">
             商品写真の保存に使うSupabase Storage設定を確認します。秘密値そのものは表示しません。
           </p>
         </header>
 
-        <section className="grid gap-4 rounded border border-line bg-white p-5 shadow-panel">
+        <section className="grid gap-4 rounded border border-line bg-panel p-5 shadow-sheet">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="text-lg font-semibold text-ink">商品写真ストレージ</h2>
@@ -54,8 +54,8 @@ export default async function AdminStoragePage() {
             <span
               className={
                 hasError
-                  ? "inline-flex w-fit items-center rounded border border-red-200 bg-red-50 px-3 py-1 text-sm font-semibold text-red-800"
-                  : "inline-flex w-fit items-center rounded border border-emerald-200 bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-800"
+                  ? "inline-flex w-fit items-center rounded border border-line bg-panel px-3 py-1 text-sm font-semibold text-danger"
+                  : "inline-flex w-fit items-center rounded border border-line bg-panel px-3 py-1 text-sm font-semibold text-success"
               }
             >
               {hasError ? "設定確認が必要" : "利用可能"}
@@ -79,7 +79,7 @@ export default async function AdminStoragePage() {
           </div>
         </section>
 
-        <section className="grid gap-3 rounded border border-line bg-white p-5 shadow-panel">
+        <section className="grid gap-3 rounded border border-line bg-panel p-5 shadow-sheet">
           <h2 className="text-lg font-semibold text-ink">Vercelで確認する値</h2>
           <p className="text-sm leading-6 text-muted">
             Production環境に、SUPABASE_URL、SUPABASE_SERVICE_ROLE_KEY、SUPABASE_STORAGE_BUCKET

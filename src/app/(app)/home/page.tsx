@@ -179,7 +179,7 @@ export default async function HomePage({ searchParams }: PageProps) {
   ];
 
   return (
-    <main className="min-h-screen bg-surface px-4 py-6 text-ink print:bg-white print:px-0 print:py-0 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-surface px-4 py-6 text-ink print:bg-panel print:px-0 print:py-0 sm:px-6 lg:px-8">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
         <div className="print:hidden">
           <AppNav current="home" />
@@ -187,13 +187,13 @@ export default async function HomePage({ searchParams }: PageProps) {
 
         <header className="flex flex-col gap-4 border-b border-line pb-5 print:border-none md:flex-row md:items-end md:justify-between">
           <div>
-            <h1 className="text-3xl font-semibold tracking-normal">ホーム</h1>
+            <h1 className="text-xl font-semibold tracking-normal">ホーム</h1>
             <p className="mt-2 text-sm leading-6 text-muted">今日の作業を選んでください。</p>
           </div>
         </header>
 
         {params.adminDenied ? (
-          <section className="rounded border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm font-semibold text-warning shadow-panel">
+          <section className="rounded border border-line bg-markSoft px-4 py-3 text-sm font-semibold text-ink shadow-sheet">
             管理者専用の画面です。必要な場合は管理者に依頼してください。
           </section>
         ) : null}
@@ -205,16 +205,16 @@ export default async function HomePage({ searchParams }: PageProps) {
               href={item.href}
               className={
                 item.tone === "out"
-                  ? "min-h-40 rounded-xl border-2 border-accent bg-panel p-6 shadow-panel transition hover:bg-subtle focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
-                  : "min-h-40 rounded-xl border-2 border-muted bg-panel p-6 shadow-panel transition hover:bg-subtle focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
+                  ? "min-h-40 rounded border-2 border-accent bg-panel p-6 shadow-sheet transition hover:bg-subtle   "
+                  : "min-h-40 rounded border-2 border-muted bg-panel p-6 shadow-sheet transition hover:bg-subtle   "
               }
             >
               <div className="flex items-start justify-between gap-4">
                 <p
                   className={
                     item.tone === "out"
-                      ? "text-3xl font-semibold text-accent"
-                      : "text-3xl font-semibold text-ink"
+                      ? "text-2xl font-semibold text-accent"
+                      : "text-2xl font-semibold text-ink"
                   }
                 >
                   {item.title}
@@ -240,16 +240,18 @@ export default async function HomePage({ searchParams }: PageProps) {
             {attentionItems.map((item) => (
               <a
                 key={item.title}
-                className="rounded border border-line bg-white px-4 py-3 shadow-panel transition hover:border-accent hover:shadow-md"
+                className="rounded border border-line bg-panel px-4 py-3 shadow-sheet transition hover:border-accent "
                 href={item.href}
               >
                 <div className="flex items-center justify-between gap-3">
                   <p className="text-sm font-semibold text-muted">{item.title}</p>
                   <p
                     className={
-                      item.isWarning
-                        ? "rounded bg-red-50 px-2.5 py-1 text-sm font-semibold text-danger"
-                        : "rounded bg-gray-50 px-2.5 py-1 text-sm font-semibold text-muted"
+                      item.isWarning && item.title === "在庫0"
+                        ? "rounded bg-panel px-2.5 py-1 text-sm font-semibold text-danger"
+                        : item.isWarning && (item.title === "確認待ち" || item.title === "不足在庫")
+                          ? "mark-under rounded px-2.5 py-1 text-sm font-semibold text-ink"
+                        : "rounded bg-subtle px-2.5 py-1 text-sm font-semibold text-muted"
                     }
                   >
                     {item.value}
@@ -261,7 +263,7 @@ export default async function HomePage({ searchParams }: PageProps) {
           </div>
         </section>
 
-        <section className="rounded border border-line bg-white p-5 shadow-panel">
+        <section className="rounded border border-line bg-panel p-5 shadow-sheet">
           <div className="flex items-center justify-between gap-3">
             <p className="text-sm font-semibold text-muted">直近の在庫更新</p>
             <a className="text-sm font-semibold text-accent hover:underline" href="/movements">
@@ -296,16 +298,16 @@ export default async function HomePage({ searchParams }: PageProps) {
               <a
                 key={item.href}
                 href={item.href}
-                className="min-h-32 rounded border border-line bg-white p-5 shadow-panel transition hover:border-accent hover:shadow-md"
+                className="min-h-32 rounded border border-line bg-panel p-5 shadow-sheet transition hover:border-accent "
               >
                 <div className="flex items-start justify-between gap-4">
-                  <p className="text-xl font-semibold">{item.title}</p>
+                  <p className="text-lg font-semibold">{item.title}</p>
                   {item.badge ? (
                     <span
                       className={
                         "isWarning" in item && item.isWarning
-                          ? "shrink-0 rounded bg-yellow-50 px-3 py-1 text-xs font-semibold text-warning"
-                          : "shrink-0 rounded bg-gray-50 px-3 py-1 text-xs font-semibold text-muted"
+                          ? "shrink-0 rounded bg-markSoft px-3 py-1 text-xs font-semibold text-ink"
+                          : "shrink-0 rounded bg-subtle px-3 py-1 text-xs font-semibold text-muted"
                       }
                     >
                       {item.badge}
@@ -326,16 +328,16 @@ export default async function HomePage({ searchParams }: PageProps) {
                 <a
                   key={item.href}
                   href={item.href}
-                  className="min-h-32 rounded border border-line bg-white p-5 shadow-panel transition hover:border-accent hover:shadow-md"
+                  className="min-h-32 rounded border border-line bg-panel p-5 shadow-sheet transition hover:border-accent "
                 >
                   <div className="flex items-start justify-between gap-4">
-                    <p className="text-xl font-semibold">{item.title}</p>
+                    <p className="text-lg font-semibold">{item.title}</p>
                     {item.badge ? (
                       <span
                         className={
                           "isWarning" in item && item.isWarning
-                            ? "shrink-0 rounded bg-yellow-50 px-3 py-1 text-xs font-semibold text-warning"
-                            : "shrink-0 rounded bg-gray-50 px-3 py-1 text-xs font-semibold text-muted"
+                            ? "shrink-0 rounded bg-markSoft px-3 py-1 text-xs font-semibold text-ink"
+                            : "shrink-0 rounded bg-subtle px-3 py-1 text-xs font-semibold text-muted"
                         }
                       >
                         {item.badge}

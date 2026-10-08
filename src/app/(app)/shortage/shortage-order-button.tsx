@@ -22,12 +22,12 @@ export function ShortageOrderButton({ stockItemId, isAlreadyAdded, pendingQuanti
       <button
         type="submit"
         disabled={isDisabled}
-        className="h-9 rounded bg-accent px-3 text-xs font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-muted"
+        className="h-9 rounded bg-accent px-3 text-xs font-semibold text-panel transition hover:bg-accentDeep disabled:cursor-not-allowed disabled:bg-subtle disabled:text-muted"
       >
         {hasPendingOrder ? "納品待ちあり" : isAlreadyAdded ? "追加済み" : isPending ? "追加中" : "候補へ追加"}
       </button>
       {hasPendingOrder ? (
-        <p className="rounded bg-yellow-50 px-2 py-1 text-xs font-semibold text-warning">
+        <p className="rounded bg-markSoft px-2 py-1 text-xs font-semibold text-ink">
           発注済 {pendingQuantity}個があります
         </p>
       ) : null}
@@ -35,11 +35,11 @@ export function ShortageOrderButton({ stockItemId, isAlreadyAdded, pendingQuanti
         <p
           className={
             state.status === "success"
-              ? "rounded bg-emerald-50 px-2 py-1 text-xs font-semibold text-accent"
-              : "rounded bg-red-50 px-2 py-1 text-xs font-semibold text-danger"
+              ? "rounded bg-panel px-2 py-1 text-xs font-semibold text-accent"
+              : "rounded bg-panel px-2 py-1 text-xs font-semibold text-danger"
           }
         >
-          {state.message}
+          {state.status === "success" ? "✓ " : state.message.startsWith("エラー") ? "" : "エラー: "}{state.message}
         </p>
       ) : null}
     </form>

@@ -21,8 +21,8 @@ export function ProductStockItemCreateForm({ productId, defaultMinStock }: Produ
     const hasError = Boolean(getFieldError(fieldName));
 
     return [
-      "rounded border px-3 text-ink outline-none focus:ring-2",
-      hasError ? "border-danger focus:border-danger focus:ring-danger/20" : "border-line focus:border-accent focus:ring-accent/20",
+      "rounded border px-3 text-ink  ",
+      hasError ? "border-danger  " : "border-line  ",
       className,
     ]
       .filter(Boolean)
@@ -41,7 +41,7 @@ export function ProductStockItemCreateForm({ productId, defaultMinStock }: Produ
   }, [router, state.status]);
 
   return (
-    <form action={formAction} noValidate className="mt-4 grid gap-4 rounded border border-dashed border-accent/40 bg-emerald-50/30 p-4">
+    <form action={formAction} noValidate className="mt-4 grid gap-4 rounded border border-dashed border-accent/40 bg-panel p-4">
       <input type="hidden" name="productId" value={productId} />
       <div>
         <h3 className="text-sm font-semibold text-ink">このクリニックの在庫一覧に追加</h3>
@@ -99,11 +99,11 @@ export function ProductStockItemCreateForm({ productId, defaultMinStock }: Produ
         <p
           className={
             state.status === "success"
-              ? "rounded border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm font-semibold text-accent"
-              : "rounded border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold text-danger"
+              ? "rounded border border-line border-l-4 border-l-success bg-panel px-4 py-3 text-sm font-semibold text-success"
+              : "rounded border border-line border-l-4 border-l-danger bg-panel px-4 py-3 text-sm font-semibold text-danger"
           }
         >
-          {state.message}
+          {state.status === "success" ? "✓ " : state.message.startsWith("エラー") ? "" : "エラー: "}{state.message}
         </p>
       ) : null}
 
@@ -111,7 +111,7 @@ export function ProductStockItemCreateForm({ productId, defaultMinStock }: Produ
         <button
           type="submit"
           disabled={isPending}
-          className="rounded bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded bg-accent px-4 py-2 text-sm font-semibold text-panel transition hover:bg-accentDeep disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isPending ? "追加中" : "在庫一覧に追加"}
         </button>

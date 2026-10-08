@@ -111,30 +111,30 @@ export default async function ShortagePage({ searchParams }: PageProps) {
 
     return (
       <tr key={row.stockItemId} className="print:break-inside-avoid">
-        <td className="border-b border-line px-4 py-3 print:border print:border-black print:px-2 print:py-1.5">
+        <td className="border-b border-line px-4 py-3 print:border print:border-ink print:px-2 print:py-1.5">
           <a
-            className="font-semibold text-accent hover:underline print:text-black print:no-underline"
+            className="font-semibold text-accent hover:underline print:text-ink print:no-underline"
             href={`/products/${row.productId}`}
           >
             {row.name}
           </a>
-          <p className="mt-1 text-xs text-muted print:mt-0.5 print:text-[9px] print:text-black">
+          <p className="mt-1 text-xs text-muted print:mt-0.5 print:text-xs print:text-ink">
             {row.productCode} / {row.category ?? "未分類"}
           </p>
         </td>
-        <td className="border-b border-line px-4 py-3 text-right font-semibold print:border print:border-black print:px-2 print:py-1.5">
+        <td className="border-b border-line px-4 py-3 text-right font-semibold print:border print:border-ink print:px-2 print:py-1.5">
           {row.quantity}
         </td>
-        <td className="border-b border-line px-4 py-3 text-right print:border print:border-black print:px-2 print:py-1.5">
+        <td className="border-b border-line px-4 py-3 text-right print:border print:border-ink print:px-2 print:py-1.5">
           {row.minStock}
         </td>
-        <td className="border-b border-line px-4 py-3 text-right text-danger print:border print:border-black print:px-2 print:py-1.5 print:font-semibold print:text-black">
+        <td className="border-b border-line px-4 py-3 text-right text-danger print:border print:border-ink print:px-2 print:py-1.5 print:font-semibold print:text-ink">
           {row.shortageCount}
         </td>
-        <td className="border-b border-line px-4 py-3 print:border print:border-black print:px-2 print:py-1.5">
+        <td className="border-b border-line px-4 py-3 print:border print:border-ink print:px-2 print:py-1.5">
           {row.supplierId && row.supplierName ? (
             <a
-              className="text-accent hover:underline print:text-black print:no-underline"
+              className="text-accent hover:underline print:text-ink print:no-underline"
               href={`/suppliers/${row.supplierId}`}
             >
               {row.supplierName}
@@ -143,11 +143,11 @@ export default async function ShortagePage({ searchParams }: PageProps) {
             "-"
           )}
         </td>
-        <td className="border-b border-line px-4 py-3 text-right print:border print:border-black print:px-2 print:py-1.5">
+        <td className="border-b border-line px-4 py-3 text-right print:border print:border-ink print:px-2 print:py-1.5">
           {hasPendingOrders && pendingOrders ? (
             <div>
-              <p className="font-semibold text-accent print:text-black">{pendingOrders.totalQuantity}個</p>
-              <p className="mt-1 text-xs text-muted print:text-[9px] print:text-black">
+              <p className="font-semibold text-accent print:text-ink">{pendingOrders.totalQuantity}個</p>
+              <p className="mt-1 text-xs text-muted print:text-xs print:text-ink">
                 最終 {pendingOrders.latestOrderedAt ? dateFormatter.format(pendingOrders.latestOrderedAt) : "-"}
               </p>
             </div>
@@ -164,14 +164,14 @@ export default async function ShortagePage({ searchParams }: PageProps) {
             />
           ) : null}
         </td>
-        <td className="hidden border border-black px-2 py-1.5 print:table-cell" />
+        <td className="hidden border border-ink px-2 py-1.5 print:table-cell" />
       </tr>
     );
   };
   const renderEmptyRow = () => (
     <tr>
       <td
-        className="px-4 py-12 text-center text-muted print:border print:border-black print:px-2 print:py-6 print:text-black"
+        className="px-4 py-12 text-center text-muted print:border print:border-ink print:px-2 print:py-6 print:text-ink"
         colSpan={8}
       >
         {emptyMessage}
@@ -180,15 +180,15 @@ export default async function ShortagePage({ searchParams }: PageProps) {
   );
 
   return (
-    <main className="min-h-screen bg-surface px-4 py-6 text-ink print:bg-white print:p-0 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-surface px-4 py-6 text-ink print:bg-panel print:p-0 sm:px-6 lg:px-8">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 print:max-w-none print:gap-3">
         <AppNav current="shortage" />
 
-        <header className="flex flex-col gap-4 border-b border-line pb-5 md:flex-row md:items-end md:justify-between print:border-black print:pb-3">
+        <header className="flex flex-col gap-4 border-b border-line pb-5 md:flex-row md:items-end md:justify-between print:border-ink print:pb-3">
           <div>
-            <p className="text-sm font-semibold text-accent print:text-black">{context.clinicName}</p>
-            <h1 className="mt-2 text-3xl font-semibold print:text-2xl">不足在庫一覧</h1>
-            <p className="mt-2 text-sm text-muted print:text-xs print:text-black">
+            <p className="text-sm font-semibold text-accent print:text-ink">{context.clinicName}</p>
+            <h1 className="mt-2 text-xl font-semibold print:text-2xl">不足在庫一覧</h1>
+            <p className="mt-2 text-sm text-muted print:text-xs print:text-ink">
               発行日時: {generatedAt}
             </p>
           </div>
@@ -201,17 +201,17 @@ export default async function ShortagePage({ searchParams }: PageProps) {
         </header>
 
 
-        <form className="grid gap-3 rounded border border-line bg-white p-4 shadow-panel md:grid-cols-[1fr_auto_auto] print:hidden">
+        <form className="grid gap-3 rounded border border-line bg-panel p-4 shadow-sheet md:grid-cols-[1fr_auto_auto] print:hidden">
           <input
             type="search"
             name="q"
             defaultValue={query}
             placeholder="商品名・商品コード・カテゴリ・発注先"
-            className="h-11 rounded border border-line px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+            className="h-11 rounded border border-line px-3 text-sm    "
           />
           <button
             type="submit"
-            className="h-11 rounded bg-accent px-5 text-sm font-semibold text-white transition hover:bg-teal-800"
+            className="h-11 rounded bg-accent px-5 text-sm font-semibold text-panel transition hover:bg-accentDeep"
           >
             検索
           </button>
@@ -224,12 +224,12 @@ export default async function ShortagePage({ searchParams }: PageProps) {
         </form>
 
         <section className="hidden grid-cols-2 gap-3 text-xs print:grid">
-          <div className="border border-black px-3 py-2">発注確認</div>
-          <div className="border border-black px-3 py-2">備考</div>
+          <div className="border border-ink px-3 py-2">発注確認</div>
+          <div className="border border-ink px-3 py-2">備考</div>
         </section>
 
-        <section className="overflow-hidden rounded border border-line bg-white shadow-panel print:rounded-none print:border-black print:shadow-none">
-          <div className="flex items-center justify-between border-b border-line px-4 py-3 text-sm text-muted print:border-black print:px-2 print:py-2 print:text-xs print:text-black">
+        <section className="overflow-hidden rounded border border-line bg-panel shadow-sheet print:rounded-none print:border-ink print:shadow-none">
+          <div className="flex items-center justify-between border-b border-line px-4 py-3 text-sm text-muted print:border-ink print:px-2 print:py-2 print:text-xs print:text-ink">
             <span className="print:hidden">
               表示 {pagedShortageRows.length} 件 / 不足 {shortageTotal} 件
               {query ? `（検索: ${query}）` : ""}
@@ -264,33 +264,33 @@ export default async function ShortagePage({ searchParams }: PageProps) {
             <span className="hidden print:inline">一般歯科材料在庫管理システム</span>
           </div>
           {query ? (
-            <div className="hidden border-b border-black px-2 py-1.5 text-xs text-black print:block">
+            <div className="hidden border-b border-ink px-2 py-1.5 text-xs text-ink print:block">
               出力条件: 検索 {query}
             </div>
           ) : null}
-          <table className="w-full border-collapse text-left text-sm print:text-[10.5px]">
-            <thead className="bg-gray-50 text-xs text-muted print:bg-white print:text-[10px] print:text-black">
+          <table className="w-full border-collapse text-left text-sm print:text-xs">
+            <thead className="bg-subtle text-xs text-muted print:bg-panel print:text-xs print:text-ink">
               <tr>
-                <th className="border-b border-line px-4 py-3 print:border print:border-black print:px-2 print:py-1.5">
+                <th className="border-b border-line px-4 py-3 print:border print:border-ink print:px-2 print:py-1.5">
                   商品名
                 </th>
-                <th className="border-b border-line px-4 py-3 text-right print:border print:border-black print:px-2 print:py-1.5">
+                <th className="border-b border-line px-4 py-3 text-right print:border print:border-ink print:px-2 print:py-1.5">
                   現在庫
                 </th>
-                <th className="border-b border-line px-4 py-3 text-right print:border print:border-black print:px-2 print:py-1.5">
+                <th className="border-b border-line px-4 py-3 text-right print:border print:border-ink print:px-2 print:py-1.5">
                   最低在庫
                 </th>
-                <th className="border-b border-line px-4 py-3 text-right print:border print:border-black print:px-2 print:py-1.5">
+                <th className="border-b border-line px-4 py-3 text-right print:border print:border-ink print:px-2 print:py-1.5">
                   不足数
                 </th>
-                <th className="border-b border-line px-4 py-3 print:border print:border-black print:px-2 print:py-1.5">
+                <th className="border-b border-line px-4 py-3 print:border print:border-ink print:px-2 print:py-1.5">
                   発注先
                 </th>
-                <th className="border-b border-line px-4 py-3 text-right print:border print:border-black print:px-2 print:py-1.5">
+                <th className="border-b border-line px-4 py-3 text-right print:border print:border-ink print:px-2 print:py-1.5">
                   納品待ち
                 </th>
                 <th className="border-b border-line px-4 py-3 print:hidden">発注候補</th>
-                <th className="hidden border border-black px-2 py-1.5 print:table-cell">確認</th>
+                <th className="hidden border border-ink px-2 py-1.5 print:table-cell">確認</th>
               </tr>
             </thead>
             <tbody className="print:hidden">
@@ -306,7 +306,7 @@ export default async function ShortagePage({ searchParams }: PageProps) {
           </table>
         </section>
 
-        <p className="hidden text-[10px] text-black print:block">
+        <p className="hidden text-xs text-ink print:block">
           在庫棚と照合してください。
         </p>
       </div>

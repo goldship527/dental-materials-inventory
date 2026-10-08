@@ -164,10 +164,10 @@ function NavLink({
       aria-current={isCurrent ? "page" : undefined}
       className={
         isCurrent
-          ? `${baseClassName} border border-accent/30 bg-teal-50 text-accent`
+          ? `${baseClassName} border border-accent/30 bg-tint text-accent`
           : utility
-            ? `${baseClassName} border border-line bg-white/80 text-muted transition hover:border-accent hover:bg-white hover:text-accent`
-            : `${baseClassName} border border-transparent text-muted transition hover:border-line hover:bg-white/80 hover:text-ink`
+            ? `${baseClassName} border border-line bg-panel/80 text-muted transition hover:border-accent hover:bg-panel hover:text-accent`
+            : `${baseClassName} border border-transparent text-muted transition hover:border-line hover:bg-panel/80 hover:text-ink`
       }
     >
       {item.label}
@@ -242,11 +242,11 @@ export async function AppNav({ current }: AppNavProps) {
   const shouldShowContextControls =
     shouldShowWorkStaffSelector || clinicSelection?.canSelectClinic;
   const utilityButtonClassName = isAdminMode
-    ? "inline-flex h-9 shrink-0 items-center whitespace-nowrap rounded border border-line bg-white/80 px-2 text-xs font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent"
-    : "inline-flex h-11 shrink-0 items-center whitespace-nowrap rounded border border-line bg-white/80 px-3 text-sm font-semibold text-muted transition hover:border-accent hover:bg-white hover:text-accent sm:h-9";
+    ? "inline-flex h-9 shrink-0 items-center whitespace-nowrap rounded border border-line bg-panel/80 px-2 text-xs font-semibold text-muted transition hover:border-accent hover:bg-panel hover:text-accent"
+    : "inline-flex h-11 shrink-0 items-center whitespace-nowrap rounded border border-line bg-panel/80 px-3 text-sm font-semibold text-muted transition hover:border-accent hover:bg-panel hover:text-accent sm:h-9";
   const logoutButtonClassName = isAdminMode
-    ? "inline-flex h-9 shrink-0 items-center justify-center whitespace-nowrap rounded border border-line bg-white/80 px-2 text-xs font-semibold text-muted transition hover:border-danger hover:bg-white hover:text-danger disabled:cursor-not-allowed disabled:opacity-50"
-    : "inline-flex h-11 shrink-0 items-center justify-center whitespace-nowrap rounded border border-line bg-white/80 px-3 text-sm font-semibold text-muted transition hover:border-danger hover:bg-white hover:text-danger disabled:cursor-not-allowed disabled:opacity-50 sm:h-9";
+    ? "inline-flex h-9 shrink-0 items-center justify-center whitespace-nowrap rounded border border-line bg-panel/80 px-2 text-xs font-semibold text-muted transition hover:border-danger hover:bg-panel hover:text-danger disabled:cursor-not-allowed disabled:opacity-50"
+    : "inline-flex h-11 shrink-0 items-center justify-center whitespace-nowrap rounded border border-line bg-panel/80 px-3 text-sm font-semibold text-muted transition hover:border-danger hover:bg-panel hover:text-danger disabled:cursor-not-allowed disabled:opacity-50 sm:h-9";
 
   return (
     <nav
@@ -297,7 +297,7 @@ export async function AppNav({ current }: AppNavProps) {
         {shouldShowContextRow && activeClinicContext ? (
           <div className="flex flex-col gap-2 border-t border-line/70 py-2 md:flex-row md:items-center md:justify-between">
             <div className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-1">
-              <p className="truncate text-xl font-semibold text-accent">{activeClinicContext.clinicName}</p>
+              <p className="truncate text-lg font-semibold text-accent">{activeClinicContext.clinicName}</p>
               {session?.user?.name ? (
                 <p className="truncate text-sm text-muted">{session.user.name} としてログイン中</p>
               ) : null}
