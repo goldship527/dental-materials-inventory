@@ -1,0 +1,163 @@
+# Codex指示書: 発注画面の行の整理（spec §97）
+
+作成: 2026-10-09 Claude Code（立案層）
+状態: 利用者決定済み。Codexの実装待ち。
+
+## 0. 背景と目的
+
+- 利用者の指摘:「状態・操作のところが長くなっていて、自然と見えにくい画面になっている」「そもそも確認待ちはいる？」
+- 決定（2026-10-09、利用者）:
+  1. 確認待ち（`SUGGESTED`）の状態は残す。代わりに一括確認と表示の簡素化で軽くする。
+  2. 「すべて」表示では、納品済み・見送りの枠を初期状態で折りたたむ（初期フィルタ「すべて」は維持）。
+- 仕様の正本は `docs/spec.md` §97、見た目は `docs/design.md` §5.5。本書は実装の手順と確認方法だけを書く。仕様と食い違ったら仕様を優先し、作業を止めて報告する。
+
+## 1. 現状の問題（コードで確認済み）
+
+| # | 問題 | 場所 |
+|---|---|---|
+| A | 状態の重複。行は状態別の枠に入っているのに行にもバッジ。納品済みは「納品済み」が3回 | `src/app/(app)/orders/order-request-row.tsx` 「状態・操作」の `<td>` |
+| B | 納品待ちの発注記録の補助情報（記録ID・発注スタッフ・送付方法・送付メモ・先方対応メモ）を常時5行表示 | 同上 |
+| C | 「状態・メモを編集」が全状態のセレクト＋送付情報＋メモの大きなフォーム。開くと記録情報がもう一度並ぶ | 同上 `activePanel === "status"` |
+| D | 確認待ちの「不足」が2回、違う数で出る（`shortageCount` と `requestedQuantity`） | 「在庫状況」の `<td>` |
+| E | 行の左の色線が Tailwind 既定色（`border-l-blue-400`・`green-400`・`yellow-400`・`teal-500`・`gray-300`） | `getRowToneClass` |
+| F | 行内ボタンが高さ32px（`h-8`）・文字12px（`text-xs`）。design.md §5.1 は40px以上・14px | 行内の全ボタン |
+| G | 「不足」の数字が朱（`text-danger`）。design.md §2.2 は朱を在庫0とエラーだけに使う | 「在庫状況」の `<td>` |
+| H | `updateOrderRequestStatusWithStateAction` は `memo` が無いと空で上書きする。名前の付いた操作ボタンにするとメモが消える | `src/lib/actions/orders.ts` 490行付近 |
+
+## 2. 実装指示
+
+### 2.1 ブランチ
+
+- ブランチ `ui/orders-row-simplification` は Claude Code が作成済み。文書の変更（`docs/spec.md` §97、`docs/design.md` §5.5、本書、`docs/dev-log.md` の朝礼反映）は、このブランチの最初のコミットに入っている（未push）。このブランチで続けて実装する。
+- 未追跡の `.playwright-cli/` と `docs/codex-handoff-barcode-batch-mode.md` は本件と無関係。触らない・コミットしない。
+
+### 2.2 サーバー（`src/lib/actions/orders.ts`）
+
+1. **メモの扱い（§97.5）**
+   - `updateOrderRequestStatusWithStateAction`: `formData.has("memo")` が偽なら `memo: undefined` を渡す。
+   - `updateOrderRequestStatusForContext`: `input.memo` の型を `string | null | undefined` にし、`undefined` のときは `memo` を更新データに含めない。
+   - 既存の呼び出し元（テスト含む）は `memo` を明示的に渡しているので、挙動は変わらない。
+2. **一括確認（§97.1）**
+   - 新設: `confirmOrderSuggestionsForContext(context, { orderRequestIds, revalidate? })` と、フォーム用の `confirmOrderSuggestionsWithStateAction(prevState, formData)`（`OrderActionState` を返す）。
+   - 1つの `prisma.$transaction` の中で、`markOrderRequestsOrderedForContext` と同じ順にする。
+     1. ロックなしで対象の `productId` を読む
+     2. `lockOrderRequestProducts`（商品ID昇順）
+     3. 発注行ID昇順に `lockOrderReceipt`
+     4. `clinicId` 一致かつ `status = "SUGGESTED"` で読み直す
+   - 0件なら `OrderBusinessError("確認待ちの候補が見つかりません。一覧を更新してください。")` を投げる。
+   - `updateMany` で `status: "CONFIRMED"` にする。条件に `status: "SUGGESTED"` を含める。
+   - 商品ID昇順に、`clearOrderSuggestionSuppression` と `syncOrderSuggestion`（既存の1件確認と同じ引数）を呼ぶ。
+   - 戻り値の件数で案内文を作る。例:「5件を発注予定にしました（1件は状態が変わったため対象外）。」
+   - 想定外の例外は既存の `toOrderActionError`（§94.5の定型文）に任せる。
+
+### 2.3 画面（`src/app/(app)/orders/`）
+
+1. **`page.tsx`**
+   - 表の見出し「状態・操作」→「記録・操作」。印刷用の列（状態・備考・確認）は変えない。
+   - 「確認待ち」枠の見出しの右に、一括確認のフォームを置く。
+     - 文言は「{N}件をまとめて発注予定へ」。
+     - `btn-secondary`・高さ40px以上・`text-sm`・`print:hidden`。
+     - 結果の案内文は、その枠の見出しの下に表示する。クライアント部品が必要なら `supplier-order-record-panel.tsx` と同じ形で新しいファイルを作る。
+   - 状態フィルタが `ALL` のとき、「納品済み」「見送り」の枠は見出しだけを表示する（§97.4）。
+     - 見出しをボタンにし、「納品済み N件（開く）」「…（閉じる）」と `aria-expanded` を付ける。中身は既定で隠す。
+     - 状態は保存しない。
+     - 隠し方は `hidden print:block` 系にし、印刷では全行を出す。閉じた `<details>` は印刷で中身が出ないので使わない。
+   - フィルタが `RECEIVED` / `SKIPPED` のときは開いた状態にする。
+2. **`order-request-row.tsx`**
+   - `getRowToneClass` を削除し、行の左の色線をなくす（問題E）。
+   - 「在庫状況」:
+     - 画面では「現在」「基準」の2つだけ。「不足」は `hidden print:block` で印刷にだけ残す。
+     - 数字は墨（`text-ink`）。朱をやめる（問題G）。
+     - 納品済み・見送りの行は、画面では「—」にする（印刷は現行どおり）。
+     - 確認待ちの網掛けの「不足 N」の枠は削除する（問題D）。
+   - 「発注量」:
+     - 確認待ちの行は「発注 N（単位）」と表示する。単位は `row.orderUnit` があるときだけ。
+     - その下に折りたたみ「計算の内訳」を置き、中は「基準 a − 現在庫 b − 納品待ち c − 発注予定 d」にする。`<details>` でよい（`print:hidden`）。
+     - 「数量変更」「数量を変えて発注予定へ」は現行の位置のまま。
+   - 「記録・操作」は spec §97.3 の表どおり。閉じた状態の要素は最大3つにする。
+     - 記録の1行:
+       - 納品待ちは「{送付方法}・{MM/DD}・{発注スタッフ名}」。無い項目は省き、区切りも詰める。
+       - 納品済みは「✓ {MM/DD} 受領 {receivedQuantity}個・{確認スタッフ名}」（`text-success`）。
+       - 発注予定・見送りは `memo` を1行（`line-clamp-1`）。
+     - 「記録の詳細」: 発注記録ID（下8桁）、送付メモ、先方対応メモ、納品メモ、備考メモ（1行に収まらない分）。`<details>`・`print:hidden`。中身が無ければ出さない。
+     - 主な操作: 納品待ちの「納品確認」だけ。既存の納品確認フォームをそのまま使う。
+     - 「その他の操作」ボタン: 押すと、その状態で使える操作ボタンを縦に並べる（既存の `togglePanel` と同じ開閉方式で、パネル名 `more` を追加）。ホバーで開く形にしない。各操作は次のとおり。
+
+| 操作 | 送る内容 | 備考 |
+|---|---|---|
+| この行だけ発注予定へ | `status=CONFIRMED` | 確認待ちのみ |
+| 見送り | `status=SKIPPED` | 確認待ち・発注予定。メモ欄を開いて理由を任意入力できるようにする（入力欄を出す場合は `memo` を送る） |
+| この行だけ発注を記録 | `status=ORDERED`＋送付方法（必須）・送付メモ・先方対応メモ・`staffOperatorId` | 発注予定のみ。現行の状態フォームの該当部分を移す。画面上部の担当者が未選択なら押せない（現行と同じ案内） |
+| 発注記録を修正 | `status=ORDERED`＋送付方法・送付メモ・先方対応メモ | 納品待ちのみ。現在値を初期値にする |
+| 発注予定に戻す | `status=CONFIRMED` | 納品待ち・見送り。補足「誤って発注を記録した場合に使います。」（納品待ちのとき） |
+| 納品待ちを打ち切る（見送り） | `status=SKIPPED` | 納品待ちのみ。補足「入荷しない分を待たない時に使います。納品待ちの合計から外れます。」 |
+| メモを編集 | 現在の `status`＋`memo` | 発注予定・納品待ち・見送り。状態は変えない |
+| 納品確認を取り消す | 既存の取り消しフォーム | 納品済みのみ。`btn-danger` を維持 |
+
+   - 状態を変えるボタンは `memo` を送らない（§97.5でメモを保持する）。
+   - 状態バッジ（`getStatusBadgeClass` と、納品済みの重複する小札・緑の枠）は画面から削除する。印刷用の状態セルは残す。
+   - 行内のボタンと入力欄はすべて高さ40px以上（`min-h-10` / `h-10`）、文字は `text-sm`。`h-8`・`h-9`・`text-xs` のボタンを残さない（問題F）。数量の −／＋ は40px角。
+   - 全状態のセレクト `statusOptions`・`statusOptionLabels`・`selectedStatus` は不要になったら削除する。
+3. 文言は spec §97 と本書のとおり。新しい色・トークンを足さない。Tailwind 既定パレットのクラスを使わない。
+
+### 2.4 変えないもの
+
+- `/orders/print`、発注書下書き、印刷時の表示内容
+- §94・§95 の業務規則、DB・Enum、自動計算、ホームの「確認待ち N件」
+- 「発注済みにする」パネル（`supplier-order-record-panel.tsx`）の動作。ボタンの高さ・文字だけ、行内と同じ基準に合わせてよい
+
+## 3. テスト
+
+### 3.1 自動テスト（架空データ、既存の隔離DBの仕組みを使う）
+
+`tests/order-request-status.test.ts` に追加するか、新しく `tests/order-suggestion-bulk-confirm.test.ts` を作る。
+
+| ID | 内容 | 期待 |
+|---|---|---|
+| T1 | 同じ発注先の確認待ち3件を一括確認 | 3件とも `CONFIRMED`、各商品の `autoOrderSuppressedAt` が null、確認待ちが再作成されない |
+| T2 | 3件のうち1件を先に `SKIPPED` にしてから一括確認 | 2件だけ `CONFIRMED`、返り値で対象外1件 |
+| T3 | 対象が全て確認待ちでない | `OrderBusinessError`「確認待ちの候補が見つかりません…」 |
+| T4 | 他院の発注行IDを混ぜる | 他院の行は変わらない |
+| T5 | メモ「備考A」のある納品待ちを、`memo` を渡さずに `CONFIRMED` へ戻す | メモ「備考A」が残る |
+| T6 | 同じ行で `memo: null` を明示して状態変更 | メモが空になる（従来どおり） |
+
+- テストは既存と同じく `corepack pnpm exec tsx tests/<ファイル>` で実行する（DBを使うので隔離DBでのみ）。新しいファイルを作った場合は `.github/workflows/receipt-regression.yml` の「Receipt and stock regression tests」に1行追加する。
+- 同ワークフローの既存テスト（`order-request-status`・`order-revert-and-edit-guards`・`auto-order-suggestions` ほか）が全て通ること。
+
+### 3.2 型・ビルド・機械検査
+
+- `corepack pnpm typecheck`、`corepack pnpm build`
+- `src/app/(app)/orders/` について次がすべて0件:
+  - Tailwind既定パレットのクラス（`-(red|blue|green|yellow|teal|gray|slate|…)-\d{2,3}`）
+  - HEXの直書き
+  - `text-[` の任意サイズ
+  - 行内の `h-8`・`h-9` のボタン
+- `docs/design.md` §7 と同じ機械検査を `orders` 配下で実施し、件数を記録する。
+
+### 3.3 画面確認（架空データ、隔離環境。公開DB・本番に接続しない）
+
+- 1つの発注先に、確認待ち2・発注予定2・納品待ち2（送付メモ・先方対応メモあり／なし）・納品済み2・見送り1を用意する。
+- 幅1024×768・768×1024・390×844で、次を確認する。
+  1. 閉じた状態で、各行の「記録・操作」列の要素が最大3つ
+  2. 状態バッジが行に出ない
+  3. 「不足」の数字が画面に出ず、朱の数字が無い
+  4. 「すべて」で納品済み・見送りが見出しだけ、押すと開く。フィルタ「納品済み」では開いている
+  5. 一括確認で確認待ちが発注予定へ移り、案内文が出る
+  6. 「発注予定に戻す」でメモが残る
+  7. 横はみ出し0px
+- **行の高さの計測**: 変更前（`master`）と変更後で、各状態の行の高さ（全パネルを閉じた状態）を3幅で計測し、表にして dev-log に残す。納品待ち（メモあり）の行が変更前より低くなっていること。
+- 印刷プレビュー（`/orders` の印刷）で、閉じた納品済み・見送りの行も含めて全行が出ること。状態・備考列が現行どおりであること。
+- キーボードだけで「その他の操作」→各操作→閉じるが行え、フォーカスが黄と墨の二重リングで見えること。
+
+## 4. 完了条件
+
+- 3.1〜3.3が全て成功し、結果（件数・計測表）が `docs/dev-log.md` にある。
+- PRを作成し、回帰CIとVercel Previewが成功している。**マージ・本番公開はしない**（Claude Codeのレビューと利用者の指示を待つ）。
+- dev-log の末尾に朝礼反映ブロックを追記している（前回の「次のアクション」の引き継ぎ規則を守る）。
+
+## 5. 実装後にClaude Codeがレビューする点
+
+- spec §97.3 の表と画面の操作が1対1で合っているか（不足・余分なし）
+- メモ保持（T5）と一括確認のロック順（§95.7）
+- 印刷で行が欠けないこと
+- 状態遷移の規則（§94.4・§95.6）の挙動が、画面の変更によって変わっていないか
