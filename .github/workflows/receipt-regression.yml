@@ -60,6 +60,7 @@ jobs:
           corepack pnpm exec tsx tests/order-revert-and-edit-guards.test.ts
           corepack pnpm exec tsx tests/barcode-batch-order-receive.test.ts
           corepack pnpm exec tsx tests/order-request-status.test.ts
+          corepack pnpm exec tsx tests/order-suggestion-bulk-confirm.test.ts
           corepack pnpm exec tsx tests/auto-order-suggestions.test.ts
           node --import tsx --test tests/card-issue.test.ts
       - name: Typecheck and build

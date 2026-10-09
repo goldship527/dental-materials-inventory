@@ -13,8 +13,10 @@ import {
   type OrderRequestStatusValue,
 } from "@/lib/orders/status";
 import { OrderRequestTableRow } from "./order-request-row";
+import { OrderStatusBlock } from "./order-status-block";
 import { OrdersPrintButton } from "./print-button";
 import { SupplierOrderRecordPanel } from "./supplier-order-record-panel";
+import { SupplierSuggestionConfirm } from "./supplier-suggestion-confirm";
 
 type OrderListFilterValue = "ALL" | "SUGGESTED" | "PLANNED" | "AWAITING_RECEIPT" | "RECEIVED" | "SKIPPED";
 type OrderStatusFilterValue = Exclude<OrderListFilterValue, "ALL">;
@@ -196,7 +198,7 @@ function OrderRequestRowsTable({
             <th className="border-b border-accent px-4 py-3 print:border print:border-ink print:px-2 print:py-1.5">
               発注量
             </th>
-            <th className="border-b border-accent px-4 py-3 print:hidden">状態・操作</th>
+            <th className="border-b border-accent px-4 py-3 print:hidden">記録・操作</th>
             <th className="hidden border border-ink px-2 py-1.5 print:table-cell">状態</th>
             <th className="hidden border border-ink px-2 py-1.5 print:table-cell">備考</th>
             <th className="hidden border border-ink px-2 py-1.5 print:table-cell">確認</th>
@@ -205,7 +207,7 @@ function OrderRequestRowsTable({
         <tbody>
           {rows.map((row) => (
             <OrderRequestTableRow
-              key={`${row.id}-${row.status}-${row.requestedQuantity}-${row.memo ?? ""}-${row.orderedMethod ?? ""}-${row.orderedMemo ?? ""}-${row.supplierResponseMemo ?? ""}`}
+              key={`${row.id}-${row.status}-${row.requestedQuantity}-${row.memo ?? ""}-${row.orderedMethod ?? ""}-${row.orderedMemo ?? ""}-${row.supplierResponseMemo ?? ""}-${row.receivedAt?.getTime() ?? ""}-${row.receivedQuantity ?? ""}-${row.receivedMemo ?? ""}`}
               clinicId={clinicId}
               row={row}
               staffOperators={staffOperators}
@@ -328,17 +330,17 @@ export default async function OrdersPage({ searchParams }: PageProps) {
             </p>
           </div>
           <div className="flex w-full gap-2 overflow-x-auto pb-1 print:hidden md:w-auto md:justify-end md:overflow-visible md:pb-0">
-            <a className="inline-flex h-9 shrink-0 items-center justify-center rounded btn-secondary px-3 text-xs font-semibold transition" href="/shortage">
+            <a className="inline-flex h-10 shrink-0 items-center justify-center rounded btn-secondary px-3 text-sm font-semibold transition" href="/shortage">
               不足一覧へ
             </a>
             <a
-              className="inline-flex h-9 shrink-0 items-center justify-center rounded btn-secondary px-3 text-xs font-semibold transition"
+              className="inline-flex h-10 shrink-0 items-center justify-center rounded btn-secondary px-3 text-sm font-semibold transition"
               href="/orders/print"
             >
               発注書下書き
             </a>
             <a
-              className="inline-flex h-9 shrink-0 items-center justify-center rounded btn-secondary px-3 text-xs font-semibold transition"
+              className="inline-flex h-10 shrink-0 items-center justify-center rounded btn-secondary px-3 text-sm font-semibold transition"
               href="/order-records"
             >
               発注記録
@@ -435,14 +437,6 @@ export default async function OrdersPage({ searchParams }: PageProps) {
               const receivedRows = sortRowsByStatusFlow(supplierRows.filter((row) => row.status === "ORDERED" && row.receivedAt));
               const skippedRows = sortRowsByStatusFlow(supplierRows.filter((row) => row.status === "SKIPPED"));
               const rowBlocks = [
-                {
-                  key: "suggested",
-                  title: "確認待ち",
-                  description: "在庫変動から自動計算・スタッフ確認待ち",
-                  rows: suggestedRows,
-                  className: "border-line",
-                  headerClassName: "bg-tint",
-                },
                 {
                   key: "active",
                   title: "発注予定",
@@ -545,38 +539,37 @@ export default async function OrdersPage({ searchParams }: PageProps) {
                   </div>
                 </div>
                 <div className="grid gap-3 bg-subtle/30 p-3 print:bg-panel print:p-0">
+                  <SupplierSuggestionConfirm orderRequestIds={suggestedRows.map((row) => row.id)}>
+                    <OrderRequestRowsTable
+                      clinicId={context.clinicId}
+                      rows={suggestedRows}
+                      staffOperators={staffOperators}
+                    />
+                  </SupplierSuggestionConfirm>
                   {rowBlocks.map((block) => (
-                    <section
+                    <OrderStatusBlock
                       key={block.key}
-                      className={`overflow-hidden rounded border bg-panel print:break-inside-avoid print:rounded-none print:border-ink ${block.className}`}
+                      title={block.title}
+                      description={block.description}
+                      count={block.rows.length}
+                      className={block.className}
+                      headerClassName={block.headerClassName}
+                      foldInitially={selectedStatus === "ALL" && (block.key === "received" || block.key === "skipped")}
+                      action={block.key === "active" && activeRows.length > 0 ? (
+                        <SupplierOrderRecordPanel
+                          clinicId={context.clinicId}
+                          orderRequestIds={activeRows.map((row) => row.id)}
+                          printHref={buildOrdersPrintHref(activeRows[0]?.supplierId)}
+                          staffOperators={staffOperators}
+                        />
+                      ) : null}
                     >
-                      <div
-                        className={`flex flex-col gap-2 border-b border-line px-3 py-2 text-sm lg:flex-row lg:items-start lg:justify-between print:border-ink print:bg-panel print:px-2 print:py-1.5 print:text-xs ${block.headerClassName}`}
-                      >
-                        <div>
-                          <h3 className="font-semibold">{block.title}</h3>
-                          <p className="mt-0.5 text-xs text-muted print:text-ink">{block.description}</p>
-                        </div>
-                        <div className="flex flex-wrap items-start justify-end gap-2">
-                          <span className="rounded border border-line bg-panel/80 px-2 py-1 text-xs font-semibold text-muted print:border-ink print:text-ink">
-                            {block.rows.length} 件
-                          </span>
-                          {block.key === "active" && activeRows.length > 0 ? (
-                            <SupplierOrderRecordPanel
-                              clinicId={context.clinicId}
-                              orderRequestIds={activeRows.map((row) => row.id)}
-                              printHref={buildOrdersPrintHref(activeRows[0]?.supplierId)}
-                              staffOperators={staffOperators}
-                            />
-                          ) : null}
-                        </div>
-                      </div>
                       <OrderRequestRowsTable
                         clinicId={context.clinicId}
                         rows={block.rows}
                         staffOperators={staffOperators}
                       />
-                    </section>
+                    </OrderStatusBlock>
                   ))}
                 </div>
                 </section>

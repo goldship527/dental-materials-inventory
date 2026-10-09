@@ -16,7 +16,11 @@ import {
   lockOrderRequestProducts,
   lockStockItem,
 } from "@/lib/orders/locks";
-import { clearOrderSuggestionSuppression, syncOrderSuggestion } from "@/lib/orders/suggestions";
+import {
+  clearOrderSuggestionSuppression,
+  syncOrderSuggestion,
+  syncOrderSuggestionsInSeparateTransactions,
+} from "@/lib/orders/suggestions";
 
 const orderRequestIdSchema = z.string().min(1);
 const orderRequestIdsSchema = z.array(orderRequestIdSchema).min(1);
@@ -495,22 +499,32 @@ export async function updateOrderRequestStatusWithStateAction(
     const context = await requireActiveClinic();
     const orderRequestId = orderRequestIdSchema.parse(formData.get("orderRequestId"));
     const parsedStatus = orderRequestStatusSchema.parse(formData.get("status"));
-    const status = parsedStatus === "DRAFT" ? "CONFIRMED" : parsedStatus;
-    const memoValue = memoSchema.parse(formData.get("memo") ?? "");
+    const memoOnly = formData.get("memoOnly") === "on";
+    const status = parsedStatus === "DRAFT" && !memoOnly ? "CONFIRMED" : parsedStatus;
+    const memoValue = formData.has("memo") ? memoSchema.parse(formData.get("memo")) : undefined;
     const orderedMethodValue = formData.get("orderedMethod");
-    const orderedMemoValue = orderedMemoSchema.parse(formData.get("orderedMemo") ?? "");
-    const supplierResponseMemoValue = supplierResponseMemoSchema.parse(formData.get("supplierResponseMemo") ?? "");
+    const orderedMemoValue = formData.has("orderedMemo")
+      ? orderedMemoSchema.parse(formData.get("orderedMemo"))
+      : undefined;
+    const supplierResponseMemoValue = formData.has("supplierResponseMemo")
+      ? supplierResponseMemoSchema.parse(formData.get("supplierResponseMemo"))
+      : undefined;
     const orderedByStaffIdValue = formData.get("staffOperatorId");
-    const memo = memoValue.length > 0 ? memoValue : null;
+    const memo = memoValue === undefined ? undefined : memoValue.length > 0 ? memoValue : null;
 
     const request = await updateOrderRequestStatusForContext(context, {
       orderRequestId,
       status,
+      expectedStatus: memoOnly ? status : undefined,
       memo,
       orderedMethod:
-        status === "ORDERED" ? orderSendMethodSchema.parse(orderedMethodValue || undefined) : null,
-      orderedMemo: orderedMemoValue.length > 0 ? orderedMemoValue : null,
-      supplierResponseMemo: supplierResponseMemoValue.length > 0 ? supplierResponseMemoValue : null,
+        status === "ORDERED" && formData.has("orderedMethod")
+          ? orderSendMethodSchema.parse(orderedMethodValue || undefined)
+          : undefined,
+      orderedMemo: orderedMemoValue === undefined ? undefined : orderedMemoValue.length > 0 ? orderedMemoValue : null,
+      supplierResponseMemo: supplierResponseMemoValue === undefined
+        ? undefined
+        : supplierResponseMemoValue.length > 0 ? supplierResponseMemoValue : null,
       orderedByStaffId:
         status === "ORDERED" && typeof orderedByStaffIdValue === "string" && orderedByStaffIdValue.length > 0
           ? staffOperatorIdSchema.parse(orderedByStaffIdValue)
@@ -556,7 +570,8 @@ export async function updateOrderRequestStatusForContext(
   input: {
     orderRequestId: string;
     status: OrderRequestStatusValue;
-    memo: string | null;
+    expectedStatus?: OrderRequestStatusValue;
+    memo?: string | null;
     orderedMethod?: (typeof orderSendMethodValues)[number] | null;
     orderedMemo?: string | null;
     supplierResponseMemo?: string | null;
@@ -608,6 +623,10 @@ export async function updateOrderRequestStatusForContext(
 
     if (!target) {
       throw new OrderBusinessError("対象の発注候補が見つかりません。");
+    }
+
+    if (input.expectedStatus && target.status !== input.expectedStatus) {
+      throw new OrderBusinessError("状態が変わりました。一覧を更新してください。");
     }
 
     if (target.receivedAt && input.status !== "ORDERED") {
@@ -721,7 +740,7 @@ export async function updateOrderRequestStatusForContext(
       },
       data: {
         status: input.status,
-        memo: input.memo,
+        ...(input.memo !== undefined ? { memo: input.memo } : {}),
         orderRecordId,
         orderedAt,
         orderedMethod,
@@ -1367,6 +1386,126 @@ export async function revertOrderReceiptForContext(
   }
 
   return result;
+}
+
+export async function confirmOrderSuggestionsWithStateAction(
+  _previousState: OrderActionState,
+  formData: FormData,
+): Promise<OrderActionState> {
+  try {
+    const context = await requireActiveClinic();
+    const orderRequestIds = orderRequestIdsSchema.parse(formData.getAll("orderRequestId"));
+    const result = await confirmOrderSuggestionsForContext(context, { orderRequestIds });
+    if (result.partialFailure) {
+      return {
+        status: "error",
+        message: `${result.confirmedCount}件を発注予定にしました。残りは処理できませんでした。一覧を更新して、もう一度押してください。`,
+      };
+    }
+    return {
+      status: "success",
+      message: `${result.confirmedCount}件を発注予定にしました${result.excludedCount > 0 ? `（${result.excludedCount}件は状態が変わったため対象外）` : ""}。`,
+    };
+  } catch (error) {
+    return toOrderActionError(error);
+  }
+}
+
+export async function confirmOrderSuggestionsForContext(
+  context: ActiveClinicContext,
+  input: { orderRequestIds: string[]; revalidate?: boolean },
+) {
+  const orderRequestIds = [...new Set(orderRequestIdsSchema.parse(input.orderRequestIds))];
+  const initialTargets = await prisma.orderRequest.findMany({
+    where: { id: { in: orderRequestIds }, clinicId: context.clinicId, status: "SUGGESTED" },
+    select: { id: true, productId: true, supplierId: true },
+  });
+  if (initialTargets.length === 0) {
+    throw new OrderBusinessError("確認待ちの候補が見つかりません。一覧を更新してください。");
+  }
+  const supplierIds = new Set(initialTargets.map(({ supplierId }) => supplierId ?? ""));
+  if (supplierIds.size > 1) {
+    throw new OrderBusinessError("確認待ちの一括確認は発注先ごとに行ってください。");
+  }
+  const supplierId = initialTargets[0]!.supplierId ?? "";
+  const idsByProduct = new Map<string, string[]>();
+  for (const target of initialTargets) {
+    const ids = idsByProduct.get(target.productId) ?? [];
+    ids.push(target.id);
+    idsByProduct.set(target.productId, ids);
+  }
+  const productIds = [...idsByProduct.keys()].sort();
+  let confirmedCount = 0;
+  let excludedCount = orderRequestIds.length - initialTargets.length;
+  let partialFailure = false;
+  const confirmedProductIds = new Set<string>();
+
+  for (let offset = 0; offset < productIds.length; offset += 20) {
+    const chunkProductIds = productIds.slice(offset, offset + 20);
+    const chunkIds = chunkProductIds.flatMap((productId) => idsByProduct.get(productId)!);
+    try {
+      const chunk = await prisma.$transaction(async (tx) => {
+        await lockOrderRequestProducts(tx, context.clinicId, chunkProductIds);
+        for (const orderRequestId of [...chunkIds].sort()) {
+          await lockOrderReceipt(tx, orderRequestId);
+        }
+        const targets = await tx.orderRequest.findMany({
+          where: { id: { in: chunkIds }, clinicId: context.clinicId, status: "SUGGESTED" },
+          select: { id: true, productId: true, supplierId: true },
+        });
+        if (targets.some((target) => (target.supplierId ?? "") !== supplierId)) {
+          throw new OrderBusinessError("確認待ちの一括確認は発注先ごとに行ってください。");
+        }
+        if (targets.length === 0) return { count: 0, productIds: [] as string[] };
+
+        const updated = await tx.orderRequest.updateMany({
+          where: {
+            id: { in: targets.map(({ id }) => id) },
+            clinicId: context.clinicId,
+            status: "SUGGESTED",
+          },
+          data: { status: "CONFIRMED" },
+        });
+        if (updated.count === 0) return { count: 0, productIds: [] as string[] };
+
+        const updatedProductIds = [...new Set(targets.map(({ productId }) => productId))];
+        await tx.stockItem.updateMany({
+          where: {
+            clinicId: context.clinicId,
+            productId: { in: updatedProductIds },
+            autoOrderSuppressedAt: { not: null },
+          },
+          data: { autoOrderSuppressedAt: null },
+        });
+        return { count: updated.count, productIds: updatedProductIds };
+      });
+      confirmedCount += chunk.count;
+      excludedCount += chunkIds.length - chunk.count;
+      for (const productId of chunk.productIds) confirmedProductIds.add(productId);
+    } catch (error) {
+      if (offset === 0) throw error;
+      partialFailure = true;
+      break;
+    }
+  }
+
+  if (confirmedProductIds.size > 0) {
+    await syncOrderSuggestionsInSeparateTransactions(prisma, {
+      organizationId: context.organizationId,
+      actorUserId: context.userId,
+      scopes: [...confirmedProductIds].map((productId) => ({ clinicId: context.clinicId, productId })),
+    });
+  }
+  if (!partialFailure && confirmedCount === 0) {
+    throw new OrderBusinessError("確認待ちの候補が見つかりません。一覧を更新してください。");
+  }
+
+  if (input.revalidate ?? true) {
+    revalidateOrderPages();
+  }
+  return partialFailure
+    ? { confirmedCount, excludedCount, partialFailure: true }
+    : { confirmedCount, excludedCount };
 }
 
 export async function markOrderRequestsOrderedAction(formData: FormData) {
