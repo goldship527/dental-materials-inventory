@@ -86,6 +86,11 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
   const isReceived = row.status === "ORDERED" && Boolean(row.receivedAt);
   const isAwaitingReceipt = row.status === "ORDERED" && !row.receivedAt;
   const isPlanned = printableOrderRequestStatuses.includes(row.status);
+  const awaitingReceiptSummary = [
+    row.orderedMethod ? orderSendMethodLabels[row.orderedMethod] : null,
+    row.orderedAt ? shortDateFormatter.format(row.orderedAt) : null,
+    row.orderedByStaffName,
+  ].filter(Boolean).join("・");
   const showMemoInDetails = Boolean(row.memo && (row.status === "ORDERED" || row.memo.length > 50));
   const hasRecordDetails = Boolean(
     row.orderRecordId || row.orderedMemo || row.supplierResponseMemo || row.receivedMemo || showMemoInDetails,
@@ -289,16 +294,10 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
       </td>
       <td className="border-b border-line px-3 py-2 print:hidden">
         <div className="grid gap-2">
-          {(isAwaitingReceipt || isReceived || ((isPlanned || row.status === "SKIPPED") && row.memo)) ? (
+          {((isAwaitingReceipt && (awaitingReceiptSummary || hasRecordDetails)) || isReceived || ((isPlanned || row.status === "SKIPPED") && row.memo)) ? (
             <div className="min-w-0">
               {isAwaitingReceipt ? (
-                <p className="line-clamp-1 text-sm text-muted">
-                  {[
-                    row.orderedMethod ? orderSendMethodLabels[row.orderedMethod] : null,
-                    row.orderedAt ? shortDateFormatter.format(row.orderedAt) : null,
-                    row.orderedByStaffName,
-                  ].filter(Boolean).join("・")}
-                </p>
+                awaitingReceiptSummary ? <p className="line-clamp-1 text-sm text-muted">{awaitingReceiptSummary}</p> : null
               ) : isReceived ? (
                 <p className="line-clamp-1 text-sm font-semibold text-success">
                   ✓ {row.receivedAt ? shortDateFormatter.format(row.receivedAt) : ""} 受領 {row.receivedQuantity ?? "—"}個

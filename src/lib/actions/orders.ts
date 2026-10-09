@@ -16,7 +16,11 @@ import {
   lockOrderRequestProducts,
   lockStockItem,
 } from "@/lib/orders/locks";
-import { clearOrderSuggestionSuppression, syncOrderSuggestion } from "@/lib/orders/suggestions";
+import {
+  clearOrderSuggestionSuppression,
+  syncOrderSuggestion,
+  syncOrderSuggestionsInSeparateTransactions,
+} from "@/lib/orders/suggestions";
 
 const orderRequestIdSchema = z.string().min(1);
 const orderRequestIdsSchema = z.array(orderRequestIdSchema).min(1);
@@ -1392,6 +1396,12 @@ export async function confirmOrderSuggestionsWithStateAction(
     const context = await requireActiveClinic();
     const orderRequestIds = orderRequestIdsSchema.parse(formData.getAll("orderRequestId"));
     const result = await confirmOrderSuggestionsForContext(context, { orderRequestIds });
+    if (result.partialFailure) {
+      return {
+        status: "error",
+        message: `${result.confirmedCount}件を発注予定にしました。残りは処理できませんでした。一覧を更新して、もう一度押してください。`,
+      };
+    }
     return {
       status: "success",
       message: `${result.confirmedCount}件を発注予定にしました${result.excludedCount > 0 ? `（${result.excludedCount}件は状態が変わったため対象外）` : ""}。`,
@@ -1406,55 +1416,96 @@ export async function confirmOrderSuggestionsForContext(
   input: { orderRequestIds: string[]; revalidate?: boolean },
 ) {
   const orderRequestIds = [...new Set(orderRequestIdsSchema.parse(input.orderRequestIds))];
-  const result = await prisma.$transaction(async (tx) => {
-    const initialTargets = await tx.orderRequest.findMany({
-      where: { id: { in: orderRequestIds }, clinicId: context.clinicId },
-      select: { productId: true },
-    });
-    await lockOrderRequestProducts(tx, context.clinicId, initialTargets.map(({ productId }) => productId));
-    for (const orderRequestId of [...orderRequestIds].sort()) {
-      await lockOrderReceipt(tx, orderRequestId);
-    }
-
-    const targets = await tx.orderRequest.findMany({
-      where: { id: { in: orderRequestIds }, clinicId: context.clinicId, status: "SUGGESTED" },
-      select: { id: true, productId: true, supplierId: true },
-    });
-    if (targets.length === 0) {
-      throw new OrderBusinessError("確認待ちの候補が見つかりません。一覧を更新してください。");
-    }
-    if (new Set(targets.map(({ supplierId }) => supplierId ?? "")).size > 1) {
-      throw new OrderBusinessError("確認待ちの一括確認は発注先ごとに行ってください。");
-    }
-
-    const updated = await tx.orderRequest.updateMany({
-      where: {
-        id: { in: targets.map(({ id }) => id) },
-        clinicId: context.clinicId,
-        status: "SUGGESTED",
-      },
-      data: { status: "CONFIRMED" },
-    });
-    if (updated.count === 0) {
-      throw new OrderBusinessError("確認待ちの候補が見つかりません。一覧を更新してください。");
-    }
-
-    for (const productId of [...new Set(targets.map(({ productId }) => productId))].sort()) {
-      await clearOrderSuggestionSuppression(tx, context.clinicId, productId);
-      await syncOrderSuggestion(tx, {
-        clinicId: context.clinicId,
-        organizationId: context.organizationId,
-        productId,
-        actorUserId: context.userId,
-      });
-    }
-    return { confirmedCount: updated.count, excludedCount: orderRequestIds.length - updated.count };
+  const initialTargets = await prisma.orderRequest.findMany({
+    where: { id: { in: orderRequestIds }, clinicId: context.clinicId, status: "SUGGESTED" },
+    select: { id: true, productId: true, supplierId: true },
   });
+  if (initialTargets.length === 0) {
+    throw new OrderBusinessError("確認待ちの候補が見つかりません。一覧を更新してください。");
+  }
+  const supplierIds = new Set(initialTargets.map(({ supplierId }) => supplierId ?? ""));
+  if (supplierIds.size > 1) {
+    throw new OrderBusinessError("確認待ちの一括確認は発注先ごとに行ってください。");
+  }
+  const supplierId = initialTargets[0]!.supplierId ?? "";
+  const idsByProduct = new Map<string, string[]>();
+  for (const target of initialTargets) {
+    const ids = idsByProduct.get(target.productId) ?? [];
+    ids.push(target.id);
+    idsByProduct.set(target.productId, ids);
+  }
+  const productIds = [...idsByProduct.keys()].sort();
+  let confirmedCount = 0;
+  let excludedCount = orderRequestIds.length - initialTargets.length;
+  let partialFailure = false;
+  const confirmedProductIds = new Set<string>();
+
+  for (let offset = 0; offset < productIds.length; offset += 20) {
+    const chunkProductIds = productIds.slice(offset, offset + 20);
+    const chunkIds = chunkProductIds.flatMap((productId) => idsByProduct.get(productId)!);
+    try {
+      const chunk = await prisma.$transaction(async (tx) => {
+        await lockOrderRequestProducts(tx, context.clinicId, chunkProductIds);
+        for (const orderRequestId of [...chunkIds].sort()) {
+          await lockOrderReceipt(tx, orderRequestId);
+        }
+        const targets = await tx.orderRequest.findMany({
+          where: { id: { in: chunkIds }, clinicId: context.clinicId, status: "SUGGESTED" },
+          select: { id: true, productId: true, supplierId: true },
+        });
+        if (targets.some((target) => (target.supplierId ?? "") !== supplierId)) {
+          throw new OrderBusinessError("確認待ちの一括確認は発注先ごとに行ってください。");
+        }
+        if (targets.length === 0) return { count: 0, productIds: [] as string[] };
+
+        const updated = await tx.orderRequest.updateMany({
+          where: {
+            id: { in: targets.map(({ id }) => id) },
+            clinicId: context.clinicId,
+            status: "SUGGESTED",
+          },
+          data: { status: "CONFIRMED" },
+        });
+        if (updated.count === 0) return { count: 0, productIds: [] as string[] };
+
+        const updatedProductIds = [...new Set(targets.map(({ productId }) => productId))];
+        await tx.stockItem.updateMany({
+          where: {
+            clinicId: context.clinicId,
+            productId: { in: updatedProductIds },
+            autoOrderSuppressedAt: { not: null },
+          },
+          data: { autoOrderSuppressedAt: null },
+        });
+        return { count: updated.count, productIds: updatedProductIds };
+      });
+      confirmedCount += chunk.count;
+      excludedCount += chunkIds.length - chunk.count;
+      for (const productId of chunk.productIds) confirmedProductIds.add(productId);
+    } catch (error) {
+      if (offset === 0) throw error;
+      partialFailure = true;
+      break;
+    }
+  }
+
+  if (confirmedProductIds.size > 0) {
+    await syncOrderSuggestionsInSeparateTransactions(prisma, {
+      organizationId: context.organizationId,
+      actorUserId: context.userId,
+      scopes: [...confirmedProductIds].map((productId) => ({ clinicId: context.clinicId, productId })),
+    });
+  }
+  if (!partialFailure && confirmedCount === 0) {
+    throw new OrderBusinessError("確認待ちの候補が見つかりません。一覧を更新してください。");
+  }
 
   if (input.revalidate ?? true) {
     revalidateOrderPages();
   }
-  return result;
+  return partialFailure
+    ? { confirmedCount, excludedCount, partialFailure: true }
+    : { confirmedCount, excludedCount };
 }
 
 export async function markOrderRequestsOrderedAction(formData: FormData) {

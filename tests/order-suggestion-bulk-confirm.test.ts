@@ -43,6 +43,15 @@ async function main() {
       } });
       return { product, stock, request };
     }
+    async function makeSuggestions(count: number) {
+      const suggestions: Awaited<ReturnType<typeof makeSuggestion>>[] = [];
+      for (let offset = 0; offset < count; offset += 5) {
+        suggestions.push(...await Promise.all(
+          Array.from({ length: Math.min(5, count - offset) }, () => makeSuggestion()),
+        ));
+      }
+      return suggestions;
+    }
 
     const first = await Promise.all([makeSuggestion(), makeSuggestion(), makeSuggestion()]);
     const result1 = await confirmOrderSuggestionsForContext(context, {
@@ -109,6 +118,40 @@ async function main() {
     });
     assert.equal((await prisma.orderRequest.findUniqueOrThrow({ where: { id: memoRequest.id } })).memo, null);
     console.log("T6: pass");
+
+    const seventh = await makeSuggestions(45);
+    const result7 = await confirmOrderSuggestionsForContext(context, {
+      orderRequestIds: seventh.map(({ request }) => request.id), revalidate: false,
+    });
+    assert.deepEqual(result7, { confirmedCount: 45, excludedCount: 0 });
+    assert.equal(await prisma.orderRequest.count({ where: {
+      id: { in: seventh.map(({ request }) => request.id) }, status: "CONFIRMED",
+    } }), 45);
+    assert.equal(await prisma.stockItem.count({ where: {
+      id: { in: seventh.map(({ stock }) => stock.id) }, autoOrderSuppressedAt: null,
+    } }), 45);
+    assert.equal(await prisma.orderRequest.count({ where: {
+      productId: { in: seventh.map(({ product }) => product.id) }, status: "SUGGESTED",
+    } }), 0);
+    console.log("T7: pass");
+
+    const eighth = await makeSuggestions(45);
+    const skipped = [...eighth].sort((a, b) => a.product.id.localeCompare(b.product.id))[24]!;
+    await updateOrderRequestStatusForContext(context, {
+      orderRequestId: skipped.request.id, status: "SKIPPED", memo: null, revalidate: false,
+    });
+    const result8 = await confirmOrderSuggestionsForContext(context, {
+      orderRequestIds: eighth.map(({ request }) => request.id), revalidate: false,
+    });
+    assert.deepEqual(result8, { confirmedCount: 44, excludedCount: 1 });
+    assert.equal(await prisma.orderRequest.count({ where: {
+      id: { in: eighth.map(({ request }) => request.id) }, status: "CONFIRMED",
+    } }), 44);
+    assert.equal((await prisma.orderRequest.findUniqueOrThrow({ where: { id: skipped.request.id } })).status, "SKIPPED");
+    assert.equal(await prisma.orderRequest.count({ where: {
+      productId: { in: eighth.map(({ product }) => product.id) }, status: "SUGGESTED",
+    } }), 0);
+    console.log("T8: pass");
   } finally {
     await prisma.$disconnect();
   }
