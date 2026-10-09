@@ -666,3 +666,33 @@ grep -rnoE '\b(text|bg|border|ring)-(warning|caution)\b' src | wc -l
 - 本体の開始位置を、P2公開時（14.2）と比べる。F2で見出しの高さが増える分を明記する。
 - 出庫・納品カードの寸法は、P2（`master`）と差0px。
 - ドラフトPRで止める。マージ・公開は、Claude Code のレビュー後に利用者の指示で行う。
+
+---
+
+## 15. 仕上げPRのレビュー結果（2026-10-09・Claude Code）: 承認
+
+対象: PR #19（`ui/revision-finish`、`5131fdc`）。
+
+### 15.1 レビュー側での再現
+
+- 機械検査（既定パレット、HEX、任意・大きすぎる文字、影・グラデーション、warning/caution、disabled:opacity、表見出し12px、100vw、AppNav直接使用）は、すべて0件。
+- F1: 出庫＝`btn-primary`（藍の塗り）、納品＝藍の上罫3px＋`shadow-raise-light`、高さ `min-h-22`（88px）。
+- F2: `SectionHeading`（`tint` の面・上2pxの藍の罫・藍の文字）が51箇所。
+  - 普通の `h2` が残る6箇所は、確認ダイアログ・空状態・未納の注意で、セクション見出しではないため対象外としてよい。
+- F3: 件数は `text-xl`（22px）＋「件」は `text-label`（13px）。
+- F4: 「今日の作業を選んでください。」は0件。
+- F5: 639px以下で `h1.text-xl` を20px。
+- F6: ログインボタンは `btn-primary`。
+- F7: 入出庫履歴の絞り込みは、1024〜1279pxで `lg:grid-cols-4`、1280px以上で従来の8列。
+- F8: `PageShell` の `main` の既定値が `px-3 lg:px-6`。各ページの左右余白の指定は除去済み。印刷系の `print:px-0` は維持。
+- F9: `src/app/icon.svg`（藍に白の「材」、外部取得なし）。
+- 出庫・納品カードのファイルの差分は、外枠の余白指定の削除と、納品の日付見出しの `SectionHeading` 化だけ。カードの中身は変更なし。
+- CI（receipt-regression）、Vercel、Vercel Preview Comments はすべて成功。
+
+### 15.2 判断と公開手順
+
+- **承認する。** マージと本番公開は利用者の指示を受けてから、§13.4 と同じ手順で行う。
+  - 対象は PR #19
+  - head は `5131fdcaaac739fe20b3c08dde4c97e29c8fa5c8`
+  - 公開記録のブランチは `docs/ui-revision-finish-release`
+- 公開後、Claude Code が本番で §14.1 と同じ範囲を読み取りだけで再確認する（利用者のログインが必要）。
