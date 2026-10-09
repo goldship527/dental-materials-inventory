@@ -66,7 +66,7 @@ export default async function MedicalDeviceBarcodeLabelsPage({ searchParams }: P
   });
 
   return (
-    <PageShell current="imports" mainClassName="px-3 pt-3 pb-6 print:bg-panel print:px-0 print:py-0" shellClassName="print:bg-panel">
+    <PageShell current="imports" mainClassName="pt-3 pb-6 print:bg-panel print:px-0 print:py-0" shellClassName="print:bg-panel">
       <style>{`
         @page {
           size: A4 portrait;

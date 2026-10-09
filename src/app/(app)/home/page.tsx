@@ -1,4 +1,5 @@
 import { PageHeader } from "@/components/ui/page-header";
+import { SectionHeading } from "@/components/ui/section-heading";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { PageShell } from "@/components/ui/page-shell";
@@ -55,49 +56,49 @@ export default async function HomePage({ searchParams }: PageProps) {
     {
       title: "確認待ち",
       href: "/orders?status=SUGGESTED",
-      value: `${suggestedOrderRequestCount} 件`,
+      value: suggestedOrderRequestCount,
       note: "在庫変動から自動計算された発注候補",
       isWarning: suggestedOrderRequestCount > 0,
     },
     {
       title: "在庫0",
       href: "/shortage",
-      value: `${summary.zeroStockCount} 件`,
+      value: summary.zeroStockCount,
       note: "今日の使用前に優先確認したい材料",
       isWarning: summary.zeroStockCount > 0,
     },
     {
       title: "不足在庫",
       href: "/shortage",
-      value: `${summary.shortageCount} 件`,
+      value: summary.shortageCount,
       note: "最低在庫を下回っている材料",
       isWarning: summary.shortageCount > 0,
     },
     {
       title: "納品待ち",
       href: "/orders?status=AWAITING_RECEIPT",
-      value: `${pendingReceiveCount} 件`,
+      value: pendingReceiveCount,
       note: "受領確認を待っている発注",
       isWarning: pendingReceiveCount > 0,
     },
     {
       title: "期限ロット",
       href: "/stock-lots",
-      value: `${summary.attentionStockLotCount} 件`,
+      value: summary.attentionStockLotCount,
       note: "期限切れまたは30日以内",
       isWarning: summary.attentionStockLotCount > 0,
     },
     {
       title: "長期在庫",
       href: "/inventory/dormant",
-      value: `${summary.dormantStockCount} 件`,
+      value: summary.dormantStockCount,
       note: "過去90日以内に出庫がない在庫",
       isWarning: summary.dormantStockCount > 0,
     },
     {
       title: "異常出庫検知",
       href: "/movements/anomalies",
-      value: `${summary.stockAnomalyCount} 件`,
+      value: summary.stockAnomalyCount,
       note: "通常より出庫数が多い商品",
       isWarning: summary.stockAnomalyCount > 0,
     },
@@ -180,10 +181,10 @@ export default async function HomePage({ searchParams }: PageProps) {
   ];
 
   return (
-    <PageShell current="home" mainClassName="px-3 pt-3 pb-6 print:bg-panel print:px-0 print:py-0 lg:px-6" shellClassName="print:bg-panel">
+    <PageShell current="home" mainClassName="pt-3 pb-6 print:bg-panel print:px-0 print:py-0" shellClassName="print:bg-panel">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-3">
 
-        <PageHeader title="ホーム" description="今日の作業を選んでください。" className="print:border-none" />
+        <PageHeader title="ホーム" className="print:border-none" />
 
         {params.adminDenied ? (
           <section className="rounded border border-line border-l-4 border-l-ink bg-markSoft px-3 py-3 text-sm font-semibold text-ink shadow-sheet">
@@ -198,15 +199,15 @@ export default async function HomePage({ searchParams }: PageProps) {
               href={item.href}
               className={
                 item.tone === "out"
-                  ? "min-h-22 rounded border-2 border-accent btn-secondary p-3 transition"
-                  : "min-h-22 rounded border-2 border-muted btn-secondary p-3 transition"
+                  ? "min-h-22 rounded border border-accent btn-primary p-3 transition"
+                  : "min-h-22 rounded border border-line border-t-[3px] border-t-accent bg-panel p-3 text-ink shadow-raise-light transition hover:bg-subtle active:translate-y-0.5 active:shadow-press"
               }
             >
               <div className="flex items-start justify-between gap-4">
                 <p
                   className={
                     item.tone === "out"
-                      ? "text-xl font-semibold text-accent"
+                      ? "text-xl font-semibold text-panel"
                       : "text-xl font-semibold text-ink"
                   }
                 >
@@ -215,25 +216,25 @@ export default async function HomePage({ searchParams }: PageProps) {
                 <span
                   className={
                     item.tone === "out"
-                      ? "shrink-0 rounded bg-subtle px-3 py-1 text-sm font-semibold text-accent"
+                      ? "shrink-0 rounded bg-panel/15 px-3 py-1 text-sm font-semibold text-panel"
                       : "shrink-0 rounded bg-subtle px-3 py-1 text-sm font-semibold text-ink"
                   }
                 >
                   {item.badge}
                 </span>
               </div>
-              <p className="mt-2 max-w-2xl text-sm leading-5 text-muted">{item.description}</p>
+              <p className={`mt-2 max-w-2xl text-sm leading-5 ${item.tone === "out" ? "text-panel" : "text-muted"}`}>{item.description}</p>
             </a>
           ))}
         </section>
 
         <section className="grid gap-3">
-          <h2 className="text-lg font-semibold">今日の注意</h2>
+          <SectionHeading>今日の注意</SectionHeading>
           <div className="grid grid-cols-2 overflow-hidden rounded border border-line bg-panel sm:grid-cols-4">
             {attentionItems.map((item) => (
               <a
                 key={item.title}
-                className="flex min-h-13 items-center border-b border-r border-line px-3 py-2 transition hover:bg-tint"
+                className="flex min-h-[52px] items-center border-b border-r border-line px-3 py-2 transition hover:bg-tint"
                 href={item.href}
                 title={item.note}
               >
@@ -242,13 +243,14 @@ export default async function HomePage({ searchParams }: PageProps) {
                   <p
                     className={
                       item.isWarning && item.title === "在庫0"
-                        ? "rounded bg-panel px-2.5 py-1 text-sm font-semibold text-danger"
+                        ? "rounded bg-panel px-2.5 py-1 font-semibold text-danger"
                         : item.isWarning && (item.title === "確認待ち" || item.title === "不足在庫")
-                          ? "mark-under rounded px-2.5 py-1 text-sm font-semibold text-ink"
-                        : "rounded bg-subtle px-2.5 py-1 text-sm font-semibold text-muted"
+                          ? "mark-under rounded px-2.5 py-1 font-semibold text-ink"
+                        : "rounded bg-subtle px-2.5 py-1 font-semibold text-muted"
                     }
                   >
-                    {item.value}
+                    <span className="text-xl tabular-nums">{item.value}</span>{" "}
+                    <span className="text-label">件</span>
                   </p>
                 </div>
                 <span className="sr-only">{item.note}</span>
@@ -289,7 +291,7 @@ export default async function HomePage({ searchParams }: PageProps) {
         </section>
 
         <section className="grid gap-3 print:hidden">
-          <h2 className="text-lg font-semibold">確認メニュー</h2>
+          <SectionHeading>確認メニュー</SectionHeading>
           <div className="overflow-hidden rounded border border-line bg-panel">
             {menuItems.filter(item => isWorkflowLinkVisible(item.href)).map((item) => (
               <a
@@ -321,7 +323,7 @@ export default async function HomePage({ searchParams }: PageProps) {
 
         {canUseAdminMode ? (
           <section className="grid gap-3 print:hidden">
-            <h2 className="text-lg font-semibold">管理メニュー</h2>
+            <SectionHeading>管理メニュー</SectionHeading>
             <div className="overflow-hidden rounded border border-line bg-panel">
               {adminMenuItems.filter(item => isWorkflowLinkVisible(item.href)).map((item) => (
                 <a

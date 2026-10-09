@@ -29,7 +29,7 @@ export default async function AdminAuditLogsPage() {
   const logs = await getRecentAuditLogs(context.organizationId, 100);
 
   return (
-    <PageShell current="auditLogs" mainClassName="mx-auto grid w-full max-w-7xl gap-3 px-3 pt-3 pb-6 lg:px-6">
+    <PageShell current="auditLogs" mainClassName="mx-auto grid w-full max-w-7xl gap-3 pt-3 pb-6">
         <header className="grid gap-2">
           <p className="text-sm font-semibold text-accent">管理</p>
           <h1 className="text-xl font-bold tracking-tight text-ink">監査ログ</h1>

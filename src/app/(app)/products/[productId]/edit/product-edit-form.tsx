@@ -1,4 +1,5 @@
 "use client";
+import { SectionHeading } from "@/components/ui/section-heading";
 
 import { useActionState, useRef } from "react";
 import {
@@ -54,7 +55,7 @@ export function ProductEditForm({ product, suppliers }: ProductEditFormProps) {
       <input type="hidden" name="productId" value={product.id} />
 
       <section className="rounded border border-line bg-panel p-5 shadow-sheet">
-        <h2 className="text-lg font-semibold">基本情報</h2>
+        <SectionHeading>基本情報</SectionHeading>
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           <label className="grid gap-1 text-sm font-semibold text-muted md:col-span-2">
             商品名
@@ -148,7 +149,7 @@ export function ProductEditForm({ product, suppliers }: ProductEditFormProps) {
       </section>
 
       <section className="rounded border border-line bg-panel p-5 shadow-sheet">
-        <h2 className="text-lg font-semibold">発注・在庫判断</h2>
+        <SectionHeading>発注・在庫判断</SectionHeading>
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           <label className={decisionFieldClass}>
             主発注先

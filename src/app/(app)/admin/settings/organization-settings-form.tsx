@@ -1,4 +1,5 @@
 "use client";
+import { SectionHeading } from "@/components/ui/section-heading";
 
 import { useActionState } from "react";
 import {
@@ -22,7 +23,7 @@ export function OrganizationSettingsForm({ anomalyOutThreshold }: OrganizationSe
   return (
     <form action={action} className="grid gap-5 rounded border border-line bg-panel p-5 shadow-sheet">
       <div>
-        <h2 className="text-lg font-semibold text-ink">異常出庫検知</h2>
+        <SectionHeading>異常出庫検知</SectionHeading>
         <p className="mt-1 text-sm leading-6 text-muted">
           最新24時間の出庫数が、通常時の日次平均の何倍以上なら警告するかを設定します。
         </p>

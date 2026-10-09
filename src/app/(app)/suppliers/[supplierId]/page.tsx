@@ -1,3 +1,4 @@
+import { SectionHeading } from "@/components/ui/section-heading";
 import { PageHeader } from "@/components/ui/page-header";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
@@ -78,7 +79,7 @@ export default async function SupplierDetailPage({ params }: PageProps) {
   const ordersHref = `/orders?q=${supplierQuery}`;
 
   return (
-    <PageShell current="suppliers" mainClassName="px-3 pt-3 pb-6">
+    <PageShell current="suppliers" mainClassName="pt-3 pb-6">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-3">
 
         <PageHeader title={supplier.name}>
@@ -146,7 +147,7 @@ export default async function SupplierDetailPage({ params }: PageProps) {
         </section>
 
         <section className="rounded border border-line bg-panel p-3 shadow-sheet">
-          <h2 className="text-lg font-semibold">主なカテゴリ</h2>
+          <SectionHeading>主なカテゴリ</SectionHeading>
           <div className="mt-3 flex flex-wrap gap-2">
             {supplier.categories.length > 0 ? (
               supplier.categories.map((category) => (
@@ -161,7 +162,7 @@ export default async function SupplierDetailPage({ params }: PageProps) {
         </section>
 
         <section className="rounded border border-line bg-panel p-3 shadow-sheet">
-          <h2 className="text-lg font-semibold">連絡先</h2>
+          <SectionHeading>連絡先</SectionHeading>
           <div className="mt-4 grid gap-4 text-sm md:grid-cols-2">
             <div>
               <p className="font-semibold text-muted">住所</p>
@@ -193,7 +194,7 @@ export default async function SupplierDetailPage({ params }: PageProps) {
         <section className="grid gap-4 lg:grid-cols-[1.2fr_1fr]">
           <div className="overflow-hidden rounded border border-line bg-panel shadow-sheet">
             <div className="border-b border-line px-4 py-3">
-              <h2 className="text-lg font-semibold">取扱商品</h2>
+              <SectionHeading>取扱商品</SectionHeading>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full min-w-[760px] border-collapse text-left text-sm">
@@ -238,7 +239,7 @@ export default async function SupplierDetailPage({ params }: PageProps) {
 
           <div className="flex flex-col gap-4">
             <section className="rounded border border-line bg-panel p-3 shadow-sheet">
-              <h2 className="text-lg font-semibold">不足商品</h2>
+              <SectionHeading>不足商品</SectionHeading>
               <div className="mt-4 divide-y divide-line">
                 {shortageProducts.length > 0 ? (
                   shortageProducts.map((product) => (
@@ -261,7 +262,7 @@ export default async function SupplierDetailPage({ params }: PageProps) {
             </section>
 
             <section className="rounded border border-line bg-panel p-3 shadow-sheet">
-              <h2 className="text-lg font-semibold">発注候補</h2>
+              <SectionHeading>発注候補</SectionHeading>
               <div className="mt-4 divide-y divide-line">
                 {supplier.orderRequests.length > 0 ? (
                   supplier.orderRequests.map((request) => (

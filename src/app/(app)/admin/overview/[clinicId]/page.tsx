@@ -1,3 +1,4 @@
+import { SectionHeading } from "@/components/ui/section-heading";
 import { PageHeader } from "@/components/ui/page-header";
 import { notFound } from "next/navigation";
 import { PageShell } from "@/components/ui/page-shell";
@@ -142,7 +143,7 @@ export default async function AdminOverviewClinicDetailPage({ params, searchPara
   ];
 
   return (
-    <PageShell current="overview" mainClassName="mx-auto grid w-full max-w-7xl gap-3 px-3 pt-3 pb-6 lg:px-6">
+    <PageShell current="overview" mainClassName="mx-auto grid w-full max-w-7xl gap-3 pt-3 pb-6">
         <PageHeader title={detail.clinic.name}>
           <div>
             <p className="text-sm font-semibold text-accent">本部ダッシュボード / クリニック詳細</p>
@@ -324,7 +325,7 @@ export default async function AdminOverviewClinicDetailPage({ params, searchPara
 
         <section className="overflow-hidden rounded border border-line bg-panel shadow-sheet">
           <div className="border-b border-line px-5 py-4">
-            <h2 className="text-lg font-semibold text-ink">期限ロット要確認</h2>
+            <SectionHeading>期限ロット要確認</SectionHeading>
             <p className="mt-1 text-sm text-muted">期限切れ、または30日以内に期限を迎えるロットです。</p>
           </div>
           <div className="overflow-x-auto">

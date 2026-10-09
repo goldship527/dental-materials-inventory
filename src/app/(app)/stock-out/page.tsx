@@ -12,7 +12,7 @@ export default async function StockOutPage() {
     getActiveStaffOperatorOptionsForClinic({organizationId: context.organizationId, clinicId: context.clinicId}),
   ]);
   return (
-    <PageShell current="barcodeOut" mainClassName="px-3 pt-3 pb-6">
+    <PageShell current="barcodeOut" mainClassName="pt-3 pb-6">
       <div className="mx-auto flex max-w-7xl flex-col gap-4">
         <header>
           <h1 className="text-xl font-semibold">出庫する</h1>

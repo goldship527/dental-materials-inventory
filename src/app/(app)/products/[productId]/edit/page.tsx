@@ -43,7 +43,7 @@ export default async function ProductEditPage({ params, searchParams }: PageProp
   }
 
   return (
-    <PageShell current="products" mainClassName="px-3 pt-3 pb-6">
+    <PageShell current="products" mainClassName="pt-3 pb-6">
         <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
           <PageHeader title={"商品マスタ編集"}>
             <a className="text-sm font-semibold text-accent hover:underline" href={`/products/${product.id}`}>

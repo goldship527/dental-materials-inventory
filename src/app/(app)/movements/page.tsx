@@ -156,7 +156,7 @@ export default async function MovementsPage({ searchParams }: PageProps) {
       : "条件に一致する入出庫履歴はありません。検索語や絞り込みを見直してください。";
 
   return (
-    <PageShell current="movements" mainClassName="px-3 pt-3 pb-6 lg:px-6">
+    <PageShell current="movements" mainClassName="pt-3 pb-6">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-3">
 
         <PageHeader title={"入出庫履歴"}>

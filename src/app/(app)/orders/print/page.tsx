@@ -1,3 +1,4 @@
+import { SectionHeading } from "@/components/ui/section-heading";
 import { PageHeader } from "@/components/ui/page-header";
 import { PageShell } from "@/components/ui/page-shell";
 import { requireActiveClinic } from "@/lib/db/clinic";
@@ -69,7 +70,7 @@ export default async function OrdersPrintPage({ searchParams }: PageProps) {
   const issuedAtLabel = formatDateTime(issuedAt);
 
   return (
-    <PageShell current="orders" mainClassName="px-3 pt-3 pb-6 print:bg-panel print:p-0" shellClassName="print:bg-panel">
+    <PageShell current="orders" mainClassName="pt-3 pb-6 print:bg-panel print:p-0" shellClassName="print:bg-panel">
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 print:max-w-none print:gap-4">
 
         <PageHeader title={"発注書下書き"} className="print:border-b print:border-ink print:pb-3">
@@ -91,7 +92,7 @@ export default async function OrdersPrintPage({ searchParams }: PageProps) {
         <section className="rounded border border-line bg-panel p-4 text-sm shadow-sheet print:hidden">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
-              <h2 className="font-semibold">出力範囲</h2>
+              <SectionHeading className="print:border-0 print:bg-transparent print:px-0 print:py-0">出力範囲</SectionHeading>
               <p className="mt-1 text-muted">{scopeLabel}</p>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -126,7 +127,7 @@ export default async function OrdersPrintPage({ searchParams }: PageProps) {
 
         <section className="grid gap-3 rounded border border-line bg-panel p-4 text-sm shadow-sheet md:grid-cols-2 print:hidden">
           <div>
-            <h2 className="text-base font-semibold print:text-sm">発注元</h2>
+            <SectionHeading className="print:text-sm print:border-0 print:bg-transparent print:px-0 print:py-0">発注元</SectionHeading>
             <dl className="mt-3 grid gap-2">
               <div className="grid grid-cols-[6rem_1fr] gap-2">
                 <dt className="text-muted print:text-ink">名称</dt>
@@ -147,7 +148,7 @@ export default async function OrdersPrintPage({ searchParams }: PageProps) {
             </dl>
           </div>
           <div>
-            <h2 className="text-base font-semibold print:text-sm">発注内容</h2>
+            <SectionHeading className="print:text-sm print:border-0 print:bg-transparent print:px-0 print:py-0">発注内容</SectionHeading>
             <dl className="mt-3 grid gap-2">
               <div className="grid grid-cols-[7rem_1fr] gap-2">
                 <dt className="text-muted print:text-ink">発注先数</dt>
@@ -191,7 +192,7 @@ export default async function OrdersPrintPage({ searchParams }: PageProps) {
                 <div className="grid gap-3 border-b border-line p-4 md:grid-cols-[1.2fr_1fr] print:grid-cols-[1.1fr_1fr_1fr] print:border-ink print:p-2 print:text-xs">
                   <div>
                     <p className="text-xs font-semibold text-muted print:text-ink">発注先</p>
-                    <h2 className="mt-1 text-lg font-semibold print:text-base">{group.supplierName}</h2>
+                    <SectionHeading className="mt-1 print:text-base print:border-0 print:bg-transparent print:px-0 print:py-0">{group.supplierName}</SectionHeading>
                     {getMissingSupplierLabels(group).length > 0 ? (
                       <p className="mt-2 rounded border border-line border-l-4 border-l-ink bg-markSoft px-3 py-2 text-xs font-semibold text-ink print:border print:border-ink print:bg-panel print:px-2 print:py-1 print:text-ink">
                         未設定: {getMissingSupplierLabels(group).join("、")}

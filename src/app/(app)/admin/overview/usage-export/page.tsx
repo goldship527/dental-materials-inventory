@@ -1,3 +1,4 @@
+import { SectionHeading } from "@/components/ui/section-heading";
 import { PageHeader } from "@/components/ui/page-header";
 import { PageShell } from "@/components/ui/page-shell";
 import { requireAdminUser } from "@/lib/auth/admin";
@@ -8,7 +9,7 @@ export default async function AdminUsageExportPage() {
   const defaults = getDefaultAdminUsageExportDateRange();
 
   return (
-    <PageShell current="overview" mainClassName="mx-auto grid w-full max-w-5xl gap-3 px-3 pt-3 pb-6 lg:px-6">
+    <PageShell current="overview" mainClassName="mx-auto grid w-full max-w-5xl gap-3 pt-3 pb-6">
         <PageHeader title={"使用個数CSV出力"}>
           <div>
             <p className="text-sm font-semibold text-accent">本部ダッシュボード / CSV出力</p>
@@ -58,7 +59,7 @@ export default async function AdminUsageExportPage() {
 
         <section className="grid gap-4 md:grid-cols-2">
           <div className="rounded border border-line bg-panel p-3 shadow-sheet">
-            <h2 className="text-lg font-semibold text-ink">出力内容</h2>
+            <SectionHeading>出力内容</SectionHeading>
             <ul className="mt-3 grid gap-2 text-sm leading-6 text-muted">
               <li>法人合計とクリニック別を同じCSVに出力します。</li>
               <li>商品名、商品コード、JAN、カテゴリ、メーカーを含めます。</li>
@@ -66,7 +67,7 @@ export default async function AdminUsageExportPage() {
             </ul>
           </div>
           <div className="rounded border border-line bg-panel p-3 shadow-sheet">
-            <h2 className="text-lg font-semibold text-ink">集計ルール</h2>
+            <SectionHeading>集計ルール</SectionHeading>
             <ul className="mt-3 grid gap-2 text-sm leading-6 text-muted">
               <li>`movementType = OUT` の履歴を使用個数として集計します。</li>
               <li>期間は最大366日までです。</li>

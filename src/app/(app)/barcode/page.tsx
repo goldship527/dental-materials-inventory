@@ -62,7 +62,7 @@ export default async function BarcodePage({ searchParams }: PageProps) {
   );
 
   return (
-    <PageShell current="barcode" mainClassName="px-3 pt-3 pb-6 lg:px-6">
+    <PageShell current="barcode" mainClassName="pt-3 pb-6">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-3">
 
         <PageHeader title={"バーコード検索"}>

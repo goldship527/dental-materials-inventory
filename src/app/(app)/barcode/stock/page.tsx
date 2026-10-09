@@ -55,7 +55,7 @@ export default async function BarcodeStockPage({ searchParams }: PageProps) {
   const status = selectedProduct ? getStockStatus(selectedProduct.quantity, selectedProduct.minStock) : null;
 
   return (
-    <PageShell current="barcode" mainClassName="px-3 pt-3 pb-6 lg:px-6">
+    <PageShell current="barcode" mainClassName="pt-3 pb-6">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-3">
 
         <PageHeader title={"バーコード出入庫"}>

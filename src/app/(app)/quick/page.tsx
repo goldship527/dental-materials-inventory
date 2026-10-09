@@ -1,3 +1,4 @@
+import { SectionHeading } from "@/components/ui/section-heading";
 import { PageHeader } from "@/components/ui/page-header";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
@@ -114,7 +115,7 @@ export default async function QuickPage({ searchParams }: PageProps) {
   });
 
   return (
-    <PageShell current="quick" mainClassName="px-3 pt-3 pb-6 lg:px-6">
+    <PageShell current="quick" mainClassName="pt-3 pb-6">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-5">
 
         <PageHeader title={"クイック出庫"}>
@@ -131,7 +132,7 @@ export default async function QuickPage({ searchParams }: PageProps) {
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="text-sm font-semibold text-accent">バーコード作業</p>
-              <h2 className="mt-1 text-lg font-semibold">連続スキャンまたは1件ずつ出入庫</h2>
+              <SectionHeading className="mt-1">連続スキャンまたは1件ずつ出入庫</SectionHeading>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-muted">
                 バーコードがある材料は、連続スキャン画面でまとめて処理できます。
               </p>
@@ -210,7 +211,7 @@ export default async function QuickPage({ searchParams }: PageProps) {
         <QuickCardGrid cards={visibleCards} clinicId={context.clinicId} staffOperators={staffOperators} />
 
         <section className="rounded border border-line/90 bg-panel/95 p-4 shadow-sheet">
-          <h2 className="text-base font-semibold">直近のクイック出庫操作</h2>
+          <SectionHeading>直近のクイック出庫操作</SectionHeading>
           <div className="mt-3 divide-y divide-line">
             {recentMovements.length > 0 ? (
               recentMovements.map((movement) => (

@@ -1,3 +1,4 @@
+import { SectionHeading } from "@/components/ui/section-heading";
 import { PageHeader } from "@/components/ui/page-header";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
@@ -28,7 +29,7 @@ export default async function NewStocktakeSessionPage() {
   const summary = await getStocktakeStartSummary(context.clinicId);
 
   return (
-    <PageShell current="stocktake" mainClassName="px-3 pt-3 pb-6">
+    <PageShell current="stocktake" mainClassName="pt-3 pb-6">
       <div className="mx-auto flex max-w-4xl flex-col gap-6">
 
         <PageHeader title={"棚卸セッション開始"}>
@@ -53,7 +54,7 @@ export default async function NewStocktakeSessionPage() {
           </section>
         ) : (
           <form action={startStocktakeSessionAction} className="rounded border border-line bg-panel p-3 shadow-sheet">
-            <h2 className="text-lg font-semibold">新しい棚卸を開始</h2>
+            <SectionHeading>新しい棚卸を開始</SectionHeading>
             <dl className="mt-5 grid gap-3 rounded bg-subtle p-4 text-sm sm:grid-cols-2">
               <div>
                 <dt className="text-muted">対象クリニック</dt>

@@ -35,7 +35,7 @@ export default async function StaffOperatorLabelsPage({ searchParams }: PageProp
   );
 
   return (
-    <PageShell current="staffOperators" mainClassName="px-3 pt-3 pb-6 print:bg-panel print:px-0 print:py-0" shellClassName="print:bg-panel">
+    <PageShell current="staffOperators" mainClassName="pt-3 pb-6 print:bg-panel print:px-0 print:py-0" shellClassName="print:bg-panel">
       <style>{`
         @page {
           size: A4 portrait;

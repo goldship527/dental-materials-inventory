@@ -33,7 +33,7 @@ export default async function SupplierEditPage({ params }: PageProps) {
   }
 
   return (
-    <PageShell current="suppliers" mainClassName="px-3 pt-3 pb-6">
+    <PageShell current="suppliers" mainClassName="pt-3 pb-6">
       <div className="mx-auto flex w-full max-w-4xl flex-col gap-6">
 
         <PageHeader title={"発注先マスタ編集"}>

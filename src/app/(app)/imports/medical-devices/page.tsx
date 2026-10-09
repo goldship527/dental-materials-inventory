@@ -61,7 +61,7 @@ export default async function MedicalDeviceImportPreviewPage({ searchParams }: P
 
   if (cacheResult.status === "missing") {
     return (
-      <PageShell current="imports" mainClassName="mx-auto grid w-full max-w-7xl gap-3 px-3 pt-3 pb-6 lg:px-6">
+      <PageShell current="imports" mainClassName="mx-auto grid w-full max-w-7xl gap-3 pt-3 pb-6">
           <PageHeader title={"医療機器データ取り込みプレビュー"}>
 
           </PageHeader>
@@ -141,7 +141,7 @@ export default async function MedicalDeviceImportPreviewPage({ searchParams }: P
   }
 
   return (
-    <PageShell current="imports" mainClassName="mx-auto grid w-full max-w-7xl gap-3 px-3 pt-3 pb-6 lg:px-6">
+    <PageShell current="imports" mainClassName="mx-auto grid w-full max-w-7xl gap-3 pt-3 pb-6">
         <PageHeader title={"医療機器データ取り込みプレビュー"}>
           <div>
 

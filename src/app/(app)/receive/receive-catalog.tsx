@@ -1,4 +1,5 @@
 "use client";
+import { SectionHeading } from "@/components/ui/section-heading";
 
 import { useMemo, useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
@@ -97,6 +98,6 @@ export function ReceiveCatalog({rows, clinicId, staffOperators}: {rows: ReceiptC
       画面上部で作業スタッフを選ぶと、納品を確定できるようになります。
     </p>}
     {!groups.length && <div className="rounded border border-line bg-panel p-6"><p>{remaining.length ? "条件に合う商品がありません。" : "納品待ちの商品はありません。"}</p>{remaining.length > 0 && <button className={`${button} mt-3`} onClick={() => {setQuery(""); setCategory("");}}>絞り込みを解除</button>}</div>}
-    {groups.map(([day, items]) => <section key={day} className="grid gap-2"><h2 className="text-lg font-semibold">{day} 発注 <span className="text-sm font-normal">／ {items.length}商品</span></h2><div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">{items.map(row => <ReceiptItem key={row.id} row={row} staffId={staff.selectedStaffOperatorId} onReceived={id => setReceived(ids => [...ids,id])} />)}</div></section>)}
+    {groups.map(([day, items]) => <section key={day} className="grid gap-2"><SectionHeading>{day} 発注 <span className="text-sm font-normal">／ {items.length}商品</span></SectionHeading><div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">{items.map(row => <ReceiptItem key={row.id} row={row} staffId={staff.selectedStaffOperatorId} onReceived={id => setReceived(ids => [...ids,id])} />)}</div></section>)}
   </>;
 }

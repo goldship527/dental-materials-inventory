@@ -66,7 +66,7 @@ function LoginFields({ defaultEmail, defaultPassword, errorMessage }: LoginField
         type="submit"
         disabled={pending}
         aria-busy={pending}
-        className="inline-flex h-12 items-center justify-center rounded btn-primary px-5 text-base font-semibold transition disabled:cursor-wait"
+        className="inline-flex h-12 items-center justify-center rounded btn-primary px-5 text-base font-semibold shadow-raise transition active:shadow-press disabled:cursor-wait"
       >
         {pending ? (
           <span

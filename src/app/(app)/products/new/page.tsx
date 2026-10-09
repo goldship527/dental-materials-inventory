@@ -21,7 +21,7 @@ export default async function ProductNewPage() {
   const suppliers = await getProductSupplierOptions(context.organizationId);
 
   return (
-    <PageShell current="products" mainClassName="px-3 pt-3 pb-6">
+    <PageShell current="products" mainClassName="pt-3 pb-6">
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
 
         <PageHeader title={"商品マスタ新規作成"}>

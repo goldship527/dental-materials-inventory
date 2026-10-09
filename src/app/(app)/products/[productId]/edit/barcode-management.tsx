@@ -1,4 +1,5 @@
 "use client";
+import { SectionHeading } from "@/components/ui/section-heading";
 
 import { useActionState } from "react";
 import {
@@ -154,7 +155,7 @@ export function BarcodeManagement({ productId, barcodes, defaultNewBarcode = "" 
     <section className="rounded border border-line bg-panel p-5 shadow-sheet">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h2 className="text-lg font-semibold">バーコード管理</h2>
+          <SectionHeading>バーコード管理</SectionHeading>
         </div>
         <span className="rounded bg-subtle px-3 py-1 text-xs font-semibold text-muted">
           登録 {barcodes.filter((barcode) => barcode.id).length} 件

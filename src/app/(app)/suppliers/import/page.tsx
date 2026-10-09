@@ -20,7 +20,7 @@ export default async function SupplierImportPage() {
   const context = await requireActiveClinic();
 
   return (
-    <PageShell current="suppliers" mainClassName="px-3 pt-3 pb-6 lg:px-6">
+    <PageShell current="suppliers" mainClassName="pt-3 pb-6">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-3">
 
         <PageHeader title={"発注先マスタ一括取り込み"}>

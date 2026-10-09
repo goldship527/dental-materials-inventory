@@ -1,3 +1,4 @@
+import { SectionHeading } from "@/components/ui/section-heading";
 import { PageHeader } from "@/components/ui/page-header";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
@@ -200,7 +201,7 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
   const photoUrl = buildProductPhotoUrl(product);
 
   return (
-    <PageShell current="products" mainClassName="px-3 pt-3 pb-6 lg:px-6">
+    <PageShell current="products" mainClassName="pt-3 pb-6">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-4">
 
         <PageHeader title={product.name}>
@@ -395,7 +396,7 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
 
         <section className="grid gap-3 lg:grid-cols-[1.3fr_1fr]">
           <div className="rounded border border-line bg-panel p-4 shadow-sheet">
-            <h2 className="text-lg font-semibold">基本情報</h2>
+            <SectionHeading>基本情報</SectionHeading>
             <div className="mt-3"><IssueInstructions text={getIssueInstructions(product.notes)} /></div>
             <dl className="mt-3 grid gap-x-4 gap-y-2 text-sm sm:grid-cols-2">
               <div>
@@ -494,7 +495,7 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
           </div>
 
           {barcodeUiEnabled && <div className="rounded border border-line bg-panel p-4 shadow-sheet">
-            <h2 className="text-lg font-semibold">バーコード</h2>
+            <SectionHeading>バーコード</SectionHeading>
             <div className="mt-3 grid gap-2">
               {product.barcodes.length > 0 ? (
                 product.barcodes.map((barcode) => (
@@ -512,7 +513,7 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
 
         <section className="grid gap-3 lg:grid-cols-2">
           <div className="rounded border border-line bg-panel p-4 shadow-sheet">
-            <h2 className="text-lg font-semibold">直近の在庫変更</h2>
+            <SectionHeading>直近の在庫変更</SectionHeading>
             <div className="mt-3 divide-y divide-line">
               {product.recentMovements.length > 0 ? (
                 product.recentMovements.map((movement) => (
@@ -538,7 +539,7 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
           </div>
 
           <div className="rounded border border-line bg-panel p-4 shadow-sheet">
-            <h2 className="text-lg font-semibold">発注候補</h2>
+            <SectionHeading>発注候補</SectionHeading>
             <div className="mt-3 divide-y divide-line">
               {product.orderRequests.length > 0 ? (
                 product.orderRequests.map((request) => (

@@ -1,4 +1,5 @@
 "use client";
+import { SectionHeading } from "@/components/ui/section-heading";
 
 import { useActionState, useEffect, useMemo, useState, type ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
@@ -164,7 +165,7 @@ export function PurchaseHistoryImportForm() {
     <section className="rounded border border-line bg-panel p-5 shadow-sheet">
       <div className="mb-4 flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
         <div>
-          <h2 className="text-lg font-semibold">購入履歴をプレビュー</h2>
+          <SectionHeading>購入履歴をプレビュー</SectionHeading>
           <p className="mt-1 text-sm leading-6 text-muted">
             CSVファイル、またはExcelから貼り付けたTSVを読み取り、既存商品との照合結果を確認します。
             この画面では商品マスタや在庫数は変更しません。

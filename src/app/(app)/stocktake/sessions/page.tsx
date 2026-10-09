@@ -1,3 +1,4 @@
+import { SectionHeading } from "@/components/ui/section-heading";
 import { PageHeader } from "@/components/ui/page-header";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
@@ -72,7 +73,7 @@ export default async function StocktakeSessionsPage() {
   const { inProgressSession, historySessions } = await getStocktakeSessionIndex(context.clinicId);
 
   return (
-    <PageShell current="stocktake" mainClassName="px-3 pt-3 pb-6 lg:px-6">
+    <PageShell current="stocktake" mainClassName="pt-3 pb-6">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-3">
 
         <PageHeader title={"棚卸セッション"}>
@@ -88,7 +89,7 @@ export default async function StocktakeSessionsPage() {
         <section className="rounded border border-line bg-panel shadow-sheet">
           <div className="flex flex-col gap-2 border-b border-line px-4 py-3 md:flex-row md:items-center md:justify-between">
             <div>
-              <h2 className="text-lg font-semibold">進行中</h2>
+              <SectionHeading>進行中</SectionHeading>
             </div>
           </div>
           <div className="overflow-x-auto">
@@ -121,7 +122,7 @@ export default async function StocktakeSessionsPage() {
 
         <section className="rounded border border-line bg-panel shadow-sheet">
           <div className="border-b border-line px-4 py-3">
-            <h2 className="text-lg font-semibold">履歴</h2>
+            <SectionHeading>履歴</SectionHeading>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[920px] border-collapse text-left text-sm">

@@ -1,3 +1,4 @@
+import { SectionHeading } from "@/components/ui/section-heading";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { LoginForm } from "./login-form";
@@ -39,7 +40,7 @@ export default async function LoginPage({ searchParams }: PageProps) {
           </div>
 
           <section className="rounded border border-line bg-panel p-6 shadow-sheet">
-            <h2 className="text-lg font-semibold">ログイン</h2>
+            <SectionHeading>ログイン</SectionHeading>
             <p className="mt-2 text-sm leading-6 text-muted">
               メールアドレスとパスワードを入力してください。
             </p>

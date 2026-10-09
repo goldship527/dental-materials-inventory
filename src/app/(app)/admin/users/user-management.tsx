@@ -1,4 +1,5 @@
 "use client";
+import { SectionHeading } from "@/components/ui/section-heading";
 
 import { useActionState } from "react";
 import {
@@ -70,7 +71,7 @@ export function UserManagement({ users, currentUserId }: UserManagementProps) {
   return (
     <div className="grid min-w-0 gap-6">
       <section className="min-w-0 rounded border border-line bg-panel p-5 shadow-sheet">
-        <h2 className="text-lg font-semibold">ログインアカウント追加</h2>
+        <SectionHeading>ログインアカウント追加</SectionHeading>
         <p className="mt-2 text-sm leading-6 text-muted">
           クリニック共通アカウントは「クリニック共通」で作成します。ADMIN権限は共通アカウントには付けず、管理者本人の個人アカウントにだけ付けます。
         </p>
@@ -138,7 +139,7 @@ export function UserManagement({ users, currentUserId }: UserManagementProps) {
       <section className="min-w-0 rounded border border-line bg-panel p-5 shadow-sheet">
         <div className="flex flex-col gap-2 border-b border-line pb-4 md:flex-row md:items-end md:justify-between">
           <div>
-            <h2 className="text-lg font-semibold">ログインアカウント一覧</h2>
+            <SectionHeading>ログインアカウント一覧</SectionHeading>
             <p className="mt-1 text-sm text-muted">
               クリニック共通アカウントは一般ユーザー、管理者は個人アカウントとして扱います。
             </p>

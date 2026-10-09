@@ -1,3 +1,4 @@
+import { SectionHeading } from "@/components/ui/section-heading";
 import { PageShell } from "@/components/ui/page-shell";
 import { requireAdminUser } from "@/lib/auth/admin";
 import { getProductPhotoStorageDiagnostics, type ProductPhotoStorageDiagnosticItem } from "@/lib/storage/product-photos";
@@ -32,7 +33,7 @@ export default async function AdminStoragePage() {
   const hasError = diagnostics.items.some((item) => item.status === "error");
 
   return (
-    <PageShell current="storage" mainClassName="mx-auto grid w-full max-w-7xl gap-3 px-3 pt-3 pb-6 lg:px-6">
+    <PageShell current="storage" mainClassName="mx-auto grid w-full max-w-7xl gap-3 pt-3 pb-6">
         <header className="grid gap-2">
           <p className="text-sm font-semibold text-accent">管理</p>
           <h1 className="text-xl font-bold tracking-tight text-ink">ストレージ診断</h1>
@@ -44,7 +45,7 @@ export default async function AdminStoragePage() {
         <section className="grid gap-4 rounded border border-line bg-panel p-3 shadow-sheet">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="text-lg font-semibold text-ink">商品写真ストレージ</h2>
+              <SectionHeading>商品写真ストレージ</SectionHeading>
               <p className="text-sm text-muted">
                 現在の保存先: {diagnostics.mode === "supabase" ? "Supabase Storage" : "ローカル保存"}
               </p>
@@ -78,7 +79,7 @@ export default async function AdminStoragePage() {
         </section>
 
         <section className="grid gap-3 rounded border border-line bg-panel p-3 shadow-sheet">
-          <h2 className="text-lg font-semibold text-ink">Vercelで確認する値</h2>
+          <SectionHeading>Vercelで確認する値</SectionHeading>
           <p className="text-sm leading-6 text-muted">
             Production環境に、SUPABASE_URL、SUPABASE_SERVICE_ROLE_KEY、SUPABASE_STORAGE_BUCKET
             が設定されているか確認してください。値を変更した後は、ProductionをRedeployしてください。
