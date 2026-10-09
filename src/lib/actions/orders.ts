@@ -495,22 +495,32 @@ export async function updateOrderRequestStatusWithStateAction(
     const context = await requireActiveClinic();
     const orderRequestId = orderRequestIdSchema.parse(formData.get("orderRequestId"));
     const parsedStatus = orderRequestStatusSchema.parse(formData.get("status"));
-    const status = parsedStatus === "DRAFT" ? "CONFIRMED" : parsedStatus;
-    const memoValue = memoSchema.parse(formData.get("memo") ?? "");
+    const memoOnly = formData.get("memoOnly") === "on";
+    const status = parsedStatus === "DRAFT" && !memoOnly ? "CONFIRMED" : parsedStatus;
+    const memoValue = formData.has("memo") ? memoSchema.parse(formData.get("memo")) : undefined;
     const orderedMethodValue = formData.get("orderedMethod");
-    const orderedMemoValue = orderedMemoSchema.parse(formData.get("orderedMemo") ?? "");
-    const supplierResponseMemoValue = supplierResponseMemoSchema.parse(formData.get("supplierResponseMemo") ?? "");
+    const orderedMemoValue = formData.has("orderedMemo")
+      ? orderedMemoSchema.parse(formData.get("orderedMemo"))
+      : undefined;
+    const supplierResponseMemoValue = formData.has("supplierResponseMemo")
+      ? supplierResponseMemoSchema.parse(formData.get("supplierResponseMemo"))
+      : undefined;
     const orderedByStaffIdValue = formData.get("staffOperatorId");
-    const memo = memoValue.length > 0 ? memoValue : null;
+    const memo = memoValue === undefined ? undefined : memoValue.length > 0 ? memoValue : null;
 
     const request = await updateOrderRequestStatusForContext(context, {
       orderRequestId,
       status,
+      expectedStatus: memoOnly ? status : undefined,
       memo,
       orderedMethod:
-        status === "ORDERED" ? orderSendMethodSchema.parse(orderedMethodValue || undefined) : null,
-      orderedMemo: orderedMemoValue.length > 0 ? orderedMemoValue : null,
-      supplierResponseMemo: supplierResponseMemoValue.length > 0 ? supplierResponseMemoValue : null,
+        status === "ORDERED" && formData.has("orderedMethod")
+          ? orderSendMethodSchema.parse(orderedMethodValue || undefined)
+          : undefined,
+      orderedMemo: orderedMemoValue === undefined ? undefined : orderedMemoValue.length > 0 ? orderedMemoValue : null,
+      supplierResponseMemo: supplierResponseMemoValue === undefined
+        ? undefined
+        : supplierResponseMemoValue.length > 0 ? supplierResponseMemoValue : null,
       orderedByStaffId:
         status === "ORDERED" && typeof orderedByStaffIdValue === "string" && orderedByStaffIdValue.length > 0
           ? staffOperatorIdSchema.parse(orderedByStaffIdValue)
@@ -556,7 +566,8 @@ export async function updateOrderRequestStatusForContext(
   input: {
     orderRequestId: string;
     status: OrderRequestStatusValue;
-    memo: string | null;
+    expectedStatus?: OrderRequestStatusValue;
+    memo?: string | null;
     orderedMethod?: (typeof orderSendMethodValues)[number] | null;
     orderedMemo?: string | null;
     supplierResponseMemo?: string | null;
@@ -608,6 +619,10 @@ export async function updateOrderRequestStatusForContext(
 
     if (!target) {
       throw new OrderBusinessError("対象の発注候補が見つかりません。");
+    }
+
+    if (input.expectedStatus && target.status !== input.expectedStatus) {
+      throw new OrderBusinessError("状態が変わりました。一覧を更新してください。");
     }
 
     if (target.receivedAt && input.status !== "ORDERED") {
@@ -721,7 +736,7 @@ export async function updateOrderRequestStatusForContext(
       },
       data: {
         status: input.status,
-        memo: input.memo,
+        ...(input.memo !== undefined ? { memo: input.memo } : {}),
         orderRecordId,
         orderedAt,
         orderedMethod,
@@ -1366,6 +1381,79 @@ export async function revertOrderReceiptForContext(
     revalidateOrderPages();
   }
 
+  return result;
+}
+
+export async function confirmOrderSuggestionsWithStateAction(
+  _previousState: OrderActionState,
+  formData: FormData,
+): Promise<OrderActionState> {
+  try {
+    const context = await requireActiveClinic();
+    const orderRequestIds = orderRequestIdsSchema.parse(formData.getAll("orderRequestId"));
+    const result = await confirmOrderSuggestionsForContext(context, { orderRequestIds });
+    return {
+      status: "success",
+      message: `${result.confirmedCount}件を発注予定にしました${result.excludedCount > 0 ? `（${result.excludedCount}件は状態が変わったため対象外）` : ""}。`,
+    };
+  } catch (error) {
+    return toOrderActionError(error);
+  }
+}
+
+export async function confirmOrderSuggestionsForContext(
+  context: ActiveClinicContext,
+  input: { orderRequestIds: string[]; revalidate?: boolean },
+) {
+  const orderRequestIds = [...new Set(orderRequestIdsSchema.parse(input.orderRequestIds))];
+  const result = await prisma.$transaction(async (tx) => {
+    const initialTargets = await tx.orderRequest.findMany({
+      where: { id: { in: orderRequestIds }, clinicId: context.clinicId },
+      select: { productId: true },
+    });
+    await lockOrderRequestProducts(tx, context.clinicId, initialTargets.map(({ productId }) => productId));
+    for (const orderRequestId of [...orderRequestIds].sort()) {
+      await lockOrderReceipt(tx, orderRequestId);
+    }
+
+    const targets = await tx.orderRequest.findMany({
+      where: { id: { in: orderRequestIds }, clinicId: context.clinicId, status: "SUGGESTED" },
+      select: { id: true, productId: true, supplierId: true },
+    });
+    if (targets.length === 0) {
+      throw new OrderBusinessError("確認待ちの候補が見つかりません。一覧を更新してください。");
+    }
+    if (new Set(targets.map(({ supplierId }) => supplierId ?? "")).size > 1) {
+      throw new OrderBusinessError("確認待ちの一括確認は発注先ごとに行ってください。");
+    }
+
+    const updated = await tx.orderRequest.updateMany({
+      where: {
+        id: { in: targets.map(({ id }) => id) },
+        clinicId: context.clinicId,
+        status: "SUGGESTED",
+      },
+      data: { status: "CONFIRMED" },
+    });
+    if (updated.count === 0) {
+      throw new OrderBusinessError("確認待ちの候補が見つかりません。一覧を更新してください。");
+    }
+
+    for (const productId of [...new Set(targets.map(({ productId }) => productId))].sort()) {
+      await clearOrderSuggestionSuppression(tx, context.clinicId, productId);
+      await syncOrderSuggestion(tx, {
+        clinicId: context.clinicId,
+        organizationId: context.organizationId,
+        productId,
+        actorUserId: context.userId,
+      });
+    }
+    return { confirmedCount: updated.count, excludedCount: orderRequestIds.length - updated.count };
+  });
+
+  if (input.revalidate ?? true) {
+    revalidateOrderPages();
+  }
   return result;
 }
 
