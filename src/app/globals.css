@@ -120,6 +120,133 @@ a {
   }
 }
 
+.order-supplier-label,
+.order-card-qty-action {
+  display: none;
+}
+
+@media screen and (max-width: 1023.98px) {
+  .order-rows,
+  .order-rows tbody {
+    display: block;
+    width: 100%;
+  }
+
+  .order-rows thead {
+    display: none;
+  }
+
+  .order-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "product product"
+      "stock qty"
+      "supplier supplier"
+      "record record";
+    gap: 8px 12px;
+    padding: 12px;
+    border-bottom: 1px solid var(--c-rule);
+  }
+
+  .order-row:has(.order-qty-details) {
+    grid-template-areas:
+      "product product"
+      "stock qty"
+      "detail detail"
+      "supplier supplier"
+      "record record";
+  }
+
+  .order-row:has(.order-cell-stock[data-empty="true"]) {
+    grid-template-areas:
+      "product product"
+      "supplier supplier"
+      "record record";
+  }
+
+  .order-row > td {
+    display: block;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .order-row > td.order-cell-print {
+    display: none !important;
+  }
+
+  .order-cell-product { grid-area: product; overflow-wrap: anywhere; }
+  .order-cell-stock { grid-area: stock; }
+  .order-cell-supplier { grid-area: supplier; min-width: 0; overflow-wrap: anywhere; }
+  .order-cell-record { grid-area: record; }
+
+  .order-row > td.order-cell-stock[data-empty="true"] {
+    display: none;
+  }
+
+  .order-row > td.order-cell-qty,
+  .order-qty-content {
+    display: contents;
+  }
+
+  .order-qty-badge {
+    grid-area: qty;
+    justify-self: end;
+    align-self: start;
+  }
+
+  .order-cell-qty[data-empty="true"] .order-qty-badge {
+    display: none;
+  }
+
+  .order-qty-details {
+    grid-area: detail;
+    min-width: 0;
+  }
+
+  .order-qty-action {
+    display: none;
+  }
+
+  .order-qty-form {
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
+
+  .order-supplier-label {
+    display: inline;
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+
+  .order-cell-supplier > div:first-of-type {
+    display: inline;
+  }
+
+  .order-cell-supplier > div:first-of-type > div {
+    display: block;
+  }
+
+  .order-record-content {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .order-record-summary,
+  .order-receipt-form,
+  .order-more-panel {
+    flex-basis: 100%;
+    min-width: 0;
+  }
+
+  .order-card-qty-action {
+    display: inline-flex;
+  }
+}
+
 @media print {
   @page {
     size: A4 portrait;

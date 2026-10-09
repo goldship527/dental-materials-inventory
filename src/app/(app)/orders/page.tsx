@@ -106,22 +106,6 @@ function getSupplierStatusChipClass(status: OrderStatusFilterValue) {
   return "border-line bg-panel/80 text-muted";
 }
 
-function getStatusCardClass(status: OrderStatusFilterValue) {
-  if (status === "PLANNED") {
-    return "border-line bg-tint text-accent";
-  }
-
-  if (status === "AWAITING_RECEIPT") {
-    return "border-line border-l-4 border-l-ink bg-markSoft text-ink";
-  }
-
-  if (status === "RECEIVED") {
-    return "border-line bg-panel text-success";
-  }
-
-  return "border-line bg-subtle text-muted";
-}
-
 function getStatusFilterClass(_status: OrderListFilterValue, isCurrent: boolean) {
   const baseClass = "inline-flex min-h-10 items-center rounded border px-4 py-2 text-sm font-semibold transition";
   return `${baseClass} ${isCurrent ? "chip-selected border-accent" : "border-lineStrong bg-panel text-ink hover:bg-tint"}`;
@@ -176,13 +160,13 @@ function OrderRequestRowsTable({
 }) {
   return (
     <div className="overflow-x-auto">
-      <table className="w-full min-w-[960px] border-collapse text-left text-sm print:min-w-0 print:text-xs">
+      <table className="order-rows w-full border-collapse text-left text-sm print:text-xs">
         <colgroup className="print:hidden">
-          <col className="w-[22%]" />
-          <col className="w-[18%]" />
+          <col className="w-[20%]" />
+          <col className="w-[16%]" />
+          <col className="w-[20%]" />
+          <col className="w-[20%]" />
           <col className="w-[24%]" />
-          <col className="w-[14%]" />
-          <col className="w-[22%]" />
         </colgroup>
         <thead className="bg-tint text-label text-accent print:bg-panel print:text-label print:text-ink">
           <tr>
@@ -319,7 +303,7 @@ export default async function OrdersPage({ searchParams }: PageProps) {
 
   return (
     <PageShell current="orders" mainClassName="pt-3 pb-6 print:bg-panel print:p-0" shellClassName="print:bg-panel">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 print:max-w-none print:gap-3">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 print:max-w-none print:gap-3">
 
         <PageHeader title={"発注"} className="print:border-b print:border-ink print:pb-3">
           <div>
@@ -361,26 +345,13 @@ export default async function OrdersPage({ searchParams }: PageProps) {
           {countByStatus.SKIPPED} 件
         </section>
 
-        <section className="grid gap-3 md:grid-cols-4 print:hidden">
-          {counts.map((item) => (
-            <div key={item.status} className={`rounded border p-4 shadow-sheet ${getStatusCardClass(item.status)}`}>
-              <p className="text-sm font-semibold">
-                {item.label}
-              </p>
-              <p className="mt-2 text-2xl font-bold tabular-nums">
-                {item.count} 件
-              </p>
-            </div>
-          ))}
-        </section>
-
-        <form className="grid gap-3 rounded border border-line/90 bg-panel/95 p-3 shadow-sheet md:grid-cols-[1fr_auto_auto] print:hidden">
+        <form className="flex items-center gap-2 rounded border border-line/90 bg-panel/95 p-3 shadow-sheet print:hidden">
           <input
             type="search"
             name="q"
             defaultValue={query}
             placeholder="商品名・商品コード・カテゴリ・発注先・メモ"
-            className="h-10 rounded border border-line bg-panel/90 px-3 text-sm    "
+            className="h-10 min-w-0 flex-1 rounded border border-line bg-panel/90 px-3 text-sm"
           />
           {selectedStatus !== defaultOrderListFilter ? <input type="hidden" name="status" value={selectedStatus} /> : null}
           <button
@@ -390,7 +361,7 @@ export default async function OrdersPage({ searchParams }: PageProps) {
             検索
           </button>
           <a
-            className="flex h-10 items-center justify-center rounded btn-secondary px-4 text-sm font-semibold transition"
+            className="inline-flex min-h-10 shrink-0 items-center px-2 text-sm font-semibold text-accent underline transition"
             href={buildOrdersHref(selectedStatus, "")}
           >
             クリア
@@ -400,6 +371,8 @@ export default async function OrdersPage({ searchParams }: PageProps) {
         <section className="flex flex-wrap gap-2 print:hidden">
           {statusFilters.map((filter) => {
             const isCurrent = filter.value === selectedStatus;
+            const count = filter.value === "ALL" ? queryFilteredRows.length : countByStatus[filter.value];
+            const isAttentionCount = count > 0 && (filter.value === "SUGGESTED" || filter.value === "AWAITING_RECEIPT");
 
             return (
               <a
@@ -408,7 +381,10 @@ export default async function OrdersPage({ searchParams }: PageProps) {
                 aria-current={isCurrent ? "page" : undefined}
                 className={getStatusFilterClass(filter.value, isCurrent)}
               >
-                {filter.label}
+                {filter.label}{" "}
+                <span className={`ml-1 tabular-nums ${isAttentionCount ? "rounded-sm bg-mark px-1 text-ink" : count === 0 && !isCurrent ? "text-muted" : ""}`}>
+                  {count}<span className="sr-only">件</span>
+                </span>
               </a>
             );
           })}
