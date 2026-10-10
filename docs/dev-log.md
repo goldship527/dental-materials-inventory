@@ -1,4 +1,4 @@
-﻿# 開発ログ
+# 開発ログ
 
 ## 2026-05-16 初回プロジェクト作成
 
@@ -9295,6 +9295,41 @@
 
 - Codexが `docs/codex-handoff-orders-steps.md` に従い、ブランチ `ui/orders-steps` で実装・計測を行い、ドラフトPRを作成する（マージ・公開はしない）。
 - ドラフトPRの隔離DB回帰CIとVercel Previewを確認し、Claude Codeが差分をレビューする。利用者のログイン後にPreviewでspec §100.5を計測する。
+- 院内のタブレット・スマホの実機で、発注画面の表示・指操作と古い端末の`:has`表示を確かめる。
+- `markOrderRequestsOrderedForContext`の大量商品時の時間制限を別PRで調査・分割検討する。
+- Docker Desktopのソケット起動障害を別件で調査する。復旧後に分離DBの`ui-smoke`と実ページ寸法を確認する。
+- 利用者が本番のホーム・出庫・納品・在庫・発注・商品詳細、担当選択、院切替、「その他」とログアウトをタブレット横・スマホ幅で確認する。発注書下書きと不足在庫の印刷プレビュー、明るい場所での実機タブレット表示、4列の密度・写真・数量操作も確認する。
+- 利用者が本番で商品詳細の情報量・現在庫・出庫カードからの遷移を確認する。実運用前に包装・単位を現物照合し、初回の出庫・納品は少数で確認する。テスト出庫1回で基準未満の確認待ちと内訳を確認する。
+- 事務用の空欄1商品と個人名記載8商品の正式発注先を確認する。全商品約420件の棚卸確定、部分納品の取消、バーコード一括納品は対象・件数・時間制限を決めてから扱う。
+- 実機タブレットで黄の面と藍の網掛け、指操作を確認する。実運用開始後、確認待ちを数量そのままで確定した割合を見て、確認待ちの状態の要否を再判断する（spec §97）。
+
+### 承認・確認待ち
+
+- 院内のタブレット・スマホでの発注画面の実機表示の利用者確認。
+- 実運用開始前に、公開DBのテスト操作履歴を踏まえて実在庫へ合わせる方法の決定。
+- Docker Desktop起動用フォルダの退避分を元に戻すかの判断。
+- 手順の見える化PRのClaude Codeレビュー（利用者のログイン後のPreview計測を含む）と、利用者のマージ・公開指示（実装後）。
+
+## 2026-10-10 発注画面の手順の見える化をドラフトPR #27へ提出
+
+- 実装と作業記録をコミット `b7a305f` で `ui/orders-steps` へpushし、ドラフトPR [#27](https://github.com/goldship527/dental-materials-inventory/pull/27) を `master` 向けに作成した。無関係の未追跡 `.playwright-cli/` と `docs/codex-handoff-barcode-batch-mode.md` は含めていない。
+- head `b7a305f` のGitHub `receipt-regression` は [run 38044755301](https://github.com/goldship527/dental-materials-inventory/actions/runs/38044755301) で成功。隔離PostgreSQLを使う既存回帰、型検査、本番ビルドが完了した。Vercel Previewも成功した。
+- マージ・本番公開はしていない。spec §100.5の正式な寸法と実機操作は、利用者のログイン後にClaude CodeがPreviewで確認する。
+
+## 2026-10-10 朝礼反映（発注画面の手順の見える化・ドラフトPR #27）
+
+### 現在の状態
+
+- spec §100の案AをドラフトPR #27へ提出済み。架空データの4幅・A4印刷と、head `b7a305f` の隔離DB回帰CI・Vercel Previewは成功。Claude Codeレビューとログイン後のPreview計測を待つ。
+
+### 完了
+
+- 済: Codexが `docs/codex-handoff-orders-steps.md` に従い、ブランチ `ui/orders-steps` で実装・計測を行い、ドラフトPRを作成する（マージ・公開はしない）。（PR #27、head `b7a305f`。上の架空データ計測とCI結果を参照）
+- 前回の「ドラフトPRの隔離DB回帰CIとVercel Previewを確認し、Claude Codeが差分をレビューする。利用者のログイン後にPreviewでspec §100.5を計測する。」は、CI・Previewまで確認済み。レビューとログイン後計測は未了。
+
+### 次のアクション
+
+- Claude CodeがPR #27をレビューし、利用者のログイン後にPreviewでspec §100.5を計測する。
 - 院内のタブレット・スマホの実機で、発注画面の表示・指操作と古い端末の`:has`表示を確かめる。
 - `markOrderRequestsOrderedForContext`の大量商品時の時間制限を別PRで調査・分割検討する。
 - Docker Desktopのソケット起動障害を別件で調査する。復旧後に分離DBの`ui-smoke`と実ページ寸法を確認する。
