@@ -8973,11 +8973,11 @@
 
 ### 現在の状態
 
-- spec §99をドラフトPR #25（head `4861aa4`）へ実装済み。隔離DB回帰CIとVercel Previewは成功。ログイン後の目安判定と印刷・実機確認はレビュー対象。
+- spec §99をドラフトPR #25（実装コミット`4861aa4`）へ実装済み。隔離DB回帰CIとVercel Previewは成功。ログイン後の目安判定と印刷・実機確認はレビュー対象。
 
 ### 完了
 
-- 済: Codexが `docs/codex-handoff-orders-mobile.md` に従い、ブランチ `ui/orders-mobile` で実装・計測を行い、ドラフトPRを作成する（マージ・公開はしない）。（PR #25、head `4861aa4`、隔離DB回帰CI・Vercel Preview成功。上記の架空データ計測を参照）
+- 済: Codexが `docs/codex-handoff-orders-mobile.md` に従い、ブランチ `ui/orders-mobile` で実装・計測を行い、ドラフトPRを作成する（マージ・公開はしない）。（PR #25、実装コミット`4861aa4`、隔離DB回帰CI・Vercel Preview成功。上記の架空データ計測を参照）
 - 取消: PR #25の隔離DB回帰CI・Vercel Previewと印刷プレビューを確認する。（CI・Previewは成功済み。印刷プレビューはログイン後の個別確認へ分ける）
 
 ### 次のアクション
