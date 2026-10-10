@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useRef, useState } from "react";
 import { useWorkStaffSelection } from "@/components/domain/work-staff-selection";
 import {
   receiveOrderRequestWithStateAction,
@@ -49,6 +49,8 @@ function getOrderRowStatusLabel(row: OrderRequestRow) {
 export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderRequestRowProps) {
   const [activePanel, setActivePanel] = useState<ActiveOrderPanel>(null);
   const [moreForm, setMoreForm] = useState<MoreForm>(null);
+  const quantityTriggerRef = useRef<HTMLButtonElement>(null);
+  const moreTriggerRef = useRef<HTMLButtonElement>(null);
   const [requestedQuantity, setRequestedQuantity] = useState(row.requestedQuantity);
   const [selectedSupplierId, setSelectedSupplierId] = useState(row.supplierId ?? "");
   const [quantityState, quantityAction, isQuantityPending] = useActionState(
@@ -110,6 +112,15 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
   function togglePanel(panel: Exclude<ActiveOrderPanel, null>) {
     setActivePanel((currentPanel) => (currentPanel === panel ? null : panel));
     setMoreForm(null);
+  }
+
+  function closeEditor(panel: "supplier" | "quantity") {
+    setActivePanel(null);
+    if (panel === "quantity" && !isAwaitingReceipt) {
+      quantityTriggerRef.current?.focus();
+    } else {
+      moreTriggerRef.current?.focus();
+    }
   }
 
   return (
@@ -212,7 +223,7 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
                 >
                   {isSupplierPending ? "変更中" : "発注先を変更"}
                 </button>
-                <button type="button" onClick={() => setActivePanel(null)}
+                <button type="button" onClick={() => closeEditor("supplier")}
                   className="min-h-10 w-fit px-2 text-sm font-semibold text-accent underline">
                   閉じる
                 </button>
@@ -273,6 +284,10 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
                   {isQuantityPending ? "更新中" : row.status === "SUGGESTED" ? "この数量で発注予定へ" : "更新"}
                 </button>
               </div>
+              <button type="button" onClick={() => closeEditor("quantity")}
+                className="min-h-10 w-fit px-2 text-sm font-semibold text-accent underline">
+                閉じる
+              </button>
             </form>
           ) : null}
         </div>
@@ -307,7 +322,7 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
           ) : null}
           <div className="order-record-actions flex flex-wrap gap-2">
             {canChangeQuantity && !isAwaitingReceipt ? (
-              <button type="button" onClick={() => togglePanel("quantity")}
+              <button ref={quantityTriggerRef} type="button" onClick={() => togglePanel("quantity")}
                 aria-expanded={activePanel === "quantity"}
                 className="inline-flex min-h-10 items-center whitespace-nowrap rounded btn-secondary px-3 text-sm font-semibold transition">
                 {activePanel === "quantity" ? "閉じる" : "数量を変える"}
@@ -324,6 +339,7 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
               </button>
             ) : null}
             <button
+              ref={moreTriggerRef}
               type="button"
               onClick={() => togglePanel("more")}
               aria-expanded={activePanel === "more"}

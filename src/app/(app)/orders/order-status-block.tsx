@@ -36,7 +36,7 @@ export function OrderStatusBlock({
             {foldInitially ? (
               <>
                 <button type="button" aria-expanded={isOpen} onClick={() => setOpen((value) => !value)}
-                  className="min-h-10 text-left text-base font-semibold text-muted print:hidden">
+                  className="min-h-10 text-left text-base font-semibold text-accent print:hidden">
                   {title} {count}件（{isOpen ? "閉じる" : "開く"}）
                 </button>
                 <h3 className="hidden font-semibold print:block">{title} <span>{count} 件</span></h3>
