@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>発注画面 手順の見える化 モック</title>
+<style>
+  :root {
+    --c-paper: #efeee9; --c-sheet: #ffffff; --c-paper-2: #f4f3ef; --c-tint: #e4ebf2;
+    --c-ink: #1d201e; --c-ink-2: #575c58; --c-rule: #d8d6cf; --c-rule-strong: #868a84;
+    --c-ai: #1f4e79; --c-ai-deep: #163a5b; --c-ai-edge: #102a42; --c-control-edge: #a9a59b;
+    --c-mark: #ffe066; --c-mark-soft: #fff4c2; --c-shu: #b52a1c; --c-green: #1e6b45; --c-focus: #ffd400;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--c-paper); color: var(--c-ink);
+    font-family: "Inter", "Noto Sans JP", "Yu Gothic UI", system-ui, sans-serif; font-size: 14px; }
+  a { color: inherit; text-decoration: none; }
+  :focus-visible { outline: 2px solid var(--c-ink); outline-offset: 2px; box-shadow: 0 0 0 2px var(--c-focus); }
+
+  /* モックの操作帯（実画面には無い） */
+  .mock-bar { position: sticky; top: 0; z-index: 10; background: var(--c-ink); color: #fff; padding: 8px 16px;
+    display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 14px; }
+  .mock-bar strong { margin-right: 8px; }
+  .mock-bar button { min-height: 40px; padding: 0 16px; border-radius: 4px; border: 1px solid #fff; background: transparent;
+    color: #fff; font: inherit; font-weight: 600; cursor: pointer; }
+  .mock-bar button[aria-pressed="true"] { background: #fff; color: var(--c-ink); }
+  .mock-note { max-width: 1180px; margin: 12px auto 0; padding: 0 24px; color: var(--c-ink-2); font-size: 13px; line-height: 1.6; }
+
+  /* 共通ナビ */
+  .nav { height: 56px; background: var(--c-ai); color: #fff; display: flex; align-items: stretch; padding: 0 24px; gap: 4px; font-size: 16px; }
+  .nav a { display: flex; align-items: center; padding: 0 12px; font-weight: 600; }
+  .nav a.cur { background: var(--c-paper); color: var(--c-ai); }
+  .nav .right { margin-left: auto; display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 600; }
+  .nav select { height: 40px; min-width: 112px; border-radius: 4px; border: 1px solid var(--c-rule-strong); font: inherit; padding: 0 8px; }
+
+  main { max-width: 1180px; margin: 0 auto; padding: 12px 24px 48px; display: flex; flex-direction: column; gap: 16px; }
+  h1 { font-size: 22px; margin: 0; }
+  .head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .head .tools { margin-left: auto; display: flex; gap: 8px; }
+
+  /* ボタン（実装の btn-primary / btn-secondary と同じ考え方） */
+  .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 40px; padding: 0 12px; border-radius: 4px;
+    font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; text-decoration: none; }
+  .btn-secondary { border: 1px solid var(--c-rule-strong); background: linear-gradient(var(--c-sheet), var(--c-paper-2)); color: var(--c-ink);
+    box-shadow: inset 0 1px 0 #fff, 0 2px 0 var(--c-control-edge), 0 3px 4px rgb(0 0 0 / .08); }
+  .btn-primary { border: 0; background: var(--c-ai); color: #fff;
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / .22), 0 3px 0 var(--c-ai-edge), 0 4px 6px rgb(0 0 0 / .18); }
+  .btn:active { transform: translateY(2px); box-shadow: inset 0 2px 3px rgb(0 0 0 / .25); }
+  .btn-lg { min-height: 44px; padding: 0 16px; font-size: 16px; }
+
+  .filters { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 16px; border-radius: 4px;
+    border: 1px solid var(--c-rule-strong); background: var(--c-sheet); font-weight: 600; }
+  .chip.cur { background: var(--c-ai); color: #fff; border-color: var(--c-ai); box-shadow: inset 0 2px 3px rgb(0 0 0 / .25); }
+  .num { font-variant-numeric: tabular-nums; }
+  .num.mark { background: var(--c-mark); color: var(--c-ink); padding: 0 4px; border-radius: 2px; }
+  .num.zero { color: var(--c-ink-2); }
+  .chip.cur .num.zero { color: #fff; }
+  .search { display: flex; gap: 8px; align-items: center; background: var(--c-sheet); border: 1px solid var(--c-rule); border-radius: 4px; padding: 12px; }
+  .search input { flex: 1; min-width: 0; height: 40px; border: 1px solid var(--c-rule-strong); border-radius: 4px; padding: 0 12px; font: inherit;
+    box-shadow: inset 0 2px 3px rgb(0 0 0 / .10); }
+  .search a { color: var(--c-ai); text-decoration: underline; font-weight: 600; padding: 0 8px; }
+
+  /* 発注先の外枠 */
+  .supplier { background: var(--c-sheet); border: 1px solid var(--c-rule); border-radius: 4px; overflow: hidden; }
+  .supplier-head { display: flex; align-items: flex-start; gap: 12px; background: var(--c-tint); border-left: 8px solid var(--c-ai); padding: 12px 20px; }
+  .supplier-head h2 { margin: 0; font-size: 18px; color: var(--c-ai); }
+  .supplier-head .lead { font-size: 13px; color: var(--c-ink-2); margin-top: 4px; }
+  .supplier-body { padding: 12px; display: grid; gap: 12px; background: rgb(244 243 239 / .3); }
+
+  /* 状態の枠 */
+  .block { border: 1px solid var(--c-rule); border-radius: 4px; background: var(--c-sheet); overflow: hidden; }
+  .block-head { display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-bottom: 1px solid var(--c-rule); flex-wrap: wrap; }
+  .block-head .count { border: 1px solid var(--c-rule); border-radius: 4px; padding: 2px 8px; font-size: 12px; color: var(--c-ink-2); font-weight: 600; }
+  .block-head .actions { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+
+  /* 現行の見出し */
+  .old .block-head h3 { margin: 0; font-size: 14px; }
+  .old .block-head .desc { font-size: 12px; color: var(--c-ink-2); margin-top: 2px; }
+  .old .block.suggested .block-head { background: var(--c-tint); }
+
+  /* 案A の見出し */
+  .step { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%;
+    font-weight: 700; font-size: 16px; flex: none; }
+  .new .block-head { padding: 12px 16px; border-bottom-width: 2px; }
+  .new .block-head h3 { margin: 0; font-size: 18px; line-height: 1.3; }
+  .new .block-head .next { font-size: 14px; color: var(--c-ink); margin-top: 2px; }
+  .new .block-head .next b { font-weight: 700; }
+  .new .block.suggested .block-head { background: var(--c-mark-soft); border-bottom-color: var(--c-ink); }
+  .new .block.suggested .step { background: var(--c-mark); color: var(--c-ink); border: 2px solid var(--c-ink); }
+  .new .block.planned .block-head { background: var(--c-tint); border-bottom-color: var(--c-ai); }
+  .new .block.planned .step { background: var(--c-ai); color: #fff; }
+  .new .block.awaiting .block-head { background: var(--c-sheet); border-bottom-color: var(--c-ink); }
+  .new .block.awaiting .step { background: var(--c-sheet); color: var(--c-ink); border: 2px solid var(--c-ink); }
+  .new .block.done .block-head { background: var(--c-paper-2); border-bottom-width: 1px; }
+  .new .block.done h3 { font-size: 16px; color: var(--c-ink-2); }
+  .fold { color: var(--c-ai); font-weight: 600; background: none; border: 0; font: inherit; font-size: 14px; cursor: pointer; min-height: 40px; padding: 0; }
+
+  /* 手順の帯（案A） */
+  .flow { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; font-size: 14px; color: var(--c-ink-2); }
+  .flow .s { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; color: var(--c-ink); }
+  .flow .arrow { color: var(--c-rule-strong); }
+  .flow .dot { width: 20px; height: 20px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+  .flow .d1 { background: var(--c-mark); border: 2px solid var(--c-ink); }
+  .flow .d2 { background: var(--c-ai); color: #fff; }
+  .flow .d3 { border: 2px solid var(--c-ink); }
+
+  /* 表 */
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; font-size: 13px; color: var(--c-ai); background: var(--c-tint); padding: 8px 12px; border-bottom: 1px solid var(--c-ai); }
+  td { padding: 8px 12px; border-bottom: 1px solid var(--c-rule); vertical-align: top; }
+  tr:last-child td { border-bottom: 0; }
+  .pname { color: var(--c-ai); font-weight: 600; font-size: 14px; }
+  .sub { font-size: 12px; color: var(--c-ink-2); margin-top: 2px; }
+  .stock { display: inline-grid; grid-template-columns: 1fr 1fr; gap: 8px; border: 1px solid var(--c-rule); border-radius: 4px; padding: 6px 12px; text-align: center; }
+  .stock small { display: block; font-size: 12px; color: var(--c-ink-2); font-weight: 600; }
+  .stock b { font-size: 18px; font-variant-numeric: tabular-nums; }
+  .qty { display: inline-flex; align-items: baseline; gap: 4px; background: var(--c-tint); color: var(--c-ai); padding: 4px 10px; border-radius: 4px; }
+  .qty small { font-size: 12px; font-weight: 600; }
+  .qty b { font-size: 18px; font-variant-numeric: tabular-nums; }
+  .link { color: var(--c-ai); font-size: 14px; display: inline-block; margin-top: 6px; }
+  .cell-stack { display: grid; gap: 8px; justify-items: start; }
+  .ops { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+  .new td.ops-cell { width: 1%; white-space: nowrap; }
+  .new td.ops-cell .ops { flex-wrap: nowrap; }
+  .new th.ops-head { text-align: right; }
+  .record { font-size: 14px; color: var(--c-ink-2); }
+
+  .compare { display: grid; gap: 8px; }
+  .label-band { font-size: 13px; font-weight: 700; color: var(--c-ink-2); letter-spacing: .02em; }
+  .callout { background: var(--c-sheet); border: 1px solid var(--c-rule); border-left: 4px solid var(--c-ai); padding: 12px 16px; border-radius: 4px; font-size: 14px; line-height: 1.7; }
+  .callout ol { margin: 4px 0 0; padding-left: 20px; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="mock-bar" role="group" aria-label="表示の切り替え">
+  <strong>発注画面モック（架空データ）</strong>
+  <button type="button" data-view="old" aria-pressed="false">現行</button>
+  <button type="button" data-view="new" aria-pressed="true">案A</button>
+</div>
+<p class="mock-note">ボタンはすべて見た目だけで、押しても何も起きません。上の「現行」「案A」で切り替えて見比べてください。タブレット横（1024px以上）の表示です。スマホ・タブレット縦のカード表示も、同じ考え方で合わせます。</p>
+
+<nav class="nav" aria-label="共通ナビ">
+  <a href="#">ホーム</a><a href="#">出庫</a><a href="#">納品</a><a href="#">在庫</a><a href="#" class="cur">発注</a><a href="#">履歴</a><a href="#">棚卸</a>
+  <span class="right">クリニック1 担当 <select aria-label="担当"><option>架空担当A</option></select> その他</span>
+</nav>
+
+<main>
+  <div class="head">
+    <h1>発注</h1>
+    <div class="tools">
+      <a class="btn btn-secondary" href="#">不足一覧へ</a>
+      <a class="btn btn-secondary" href="#">発注書下書き</a>
+      <a class="btn btn-secondary" href="#">発注記録</a>
+      <button class="btn btn-secondary" type="button">印刷</button>
+    </div>
+  </div>
+
+  <form class="search" onsubmit="return false">
+    <input type="search" placeholder="商品名・商品コード・カテゴリ・発注先・メモ" aria-label="検索">
+    <button class="btn btn-primary" type="submit">検索</button>
+    <a href="#">クリア</a>
+  </form>
+
+  <div class="filters">
+    <a class="chip cur" href="#">すべて <span class="num">6</span></a>
+    <a class="chip" href="#">確認待ち <span class="num mark">2</span></a>
+    <a class="chip" href="#">発注予定 <span class="num">1</span></a>
+    <a class="chip" href="#">納品待ち <span class="num mark">1</span></a>
+    <a class="chip" href="#">納品済み <span class="num">2</span></a>
+    <a class="chip" href="#">見送り <span class="num zero">0</span></a>
+  </div>
+
+  <!-- ===================== 現行 ===================== -->
+  <section class="old compare" data-panel="old" hidden>
+    <div class="label-band">現行（2026-10-10 本番と同じ並び）</div>
+    <div class="supplier">
+      <div class="supplier-head">
+        <div><h2>ディーラーA</h2><div class="lead">平均納品日数: 1.0日（中央値 1.0日、直近180日、3件）</div></div>
+        <div style="margin-left:auto;display:flex;gap:6px"><span class="block-head"><span class="count">全6件</span></span></div>
+      </div>
+      <div class="supplier-body">
+        <div class="block suggested">
+          <div class="block-head">
+            <div><h3>確認待ち</h3><div class="desc">在庫変動から自動計算・スタッフ確認待ち</div></div>
+            <div class="actions"><span class="count">2 件</span><button class="btn btn-secondary" type="button">2件をまとめて発注予定へ</button></div>
+          </div>
+          <table>
+            <thead><tr><th>商品</th><th>在庫状況</th><th>発注先</th><th>発注量</th><th>記録・操作</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><div class="pname">架空レジン A2</div><div class="sub">コード未設定 / CR関連</div></td>
+                <td><div class="stock"><span><small>現在</small><b>0</b></span><span><small>基準</small><b>1</b></span></div></td>
+                <td><div class="cell-stack"><span><span class="pname" style="font-weight:400">ディーラーA</span><div class="sub">単位: 本</div></span><button class="btn btn-secondary" type="button">発注先を変更</button></div></td>
+                <td><div class="cell-stack"><span class="qty"><small>発注</small><b>1</b>（本）</span><span class="link">▸ 計算の内訳</span><button class="btn btn-secondary" type="button">数量を変えて発注予定へ</button></div></td>
+                <td><button class="btn btn-secondary" type="button">その他の操作</button></td>
+              </tr>
+              <tr>
+                <td><div class="pname">架空う蝕検知液</div><div class="sub">コード未設定 / CR関連</div></td>
+                <td><div class="stock"><span><small>現在</small><b>7</b></span><span><small>基準</small><b>9</b></span></div></td>
+                <td><div class="cell-stack"><span><span class="pname" style="font-weight:400">ディーラーA</span><div class="sub">単位: 本</div></span><button class="btn btn-secondary" type="button">発注先を変更</button></div></td>
+                <td><div class="cell-stack"><span class="qty"><small>発注</small><b>2</b>（本）</span><span class="link">▸ 計算の内訳</span><button class="btn btn-secondary" type="button">数量を変えて発注予定へ</button></div></td>
+                <td><button class="btn btn-secondary" type="button">その他の操作</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="block">
+          <div class="block-head">
+            <div><h3>発注予定</h3><div class="desc">これから発注する対象</div></div>
+            <div class="actions"><span class="count">1 件</span><button class="btn btn-secondary" type="button">このディーラーだけ印刷</button><button class="btn btn-primary" type="button">発注済みにする</button></div>
+          </div>
+          <table>
+            <thead><tr><th>商品</th><th>在庫状況</th><th>発注先</th><th>発注量</th><th>記録・操作</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><div class="pname">架空咬合紙 赤・青</div><div class="sub">コード未設定 / CR関連</div></td>
+                <td><div class="stock"><span><small>現在</small><b>0</b></span><span><small>基準</small><b>2</b></span></div></td>
+                <td><div class="cell-stack"><span><span class="pname" style="font-weight:400">ディーラーA</span><div class="sub">単位: 袋</div></span><button class="btn btn-secondary" type="button">発注先を変更</button></div></td>
+                <td><div class="cell-stack"><span class="qty"><small>発注</small><b>2</b></span><button class="btn btn-secondary" type="button">数量変更</button></div></td>
+                <td><button class="btn btn-secondary" type="button">その他の操作</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="block">
+          <div class="block-head">
+            <div><h3>納品待ち</h3><div class="desc">発注記録済み・商品到着待ち</div></div>
+            <div class="actions"><span class="count">1 件</span></div>
+          </div>
+          <table>
+            <thead><tr><th>商品</th><th>在庫状況</th><th>発注先</th><th>発注量</th><th>記録・操作</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><div class="pname">架空ボンディング材</div><div class="sub">コード未設定 / CR関連</div></td>
+                <td><div class="stock"><span><small>現在</small><b>1</b></span><span><small>基準</small><b>3</b></span></div></td>
+                <td><span class="pname" style="font-weight:400">ディーラーA</span><div class="sub">単位: 本</div></td>
+                <td><div class="cell-stack"><span class="qty"><small>発注</small><b>2</b></span><button class="btn btn-secondary" type="button">数量変更</button></div></td>
+                <td><div class="cell-stack"><span class="record">FAX・10/09・架空担当A</span><button class="btn btn-secondary" type="button" style="background:var(--c-mark-soft)">納品確認</button><button class="btn btn-secondary" type="button">その他の操作</button></div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="block"><div class="block-head"><button class="fold" type="button">納品済み 2件（開く）</button></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 案A ===================== -->
+  <section class="new compare" data-panel="new">
+    <div class="label-band">案A（並びはそのまま、見た目とボタンの位置をそろえる）</div>
+
+    <div class="flow" aria-label="発注の手順">
+      <span class="s"><span class="dot d1">1</span>確認待ち</span><span class="arrow">→</span>
+      <span class="s"><span class="dot d2">2</span>発注予定</span><span class="arrow">→</span>
+      <span class="s"><span class="dot d3">3</span>納品待ち</span><span class="arrow">→</span>
+      <span>納品済み</span>
+    </div>
+
+    <div class="supplier">
+      <div class="supplier-head">
+        <div><h2>ディーラーA</h2><div class="lead">平均納品日数: 1.0日（中央値 1.0日、直近180日、3件）</div></div>
+      </div>
+      <div class="supplier-body">
+
+        <div class="block suggested">
+          <div class="block-head">
+            <span class="step" aria-hidden="true">1</span>
+            <div>
+              <h3>確認待ち <span class="count" style="font-size:13px;vertical-align:2px">2件</span></h3>
+              <div class="next">自動で計算した数量を確かめて、<b>発注予定へ移します。</b></div>
+            </div>
+            <div class="actions"><button class="btn btn-primary btn-lg" type="button">2件をまとめて発注予定へ</button></div>
+          </div>
+          <table>
+            <thead><tr><th>商品</th><th>在庫（現在 / 基準）</th><th>発注先</th><th>発注量</th><th class="ops-head">操作</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><div class="pname">架空レジン A2</div><div class="sub">コード未設定 / CR関連</div></td>
+                <td><div class="stock"><span><small>現在</small><b>0</b></span><span><small>基準</small><b>1</b></span></div></td>
+                <td>ディーラーA<div class="sub">単位: 本</div></td>
+                <td><span class="qty"><small>発注</small><b>1</b>（本）</span><br><span class="link">▸ 計算の内訳</span></td>
+                <td class="ops-cell"><div class="ops"><button class="btn btn-secondary" type="button">数量を変える</button><button class="btn btn-secondary" type="button">その他</button></div></td>
+              </tr>
+              <tr>
+                <td><div class="pname">架空う蝕検知液</div><div class="sub">コード未設定 / CR関連</div></td>
+                <td><div class="stock"><span><small>現在</small><b>7</b></span><span><small>基準</small><b>9</b></span></div></td>
+                <td>ディーラーA<div class="sub">単位: 本</div></td>
+                <td><span class="qty"><small>発注</small><b>2</b>（本）</span><br><span class="link">▸ 計算の内訳</span></td>
+                <td class="ops-cell"><div class="ops"><button class="btn btn-secondary" type="button">数量を変える</button><button class="btn btn-secondary" type="button">その他</button></div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="block planned">
+          <div class="block-head">
+            <span class="step" aria-hidden="true">2</span>
+            <div>
+              <h3>発注予定 <span class="count" style="font-size:13px;vertical-align:2px">1件</span></h3>
+              <div class="next">発注書を印刷してディーラーに送り、<b>送ったら「発注済みにする」</b>を押します。</div>
+            </div>
+            <div class="actions"><button class="btn btn-secondary btn-lg" type="button">発注書を印刷</button><button class="btn btn-primary btn-lg" type="button">発注済みにする</button></div>
+          </div>
+          <table>
+            <thead><tr><th>商品</th><th>在庫（現在 / 基準）</th><th>発注先</th><th>発注量</th><th class="ops-head">操作</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><div class="pname">架空咬合紙 赤・青</div><div class="sub">コード未設定 / CR関連</div></td>
+                <td><div class="stock"><span><small>現在</small><b>0</b></span><span><small>基準</small><b>2</b></span></div></td>
+                <td>ディーラーA<div class="sub">単位: 袋</div></td>
+                <td><span class="qty"><small>発注</small><b>2</b></span></td>
+                <td class="ops-cell"><div class="ops"><button class="btn btn-secondary" type="button">数量を変える</button><button class="btn btn-secondary" type="button">その他</button></div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="block awaiting">
+          <div class="block-head">
+            <span class="step" aria-hidden="true">3</span>
+            <div>
+              <h3>納品待ち <span class="count" style="font-size:13px;vertical-align:2px">1件</span></h3>
+              <div class="next">商品が届いたら、その行の<b>「納品確認」</b>を押します。</div>
+            </div>
+          </div>
+          <table>
+            <thead><tr><th>商品</th><th>在庫（現在 / 基準）</th><th>発注先</th><th>発注量・記録</th><th class="ops-head">操作</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><div class="pname">架空ボンディング材</div><div class="sub">コード未設定 / CR関連</div></td>
+                <td><div class="stock"><span><small>現在</small><b>1</b></span><span><small>基準</small><b>3</b></span></div></td>
+                <td>ディーラーA<div class="sub">単位: 本</div></td>
+                <td><span class="qty"><small>発注</small><b>2</b></span><div class="record" style="margin-top:6px">FAX・10/09・架空担当A</div></td>
+                <td class="ops-cell"><div class="ops"><button class="btn btn-secondary" type="button">納品確認</button><button class="btn btn-secondary" type="button">その他</button></div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="block done"><div class="block-head"><button class="fold" type="button">納品済み 2件（開く）</button></div></div>
+      </div>
+    </div>
+
+    <div class="callout">
+      <b>案Aで変えたところ</b>
+      <ol>
+        <li>枠ごとに手順の番号と「次にすること」を1行で書いた。見出しを18pxにした。</li>
+        <li>枠の色で段階を分けた。1 確認待ち＝黄の面（design.md の「注意」）、2 発注予定＝藍の網掛け、3 納品待ち＝白に墨の罫、納品済み・見送り＝色なし。</li>
+        <li>枠の主な操作は見出しの右端に1つだけ。藍の塗りで、高さ44px。<br>
+          1 は「まとめて発注予定へ」。2 は「発注書を印刷」→「発注済みにする」の順（現行の「このディーラーだけ印刷」を言い換え）。</li>
+        <li>行の操作ボタンは、すべて右端の「操作」列に、いつも同じ順で並べた。<br>
+          「数量を変える」（納品待ちは「納品確認」）と「その他」の2つだけ。「発注先を変更」は「その他」の中へ移した。</li>
+        <li>在庫・発注先・発注量の列は、見るだけの情報にした。</li>
+        <li>発注の流れ「1 確認待ち → 2 発注予定 → 3 納品待ち → 納品済み」を一覧の上に表示した。</li>
+      </ol>
+    </div>
+  </section>
+</main>
+
+<script>
+  const buttons = document.querySelectorAll('.mock-bar button');
+  buttons.forEach((b) => b.addEventListener('click', () => {
+    buttons.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+    document.querySelectorAll('[data-panel]').forEach((p) => { p.hidden = p.dataset.panel !== b.dataset.view; });
+  }));
+</script>
+</body>
+</html>
