@@ -163,11 +163,11 @@ function OrderRequestRowsTable({
     <div className="overflow-x-auto">
       <table className="order-rows w-full border-collapse text-left text-sm print:text-xs">
         <colgroup className="print:hidden">
-          <col className="w-[20%]" />
-          <col className="w-[16%]" />
-          <col className="w-[20%]" />
-          <col className="w-[20%]" />
           <col className="w-[24%]" />
+          <col className="w-[14%]" />
+          <col className="w-[18%]" />
+          <col className="w-[18%]" />
+          <col className="w-[26%]" />
         </colgroup>
         <thead className="bg-tint text-label text-accent print:bg-panel print:text-label print:text-ink">
           <tr>
@@ -183,7 +183,7 @@ function OrderRequestRowsTable({
             <th className="border-b border-accent px-4 py-3 print:border print:border-ink print:px-2 print:py-1.5">
               発注量
             </th>
-            <th className="border-b border-accent px-4 py-3 print:hidden">記録・操作</th>
+            <th className="border-b border-accent px-3 py-3 print:hidden">操作</th>
             <th className="hidden border border-ink px-2 py-1.5 print:table-cell">状態</th>
             <th className="hidden border border-ink px-2 py-1.5 print:table-cell">備考</th>
             <th className="hidden border border-ink px-2 py-1.5 print:table-cell">確認</th>
@@ -389,6 +389,16 @@ export default async function OrdersPage({ searchParams }: PageProps) {
           })}
         </section>
 
+        <div aria-label="発注の手順" className="hidden flex-wrap items-center gap-x-2 gap-y-1 text-sm text-ink sm:flex print:hidden">
+          <span className="inline-flex items-center gap-1.5 font-semibold"><span aria-hidden="true" className="inline-flex h-5 w-5 items-center justify-center rounded-full border-2 border-ink bg-mark text-xs font-bold">1</span>確認待ち</span>
+          <span aria-hidden="true" className="text-muted">→</span>
+          <span className="inline-flex items-center gap-1.5 font-semibold"><span aria-hidden="true" className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-accent text-xs font-bold text-panel">2</span>発注予定</span>
+          <span aria-hidden="true" className="text-muted">→</span>
+          <span className="inline-flex items-center gap-1.5 font-semibold"><span aria-hidden="true" className="inline-flex h-5 w-5 items-center justify-center rounded-full border-2 border-ink bg-panel text-xs font-bold">3</span>納品待ち</span>
+          <span aria-hidden="true" className="text-muted">→</span>
+          <span>納品済み</span>
+        </div>
+
         <section className="hidden grid-cols-2 gap-3 text-xs print:grid">
           <div className="min-h-12 border border-ink px-3 py-2">発注前確認</div>
           <div className="min-h-12 border border-ink px-3 py-2">印刷備考</div>
@@ -416,33 +426,41 @@ export default async function OrdersPage({ searchParams }: PageProps) {
                   key: "active",
                   title: "発注予定",
                   description: "これから発注する対象",
+                  step: 2 as const,
+                  nextAction: "発注書を印刷してディーラーに送り、送ったら「発注済みにする」を押します。",
                   rows: activeRows,
                   className: "border-accent/30",
-                  headerClassName: "bg-panel",
+                  headerClassName: "border-b-2 border-accent bg-tint",
                 },
                 {
                   key: "awaiting-receipt",
                   title: "納品待ち",
                   description: "発注記録済み・商品到着待ち",
+                  step: 3 as const,
+                  nextAction: "商品が届いたら、その行の「納品確認」を押します。",
                   rows: awaitingReceiptRows,
                   className: "border-line",
-                  headerClassName: "bg-markSoft",
+                  headerClassName: "border-b-2 border-ink bg-panel",
                 },
                 {
                   key: "received",
                   title: "納品済み",
                   description: "納品確認済み",
+                  step: undefined,
+                  nextAction: undefined,
                   rows: receivedRows,
                   className: "border-line",
-                  headerClassName: "bg-panel",
+                  headerClassName: "border-line bg-subtle",
                 },
                 {
                   key: "skipped",
                   title: "見送り",
                   description: "今回は発注しないもの",
+                  step: undefined,
+                  nextAction: undefined,
                   rows: skippedRows,
                   className: "border-line",
-                  headerClassName: "bg-subtle/70",
+                  headerClassName: "border-line bg-subtle",
                 },
               ].filter((block) => block.rows.length > 0);
               const hasUnassignedSupplier = supplierRows.some((row) => !row.supplierId);
@@ -497,13 +515,13 @@ export default async function OrdersPage({ searchParams }: PageProps) {
                   </div>
                   <div className="flex flex-wrap items-start justify-end gap-2">
                     <div className="flex flex-wrap items-center justify-end gap-1.5">
-                      <span className="rounded border border-line bg-panel/80 px-2 py-1 text-xs font-semibold text-muted print:border-ink print:text-ink">
+                      <span className="hidden rounded border border-line bg-panel/80 px-2 py-1 text-xs font-semibold text-muted print:inline-flex print:border-ink print:text-ink">
                         全 {supplierRows.length} 件
                       </span>
                       {primaryStatusCounts.map((item) => (
                         <span
                           key={item.status}
-                          className={`rounded border px-2 py-1 text-label font-semibold print:border-ink print:bg-panel print:text-ink ${getSupplierStatusChipClass(
+                          className={`hidden rounded border px-2 py-1 text-label font-semibold print:inline-flex print:border-ink print:bg-panel print:text-ink ${getSupplierStatusChipClass(
                             item.status,
                           )}`}
                         >
@@ -526,6 +544,8 @@ export default async function OrdersPage({ searchParams }: PageProps) {
                       key={block.key}
                       title={block.title}
                       description={block.description}
+                      step={block.step}
+                      nextAction={block.nextAction}
                       count={block.rows.length}
                       className={block.className}
                       headerClassName={block.headerClassName}

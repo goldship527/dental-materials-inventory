@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useRef, useState } from "react";
 import { useWorkStaffSelection } from "@/components/domain/work-staff-selection";
 import {
   receiveOrderRequestWithStateAction,
@@ -49,6 +49,8 @@ function getOrderRowStatusLabel(row: OrderRequestRow) {
 export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderRequestRowProps) {
   const [activePanel, setActivePanel] = useState<ActiveOrderPanel>(null);
   const [moreForm, setMoreForm] = useState<MoreForm>(null);
+  const quantityTriggerRef = useRef<HTMLButtonElement>(null);
+  const moreTriggerRef = useRef<HTMLButtonElement>(null);
   const [requestedQuantity, setRequestedQuantity] = useState(row.requestedQuantity);
   const [selectedSupplierId, setSelectedSupplierId] = useState(row.supplierId ?? "");
   const [quantityState, quantityAction, isQuantityPending] = useActionState(
@@ -110,6 +112,15 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
   function togglePanel(panel: Exclude<ActiveOrderPanel, null>) {
     setActivePanel((currentPanel) => (currentPanel === panel ? null : panel));
     setMoreForm(null);
+  }
+
+  function closeEditor(panel: "supplier" | "quantity") {
+    setActivePanel(null);
+    if (panel === "quantity" && !isAwaitingReceipt) {
+      quantityTriggerRef.current?.focus();
+    } else {
+      moreTriggerRef.current?.focus();
+    }
   }
 
   return (
@@ -184,14 +195,6 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
         )}
         {canChangeSupplier ? (
           <div className="mt-2 grid gap-1.5 print:hidden">
-            <button
-              type="button"
-              onClick={() => togglePanel("supplier")}
-              aria-expanded={activePanel === "supplier"}
-              className="order-supplier-change inline-flex min-h-10 w-fit items-center rounded btn-secondary px-3 text-sm font-semibold transition"
-            >
-              {activePanel === "supplier" ? "閉じる" : "発注先を変更"}
-            </button>
             {activePanel === "supplier" ? (
               <form action={supplierAction} className="grid gap-1.5 rounded border border-line bg-subtle/60 p-2">
                 <input type="hidden" name="orderRequestId" value={row.id} />
@@ -199,7 +202,7 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
                   name="supplierId"
                   value={selectedSupplierId}
                   onChange={(event) => setSelectedSupplierId(event.target.value)}
-                  className="h-10 rounded border border-line bg-panel/90 px-3 text-sm"
+                  className="h-10 min-w-0 rounded border border-line bg-panel/90 px-3 text-sm"
                 >
                   {row.supplierId ? null : (
                     <option value="" disabled>
@@ -220,6 +223,10 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
                 >
                   {isSupplierPending ? "変更中" : "発注先を変更"}
                 </button>
+                <button type="button" onClick={() => closeEditor("supplier")}
+                  className="min-h-10 w-fit px-2 text-sm font-semibold text-accent underline">
+                  閉じる
+                </button>
               </form>
             ) : null}
           </div>
@@ -238,23 +245,10 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
               <p>基準 {row.minStock} − 現在庫 {row.quantity} − 納品待ち {row.pendingOrderedQuantity} − 発注予定 {row.plannedQuantity}</p>
             </details>
           ) : null}
-          {canChangeQuantity ? (
-            <button
-              type="button"
-              onClick={() => togglePanel("quantity")}
-              className="order-qty-action inline-flex min-h-10 w-fit items-center whitespace-nowrap rounded btn-secondary px-3 text-sm font-semibold transition print:hidden"
-            >
-              {activePanel === "quantity"
-                ? "閉じる"
-                : row.status === "SUGGESTED"
-                  ? "数量を変えて発注予定へ"
-                  : "数量変更"}
-            </button>
-          ) : null}
           {canChangeQuantity && activePanel === "quantity" ? (
             <form action={quantityAction} className="order-qty-form grid gap-1.5 rounded border border-line bg-subtle/60 p-2">
               <input type="hidden" name="orderRequestId" value={row.id} />
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
                   onClick={() => changeRequestedQuantity(requestedQuantity - 1)}
@@ -285,11 +279,15 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
                 <button
                   type="submit"
                   disabled={isQuantityPending}
-                  className="min-h-10 rounded btn-primary px-3 text-sm font-semibold transition disabled:cursor-not-allowed"
+                  className="min-h-10 w-full rounded btn-secondary px-3 text-sm font-semibold transition disabled:cursor-not-allowed"
                 >
-                  {isQuantityPending ? "更新中" : "更新"}
+                  {isQuantityPending ? "更新中" : row.status === "SUGGESTED" ? "この数量で発注予定へ" : "更新"}
                 </button>
               </div>
+              <button type="button" onClick={() => closeEditor("quantity")}
+                className="min-h-10 w-fit px-2 text-sm font-semibold text-accent underline">
+                閉じる
+              </button>
             </form>
           ) : null}
         </div>
@@ -322,38 +320,34 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
               ) : null}
             </div>
           ) : null}
-          {canChangeQuantity ? (
+          <div className="order-record-actions flex flex-wrap gap-2">
+            {canChangeQuantity && !isAwaitingReceipt ? (
+              <button ref={quantityTriggerRef} type="button" onClick={() => togglePanel("quantity")}
+                aria-expanded={activePanel === "quantity"}
+                className="inline-flex min-h-10 items-center whitespace-nowrap rounded btn-secondary px-3 text-sm font-semibold transition">
+                {activePanel === "quantity" ? "閉じる" : "数量を変える"}
+              </button>
+            ) : null}
+            {isAwaitingReceipt ? (
+              <button
+                type="button"
+                onClick={() => togglePanel("receipt")}
+                aria-expanded={activePanel === "receipt"}
+                className="inline-flex min-h-10 items-center whitespace-nowrap rounded btn-secondary px-3 text-sm font-semibold transition"
+              >
+                {activePanel === "receipt" ? "閉じる" : "納品確認"}
+              </button>
+            ) : null}
             <button
+              ref={moreTriggerRef}
               type="button"
-              onClick={() => togglePanel("quantity")}
-              aria-expanded={activePanel === "quantity"}
-              className={`order-card-qty-action ${row.status === "SUGGESTED" ? "order-card-qty-suggested" : ""} min-h-10 w-fit items-center whitespace-nowrap rounded btn-secondary px-3 text-sm font-semibold transition`}
+              onClick={() => togglePanel("more")}
+              aria-expanded={activePanel === "more"}
+              className="inline-flex min-h-10 items-center whitespace-nowrap rounded btn-secondary px-3 text-sm font-semibold transition"
             >
-              {activePanel === "quantity"
-                ? "閉じる"
-                : row.status === "SUGGESTED"
-                  ? "数量を変えて発注予定へ"
-                  : "数量変更"}
+              {activePanel === "more" ? "閉じる" : "その他"}
             </button>
-          ) : null}
-          {isAwaitingReceipt ? (
-            <button
-              type="button"
-              onClick={() => togglePanel("receipt")}
-              aria-expanded={activePanel === "receipt"}
-              className="inline-flex min-h-10 w-fit items-center rounded btn-secondary bg-markSoft px-3 text-sm font-semibold transition"
-            >
-              {activePanel === "receipt" ? "納品確認を閉じる" : "納品確認"}
-            </button>
-          ) : null}
-          <button
-            type="button"
-            onClick={() => togglePanel("more")}
-            aria-expanded={activePanel === "more"}
-            className="inline-flex min-h-10 w-fit items-center rounded btn-secondary px-3 text-sm font-semibold transition"
-          >
-            {activePanel === "more" ? "その他の操作を閉じる" : "その他の操作"}
-          </button>
+          </div>
           {activePanel === "receipt" && isAwaitingReceipt ? (
             <form action={receiptAction} className="order-receipt-form grid gap-2 rounded border border-line border-l-4 border-l-ink bg-markSoft p-2">
               <input type="hidden" name="orderRequestId" value={row.id} />
@@ -385,6 +379,12 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
           ) : null}
           {activePanel === "more" ? (
             <div className="order-more-panel grid gap-2 rounded border border-line bg-subtle/60 p-2">
+              {isAwaitingReceipt && canChangeQuantity ? (
+                <button type="button" onClick={() => togglePanel("quantity")}
+                  className="min-h-10 rounded btn-secondary px-3 text-left text-sm font-semibold">
+                  数量を変える
+                </button>
+              ) : null}
               {row.status === "SUGGESTED" ? (
                 <form action={statusAction}>
                   <input type="hidden" name="orderRequestId" value={row.id} />
@@ -395,15 +395,9 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
                   </button>
                 </form>
               ) : null}
-              {row.status === "SUGGESTED" && canChangeQuantity ? (
-                <button type="button" onClick={() => togglePanel("quantity")}
-                  className="order-card-only min-h-10 rounded btn-secondary px-3 text-left text-sm font-semibold">
-                  数量を変えて発注予定へ
-                </button>
-              ) : null}
               {canChangeSupplier ? (
                 <button type="button" onClick={() => togglePanel("supplier")}
-                  className="order-card-only min-h-10 rounded btn-secondary px-3 text-left text-sm font-semibold">
+                  className="min-h-10 rounded btn-secondary px-3 text-left text-sm font-semibold">
                   発注先を変更
                 </button>
               ) : null}
