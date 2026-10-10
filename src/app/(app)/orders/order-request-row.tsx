@@ -187,6 +187,7 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
             <button
               type="button"
               onClick={() => togglePanel("supplier")}
+              aria-expanded={activePanel === "supplier"}
               className="order-supplier-change inline-flex min-h-10 w-fit items-center rounded btn-secondary px-3 text-sm font-semibold transition"
             >
               {activePanel === "supplier" ? "閉じる" : "発注先を変更"}

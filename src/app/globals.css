@@ -231,6 +231,10 @@ a {
     display: none;
   }
 
+  .order-supplier-change[aria-expanded="true"] {
+    display: inline-flex;
+  }
+
   .order-cell-supplier > div:first-of-type {
     display: inline;
   }
@@ -259,6 +263,10 @@ a {
 
   .order-card-qty-suggested {
     display: none;
+  }
+
+  .order-card-qty-suggested[aria-expanded="true"] {
+    display: inline-flex;
   }
 
   .order-more-panel .order-card-only {
