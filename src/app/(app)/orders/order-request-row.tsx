@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useRef, useState } from "react";
+import { useActionState, useCallback, useEffect, useRef, useState } from "react";
 import { useWorkStaffSelection } from "@/components/domain/work-staff-selection";
 import {
   receiveOrderRequestWithStateAction,
@@ -18,8 +18,26 @@ import {
   orderRequestStatusLabels,
   printableOrderRequestStatuses,
 } from "@/lib/orders/status";
+import { useOrderNotice } from "./order-notice";
 
 const initialState: OrderActionState = {};
+type OrderStateAction = (previousState: OrderActionState, formData: FormData) => Promise<OrderActionState>;
+
+function useNotifyingAction(action: OrderStateAction, setInlineMessage: (message: string | null) => void) {
+  const { show } = useOrderNotice();
+  const notifyingAction = useCallback(async (previousState: OrderActionState, formData: FormData) => {
+    const result = await action(previousState, formData);
+    if (result.status === "success") {
+      setInlineMessage(null);
+      if (result.message) show(result.message);
+    } else {
+      setInlineMessage(result.message ?? null);
+    }
+    return result;
+  }, [action, setInlineMessage, show]);
+
+  return useActionState(notifyingAction, initialState);
+}
 type OrderRequestRowProps = {
   clinicId: string;
   row: OrderRequestRow;
@@ -49,42 +67,38 @@ function getOrderRowStatusLabel(row: OrderRequestRow) {
 export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderRequestRowProps) {
   const [activePanel, setActivePanel] = useState<ActiveOrderPanel>(null);
   const [moreForm, setMoreForm] = useState<MoreForm>(null);
+  const [isRevertConfirmOpen, setIsRevertConfirmOpen] = useState(false);
+  const [inlineMessage, setInlineMessage] = useState<string | null>(null);
   const quantityTriggerRef = useRef<HTMLButtonElement>(null);
   const moreTriggerRef = useRef<HTMLButtonElement>(null);
+  const revertTriggerRef = useRef<HTMLButtonElement>(null);
+  const revertCancelRef = useRef<HTMLButtonElement>(null);
   const [requestedQuantity, setRequestedQuantity] = useState(row.requestedQuantity);
   const [selectedSupplierId, setSelectedSupplierId] = useState(row.supplierId ?? "");
-  const [quantityState, quantityAction, isQuantityPending] = useActionState(
+  const [, quantityAction, isQuantityPending] = useNotifyingAction(
     updateOrderRequestQuantityWithStateAction,
-    initialState,
+    setInlineMessage,
   );
-  const [supplierState, supplierAction, isSupplierPending] = useActionState(
+  const [, supplierAction, isSupplierPending] = useNotifyingAction(
     updateOrderRequestSupplierWithStateAction,
-    initialState,
+    setInlineMessage,
   );
-  const [statusState, statusAction, isStatusPending] = useActionState(
+  const [, statusAction, isStatusPending] = useNotifyingAction(
     updateOrderRequestStatusWithStateAction,
-    initialState,
+    setInlineMessage,
   );
-  const [receiptState, receiptAction, isReceiptPending] = useActionState(
+  const [, receiptAction, isReceiptPending] = useNotifyingAction(
     receiveOrderRequestWithStateAction,
-    initialState,
+    setInlineMessage,
   );
-  const [receiptRevertState, receiptRevertAction, isReceiptRevertPending] = useActionState(
+  const [, receiptRevertAction, isReceiptRevertPending] = useNotifyingAction(
     revertOrderReceiptWithStateAction,
-    initialState,
+    setInlineMessage,
   );
-  const activeState = receiptRevertState.message
-    ? receiptRevertState
-    : receiptState.message
-    ? receiptState
-    : statusState.message
-      ? statusState
-      : supplierState.message
-        ? supplierState
-        : quantityState;
   const canChangeQuantity = canChangeOrderRequestQuantity(row.status, row.receivedAt);
   const canChangeSupplier =
-    (row.status === "SUGGESTED" || printableOrderRequestStatuses.includes(row.status)) && row.supplierOptions.length > 0;
+    (row.status === "SUGGESTED" || printableOrderRequestStatuses.includes(row.status)) &&
+    (row.supplierOptions.length >= 2 || (!row.supplierId && row.supplierOptions.length >= 1));
   const isReceived = row.status === "ORDERED" && Boolean(row.receivedAt);
   const isAwaitingReceipt = row.status === "ORDERED" && !row.receivedAt;
   const isPlanned = printableOrderRequestStatuses.includes(row.status);
@@ -103,6 +117,10 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
   });
   const hasSelectedStaffOperator = selectedStaffOperatorId.length > 0;
 
+  useEffect(() => {
+    if (isRevertConfirmOpen) revertCancelRef.current?.focus();
+  }, [isRevertConfirmOpen]);
+
   function changeRequestedQuantity(nextQuantity: number) {
     const normalizedQuantity = Math.max(1, Math.min(9999, Math.trunc(Number.isFinite(nextQuantity) ? nextQuantity : 1)));
 
@@ -112,6 +130,7 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
   function togglePanel(panel: Exclude<ActiveOrderPanel, null>) {
     setActivePanel((currentPanel) => (currentPanel === panel ? null : panel));
     setMoreForm(null);
+    setIsRevertConfirmOpen(false);
   }
 
   function closeEditor(panel: "supplier" | "quantity") {
@@ -135,15 +154,11 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
         <p className="mt-0.5 text-xs text-muted print:mt-0.5 print:text-xs print:text-ink">
           {row.productCode ?? "コード未設定"} / {row.category ?? "未分類"}
         </p>
-        {activeState.message ? (
+        {inlineMessage ? (
           <p
-            className={
-              activeState.status === "success"
-                ? "mt-1.5 rounded bg-panel px-3 py-1.5 text-xs font-semibold text-success print:hidden"
-                : "mt-1.5 rounded bg-panel px-3 py-1.5 text-xs font-semibold text-danger print:hidden"
-            }
+            className="mt-1.5 rounded bg-panel px-3 py-1.5 text-xs font-semibold text-danger print:hidden"
           >
-            {activeState.message}
+            {inlineMessage}
           </p>
         ) : null}
       </td>
@@ -460,13 +475,31 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
                 </button>
               ) : null}
               {isReceived ? (
-                <form action={receiptRevertAction}>
-                  <input type="hidden" name="orderRequestId" value={row.id} />
-                  <button type="submit" disabled={isReceiptRevertPending}
-                    className="min-h-10 w-full rounded btn-secondary btn-danger px-3 text-left text-sm font-semibold">
-                    {isReceiptRevertPending ? "取り消し中" : "納品確認を取り消す"}
+                <>
+                  <button ref={revertTriggerRef} type="button" onClick={() => setIsRevertConfirmOpen(true)}
+                    aria-expanded={isRevertConfirmOpen}
+                    className="min-h-10 rounded btn-secondary btn-danger px-3 text-left text-sm font-semibold">
+                    納品確認を取り消す
                   </button>
-                </form>
+                  {isRevertConfirmOpen ? (
+                    <div className="grid gap-2 border-t border-line pt-2">
+                      <p className="text-sm text-ink">納品確認を取り消します。在庫へ反映していた場合は、在庫数も元に戻ります。</p>
+                      <form action={receiptRevertAction}>
+                        <input type="hidden" name="orderRequestId" value={row.id} />
+                        <button type="submit" disabled={isReceiptRevertPending}
+                          className="min-h-10 rounded btn-secondary btn-danger px-3 text-sm font-semibold disabled:cursor-not-allowed">
+                          {isReceiptRevertPending ? "取り消し中" : "取り消す"}
+                        </button>
+                      </form>
+                      <button ref={revertCancelRef} type="button" onClick={() => {
+                        setIsRevertConfirmOpen(false);
+                        revertTriggerRef.current?.focus();
+                      }} className="min-h-10 w-fit px-2 text-sm font-semibold text-accent underline">
+                        やめる
+                      </button>
+                    </div>
+                  ) : null}
+                </>
               ) : null}
               {moreForm === "skip" && (row.status === "SUGGESTED" || isPlanned) ? (
                 <form action={statusAction} className="grid gap-2 border-t border-line pt-2">

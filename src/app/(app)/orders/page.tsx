@@ -14,6 +14,7 @@ import {
   type OrderRequestStatusValue,
 } from "@/lib/orders/status";
 import { OrderRequestTableRow } from "./order-request-row";
+import { OrderNoticeProvider } from "./order-notice";
 import { OrderStatusBlock } from "./order-status-block";
 import { OrdersPrintButton } from "./print-button";
 import { SupplierOrderRecordPanel } from "./supplier-order-record-panel";
@@ -404,6 +405,7 @@ export default async function OrdersPage({ searchParams }: PageProps) {
           <div className="min-h-12 border border-ink px-3 py-2">印刷備考</div>
         </section>
 
+        <OrderNoticeProvider>
         <section className="flex flex-col gap-3 print:gap-3">
           <div className="rounded border border-line/90 bg-panel/95 px-4 py-2 text-sm text-muted shadow-sheet print:rounded-none print:border-ink print:px-2 print:py-2 print:text-xs print:text-ink print:shadow-none">
             表示 {filteredRows.length} 件 / 検索後 {queryFilteredRows.length} 件 / 全 {rows.length} 件
@@ -576,6 +578,7 @@ export default async function OrdersPage({ searchParams }: PageProps) {
             </div>
           )}
         </section>
+        </OrderNoticeProvider>
 
         <p className="hidden text-xs leading-5 text-ink print:block">
           発注数量、発注先、状態、備考を確認してください。
