@@ -32,18 +32,18 @@ export function SupplierOrderRecordPanel({
   }
 
   return (
-    <div className="grid gap-2 print:hidden">
-      <div className="flex flex-wrap justify-end gap-2">
+    <div className="grid w-full gap-2 print:hidden sm:w-auto">
+      <div className="flex flex-wrap gap-2 sm:justify-end">
         <a
-          className="inline-flex min-h-10 items-center justify-center rounded btn-secondary border-accent/30 px-3 py-1.5 text-sm font-semibold transition"
+          className="inline-flex min-h-11 flex-1 items-center justify-center rounded btn-secondary px-3 text-base font-semibold transition sm:flex-none"
           href={printHref}
         >
-          このディーラーだけ印刷
+          発注書を印刷
         </a>
         <button
           type="button"
           onClick={() => setIsOpen((current) => !current)}
-          className="inline-flex min-h-10 items-center justify-center rounded btn-primary px-3 py-1.5 text-sm font-semibold transition"
+          className="inline-flex min-h-11 flex-1 items-center justify-center rounded btn-primary px-3 text-base font-semibold transition sm:flex-none"
         >
           {isOpen ? "入力を閉じる" : "発注済みにする"}
         </button>
@@ -99,7 +99,7 @@ export function SupplierOrderRecordPanel({
             <SubmitButton
               pendingLabel="移動中"
               disabled={!canSubmit}
-              className="min-h-10 rounded btn-primary px-3 text-sm font-semibold transition disabled:cursor-not-allowed"
+              className="min-h-10 rounded btn-secondary px-3 text-sm font-semibold transition disabled:cursor-not-allowed"
             >
               納品待ちへ移す
             </SubmitButton>
