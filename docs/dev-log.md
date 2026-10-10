@@ -9371,3 +9371,32 @@
 ### 承認・確認待ち
 
 - ログイン後のPreview計測とClaude Codeの再判定、院内の実機表示、マージ・公開の利用者指示。
+
+## 2026-10-10 発注画面の手順の見える化を本番公開（PR #27）
+
+- 利用者の明示指示を受け、Claude Code再レビュー承認（`docs/codex-handoff-orders-steps.md` §7）を同ファイルだけのコミット`846ee60`（`docs: approve PR 27 (handoff §7)`）としてpushした。親は指定の`809a539`で、両者の差分は指示書1ファイルだけ。
+- PR #27は`master`向けでhead`846ee60`、競合なし、隔離DB回帰CI・Vercel Previewを含む全チェック成功を再確認してからマージした。マージコミットは`3dade7d7248dffbbfd9b979ab7bd45fd1a29e635`。PRの差分にDB関連ファイルはない。
+- Vercel Production deployment `dpl_HXGaaGdH8KjL7KQ8KCKhMPnewpsh` は、上記マージコミット・`master`・target `production` で`READY`。正式ドメイン`https://dental-materials-inventory.vercel.app`へ割り当て済み。
+- 正式ドメインへの匿名GETで`/login`はHTTP 200、未ログインの`/orders`はHTTP 307で`/login`へ転送。今回の公開作業では、公開DBへの直接操作・スキーマ移行はしていない。ログイン後の本番画面や印刷ダイアログの目視、院内実機は今回の匿名確認の範囲外。
+
+## 2026-10-10 朝礼反映（発注画面の手順の見える化・PR #27公開）
+
+### 現在の状態
+
+- spec §100の案AとClaude Code再レビュー承認済みの修正をPR #27で本番公開した。Vercel Productionは対象コミットでREADY、匿名HTTP確認は成功。実機と印刷ダイアログの目視は未確認。
+
+### 完了
+
+- 済: 修正コミットの隔離DB回帰CIとVercel Previewを確認する。その後、利用者がPreviewへログインし、Claude Codeが1024・768・390・375pxと印刷指定を計測する。（head`846ee60`のチェック成功、指示書§7.2のPreview計測と§6.1の印刷指定レビューで確認）
+- 済: PR #27をマージ・本番公開する。（マージ`3dade7d`、Vercel Production READY、匿名GETで`/login` 200・`/orders` 307→`/login`）
+
+### 次のアクション
+
+- 院内のタブレット・スマホの実機で、発注画面の表示・指操作と古い端末の`:has`表示を確かめる。
+- `markOrderRequestsOrderedForContext`の大量商品時の時間制限を別PRで調査・分割検討する。
+- Docker Desktopのソケット起動障害を別件で調査する。復旧後に分離DBの`ui-smoke`と実ページ寸法を確認する。
+- 発注画面の印刷ダイアログを目視し、ログイン後の本番画面を確認する。指示書§7.4の改善候補（保存後の案内文、発注先が1社の場合の操作、納品確認取消時の確認）を別件で検討する。
+
+### 承認・確認待ち
+
+- 院内のタブレット・スマホでの発注画面の実機表示と印刷ダイアログの利用者確認。
