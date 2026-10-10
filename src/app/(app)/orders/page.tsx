@@ -1,5 +1,6 @@
 import { SectionHeading } from "@/components/ui/section-heading";
 import { PageHeader } from "@/components/ui/page-header";
+import { OrdersHeaderMenu } from "./orders-header-menu";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { PageShell } from "@/components/ui/page-shell";
@@ -306,14 +307,12 @@ export default async function OrdersPage({ searchParams }: PageProps) {
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 print:max-w-none print:gap-3">
 
         <PageHeader title={"発注"} className="print:border-b print:border-ink print:pb-3">
-          <div>
-
-            <p className="mt-2 text-sm text-muted print:text-xs print:text-ink">
-              <span className="hidden print:inline">この一覧は発注前の確認用で、外部発注送信済みではありません。</span>
-              発行日時: {generatedAt}
-            </p>
-          </div>
-          <div className="flex w-full gap-2 overflow-x-auto pb-1 print:hidden md:w-auto md:justify-end md:overflow-visible md:pb-0">
+          <p className="orders-issued-at mt-2 text-sm text-muted print:text-xs print:text-ink">
+            <span className="hidden print:inline">この一覧は発注前の確認用で、外部発注送信済みではありません。</span>
+            発行日時: {generatedAt}
+          </p>
+          <OrdersHeaderMenu />
+          <div className="hidden w-full gap-2 overflow-x-auto pb-1 print:hidden sm:flex md:w-auto md:justify-end md:overflow-visible md:pb-0">
             <a className="inline-flex h-10 shrink-0 items-center justify-center rounded btn-secondary px-3 text-sm font-semibold transition" href="/shortage">
               不足一覧へ
             </a>

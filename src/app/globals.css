@@ -121,8 +121,15 @@ a {
 }
 
 .order-supplier-label,
-.order-card-qty-action {
+.order-card-qty-action,
+.order-card-only {
   display: none;
+}
+
+@media screen and (max-width: 639.98px) {
+  .orders-issued-at {
+    display: none;
+  }
 }
 
 @media screen and (max-width: 1023.98px) {
@@ -220,6 +227,10 @@ a {
     font-weight: 600;
   }
 
+  .order-supplier-change {
+    display: none;
+  }
+
   .order-cell-supplier > div:first-of-type {
     display: inline;
   }
@@ -244,6 +255,14 @@ a {
 
   .order-card-qty-action {
     display: inline-flex;
+  }
+
+  .order-card-qty-suggested {
+    display: none;
+  }
+
+  .order-more-panel .order-card-only {
+    display: block;
   }
 }
 

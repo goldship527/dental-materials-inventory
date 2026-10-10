@@ -187,7 +187,7 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
             <button
               type="button"
               onClick={() => togglePanel("supplier")}
-              className="inline-flex min-h-10 w-fit items-center rounded btn-secondary px-3 text-sm font-semibold transition"
+              className="order-supplier-change inline-flex min-h-10 w-fit items-center rounded btn-secondary px-3 text-sm font-semibold transition"
             >
               {activePanel === "supplier" ? "閉じる" : "発注先を変更"}
             </button>
@@ -326,7 +326,7 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
               type="button"
               onClick={() => togglePanel("quantity")}
               aria-expanded={activePanel === "quantity"}
-              className="order-card-qty-action min-h-10 w-fit items-center whitespace-nowrap rounded btn-secondary px-3 text-sm font-semibold transition"
+              className={`order-card-qty-action ${row.status === "SUGGESTED" ? "order-card-qty-suggested" : ""} min-h-10 w-fit items-center whitespace-nowrap rounded btn-secondary px-3 text-sm font-semibold transition`}
             >
               {activePanel === "quantity"
                 ? "閉じる"
@@ -393,6 +393,18 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
                     この行だけ発注予定へ
                   </button>
                 </form>
+              ) : null}
+              {row.status === "SUGGESTED" && canChangeQuantity ? (
+                <button type="button" onClick={() => togglePanel("quantity")}
+                  className="order-card-only min-h-10 rounded btn-secondary px-3 text-left text-sm font-semibold">
+                  数量を変えて発注予定へ
+                </button>
+              ) : null}
+              {canChangeSupplier ? (
+                <button type="button" onClick={() => togglePanel("supplier")}
+                  className="order-card-only min-h-10 rounded btn-secondary px-3 text-left text-sm font-semibold">
+                  発注先を変更
+                </button>
               ) : null}
               {row.status === "SUGGESTED" || isPlanned ? (
                 <button type="button" onClick={() => setMoreForm(moreForm === "skip" ? null : "skip")}
