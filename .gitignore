@@ -5,6 +5,7 @@ node_modules
 .next
 out
 /output/
+/.playwright-cli/
 
 # production
 build
