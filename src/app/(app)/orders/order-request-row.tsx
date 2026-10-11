@@ -516,6 +516,7 @@ export function OrderRequestTableRow({ clinicId, row, staffOperators }: OrderReq
                 <form action={statusAction} className="grid gap-2 border-t border-line pt-2">
                   <input type="hidden" name="orderRequestId" value={row.id} />
                   <input type="hidden" name="status" value="ORDERED" />
+                  {moreForm === "edit-record" ? <input type="hidden" name="intent" value="edit-record" /> : null}
                   {moreForm === "order" ? (
                     <>
                       <input type="hidden" name="staffOperatorId" value={selectedStaffOperatorId} />

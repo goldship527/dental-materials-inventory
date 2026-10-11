@@ -500,6 +500,7 @@ export async function updateOrderRequestStatusWithStateAction(
     const orderRequestId = orderRequestIdSchema.parse(formData.get("orderRequestId"));
     const parsedStatus = orderRequestStatusSchema.parse(formData.get("status"));
     const memoOnly = formData.get("memoOnly") === "on";
+    const editRecord = formData.get("intent") === "edit-record";
     const status = parsedStatus === "DRAFT" && !memoOnly ? "CONFIRMED" : parsedStatus;
     const memoValue = formData.has("memo") ? memoSchema.parse(formData.get("memo")) : undefined;
     const orderedMethodValue = formData.get("orderedMethod");
@@ -532,10 +533,15 @@ export async function updateOrderRequestStatusWithStateAction(
     });
 
     const label = orderRequestStatusLabels[status];
+    const message = memoOnly
+      ? `${request.productName} のメモを保存しました。`
+      : editRecord && request.previousStatus === "ORDERED" && status === "ORDERED"
+        ? `${request.productName} の発注記録を更新しました。`
+        : `${request.productName} を${label}にしました。`;
 
     return {
       status: "success",
-      message: `${request.productName} を${label}にしました。`,
+      message,
     };
   } catch (error) {
     return toOrderActionError(error);
@@ -579,7 +585,7 @@ export async function updateOrderRequestStatusForContext(
     revalidate?: boolean;
   },
 ) {
-  const request = await prisma.$transaction(async (tx) => {
+  const { request, previousStatus } = await prisma.$transaction(async (tx) => {
     const initialTarget = await tx.orderRequest.findFirst({
       where: {
         id: input.orderRequestId,
@@ -790,7 +796,7 @@ export async function updateOrderRequestStatusForContext(
       actorUserId: context.userId,
     });
 
-    return updatedRequest;
+    return { request: updatedRequest, previousStatus: target.status };
   });
 
   if (input.revalidate ?? true) {
@@ -801,6 +807,7 @@ export async function updateOrderRequestStatusForContext(
     productName: request.product.name,
     orderedAt: request.orderedAt,
     status: request.status,
+    previousStatus,
   };
 }
 
