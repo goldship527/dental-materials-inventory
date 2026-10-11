@@ -185,3 +185,11 @@
   - その直後に、本書だけを変更したClaude Codeのコミット（件名 `docs: approve PR 29 (handoff §7)`）が1件だけ乗ったもの。`git diff 325afca <head> --stat` が本書1ファイルだけであることを確かめる。
 - このheadに限定してマージする。DBの変更はない。
 - 公開後は匿名HTTPで `/login` 200、未ログインの `/orders` が `/login` へ転送されることを確認する。公開記録は別のdocs PRで、本書§7と作業記録・朝礼反映を統合する。
+
+## 8. 公開記録（2026-10-11、PR #29）
+
+- 利用者は、PR #30と文書コミット `1ee0ae4` を先に取り込んだmasterを `ui/orders-feedback` へ取り込み、再検証したheadでPR #29を公開するよう指示した。§7.3のhead条件はこの指示に従い更新された。
+- 承認済みhead `21e926f` へ `origin/master`（`1ee0ae4`）をマージした。競合は `docs/spec.md` と `docs/dev-log.md` の追記だけで、§101を§102より先に置いて両方を保った。新headは `cc27a0a7c05cab57452e85bbce54834e8a93ec71`。
+- `git diff 21e926f cc27a0a` は、master由来の `.gitignore` 1行、`vercel.json` の `regions` 1行、文書だけだった。`src` 配下の差分はない。
+- 新headの隔離DB回帰CI run `38105691501` で回帰テスト・型検査・ビルドが成功し、Vercel Previewも成功。競合なしを確認してPR #29をマージコミット `13f9dd6102f9ea5cbfd6d65dab479fa871e3656b` でmasterへ統合した。
+- このマージコミットのVercel Productionは成功。本番匿名GET `/login` は200、`x-vercel-id` の先頭2つは `hnd1::hnd1`。未ログイン `/orders` は307で `/login` へ転送された。公開作業でDB・環境変数の変更や実データ操作はしていない。
